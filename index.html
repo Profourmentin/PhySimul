@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Simulabo PhCh</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Concept : un cahier de TP. Le fond est du papier millimétré, la figure d'ouverture est une
+   chronophotographie tracée à l'échelle (1 petit carreau = 0,1 m), le catalogue est un classeur de fiches.
+   Palette et polices reprennent celles du simulateur « Banc d'optique photovoltaïque ». */
+:root {
+  --bg: #F2F6F5;
+  --surface: #FFFFFF;
+  --ink: #12202A;
+  --muted: #566673;
+  --line: #CCD7D4;
+  --accent: #1B5E8C;
+  --accent-ink: #FFFFFF;
+  --grid: #D8E5E0;
+  --grid-major: #BBD0C8;
+  --vec: #B56F00;
+  --ok: #17734A;
+  --ok-bg: #DDF1E6;
+  --new: #FFFFFF;
+  --new-bg: #1B5E8C;
+  --t-matiere: #0E7566;   --tb-matiere: #DDF0EC;
+  --t-mouvement: #1B5E8C; --tb-mouvement: #DCEAF4;
+  --t-energie: #A65F00;   --tb-energie: #FBEBCB;
+  --t-ondes: #6244A0;     --tb-ondes: #E9E2F5;
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --accent: #6BB4E8; --accent-ink: #0B1A24;
+    --grid: #182630; --grid-major: #233744; --vec: #F2A81D;
+    --ok: #67D39B; --ok-bg: #12301F; --new: #0B1A24; --new-bg: #6BB4E8;
+    --t-matiere: #52C7B3;   --tb-matiere: #12302C;
+    --t-mouvement: #6BB4E8; --tb-mouvement: #14293A;
+    --t-energie: #F2A81D;   --tb-energie: #3A2A0C;
+    --t-ondes: #B49CF0;     --tb-ondes: #261E3D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+  --accent: #6BB4E8; --accent-ink: #0B1A24;
+  --grid: #182630; --grid-major: #233744; --vec: #F2A81D;
+  --ok: #67D39B; --ok-bg: #12301F; --new: #0B1A24; --new-bg: #6BB4E8;
+  --t-matiere: #52C7B3;   --tb-matiere: #12302C;
+  --t-mouvement: #6BB4E8; --tb-mouvement: #14293A;
+  --t-energie: #F2A81D;   --tb-energie: #3A2A0C;
+  --t-ondes: #B49CF0;     --tb-ondes: #261E3D;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 84px); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  padding-block: 0 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 20; }
+.wrap { max-width: 1160px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-head); margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.mono { font-family: var(--font-data); }
+.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- en-tête ---------- */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding-block: 18px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 26px/1 var(--font-head); letter-spacing: .01em; }
+.brand svg { width: 34px; height: 34px; flex: none; }
+.brand small { font: 500 11px/1 var(--font-data); letter-spacing: .14em; color: var(--muted); text-transform: uppercase; align-self: flex-end; padding-bottom: 3px; }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav a { text-decoration: none; font-weight: 500; font-size: 15px; padding: 7px 12px; border-radius: 6px; color: var(--muted); }
+.nav a:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
+
+/* ---------- hero ---------- */
+.hero { display: grid; grid-template-columns: 1fr; gap: 32px; padding-block: 28px 44px; align-items: center; }
+@media (min-width: 940px) { .hero { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 56px; padding-block: 40px 56px; } }
+.hero h1 { font-weight: 700; font-size: clamp(42px, 8vw, 74px); line-height: .96; letter-spacing: -.005em; margin-top: 14px; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .lead { margin-top: 18px; color: var(--muted); max-width: 52ch; font-size: 17px; }
+.searchbar { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; }
+.field { position: relative; flex: 1 1 260px; min-width: 0; }
+.field svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
+.field input {
+  width: 100%; font: 400 16px var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 14px 44px 14px 44px; min-height: 52px;
+}
+.field input::placeholder { color: var(--muted); opacity: .85; }
+.field input:hover { border-color: var(--muted); }
+.field kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 500 12px var(--font-data); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; background: var(--bg); }
+.field input:focus + kbd, .field input:not(:placeholder-shown) + kbd { display: none; }
+button { font: 600 15px var(--font-body); border-radius: 8px; padding: 12px 18px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+button:hover { border-color: var(--muted); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); min-height: 52px; }
+button.primary:hover { filter: brightness(1.08); }
+.suggest { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
+.suggest button { font: 500 13px var(--font-data); padding: 5px 11px; border-radius: 999px; background: transparent; }
+.stats { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 26px; font: 500 13px var(--font-data); color: var(--muted); letter-spacing: .02em; }
+.stats b { color: var(--ink); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+
+/* feuille millimétrée avec chronophotographie */
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; box-shadow: 0 1px 0 var(--line), 0 14px 30px -18px color-mix(in srgb, var(--ink) 40%, transparent); }
+.sheet-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; padding: 10px 14px; border-bottom: 1px solid var(--line); font: 500 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sheet svg { display: block; width: 100%; height: auto; }
+.sheet svg text { font-family: var(--font-data); font-size: 12px; fill: var(--muted); }
+.sheet .gridline { stroke: var(--grid); stroke-width: 1; }
+.sheet .gridmajor { stroke: var(--grid-major); stroke-width: 1.2; }
+.sheet .axis { stroke: var(--ink); stroke-width: 1.6; fill: none; }
+.sheet .path { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 5; fill: none; }
+.sheet .pt { fill: var(--accent); }
+.sheet .vec { stroke: var(--vec); stroke-width: 2.2; stroke-linecap: round; }
+.sheet #arrHead { fill: var(--vec); }
+.sheet .intro .pt { animation: pop .45s cubic-bezier(.2, .8, .3, 1.3) backwards; animation-delay: calc(var(--i) * 70ms); transform-box: fill-box; transform-origin: center; }
+.sheet .intro .vec { animation: fade .4s ease-out backwards; animation-delay: calc(var(--i) * 70ms + 120ms); }
+@keyframes pop { from { opacity: 0; transform: scale(.2); } }
+@keyframes fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sheet .intro .pt, .sheet .intro .vec { animation: none; } }
+.sheet-ctl { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+@media (min-width: 520px) { .sheet-ctl { grid-template-columns: 1fr 1fr; align-items: end; } }
+.sheet-ctl label { font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; gap: 10px; }
+.sheet-ctl label output { font-family: var(--font-data); font-weight: 500; font-variant-numeric: tabular-nums; }
+.sheet-ctl input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+.read { display: flex; flex-wrap: wrap; gap: 4px 18px; font: 500 13px var(--font-data); color: var(--muted); font-variant-numeric: tabular-nums; }
+.read b { color: var(--ink); font-weight: 600; }
+.legend { padding: 0 14px 12px; font: 400 12px var(--font-data); color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.legend i { display: inline-block; vertical-align: middle; margin-right: 6px; }
+.legend .d { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+.legend .a { width: 16px; height: 2px; background: var(--vec); position: relative; top: -1px; }
+
+/* ---------- thèmes ---------- */
+section { padding-block: 8px; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 16px; }
+.sec-head h2 { font-size: clamp(26px, 4.4vw, 34px); font-weight: 600; letter-spacing: .005em; }
+.sec-head p { color: var(--muted); font-size: 15px; max-width: 56ch; }
+.themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 44px; }
+.tile {
+  --tc: var(--t-mouvement); --tb: var(--tb-mouvement);
+  display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: center; text-align: left;
+  padding: 14px 16px; border-radius: 8px; background: var(--surface); border: 1.5px solid var(--line); color: var(--ink); min-width: 0;
+}
+.tile:hover { border-color: var(--tc); }
+.tile[aria-pressed="true"] { border-color: var(--tc); background: var(--tb); box-shadow: inset 0 0 0 1px var(--tc); }
+.tile[data-th="matiere"] { --tc: var(--t-matiere); --tb: var(--tb-matiere); }
+.tile[data-th="energie"] { --tc: var(--t-energie); --tb: var(--tb-energie); }
+.tile[data-th="ondes"] { --tc: var(--t-ondes); --tb: var(--tb-ondes); }
+.tile .ico { grid-row: 1 / span 2; width: 42px; height: 42px; border-radius: 8px; background: var(--tb); color: var(--tc); display: grid; place-items: center; }
+.tile[aria-pressed="true"] .ico { background: var(--surface); }
+.tile .ico svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tile .ico svg circle { fill: currentColor; stroke: none; }
+.tile .n { font: 500 11px/1 var(--font-data); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); align-self: end; }
+.tile .name { font: 600 20px/1.1 var(--font-head); letter-spacing: .01em; grid-column: 2; align-self: start; }
+.tile .count { grid-row: 1 / span 2; grid-column: 3; font: 600 15px var(--font-data); font-variant-numeric: tabular-nums; color: var(--tc); min-width: 1.6em; text-align: right; }
+.tile.zero { opacity: .55; }
+
+/* ---------- catalogue ---------- */
+.toolbar { background: var(--bg); padding-block: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+@media (min-width: 720px) { .toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; } }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tools .field { flex: 2 1 240px; }
+.tools .field input { min-height: 44px; padding-block: 10px; }
+select {
+  font: 500 14px var(--font-body); color: var(--ink); background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; min-height: 44px; flex: 1 1 140px; min-width: 0; max-width: 100%;
+}
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); padding: 0 4px; white-space: nowrap; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 8px; min-height: 28px; }
+.count-live { font: 500 13px var(--font-data); color: var(--muted); }
+button.link { background: transparent; border: 0; padding: 4px 6px; font-weight: 600; font-size: 14px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+button.link[hidden] { display: none; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 18px; padding-bottom: 20px; }
+.card {
+  --tc: var(--t-mouvement); --tb: var(--tb-mouvement);
+  position: relative; display: flex; flex-direction: column; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0;
+}
+.card[data-th="matiere"] { --tc: var(--t-matiere); --tb: var(--tb-matiere); }
+.card[data-th="energie"] { --tc: var(--t-energie); --tb: var(--tb-energie); }
+.card[data-th="ondes"] { --tc: var(--t-ondes); --tb: var(--tb-ondes); }
+.card.live:hover { border-color: var(--tc); box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--ink) 55%, transparent); transform: translateY(-2px); }
+.card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+@media (prefers-reduced-motion: reduce) { .card, .card.live:hover { transition: none; transform: none; } }
+.card.soon { border-style: dashed; background: transparent; }
+.thumb {
+  position: relative; aspect-ratio: 5 / 3; color: var(--tc); border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(color-mix(in srgb, var(--tc) 13%, transparent) 1px, transparent 1px) 0 0 / 10px 10px,
+    linear-gradient(90deg, color-mix(in srgb, var(--tc) 13%, transparent) 1px, transparent 1px) 0 0 / 10px 10px,
+    var(--tb);
+}
+.card.soon .thumb { opacity: .62; }
+.thumb svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.thumb .s { stroke: var(--tc); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.thumb .dash { stroke-dasharray: 4 5; stroke-width: 1.8; }
+.thumb .f { fill: var(--tc); stroke: none; }
+.thumb .v { stroke: var(--vec); fill: none; stroke-width: 3; stroke-linecap: round; }
+.thumb .beam { fill: var(--vec); opacity: .4; }
+.thumb .water { fill: var(--tc); opacity: .16; }
+.thumb .sun { fill: var(--vec); }
+.badge { position: absolute; top: 10px; left: 10px; font: 600 11px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; padding: 5px 8px; border-radius: 4px; }
+.badge.new { background: var(--new-bg); color: var(--new); }
+.badge.soon { background: var(--surface); color: var(--muted); border: 1px dashed var(--muted); }
+.card-body { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 16px; flex: 1; }
+.card .meta { font: 500 11px/1.3 var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--tc); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.card .meta span + span { color: var(--muted); }
+.card h3 { font-size: 24px; font-weight: 600; line-height: 1.1; letter-spacing: .005em; }
+.card h3 a { text-decoration: none; }
+.card h3 a::after { content: ""; position: absolute; inset: 0; }
+.card .desc { color: var(--muted); font-size: 14.5px; }
+.tags { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tags li { font: 400 12px var(--font-data); padding: 3px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+.foot { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font: 500 13px var(--font-data); color: var(--muted); }
+.foot .go { color: var(--accent); font-weight: 600; font-family: var(--font-body); font-size: 14px; }
+.card.live:hover .go { text-decoration: underline; text-underline-offset: 3px; }
+mark { background: color-mix(in srgb, var(--vec) 32%, transparent); color: inherit; border-radius: 2px; padding: 0 1px; }
+.empty { grid-column: 1 / -1; padding: 40px 20px; text-align: center; border: 1.5px dashed var(--line); border-radius: 8px; color: var(--muted); }
+.empty h3 { color: var(--ink); font-size: 24px; margin-bottom: 6px; }
+.empty button { margin-top: 14px; }
+
+/* ---------- contribuer ---------- */
+#contribuer { margin-top: 44px; padding: 28px 0 0; border-top: 1px solid var(--line); }
+.contrib { display: grid; grid-template-columns: 1fr; gap: 28px; }
+@media (min-width: 900px) { .contrib { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; } }
+.steps { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+.steps li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 600 15px var(--font-data); border: 1.5px solid var(--accent); color: var(--accent); }
+.steps b { display: block; font-weight: 600; }
+.steps span { color: var(--muted); font-size: 15px; }
+.code { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.code-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--line); font: 500 12px var(--font-data); color: var(--muted); letter-spacing: .04em; }
+.code-head button { padding: 5px 12px; font-size: 13px; }
+.code pre { margin: 0; padding: 14px; overflow-x: auto; font: 400 13px/1.6 var(--font-data); color: var(--ink); tab-size: 2; }
+.code .k { color: var(--accent); }
+.code .st { color: var(--muted); }
+.status { min-height: 1.4em; padding: 0 14px 10px; font-size: 13px; color: var(--muted); }
+footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; color: var(--muted); font-size: 14px; }
+footer .mono { font-size: 12px; letter-spacing: .06em; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" aria-label="Simulabo PhCh, accueil">
+      <svg viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="6" fill="var(--accent)"/><path d="M5 27 Q17 -4 29 27" fill="none" stroke="var(--accent-ink)" stroke-width="1.4" stroke-dasharray="2 3"/><circle cx="8" cy="19" r="2.4" fill="var(--accent-ink)"/><circle cx="17" cy="11" r="2.4" fill="var(--accent-ink)"/><circle cx="26" cy="19" r="2.4" fill="var(--accent-ink)"/></svg>
+      Simulabo <small>PhCh</small>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#catalogue">Catalogue</a>
+      <a href="#themes">Thèmes</a>
+      <a href="#contribuer">Contribuer</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-labelledby="h1">
+    <div>
+      <p class="kicker">Physique-chimie · Lycée</p>
+      <h1 id="h1">Voir la physique <em>avant</em> de la calculer.</h1>
+      <p class="lead">Des simulations interactives qui s'ouvrent dans le navigateur, sur ordinateur, tablette ou téléphone. Pas de compte, pas d'installation : on règle, on observe, on mesure.</p>
+      <form class="searchbar" id="heroForm" role="search">
+        <div class="field">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
+          <input id="qHero" type="search" placeholder="Une notion : angle d'incidence…" autocomplete="off" aria-label="Rechercher une simulation">
+          <kbd aria-hidden="true">/</kbd>
+        </div>
+        <button class="primary" type="submit">Voir les simulations</button>
+      </form>
+      <div class="suggest" id="suggest"><span>Essayer :</span></div>
+      <p class="stats" id="stats"></p>
+    </div>
+
+    <figure class="sheet" style="margin:0" aria-label="Chronophotographie interactive d'un lancer">
+      <div class="sheet-head"><span>Chronophotographie</span><span>Δt = 0,1 s</span></div>
+      <svg id="chrono" viewBox="0 0 560 330" role="img" aria-label="Positions successives d'une balle lancée, à intervalles de 0,1 seconde, avec son vecteur vitesse">
+        <defs>
+          <pattern id="mm" x="36" y="290" width="35" height="35" patternUnits="userSpaceOnUse">
+            <path class="gridline" d="M7 0V35M14 0V35M21 0V35M28 0V35M0 7H35M0 14H35M0 21H35M0 28H35"/>
+            <path class="gridmajor" d="M0 0H35M0 0V35"/>
+          </pattern>
+          <marker id="arr" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto"><path id="arrHead" d="M0 0L8 4L0 8z"/></marker>
+        </defs>
+        <rect width="560" height="330" fill="url(#mm)"/>
+        <g id="chronoG"></g>
+      </svg>
+      <div class="sheet-ctl">
+        <div>
+          <label for="alpha">Angle de tir α <output id="alphaOut" for="alpha">45°</output></label>
+          <input id="alpha" type="range" min="15" max="80" step="1" value="45" aria-label="Angle de tir en degrés">
+        </div>
+        <p class="read" id="read" aria-live="polite"></p>
+      </div>
+      <p class="legend"><span><i class="d"></i>position à chaque 0,1 s</span><span><i class="a"></i>vecteur vitesse</span></p>
+    </figure>
+  </section>
+
+  <section id="themes" aria-labelledby="hThemes">
+    <div class="sec-head">
+      <h2 id="hThemes">Parcourir par thème</h2>
+      <p>Les quatre thèmes du programme. Un clic filtre le catalogue, un second clic le réinitialise.</p>
+    </div>
+    <div class="themes" id="themeTiles"></div>
+  </section>
+
+  <section id="catalogue" aria-labelledby="hCat">
+    <div class="sec-head">
+      <h2 id="hCat">Catalogue</h2>
+      <p>Simulations et cours interactifs. Les fiches en pointillés sont en préparation.</p>
+    </div>
+    <div class="toolbar">
+      <div class="tools" role="search">
+        <div class="field">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
+          <input id="q" type="search" placeholder="Rechercher dans le catalogue" autocomplete="off" aria-label="Rechercher dans le catalogue">
+        </div>
+        <select id="fNiveau" aria-label="Niveau"></select>
+        <select id="fType" aria-label="Type de ressource"></select>
+        <select id="fSort" aria-label="Tri">
+          <option value="dispo">Disponibles d'abord</option>
+          <option value="recent">Plus récentes</option>
+          <option value="az">Titre A → Z</option>
+        </select>
+        <label class="check" for="fDispo"><input id="fDispo" type="checkbox">Disponibles seulement</label>
+      </div>
+      <div class="meta-row">
+        <span class="count-live" id="count" role="status" aria-live="polite"></span>
+        <button class="link" id="reset" type="button" hidden>Réinitialiser les filtres</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="contribuer" aria-labelledby="hContrib">
+    <div class="contrib">
+      <div>
+        <p class="kicker">Un site qui grandit</p>
+        <h2 id="hContrib" style="font-size:clamp(28px,5vw,40px);font-weight:600;margin-top:10px">Ajouter une simulation prend trois minutes</h2>
+        <p style="color:var(--muted);margin-top:10px;max-width:54ch">Chaque simulation reste un fichier HTML autonome. Le catalogue lit une simple liste : une entrée de plus, et la fiche apparaît avec sa recherche, son thème et son niveau.</p>
+        <ol class="steps">
+          <li><div><b>Déposer le fichier</b><span>Place la simulation dans le dossier <span class="mono">sims/</span> du dépôt.</span></div></li>
+          <li><div><b>Décrire la fiche</b><span>Copie l'entrée ci-contre dans la liste du catalogue et remplace les champs.</span></div></li>
+          <li><div><b>Publier</b><span>Un envoi sur GitHub met le site en ligne automatiquement.</span></div></li>
+        </ol>
+      </div>
+      <div class="code">
+        <div class="code-head"><span>Une entrée du catalogue</span><button id="copy" type="button">Copier</button></div>
+        <pre id="snippet" tabindex="0" aria-label="Exemple d'entrée du catalogue"></pre>
+        <p class="status" id="copyStatus" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Simulabo PhCh · physique-chimie pour le lycée, programme de seconde et de première.</span>
+    <span class="mono">Aucun compte · aucune donnée collectée</span>
+  </footer>
+</div>
+
+<script type="application/json" id="catalogue-data">
+[
+  {
+    "id": "banc-optique-photovoltaique",
+    "titre": "Banc d'optique photovoltaïque",
+    "resume": "Règle la distance et l'angle d'incidence d'une cellule photovoltaïque, lis la puissance reçue et complète un tableau de mesures.",
+    "theme": "energie", "niveau": "Seconde", "type": "Simulation", "duree": 20,
+    "notions": ["angle d'incidence", "constante solaire", "puissance reçue", "loi en 1/d²"],
+    "statut": "dispo", "url": "sims/banc-optique.html", "date": "2026-10-22", "glyph": "bench"
+  },
+  {
+    "id": "description-mouvement",
+    "titre": "Description d'un mouvement",
+    "resume": "Le cours en pages interactives, avec un exercice d'application et sa correction pour chaque partie.",
+    "theme": "mouvement", "niveau": "Première spé", "type": "Cours interactif", "duree": null,
+    "notions": ["référentiel", "trajectoire", "vecteur vitesse"],
+    "statut": "prepa", "url": "", "date": "2026-10-19", "glyph": "chrono"
+  },
+  {
+    "id": "dissolution-dilution",
+    "titre": "Dissolution et dilution",
+    "resume": "Dissous un solide, dilue la solution et suis l'évolution de la concentration en masse.",
+    "theme": "matiere", "niveau": "Seconde", "type": "Simulation", "duree": 20,
+    "notions": ["solution", "concentration", "dilution"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "beaker"
+  },
+  {
+    "id": "pression-gaz",
+    "titre": "Pression d'un gaz",
+    "resume": "Comprime un gaz dans un cylindre et relie pression, volume et agitation des particules.",
+    "theme": "matiere", "niveau": "Seconde", "type": "Simulation", "duree": 15,
+    "notions": ["pression", "loi de Boyle-Mariotte", "modèle microscopique"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "gas"
+  },
+  {
+    "id": "principe-inertie",
+    "titre": "Principe d'inertie",
+    "resume": "Pousse un mobile sur coussin d'air et compare les chronophotographies avec et sans frottements.",
+    "theme": "mouvement", "niveau": "Seconde", "type": "Simulation", "duree": 20,
+    "notions": ["forces", "mouvement rectiligne uniforme", "chronophotographie"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "chrono-droite"
+  },
+  {
+    "id": "gravitation",
+    "titre": "Interaction gravitationnelle",
+    "resume": "Change les masses et la distance, observe la force et la trajectoire d'un satellite.",
+    "theme": "mouvement", "niveau": "Seconde", "type": "Simulation", "duree": 20,
+    "notions": ["loi de gravitation", "force", "satellite"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "orbit"
+  },
+  {
+    "id": "energie-pendule",
+    "titre": "Énergie d'un pendule",
+    "resume": "Lâche un pendule et suis les échanges entre énergie cinétique et énergie potentielle.",
+    "theme": "energie", "niveau": "Seconde", "type": "Simulation", "duree": 15,
+    "notions": ["énergie cinétique", "énergie potentielle", "conservation"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "pendulum"
+  },
+  {
+    "id": "refraction-lumiere",
+    "titre": "Réfraction de la lumière",
+    "resume": "Envoie un rayon lumineux à travers une interface et vérifie la loi de Snell-Descartes.",
+    "theme": "ondes", "niveau": "Seconde", "type": "Simulation", "duree": 15,
+    "notions": ["angle d'incidence", "indice de réfraction", "Snell-Descartes"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "refraction"
+  },
+  {
+    "id": "spectres-emission",
+    "titre": "Spectres d'émission",
+    "resume": "Compare la lumière d'une lampe et celle d'un gaz pour identifier les raies caractéristiques de leur spectre.",
+    "theme": "ondes", "niveau": "Seconde", "type": "Simulation", "duree": 15,
+    "notions": ["spectre", "raies", "longueur d'onde"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "spectrum"
+  },
+  {
+    "id": "loi-ohm",
+    "titre": "Loi d'Ohm",
+    "resume": "Fais varier la tension aux bornes d'un conducteur ohmique et trace la caractéristique.",
+    "theme": "ondes", "niveau": "Seconde", "type": "Simulation", "duree": 20,
+    "notions": ["tension", "intensité", "résistance"],
+    "statut": "prepa", "url": "", "date": null, "glyph": "circuit"
+  }
+]
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("catalogue-data").textContent);
+  var THEMES = [
+    { id: "matiere",   n: 1, court: "Matière",          long: "Constitution et transformations de la matière",
+      ico: '<path d="M12 4h8M14 4v8L7 25a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3l-7-13V4"/><path d="M10 20h12"/>' },
+    { id: "mouvement", n: 2, court: "Mouvement",        long: "Mouvement et interactions",
+      ico: '<path d="M4 27C9 5 23 5 28 27" stroke-dasharray="2 3"/><circle cx="8" cy="16" r="2.4"/><circle cx="16" cy="9.5" r="2.4"/><circle cx="24" cy="16" r="2.4"/>' },
+    { id: "energie",   n: 3, court: "Énergie",          long: "L'énergie : conversions et transferts",
+      ico: '<circle cx="16" cy="16" r="5" style="fill:none;stroke:currentColor"/><path d="M16 3v4M16 25v4M3 16h4M25 16h4M7 7l3 3M22 22l3 3M25 7l-3 3M10 22l-3 3"/>' },
+    { id: "ondes",     n: 4, court: "Ondes et signaux", long: "Ondes et signaux",
+      ico: '<path d="M2 16c4-12 8-12 12 0s8 12 12 0 4-6 6-6"/>' }
+  ];
+  var TH = {}; THEMES.forEach(function (t) { TH[t.id] = t; });
+  var state = { q: "", theme: "", niveau: "", type: "", dispo: false, sort: "dispo" };
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function norm(s) { return String(s).replace(/[’‘]/g, "'").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function fr(n, d) { return n.toFixed(d).replace(".", ","); }
+
+  DATA.forEach(function (it) {
+    it.hay = norm([it.titre, it.resume, it.type, it.niveau, TH[it.theme].long, TH[it.theme].court, it.notions.join(" ")].join(" "));
+  });
+
+  function tokens() { return norm(state.q).split(/\s+/).filter(Boolean); }
+  function matches(it, ignoreTheme) {
+    if (!ignoreTheme && state.theme && it.theme !== state.theme) return false;
+    if (state.niveau && it.niveau !== state.niveau) return false;
+    if (state.type && it.type !== state.type) return false;
+    if (state.dispo && it.statut !== "dispo") return false;
+    var t = tokens();
+    for (var i = 0; i < t.length; i++) if (it.hay.indexOf(t[i]) < 0) return false;
+    return true;
+  }
+  function hl(text) {
+    var t = tokens();
+    if (!t.length) return esc(text);
+    var n = norm(text);
+    if (n.length !== text.length) return esc(text);
+    var r = [];
+    t.forEach(function (w) { var i = n.indexOf(w); while (i >= 0) { r.push([i, i + w.length]); i = n.indexOf(w, i + w.length); } });
+    if (!r.length) return esc(text);
+    r.sort(function (a, b) { return a[0] - b[0]; });
+    var m = [r[0]];
+    for (var k = 1; k < r.length; k++) { var l = m[m.length - 1]; if (r[k][0] <= l[1]) l[1] = Math.max(l[1], r[k][1]); else m.push(r[k]); }
+    var out = "", p = 0;
+    m.forEach(function (x) { out += esc(text.slice(p, x[0])) + "<mark>" + esc(text.slice(x[0], x[1])) + "</mark>"; p = x[1]; });
+    return out + esc(text.slice(p));
+  }
+
+  /* ---------- vignettes ---------- */
+  function glyph(g) {
+    var s = "";
+    if (g === "bench") {
+      s += '<line class="s" x1="12" y1="94" x2="188" y2="94"/>';
+      for (var i = 0; i <= 10; i++) s += '<line class="s" style="stroke-width:1.5" x1="' + (12 + i * 17.6) + '" y1="94" x2="' + (12 + i * 17.6) + '" y2="' + (i % 5 === 0 ? 104 : 100) + '"/>';
+      s += '<rect class="f" x="16" y="50" width="24" height="32" rx="3"/><polygon class="beam" points="40,58 138,44 138,88 40,74"/>';
+      s += '<line class="s" x1="138" y1="68" x2="138" y2="94"/><g transform="translate(138,66) rotate(-24)"><rect class="f" x="-3.5" y="-26" width="7" height="52" rx="1.5"/></g>';
+    } else if (g === "chrono") {
+      var d = "";
+      for (var a = 0; a <= 8; a++) { var x = 22 + a * 19.5, y = 102 - 4.6 * a * (8 - a); d += '<circle class="f" cx="' + x + '" cy="' + y.toFixed(1) + '" r="4.6"/>'; }
+      s += '<path class="s dash" d="M22 102 Q100 -50 178 102"/>' + d;
+      s += '<line class="v" x1="22" y1="102" x2="38" y2="72"/>';
+    } else if (g === "chrono-droite") {
+      s += '<line class="s dash" x1="14" y1="70" x2="186" y2="70"/>';
+      for (var b = 0; b < 7; b++) s += '<circle class="f" cx="' + (24 + b * 25) + '" cy="70" r="4.8"/>';
+      s += '<line class="v" x1="24" y1="48" x2="52" y2="48"/><line class="v" x1="49" y1="43" x2="54" y2="48"/><line class="v" x1="49" y1="53" x2="54" y2="48"/>';
+    } else if (g === "refraction") {
+      s += '<rect class="water" x="0" y="62" width="200" height="58"/><line class="s" x1="0" y1="62" x2="200" y2="62"/>';
+      s += '<line class="s dash" x1="100" y1="10" x2="100" y2="112"/><line class="v" x1="44" y1="14" x2="100" y2="62"/><line class="v" x1="100" y1="62" x2="132" y2="110"/>';
+    } else if (g === "spectrum") {
+      s += '<rect x="14" y="28" width="172" height="64" rx="4" fill="#0B1218"/>';
+      [[40, "#8B5CF6"], [58, "#3B82F6"], [76, "#22D3EE"], [112, "#84CC16"], [134, "#FACC15"], [160, "#EF4444"]].forEach(function (l) { s += '<rect x="' + l[0] + '" y="28" width="3" height="64" fill="' + l[1] + '"/>'; });
+    } else if (g === "beaker") {
+      s += '<path class="water" d="M65 56H135V92Q135 103 124 103H76Q65 103 65 92Z" style="opacity:.3"/><path class="s" d="M62 18V92Q62 106 76 106H124Q138 106 138 92V18"/><line class="s" x1="56" y1="18" x2="144" y2="18"/>';
+      s += '<circle class="f" cx="82" cy="94" r="4"/><circle class="f" cx="100" cy="97" r="4"/><circle class="f" cx="117" cy="93" r="4"/><circle class="f" cx="96" cy="78" r="3"/>';
+    } else if (g === "gas") {
+      s += '<rect class="s" x="28" y="28" width="120" height="64" rx="3"/><rect class="f" x="148" y="22" width="9" height="76" rx="2"/><line class="s" x1="157" y1="60" x2="188" y2="60"/>';
+      [[44, 44], [70, 70], [96, 40], [118, 76], [60, 82], [130, 48], [88, 62], [108, 52]].forEach(function (p) { s += '<circle class="f" cx="' + p[0] + '" cy="' + p[1] + '" r="3.8"/>'; });
+      s += '<line class="v" x1="96" y1="40" x2="110" y2="34"/><line class="v" x1="118" y1="76" x2="104" y2="84"/>';
+    } else if (g === "circuit") {
+      s += '<path class="s" d="M30 30H76L82 17L94 43L106 17L118 43L124 30H170V92H30V68M30 52V30"/>';
+      s += '<line class="s" x1="20" y1="52" x2="40" y2="52"/><line class="s" x1="25" y1="60" x2="35" y2="60"/><circle class="sun" cx="100" cy="92" r="5"/>';
+    } else if (g === "orbit") {
+      s += '<ellipse class="s dash" cx="100" cy="60" rx="72" ry="40"/><circle class="sun" cx="46" cy="60" r="11"/>';
+      s += '<circle class="f" cx="156" cy="32" r="6"/><line class="v" x1="150" y1="35" x2="108" y2="52"/>';
+    } else if (g === "pendulum") {
+      s += '<line class="s dash" x1="100" y1="12" x2="100" y2="100"/><path class="s dash" d="M52 78Q100 118 148 78"/>';
+      s += '<line class="s" x1="100" y1="12" x2="54" y2="78"/><circle class="f" cx="54" cy="78" r="10"/><circle class="f" cx="100" cy="12" r="3.5"/>';
+    }
+    return '<svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + s + '</svg>';
+  }
+
+  /* ---------- tuiles de thèmes ---------- */
+  var tilesEl = $("themeTiles");
+  tilesEl.innerHTML = THEMES.map(function (t) {
+    return '<button type="button" class="tile" data-th="' + t.id + '" aria-pressed="false">' +
+      '<span class="ico"><svg viewBox="0 0 32 32" aria-hidden="true">' + t.ico + '</svg></span>' +
+      '<span class="n">Thème ' + t.n + '</span><span class="name">' + esc(t.court) + '</span>' +
+      '<span class="count" aria-hidden="true"></span></button>';
+  }).join("");
+  tilesEl.addEventListener("click", function (e) {
+    var b = e.target.closest(".tile"); if (!b) return;
+    var id = b.getAttribute("data-th");
+    state.theme = state.theme === id ? "" : id;
+    update();
+  });
+
+  /* ---------- filtres ---------- */
+  function uniq(key) { var o = []; DATA.forEach(function (d) { if (o.indexOf(d[key]) < 0) o.push(d[key]); }); return o; }
+  function fillSelect(id, label, values) {
+    var el = $(id);
+    el.innerHTML = '<option value="">' + label + '</option>' + values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join("");
+    el.hidden = values.length < 2;
+  }
+  fillSelect("fNiveau", "Tous les niveaux", uniq("niveau"));
+  fillSelect("fType", "Tous les types", uniq("type"));
+
+  function setQ(v, from) {
+    state.q = v;
+    if (from !== "hero") $("qHero").value = v;
+    if (from !== "tool") $("q").value = v;
+    update();
+  }
+  $("qHero").addEventListener("input", function (e) { setQ(e.target.value, "hero"); });
+  $("q").addEventListener("input", function (e) { setQ(e.target.value, "tool"); });
+  $("heroForm").addEventListener("submit", function (e) { e.preventDefault(); $("catalogue").scrollIntoView(); });
+  $("fNiveau").addEventListener("change", function (e) { state.niveau = e.target.value; update(); });
+  $("fType").addEventListener("change", function (e) { state.type = e.target.value; update(); });
+  $("fSort").addEventListener("change", function (e) { state.sort = e.target.value; update(); });
+  $("fDispo").addEventListener("change", function (e) { state.dispo = e.target.checked; update(); });
+  $("reset").addEventListener("click", resetAll);
+  function resetAll() {
+    state = { q: "", theme: "", niveau: "", type: "", dispo: false, sort: "dispo" };
+    $("qHero").value = ""; $("q").value = ""; $("fNiveau").value = ""; $("fType").value = ""; $("fSort").value = "dispo"; $("fDispo").checked = false;
+    update();
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) { e.preventDefault(); $("qHero").focus(); }
+  });
+
+  /* suggestions */
+  var sg = $("suggest");
+  ["lumière", "mouvement", "énergie", "gaz"].forEach(function (w) {
+    var b = document.createElement("button"); b.type = "button"; b.textContent = w;
+    b.addEventListener("click", function () { setQ(w, "all"); $("catalogue").scrollIntoView(); });
+    sg.appendChild(b);
+  });
+
+  /* ---------- rendu ---------- */
+  function isNew(it) { return it.statut === "dispo" && it.date && (Date.now() - new Date(it.date).getTime()) < 30 * 864e5; }
+  function sorted(list) {
+    var a = list.slice();
+    a.sort(function (x, y) {
+      if (state.sort === "az") return x.titre.localeCompare(y.titre, "fr");
+      var dx = x.date ? Date.parse(x.date) : 0, dy = y.date ? Date.parse(y.date) : 0;
+      if (state.sort === "dispo" && x.statut !== y.statut) return x.statut === "dispo" ? -1 : 1;
+      return dy - dx || x.titre.localeCompare(y.titre, "fr");
+    });
+    return a;
+  }
+  function card(it) {
+    var live = it.statut === "dispo", t = TH[it.theme];
+    var badge = isNew(it) ? '<span class="badge new">Nouveau</span>' : (live ? "" : '<span class="badge soon">En préparation</span>');
+    var title = live ? '<a href="' + esc(it.url) + '">' + hl(it.titre) + '</a>' : hl(it.titre);
+    var tags = it.notions.slice(0, 3).map(function (n) { return "<li>" + hl(n) + "</li>"; }).join("");
+    var info = [it.niveau].concat(it.duree ? [it.duree + " min"] : []).join(" · ");
+    return '<article class="card ' + (live ? "live" : "soon") + '" data-th="' + it.theme + '">' +
+      '<div class="thumb">' + glyph(it.glyph) + badge + '</div>' +
+      '<div class="card-body"><p class="meta"><span>' + esc(t.court) + '</span><span>' + esc(it.type) + '</span></p>' +
+      '<h3>' + title + '</h3><p class="desc">' + hl(it.resume) + '</p><ul class="tags">' + tags + '</ul>' +
+      '<div class="foot"><span>' + esc(info) + '</span>' + (live ? '<span class="go">Ouvrir →</span>' : '<span>Bientôt</span>') + '</div></div></article>';
+  }
+  function update() {
+    var list = sorted(DATA.filter(function (d) { return matches(d, false); }));
+    var grid = $("grid");
+    if (!list.length) {
+      var q = state.q.trim();
+      grid.innerHTML = '<div class="empty"><h3>Aucune fiche ne correspond' + (q ? ' à « ' + esc(q) + ' »' : '') + '</h3><p>Essaie un mot plus court, une notion du programme ou retire un filtre.</p><button type="button" id="emptyReset">Tout afficher</button></div>';
+      $("emptyReset").addEventListener("click", resetAll);
+    } else grid.innerHTML = list.map(card).join("");
+    $("count").textContent = list.length + (list.length > 1 ? " fiches" : " fiche") + " sur " + DATA.length;
+    var active = state.q || state.theme || state.niveau || state.type || state.dispo;
+    $("reset").hidden = !active;
+    var tiles = tilesEl.querySelectorAll(".tile");
+    Array.prototype.forEach.call(tiles, function (b) {
+      var id = b.getAttribute("data-th");
+      var n = DATA.filter(function (d) { return d.theme === id && matches(d, true); }).length;
+      b.querySelector(".count").textContent = n;
+      b.setAttribute("aria-pressed", state.theme === id ? "true" : "false");
+      b.setAttribute("aria-label", TH[id].court + ", thème " + TH[id].n + ", " + n + (n > 1 ? " fiches" : " fiche"));
+      b.classList.toggle("zero", n === 0 && state.theme !== id);
+    });
+  }
+
+  var nd = DATA.filter(function (d) { return d.statut === "dispo"; }).length;
+  $("stats").innerHTML = '<span><b>' + nd + '</b> disponible' + (nd > 1 ? "s" : "") + '</span><span><b>' + (DATA.length - nd) + '</b> en préparation</span><span><b>' + THEMES.length + '</b> thèmes</span>';
+
+  /* ---------- chronophotographie ---------- */
+  var S = 70, OX = 36, OY = 290, V0 = 8, G = 9.8, DT = 0.1, introDone = false;
+  function chrono(deg) {
+    var a = deg * Math.PI / 180, vx = V0 * Math.cos(a), vy0 = V0 * Math.sin(a), T = 2 * vy0 / G;
+    var g = '<line class="axis" x1="' + (OX - 10) + '" y1="' + OY + '" x2="548" y2="' + OY + '"/><line class="axis" x1="' + OX + '" y1="' + (OY + 10) + '" x2="' + OX + '" y2="12"/>';
+    var m, ty;
+    for (m = 1; m <= 7; m++) g += '<line class="axis" x1="' + (OX + m * S) + '" y1="' + OY + '" x2="' + (OX + m * S) + '" y2="' + (OY + 6) + '"/><text x="' + (OX + m * S) + '" y="' + (OY + 20) + '" text-anchor="middle">' + m + '</text>';
+    for (m = 1; m <= 3; m++) { ty = OY - m * S; g += '<line class="axis" x1="' + (OX - 6) + '" y1="' + ty + '" x2="' + OX + '" y2="' + ty + '"/><text x="' + (OX - 10) + '" y="' + (ty + 4) + '" text-anchor="end">' + m + '</text>'; }
+    g += '<text x="544" y="' + (OY - 8) + '" text-anchor="end">x (m)</text><text x="' + (OX + 8) + '" y="20">y (m)</text>';
+    var d = "M" + OX + " " + OY, k;
+    for (k = 1; k <= 60; k++) { var t = T * k / 60; d += " L" + (OX + vx * t * S).toFixed(1) + " " + (OY - (vy0 * t - 0.5 * G * t * t) * S).toFixed(1); }
+    g += '<path class="path" d="' + d + '"/><g class="' + (introDone ? "" : "intro") + '">';
+    for (k = 0; k * DT <= T + 1e-9; k++) {
+      var tt = k * DT, px = OX + vx * tt * S, py = OY - (vy0 * tt - 0.5 * G * tt * tt) * S, vy = vy0 - G * tt;
+      if (k % 2 === 0) g += '<line class="vec" style="--i:' + k + '" x1="' + px.toFixed(1) + '" y1="' + py.toFixed(1) + '" x2="' + (px + vx * 6).toFixed(1) + '" y2="' + (py - vy * 6).toFixed(1) + '" marker-end="url(#arr)"/>';
+    }
+    for (k = 0; k * DT <= T + 1e-9; k++) {
+      var t2 = k * DT, qx = OX + vx * t2 * S, qy = OY - (vy0 * t2 - 0.5 * G * t2 * t2) * S;
+      g += '<circle class="pt" style="--i:' + k + '" cx="' + qx.toFixed(1) + '" cy="' + qy.toFixed(1) + '" r="5.5"/>';
+    }
+    g += "</g>";
+    $("chronoG").innerHTML = g;
+    introDone = true;
+    $("alphaOut").textContent = deg + "°";
+    $("read").innerHTML = 'Portée <b>' + fr(V0 * V0 * Math.sin(2 * a) / G, 1) + ' m</b> · Hauteur max <b>' + fr(vy0 * vy0 / (2 * G), 1) + ' m</b> · Durée <b>' + fr(T, 1) + ' s</b>';
+  }
+  $("alpha").addEventListener("input", function (e) { chrono(parseInt(e.target.value, 10)); });
+
+  /* ---------- extrait à copier ---------- */
+  var SNIPPET = '{\n  "id": "refraction-lumiere",\n  "titre": "Réfraction de la lumière",\n  "resume": "Une phrase qui donne envie d\'ouvrir la simulation.",\n  "theme": "ondes",\n  "niveau": "Seconde",\n  "type": "Simulation",\n  "duree": 15,\n  "notions": ["Snell-Descartes", "indice de réfraction"],\n  "statut": "dispo",\n  "url": "sims/refraction.html",\n  "date": "2026-11-05",\n  "glyph": "refraction"\n}';
+  $("snippet").textContent = SNIPPET;
+  $("copy").addEventListener("click", function () {
+    function fallback() {
+      var r = document.createRange(); r.selectNodeContents($("snippet"));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      $("copyStatus").textContent = "Copie automatique impossible : le texte est sélectionné, copie-le avec ton clavier.";
+    }
+    try { navigator.clipboard.writeText(SNIPPET).then(function () { $("copyStatus").textContent = "Entrée copiée."; }, fallback); } catch (e) { fallback(); }
+  });
+
+  chrono(45);
+  update();
+})();
+</script>
+
+</body>
+</html>
