@@ -1,0 +1,461 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Banc d'optique photovoltaïque</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: un banc d'optique sombre en haut (source à gauche, cellule mobile sur le rail),
+   puis réglages et afficheurs côte à côte, puis le tableau de mesures. */
+:root {
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --accent: #1B5E8C;
+  --accent-ink: #FFFFFF;
+  --danger: #A8281F;
+  --beam: #F2A81D;
+  --lcd-bg: #0F1A21;
+  --lcd-fg: #FFC24A;
+  --lcd-dim: #A98A45;
+  --lcd-label: #8FA3AF;
+  --stage-a: #121C24;
+  --stage-b: #1B2832;
+  --stage-ink: #DCE6EC;
+  --stage-muted: #8EA2AF;
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1419;
+    --surface: #162027;
+    --ink: #E4ECF0;
+    --muted: #93A4AF;
+    --line: #2A3944;
+    --accent: #6BB4E8;
+    --accent-ink: #0B1A24;
+    --danger: #F2877F;
+    --lcd-bg: #070C10;
+    --stage-a: #0A1015;
+    --stage-b: #141F27;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1419;
+  --surface: #162027;
+  --ink: #E4ECF0;
+  --muted: #93A4AF;
+  --line: #2A3944;
+  --accent: #6BB4E8;
+  --accent-ink: #0B1A24;
+  --danger: #F2877F;
+  --lcd-bg: #070C10;
+  --stage-a: #0A1015;
+  --stage-b: #141F27;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1 { font: 600 clamp(28px, 6vw, 40px)/1.05 var(--font-head); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h2 { font: 600 20px/1.2 var(--font-head); margin: 0; letter-spacing: .02em; }
+.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+
+.stage { background: linear-gradient(180deg, var(--stage-a), var(--stage-b)); border-radius: 10px; border: 1px solid var(--line); overflow: hidden; }
+.stage svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
+.stage text { font-family: var(--font-body); fill: var(--stage-ink); }
+.stage .halo { paint-order: stroke; stroke: var(--stage-a); stroke-width: 4px; stroke-linejoin: round; }
+.hint { font-size: 13px; color: var(--muted); margin: -8px 0 0; }
+
+.panel { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 780px) { .panel { grid-template-columns: 1.1fr 1fr; align-items: start; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.ctl { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; }
+.ctl label { font-weight: 600; }
+.ctl label small { font-weight: 400; color: var(--muted); }
+.ctl .num { display: flex; align-items: baseline; gap: 6px; }
+.ctl input[type="number"] {
+  width: 5.2em; font: 500 16px var(--font-data); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; text-align: right;
+}
+.ctl .unit { font: 500 14px var(--font-data); color: var(--muted); min-width: 2em; }
+.ctl input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+
+.readouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 560px) { .readouts { grid-template-columns: 1fr 1fr; } .readouts .lcd.power { grid-column: 1 / -1; } }
+.lcd { background: var(--lcd-bg); border-radius: 8px; padding: 10px 12px 12px; border: 1px solid var(--line); min-width: 0; }
+.lcd .lab { font: 500 11px/1.2 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--lcd-label); }
+.lcd .val { margin-top: 8px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.lcd .v { font: 600 clamp(26px, 6vw, 34px)/1 var(--font-data); color: var(--lcd-fg); font-variant-numeric: tabular-nums; }
+.lcd.power .v { font-size: clamp(32px, 8vw, 44px); }
+.lcd .u { font: 500 14px var(--font-data); color: var(--lcd-dim); }
+
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button {
+  font: 600 15px var(--font-body); border-radius: 8px; padding: 10px 16px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+}
+button:hover { border-color: var(--muted); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.08); }
+button.danger { color: var(--danger); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.table-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 600 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+td { font-family: var(--font-data); font-size: 15px; }
+th:first-child, td:first-child { text-align: left; color: var(--muted); }
+tbody tr:last-child td { border-bottom: 0; }
+td.x { width: 1%; }
+td.x button { padding: 2px 9px; font-size: 18px; line-height: 1.2; color: var(--muted); background: transparent; border-color: transparent; }
+td.x button:hover { color: var(--danger); border-color: var(--line); }
+.empty { padding: 22px 16px; color: var(--muted); text-align: center; }
+.status { min-height: 1.5em; font-size: 14px; color: var(--muted); margin: 0; }
+textarea#fallback { width: 100%; min-height: 110px; font: 14px var(--font-data); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+
+details { color: var(--muted); font-size: 14px; }
+details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+details p { margin: 8px 0 0; max-width: 70ch; }
+.formula { font-family: var(--font-data); color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">TP de physique-chimie</p>
+    <h1>Banc d'optique photovoltaïque</h1>
+    <p class="sub">Angle d'incidence et constante solaire : règle la distance et l'angle, lis la puissance fournie par la cellule et note tes mesures.</p>
+  </header>
+
+  <section class="stage" aria-label="Banc d'optique">
+    <svg id="bench" viewBox="0 0 900 310" role="img" aria-label="Source lumineuse à gauche et cellule photovoltaïque mobile sur un rail gradué en centimètres">
+      <defs>
+        <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#FFD36B" stop-opacity=".95"/>
+          <stop offset="1" stop-color="#F2A81D" stop-opacity=".28"/>
+        </linearGradient>
+        <linearGradient id="railGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#C9D3DA"/>
+          <stop offset=".5" stop-color="#9FB0BB"/>
+          <stop offset="1" stop-color="#6F808B"/>
+        </linearGradient>
+        <linearGradient id="cellGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#2F7FB8"/>
+          <stop offset="1" stop-color="#1B4F78"/>
+        </linearGradient>
+        <radialGradient id="lensGrad" cx=".3" cy=".5" r=".8">
+          <stop offset="0" stop-color="#FFF3C4"/>
+          <stop offset="1" stop-color="#F2A81D"/>
+        </radialGradient>
+      </defs>
+
+      <!-- rail -->
+      <rect x="30" y="250" width="850" height="14" rx="3" fill="url(#railGrad)"/>
+      <g id="ticks"></g>
+
+      <!-- source lumineuse -->
+      <text x="36" y="96" font-size="17" font-weight="600">Source lumineuse</text>
+      <rect x="60" y="182" width="12" height="54" fill="#7E909B"/>
+      <rect x="46" y="236" width="40" height="14" rx="2" fill="#566874"/>
+      <rect x="36" y="118" width="62" height="64" rx="7" fill="#3A4A56" stroke="#5B6F7C" stroke-width="1.5"/>
+      <rect x="44" y="128" width="30" height="5" rx="2" fill="#22303A"/>
+      <rect x="44" y="140" width="30" height="5" rx="2" fill="#22303A"/>
+      <rect x="44" y="152" width="30" height="5" rx="2" fill="#22303A"/>
+      <ellipse cx="98" cy="150" rx="8" ry="24" fill="url(#lensGrad)"/>
+
+      <!-- faisceau -->
+      <g id="beamG"><polygon id="beam" fill="url(#beamGrad)"/></g>
+
+      <!-- cote de distance -->
+      <g id="dim" stroke="#8EA2AF" stroke-width="1.5" fill="none">
+        <line id="dimLine" y1="224" y2="224"/>
+        <line id="dimL" y1="216" y2="232"/>
+        <line id="dimR" y1="216" y2="232"/>
+      </g>
+      <text id="dimText" y="216" font-size="16" text-anchor="middle" font-family="IBM Plex Mono, monospace" class="halo"></text>
+
+      <!-- cellule -->
+      <text id="cellLabel" y="56" font-size="17" font-weight="600" text-anchor="middle">Cellule photovoltaïque</text>
+      <g id="cellG">
+        <rect id="stand" x="-5" y="0" width="10" height="86" fill="#7E909B"/>
+        <rect id="rider" x="-16" y="86" width="32" height="14" rx="2" fill="#566874"/>
+        <polygon points="0,100 -5,108 5,108" fill="#FF6B5A"/>
+        <path id="arc" fill="none" stroke="#FFC24A" stroke-width="2"/>
+        <line id="normal" stroke="#DCE6EC" stroke-width="1.6" stroke-dasharray="6 5"/>
+        <text id="normalText" font-size="13" text-anchor="middle" class="halo">normale</text>
+        <text id="thetaText" font-size="17" font-style="italic" font-weight="600" text-anchor="middle" class="halo" style="fill:#FFC24A">θ</text>
+        <g id="cellRot">
+          <rect x="-4" y="-50" width="12" height="100" rx="2" fill="#2C3B46"/>
+          <rect x="-9" y="-50" width="6" height="100" rx="1.5" fill="url(#cellGrad)"/>
+          <g stroke="#9CCBEA" stroke-opacity=".6" stroke-width="1">
+            <line x1="-9" x2="-3" y1="-30" y2="-30"/><line x1="-9" x2="-3" y1="-10" y2="-10"/>
+            <line x1="-9" x2="-3" y1="10" y2="10"/><line x1="-9" x2="-3" y1="30" y2="30"/>
+          </g>
+          <circle r="4" fill="#B6C5CE"/>
+        </g>
+        <rect id="hit" x="-30" y="-62" width="60" height="124" fill="transparent" style="cursor:ew-resize;touch-action:none"/>
+      </g>
+    </svg>
+  </section>
+  <p class="hint">Astuce : tu peux aussi faire glisser la cellule le long du banc.</p>
+
+  <div class="panel">
+    <section class="card" aria-label="Réglages">
+      <h2>Réglages</h2>
+      <div class="ctl">
+        <label for="dNum">Distance <small>source – cellule</small></label>
+        <div class="num"><input id="dNum" type="number" min="10" max="100" step="0.5" inputmode="decimal"><span class="unit">cm</span></div>
+        <input id="dRange" type="range" min="10" max="100" step="0.5" aria-label="Distance en centimètres">
+      </div>
+      <div class="ctl">
+        <label for="aNum">Angle d'incidence <small>θ</small></label>
+        <div class="num"><input id="aNum" type="number" min="0" max="90" step="1" inputmode="numeric"><span class="unit">°</span></div>
+        <input id="aRange" type="range" min="0" max="90" step="1" aria-label="Angle d'incidence en degrés">
+      </div>
+      <label class="check" for="noise"><input id="noise" type="checkbox">Mesures bruitées (±&#8239;1&#8239;%)</label>
+    </section>
+
+    <section class="card" aria-label="Mesures en direct">
+      <h2>Mesure en direct</h2>
+      <div class="readouts">
+        <div class="lcd"><div class="lab">Distance d</div><div class="val"><span class="v" id="rd">–</span><span class="u">cm</span></div></div>
+        <div class="lcd"><div class="lab">Angle θ</div><div class="val"><span class="v" id="ra">–</span><span class="u">°</span></div></div>
+        <div class="lcd power"><div class="lab">Puissance P de la cellule</div><div class="val"><span class="v" id="rp">–</span><span class="u">mW</span></div></div>
+      </div>
+      <div class="row">
+        <button id="save" class="primary" type="button">Enregistrer la mesure</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" aria-label="Tableau de mesures">
+    <div class="table-head">
+      <h2>Tableau de mesures</h2>
+      <div class="row">
+        <button id="copy" type="button">Copier le tableau</button>
+        <button id="undo" type="button">Retirer la dernière</button>
+        <button id="clear" class="danger" type="button">Tout effacer</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>N°</th><th>d (cm)</th><th>θ (°)</th><th>P (mW)</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty">Aucune mesure pour l'instant. Règle la distance et l'angle, puis appuie sur « Enregistrer la mesure ».</div>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <textarea id="fallback" readonly hidden aria-label="Tableau à copier"></textarea>
+  </section>
+
+  <details>
+    <summary>Modèle utilisé par la simulation</summary>
+    <p>La puissance reçue suit la loi <span class="formula">P = P₀ · (d₀ / d)² · cos θ</span> avec P₀ = 50 mW pour d₀ = 20 cm. Elle diminue comme l'inverse du carré de la distance et proportionnellement au cosinus de l'angle d'incidence θ, mesuré entre la normale à la cellule et la direction de la lumière.</p>
+    <p>Le même raisonnement s'applique au rayonnement solaire : la constante solaire est l'éclairement reçu en incidence normale (θ = 0°) à la distance Terre-Soleil, environ 1&#8239;361 W·m⁻².</p>
+  </details>
+</div>
+
+<script>
+(function () {
+  var X0 = 100, SC = 7.4, CY = 150, DMIN = 10, DMAX = 100;
+  var KEY = "banc-optique-photovoltaique-v1";
+  var state = { d: 40, th: 0, noise: false, rows: [] };
+  var eps = 1;
+
+  function $(id) { return document.getElementById(id); }
+  function fmt(v, n) { return v.toFixed(n).replace(".", ","); }
+  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+  function ideal(d, th) {
+    var c = Math.cos(th * Math.PI / 180);
+    if (th >= 90 || c < 1e-9) c = 0;
+    return 50 * Math.pow(20 / d, 2) * c;
+  }
+  function reading() { return ideal(state.d, state.th) * (state.noise ? eps : 1); }
+  function resample() { eps = 1 + (Math.random() * 2 - 1) * 0.01; }
+
+  /* graduations du rail */
+  (function ticks() {
+    var g = $("ticks"), s = "";
+    for (var i = 0; i <= 100; i++) {
+      var x = X0 + i * SC, long = i % 10 === 0, mid = i % 5 === 0;
+      var h = long ? 16 : (mid ? 11 : 6);
+      s += '<line x1="' + x + '" x2="' + x + '" y1="264" y2="' + (264 + h) + '" stroke="#8EA2AF" stroke-width="' + (long ? 1.6 : 1) + '"/>';
+      if (long) s += '<text x="' + x + '" y="298" font-size="16" text-anchor="middle" style="fill:#8EA2AF">' + i + '</text>';
+    }
+    s += '<text x="878" y="298" font-size="15" text-anchor="end" style="fill:#8EA2AF">cm</text>';
+    g.innerHTML = s;
+  })();
+
+  function render() {
+    var d = state.d, th = state.th, r = th * Math.PI / 180;
+    var x = X0 + d * SC, s = Math.sin(r), c = Math.cos(r);
+
+    $("cellG").setAttribute("transform", "translate(" + x + "," + CY + ")");
+    $("cellRot").setAttribute("transform", "rotate(" + th + ")");
+    $("stand").setAttribute("height", 86);
+
+    /* faisceau */
+    var pts = [X0, 128, x + 50 * s, CY - 50 * c, x - 50 * s, CY + 50 * c, X0, 172]
+      .map(function (v) { return Math.round(v * 10) / 10; });
+    $("beam").setAttribute("points", pts[0] + "," + pts[1] + " " + pts[2] + "," + pts[3] + " " + pts[4] + "," + pts[5] + " " + pts[6] + "," + pts[7]);
+    $("beamG").setAttribute("opacity", (0.2 + 0.8 * Math.min(1, Math.pow(20 / d, 2))).toFixed(2));
+
+    /* normale et angle (coordonnées locales, origine = centre de la cellule) */
+    var nl = 66;
+    $("normal").setAttribute("x1", 0); $("normal").setAttribute("y1", 0);
+    $("normal").setAttribute("x2", (-nl * c).toFixed(1)); $("normal").setAttribute("y2", (-nl * s).toFixed(1));
+    var nt = $("normalText");
+    var tipX = x - nl * c;
+    nt.setAttribute("x", (-nl * c).toFixed(1)); nt.setAttribute("y", (-nl * s - 9).toFixed(1));
+    nt.style.display = tipX < 135 ? "none" : "";
+    var ar = 44;
+    if (th > 0) {
+      $("arc").setAttribute("d", "M " + (-ar) + " 0 A " + ar + " " + ar + " 0 0 1 " + (-ar * c).toFixed(1) + " " + (-ar * s).toFixed(1));
+      var tx = -(ar + 16) * Math.cos(r / 2), ty = -(ar + 16) * Math.sin(r / 2) + 6;
+      $("thetaText").setAttribute("x", tx.toFixed(1)); $("thetaText").setAttribute("y", ty.toFixed(1));
+      $("arc").style.display = ""; $("thetaText").style.display = "";
+    } else {
+      $("arc").style.display = "none"; $("thetaText").style.display = "none";
+    }
+
+    /* étiquette et cote */
+    $("cellLabel").setAttribute("x", clamp(x, 190, 790));
+    $("dimLine").setAttribute("x1", X0); $("dimLine").setAttribute("x2", x);
+    $("dimL").setAttribute("x1", X0); $("dimL").setAttribute("x2", X0);
+    $("dimR").setAttribute("x1", x); $("dimR").setAttribute("x2", x);
+    $("dimText").setAttribute("x", (X0 + x) / 2);
+    $("dimText").textContent = "d = " + fmt(d, 1) + " cm";
+
+    /* champs */
+    $("dRange").value = d; $("aRange").value = th;
+    if (document.activeElement !== $("dNum")) $("dNum").value = d;
+    if (document.activeElement !== $("aNum")) $("aNum").value = th;
+    $("rd").textContent = fmt(d, 1);
+    $("ra").textContent = String(th);
+    $("rp").textContent = fmt(reading(), 2);
+  }
+
+  function setD(v) { state.d = clamp(Math.round(v * 2) / 2, DMIN, DMAX); resample(); render(); }
+  function setA(v) { state.th = clamp(Math.round(v), 0, 90); resample(); render(); }
+
+  $("dRange").addEventListener("input", function (e) { setD(parseFloat(e.target.value)); });
+  $("aRange").addEventListener("input", function (e) { setA(parseFloat(e.target.value)); });
+  $("dNum").addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setD(v); else render(); e.target.value = state.d; });
+  $("aNum").addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setA(v); else render(); e.target.value = state.th; });
+  $("noise").addEventListener("change", function (e) { state.noise = e.target.checked; resample(); persist(); render(); });
+
+  /* glisser la cellule */
+  var bench = $("bench"), dragging = false;
+  $("hit").addEventListener("pointerdown", function (e) {
+    dragging = true;
+    try { bench.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+  bench.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    var rect = bench.getBoundingClientRect();
+    var ux = (e.clientX - rect.left) / rect.width * 900;
+    setD((ux - X0) / SC);
+  });
+  function stopDrag() { dragging = false; }
+  bench.addEventListener("pointerup", stopDrag);
+  bench.addEventListener("pointercancel", stopDrag);
+
+  /* tableau */
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify({ rows: state.rows, noise: state.noise })); } catch (e) {}
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (o && Array.isArray(o.rows)) {
+        state.rows = o.rows.filter(function (r) { return r && isFinite(r.d) && isFinite(r.th) && isFinite(r.p); }).slice(0, 500);
+      }
+      state.noise = !!(o && o.noise);
+    } catch (e) {}
+  }
+  function say(t) { $("status").textContent = t; }
+
+  function renderRows() {
+    var html = "";
+    state.rows.forEach(function (r, i) {
+      html += "<tr><td>" + (i + 1) + "</td><td>" + fmt(r.d, 1) + "</td><td>" + r.th + "</td><td>" + fmt(r.p, 2) +
+        '</td><td class="x"><button type="button" data-i="' + i + '" aria-label="Supprimer la mesure ' + (i + 1) + '">×</button></td></tr>';
+    });
+    $("rows").innerHTML = html;
+    $("empty").hidden = state.rows.length > 0;
+    $("undo").disabled = $("copy").disabled = $("clear").disabled = state.rows.length === 0;
+  }
+
+  $("save").addEventListener("click", function () {
+    var p = Math.round(reading() * 100) / 100;
+    state.rows.push({ d: state.d, th: state.th, p: p });
+    persist(); renderRows();
+    say("Mesure n°" + state.rows.length + " enregistrée : d = " + fmt(state.d, 1) + " cm, θ = " + state.th + " °, P = " + fmt(p, 2) + " mW.");
+  });
+  $("rows").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-i]");
+    if (!b) return;
+    state.rows.splice(parseInt(b.getAttribute("data-i"), 10), 1);
+    persist(); renderRows(); say("Mesure supprimée.");
+  });
+  $("undo").addEventListener("click", function () {
+    state.rows.pop(); persist(); renderRows(); say("Dernière mesure retirée.");
+  });
+  var clearTimer = null;
+  $("clear").addEventListener("click", function () {
+    var b = $("clear");
+    if (!clearTimer) {
+      b.textContent = "Confirmer l'effacement";
+      clearTimer = setTimeout(function () { b.textContent = "Tout effacer"; clearTimer = null; }, 4000);
+      return;
+    }
+    clearTimeout(clearTimer); clearTimer = null; b.textContent = "Tout effacer";
+    state.rows = []; persist(); renderRows(); say("Tableau effacé.");
+  });
+  $("copy").addEventListener("click", function () {
+    var lines = ["N°\td (cm)\tθ (°)\tP (mW)"];
+    state.rows.forEach(function (r, i) { lines.push([i + 1, fmt(r.d, 1), r.th, fmt(r.p, 2)].join("\t")); });
+    var text = lines.join("\n"), fb = $("fallback");
+    function fallback() {
+      fb.value = text; fb.hidden = false; fb.focus(); fb.select();
+      say("Copie automatique impossible : le texte est sélectionné, copie-le avec ton clavier.");
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () {
+        fb.hidden = true; say("Tableau copié. Colle-le dans un tableur.");
+      }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  load();
+  $("noise").checked = state.noise;
+  resample();
+  renderRows();
+  render();
+})();
+</script>
+
+</body></html>
