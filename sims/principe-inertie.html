@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Principe d'inertie · Simulabo PhCh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Simulation autonome : aucune bibliothèque externe, seulement les polices du site.
+   Palette et composants repris du simulateur « Banc d'optique photovoltaïque ». */
+:root {
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --accent: #1B5E8C;
+  --accent-ink: #FFFFFF;
+  --tabs-bg: #DDE4E9;
+  --ok: #17734A;   --ok-bg: #DDF1E6;
+  --warn: #8F5200; --warn-bg: #FBEBCB;
+  --info: #1B5E8C; --info-bg: #DCEAF4;
+  --bad: #A8281F;  --bad-bg: #F9DDDA;
+  --cP: #C62828; --cR: #1D4ED8; --cF: #B45309; --cf: #7E22CE; --cv: #047857;
+  --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-dim: #A98A45; --lcd-label: #8FA3AF;
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --accent: #6BB4E8; --accent-ink: #0B1A24; --tabs-bg: #0A1015;
+    --ok: #67D39B;   --ok-bg: #12301F;
+    --warn: #F2A81D; --warn-bg: #3A2A0C;
+    --info: #6BB4E8; --info-bg: #14293A;
+    --bad: #F0877D;  --bad-bg: #3B1613;
+    --cP: #F87171; --cR: #60A5FA; --cF: #FBBF24; --cf: #C084FC; --cv: #34D399;
+    --lcd-bg: #0A1015;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { font: 600 clamp(28px, 6vw, 40px)/1.05 var(--font-head); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h2 { font: 600 20px/1.2 var(--font-head); margin: 0; letter-spacing: .02em; }
+p { margin: 0; }
+.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; }
+.crumb a { color: var(--muted); text-decoration: none; font-size: 14px; }
+.crumb a:hover { color: var(--ink); text-decoration: underline; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+kbd { font: 500 12px var(--font-data); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; background: var(--bg); color: var(--ink); }
+
+/* notation vectorielle : une flèche au-dessus de la lettre */
+.vec { position: relative; display: inline-block; font-style: normal; }
+.vec::before { content: "→"; position: absolute; left: 50%; top: -.72em; transform: translateX(-50%); font-size: .7em; line-height: 1; font-family: var(--font-body); }
+p .vec, .lab .vec, .obs .vec, .lg .vec { margin-inline: .04em; }
+
+button { font: 600 15px var(--font-body); border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+button:hover:not(:disabled) { border-color: var(--muted); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+button svg { width: 18px; height: 18px; flex: none; }
+
+/* choix de la situation */
+.tabs { display: flex; gap: 4px; padding: 4px; background: var(--tabs-bg); border-radius: 10px; overflow-x: auto; }
+.tab { flex: 1 0 auto; white-space: nowrap; background: transparent; border-color: transparent; color: var(--muted); padding: 9px 14px; font-size: 14px; }
+.tab:hover:not(:disabled) { color: var(--ink); border-color: transparent; }
+.tab[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+.tab.game[aria-pressed="true"] { background: #0F172A; color: #FBBF24; }
+
+/* scène */
+.stage { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.stage.arcade { background: #0F172A; border: 3px solid #1E293B; }
+.stagebar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.stagebar button { padding: 6px 12px; font-size: 14px; background: var(--surface); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sw .track { width: 32px; height: 18px; border-radius: 9px; background: var(--line); padding: 2px; display: block; transition: background .15s; }
+.sw .knob { display: block; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+.sw[aria-checked="true"] { border-color: var(--accent); }
+.sw[aria-checked="true"] .track { background: var(--accent); }
+.sw[aria-checked="true"] .knob { transform: translateX(14px); }
+.pill { border-radius: 99px !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: .06em; }
+.pill[aria-pressed="true"] { background: var(--info-bg); color: var(--info); border-color: var(--info); }
+.cv { position: relative; }
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 320; touch-action: manipulation; }
+canvas.measuring { cursor: crosshair; }
+.mhint { position: absolute; left: 10px; top: 8px; right: 10px; font: 500 13px var(--font-data); color: var(--warn); background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; pointer-events: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { width: 18px; height: 4px; border-radius: 2px; background: currentColor; display: inline-block; }
+.legend .note { flex-basis: 100%; font-size: 12px; }
+
+/* afficheurs */
+.readouts { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 10px; }
+@media (max-width: 640px) { .readouts { grid-template-columns: 1fr 1fr; } .readouts .wide { grid-column: 1 / -1; } }
+.lcd { background: var(--lcd-bg); border-radius: 8px; padding: 10px 12px 12px; border: 1px solid var(--line); min-width: 0; }
+.lcd .lab .vec { text-transform: none; }
+.lcd .lab { font: 500 11px/1.4 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--lcd-label); }
+.lcd .val { margin-top: 8px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.lcd .v { font: 600 clamp(26px, 6vw, 34px)/1 var(--font-data); color: var(--lcd-fg); font-variant-numeric: tabular-nums; }
+.lcd .u { font: 500 14px var(--font-data); color: var(--lcd-dim); }
+.lcd .bil { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; font: 500 15px/1.35 var(--font-data); color: var(--lcd-fg); }
+.lcd .bil span { color: var(--lcd-dim); font-size: 14px; }
+
+.panel { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 780px) { .panel { grid-template-columns: 1fr 1fr; align-items: stretch; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card h2 { display: flex; align-items: center; gap: 8px; }
+.card h2 svg { width: 20px; height: 20px; color: var(--accent); }
+.card p.help { color: var(--muted); font-size: 14px; }
+.pushbtn { width: 100%; padding: 16px; font-size: 17px; background: #F2A81D; color: #3B2600; border-color: #D68F0A; user-select: none; -webkit-user-select: none; touch-action: none; }
+.pushbtn.on { background: #D68F0A; transform: scale(.985); }
+.pushbtn:disabled { background: var(--bg); color: var(--muted); border-color: var(--line); }
+.go { width: 100%; padding: 14px; font-size: 17px; background: #17734A; color: #fff; border-color: #17734A; }
+.go:disabled { background: var(--bg); color: var(--muted); border-color: var(--line); }
+.slider { display: grid; gap: 6px; }
+.slider label { font-weight: 600; display: flex; justify-content: space-between; }
+.slider label b { color: var(--accent); font-family: var(--font-data); }
+.slider input { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+.chrono-actions { display: flex; flex-direction: column; gap: 8px; }
+.status { font-size: 14px; color: var(--muted); min-height: 1.5em; }
+.status.err { color: var(--bad); }
+
+.obs { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--surface); transition: background .2s, border-color .2s; }
+.obs h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.obs h2 svg { width: 20px; height: 20px; }
+.obs p { font-size: 17px; line-height: 1.7; }
+.obs[data-tone="ok"] { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.obs[data-tone="warn"] { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+.obs[data-tone="info"] { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+.obs[data-tone="bad"] { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+
+details { color: var(--muted); font-size: 14px; }
+details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
+
+/* jeu d'arcade (toujours sur fond sombre) */
+.score { display: flex; gap: 10px; overflow-x: auto; align-items: stretch; padding: 4px; }
+.pcard { min-width: 120px; flex: 1; background: #1E293B; border: 2px solid #334155; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; color: #E2E8F0; transition: all .2s; }
+.pcard:not(.cur) { background: #182235; }
+.pcard.cur { opacity: 1; transform: scale(1.02); box-shadow: 0 0 14px rgba(255,255,255,.14); }
+.pcard .nm { font: 600 12px var(--font-data); letter-spacing: .1em; text-transform: uppercase; }
+.pcard .sc { font: 600 30px/1.1 var(--font-data); color: #fff; }
+.pcard .st { display: flex; gap: 4px; margin-top: 6px; }
+.pcard .st i { width: 10px; height: 10px; border-radius: 50%; background: #CBD5E1; }
+.pcard .st i.used { background: #334155; }
+.score .newgame { align-self: center; background: #1E293B; color: #E2E8F0; border-color: #334155; font-size: 13px; padding: 8px 12px; }
+.overlay { position: absolute; inset: 0; background: rgba(15,23,42,.95); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; color: #E2E8F0; text-align: center; overflow: auto; }
+.overlay h2 { font-size: clamp(28px, 6vw, 44px); color: #FBBF24; letter-spacing: .08em; text-transform: uppercase; }
+.overlay .count { display: flex; gap: 12px; }
+.overlay .count button { width: 76px; height: 76px; flex-direction: column; gap: 0; background: #1E293B; color: #fff; border: 2px solid #334155; border-radius: 14px; font-size: 28px; font-family: var(--font-head); }
+.overlay .count button small { font: 500 10px var(--font-data); letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+.overlay .count button:hover { background: #FBBF24; color: #451A03; border-color: #FBBF24; }
+.overlay .rules { max-width: 52ch; font-size: 14px; color: #94A3B8; background: rgba(30,41,59,.6); border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; }
+.overlay .rules b { color: #FBBF24; }
+.gpanel { background: #0F172A; border: 3px solid #1E293B; border-radius: 14px; padding: 16px; color: #E2E8F0; display: flex; justify-content: center; align-items: center; min-height: 130px; text-align: center; }
+.gpanel > div { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.gpanel .turn { font: 600 14px var(--font-data); letter-spacing: .1em; text-transform: uppercase; }
+.gpanel .pushbtn { max-width: 520px; font-size: 18px; text-transform: uppercase; letter-spacing: .04em; }
+.gpanel .pulse { font: 600 22px var(--font-head); letter-spacing: .1em; text-transform: uppercase; color: #94A3B8; }
+.gpanel .big { font: 700 40px/1.1 var(--font-head); }
+.gpanel .gmsg { color: #FDBA74; font-size: 14px; min-height: 1.3em; }
+.gpanel button.next { background: #10B981; border-color: #10B981; color: #fff; font-size: 18px; padding: 12px 24px; }
+.gpanel button.alt { background: #334155; border-color: #475569; color: #fff; }
+.gpanel button.again { background: #6366F1; border-color: #6366F1; color: #fff; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.back-link { display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker">Mouvement et interactions · Seconde</p>
+    <h1>Le principe d'inertie</h1>
+    <p class="sub">Pousse un mobile, lâche un palet, laisse tomber un objet : observe les forces et la vitesse, puis enregistre une chronophotographie pour savoir quand les forces se compensent.</p>
+  </header>
+
+  <div class="tabs" id="tabs" role="group" aria-label="Situation étudiée">
+    <button type="button" class="tab" data-mode="horizontal" data-space-ok>Horizontal</button>
+    <button type="button" class="tab" data-mode="incline" data-space-ok>Plan incliné</button>
+    <button type="button" class="tab" data-mode="vertical" data-space-ok>Chute libre</button>
+    <button type="button" class="tab" data-mode="curling" data-space-ok>Curling (TP)</button>
+    <button type="button" class="tab game" data-mode="game" data-space-ok>Curling (jeu)</button>
+  </div>
+
+  <div class="score" id="score" hidden></div>
+
+  <section class="stage" id="stage" aria-label="Simulation">
+    <div class="stagebar" id="stagebar">
+      <button type="button" id="btnReset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Relancer
+      </button>
+      <div class="tools">
+        <button type="button" class="sw" id="swHover" role="switch" aria-checked="true"><span class="track"><span class="knob"></span></span>Coussin d'air</button>
+        <button type="button" class="sw" id="swAtm" role="switch" aria-checked="false" hidden><span class="track"><span class="knob"></span></span>Atmosphère</button>
+        <button type="button" class="pill" id="tgForces" aria-pressed="true">Forces</button>
+        <button type="button" class="pill" id="tgVel" aria-pressed="true">Vitesse</button>
+      </div>
+    </div>
+    <div class="cv">
+      <canvas id="cv" width="1000" height="320" role="img" aria-label="Scène de la simulation : le mobile, ses graduations en mètres et, si elles sont affichées, les flèches des forces et de la vitesse. La description de ce qui se passe est donnée dans le bloc Observation en direct."></canvas>
+      <div class="mhint" id="mHint" role="status" hidden></div>
+      <div class="overlay" id="setup" hidden>
+        <h2>Curling arcade</h2>
+        <p>Combien de joueurs pour cette partie ?</p>
+        <div class="count" id="count">
+          <button type="button" data-n="1">1<small>joueur</small></button>
+          <button type="button" data-n="2">2<small>joueurs</small></button>
+          <button type="button" data-n="3">3<small>joueurs</small></button>
+          <button type="button" data-n="4">4<small>joueurs</small></button>
+        </div>
+        <div class="rules">
+          <p><b>Règles :</b> chaque joueur lance 5 pierres, à tour de rôle. La pierre doit s'arrêter le plus près possible du centre de la cible.</p>
+          <p style="margin-top:6px"><b>Commandes :</b> maintiens <kbd>Espace</kbd> (ou le bouton) pour pousser la pierre dans la zone 1, relâche pour la lancer. Plus tu pousses longtemps, plus elle ira vite.</p>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="gpanel" id="gpanel" hidden aria-live="polite">
+    <div id="gReady" hidden>
+      <p class="turn" id="gTurn"></p>
+      <button type="button" class="pushbtn" id="gPush" data-space-ok>Maintenir Espace ou cliquer</button>
+      <p class="gmsg" id="gMsg"></p>
+    </div>
+    <div id="gSliding" hidden><p class="pulse">La pierre glisse…</p></div>
+    <div id="gScored" hidden>
+      <p class="big" id="gPts"></p>
+      <p class="turn" id="gPtsTxt"></p>
+      <button type="button" class="next" id="gNext"></button>
+    </div>
+    <div id="gOver" hidden>
+      <p class="turn">Partie terminée</p>
+      <p class="big" id="gWin"></p>
+      <p id="gWinPts"></p>
+      <div class="row">
+        <button type="button" class="again" id="gAgain"></button>
+        <button type="button" class="alt" id="gChange">Modifier les joueurs</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="sci" style="display:flex;flex-direction:column;gap:16px">
+    <section class="readouts" aria-label="Mesures en direct">
+      <div class="lcd">
+        <div class="lab">Vitesse <span class="vec">v</span></div>
+        <div class="val"><span class="v" id="rV">0,00</span><span class="u">m/s</span></div>
+      </div>
+      <div class="lcd">
+        <div class="lab">Somme des forces Σ<span class="vec">F</span> (valeur)</div>
+        <div class="val"><span class="v" id="rF">0</span><span class="u" id="rFu">N</span></div>
+      </div>
+      <div class="lcd wide">
+        <div class="lab">Bilan</div>
+        <div class="bil"><b id="rB1">Forces compensées</b><span id="rB2">immobile</span></div>
+      </div>
+    </section>
+
+    <div class="panel">
+      <section class="card" aria-label="Commandes">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V3a2 2 0 0 0-4 0v9"/><path d="m6 13.5-2.9-2.9a2 2 0 0 0-2.8 2.8L8.6 21c.5.5 1.2.8 2 .8h3.5a5 5 0 0 0 5-5v-6.2a2 2 0 0 0-2-2h-3z"/></svg>Commandes</h2>
+        <div id="ctlPush" hidden>
+          <button type="button" class="pushbtn" id="btnPush" data-space-ok>Maintenir Espace ou cliquer</button>
+          <p class="help" id="pushHelp" style="margin-top:10px"></p>
+        </div>
+        <div id="ctlIncline" hidden style="display:flex;flex-direction:column;gap:14px">
+          <div class="slider">
+            <label for="angle"><span>Angle d'inclinaison <var style="font-style:normal">α</var></span><b id="angleVal">25°</b></label>
+            <input type="range" id="angle" min="10" max="60" step="1" value="25">
+            <p class="help">Avec le coussin d'air désactivé, le palet ne glisse que si l'angle est assez grand.</p>
+          </div>
+          <button type="button" class="go" id="btnDrop">Lâcher le palet</button>
+        </div>
+        <div id="ctlVertical" hidden>
+          <button type="button" class="go" id="btnFall">Lâcher l'objet</button>
+          <p class="help" style="margin-top:10px">Active l'atmosphère pour comparer la chute avec et sans frottements de l'air.</p>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Chronophotographie">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Chronophotographie</h2>
+        <p class="help">Enregistre les positions successives du centre de masse, une toutes les <b id="dtTxt">200 ms</b>. L'enregistrement démarre dès que le mobile se met en mouvement.</p>
+        <div class="chrono-actions">
+          <button type="button" class="primary" id="btnChrono">Démarrer l'enregistrement</button>
+          <div id="chronoMore" hidden class="chrono-actions">
+            <button type="button" id="btnMeasure">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 15.3l-8.4 8.4c-.8.8-2.1.8-2.8 0l-7.1-7.1c-.8-.8-.8-2.1 0-2.8l8.4-8.4c.8-.8 2.1-.8 2.8 0l7.1 7.1c.8.8.8 2.1 0 2.8z"/><path d="M16 12l2 2"/><path d="M13 15l2 2"/><path d="M10 18l2 2"/></svg>
+              <span id="btnMeasureTxt">Mesurer sur l'écran</span>
+            </button>
+            <button type="button" id="btnPrint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Générer le document élève
+            </button>
+          </div>
+          <p class="status" id="chronoStatus" role="status"></p>
+        </div>
+      </section>
+    </div>
+
+    <section class="obs" id="obs" data-tone="neutral" aria-live="polite">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Observation en direct</h2>
+      <p id="obsText"></p>
+    </section>
+
+    <details>
+      <summary>Mode d'emploi</summary>
+      <ul>
+        <li>Barre <kbd>Espace</kbd> ou bouton : pousse le mobile tant que tu maintiens appuyé.</li>
+        <li>Chronophotographie : démarre l'enregistrement, mets le mobile en mouvement, puis utilise « Mesurer sur l'écran » (clique sur deux croix rouges) ou génère le document élève à imprimer.</li>
+        <li>Les flèches de forces sont tracées à la même échelle entre elles ; la flèche de vitesse a sa propre échelle.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ constantes */
+  var W = 1000, H = 320, GROUND = 260, SC = 100;      // canvas logique, sol, pixels par mètre
+  var GRAV = 9.81, DT = 1 / 240, CHRONO_MAX = 40;
+  var ZONE1 = 250, ZONE3 = 600;                        // curling (px)
+  var VT = { horizontal: 90, curling: 90, incline: 0, vertical: 0 };   // haut de la zone visible (px) : on rogne le ciel vide
+  var VFLOOR = (GROUND - 15) / SC;                     // position du centre de la balle au sol (m)
+  var V_SCALE = 20;                                    // px par m/s pour la flèche vitesse
+  var MODES = {
+    horizontal: { m: 10, push: 30, mu: 0.25, dt: 0.2,  n: 48, q0: 1.0 },
+    incline:    { m: 10, mu: 0.25,           dt: 0.15, n: 36, q0: 0.5 },
+    vertical:   { m: 10, k: 15,              dt: 0.1,  n: 24, q0: 0.4 },
+    curling:    { m: 20, push: 40, fz3: 27,  dt: 0.2,  n: 48, q0: 0.5 }
+  };
+  var FSCALE = { horizontal: 0.5, incline: 0.5, vertical: 0.5, curling: 0.26 }; // px par newton
+  var PCOL = ["#60A5FA", "#F87171", "#34D399", "#FBBF24"];
+
+  var PAL = {
+    light: { sky: "#F4F7F9", skyHover: "#E3F1FB", skyAtm: "#E3E8ED", ground: "#D1D6DC", grid: "#8E9AA6", txt: "#4B5663", halo: "#F4F7F9",
+      body: "#1E293B", cg: "#FFFFFF", plane: "#CBD5E1", planeLine: "#64748B", planeLineHover: "#38BDF8", cushion: "rgba(56,189,248,.55)",
+      ghost: "rgba(30,41,59,.14)", ghostLine: "rgba(30,41,59,.40)", cross: "#DC2626",
+      P: "#C62828", R: "#1D4ED8", F: "#B45309", f: "#7E22CE", v: "#047857",
+      z1: "#BAE6FD", z2: "#E0F2FE", z3: "#F1F5F9", zline: "#EF4444", ztxt: "#475569", stone: "#64748B", handle: "#DC2626",
+      mline: "#D97706", mtxt: "#92400E", mbg: "rgba(255,255,255,.92)" },
+    dark: { sky: "#0F1A21", skyHover: "#12303F", skyAtm: "#1B2630", ground: "#26343E", grid: "#6A7C89", txt: "#B3C2CC", halo: "#0F1A21",
+      body: "#DCE6EC", cg: "#0F1A21", plane: "#2B3A46", planeLine: "#8CA0AF", planeLineHover: "#38BDF8", cushion: "rgba(56,189,248,.5)",
+      ghost: "rgba(220,230,236,.14)", ghostLine: "rgba(220,230,236,.40)", cross: "#F87171",
+      P: "#F87171", R: "#60A5FA", F: "#FBBF24", f: "#C084FC", v: "#34D399",
+      z1: "#1E5A7A", z2: "#25708F", z3: "#33424E", zline: "#F87171", ztxt: "#DCE6EC", stone: "#94A3B8", handle: "#F87171",
+      mline: "#FBBF24", mtxt: "#FDE68A", mbg: "rgba(15,26,33,.92)" },
+    arcade: { sky: "#0F172A", skyHover: "#0F172A", skyAtm: "#0F172A", ground: "#1E293B", grid: "#64748B", txt: "#94A3B8", halo: "#0F172A",
+      body: "#F8FAFC", cg: "#0F172A", plane: "#1E293B", planeLine: "#64748B", planeLineHover: "#38BDF8", cushion: "rgba(56,189,248,.5)",
+      ghost: "rgba(255,255,255,.1)", ghostLine: "rgba(255,255,255,.3)", cross: "#F87171",
+      P: "#F87171", R: "#60A5FA", F: "#FBBF24", f: "#C084FC", v: "#34D399",
+      z1: "#0369A1", z2: "#0284C7", z3: "#475569", zline: "#F87171", ztxt: "#FFFFFF", stone: "#F8FAFC", handle: "#FBBF24",
+      mline: "#FBBF24", mtxt: "#FDE68A", mbg: "rgba(15,23,42,.92)" },
+    print: { sky: "#FFFFFF", skyHover: "#FFFFFF", skyAtm: "#FFFFFF", ground: "#E5E7EB", grid: "#4B5563", txt: "#1F2937", halo: "#FFFFFF",
+      body: "#1E293B", cg: "#FFFFFF", plane: "#E5E7EB", planeLine: "#111827", planeLineHover: "#111827", cushion: "rgba(0,0,0,0)",
+      ghost: "rgba(15,23,42,.07)", ghostLine: "#334155", cross: "#DC2626",
+      P: "#000", R: "#000", F: "#000", f: "#000", v: "#000",
+      z1: "#E2E8F0", z2: "#F1F5F9", z3: "#F8FAFC", zline: "#EF4444", ztxt: "#334155", stone: "#64748B", handle: "#DC2626",
+      mline: "#000", mtxt: "#000", mbg: "#fff" }
+  };
+
+  /* ------------------------------------------------------------------ utilitaires */
+  function $(id) { return document.getElementById(id); }
+  function fmt(x, d) { var n = +(+x).toFixed(d); return n.toFixed(d).replace(".", ","); }
+  function V(t) { return '<span class="vec">' + t + "</span>"; }
+  var ZERO = V("0"), SIGMAF = "Σ" + V("F");
+  var FONT = '"IBM Plex Sans", system-ui, sans-serif';
+  var TS = 1;   // agrandissement du texte du canvas sur écran étroit
+  function fnt(w, px) { return w + " " + Math.round(px * TS) + "px " + FONT; }
+
+  /* ------------------------------------------------------------------ état */
+  var S = {
+    mode: "horizontal", kind: "horizontal",
+    q: 1, v: 0, net: 0, fric: 0, push: 0,
+    pushing: false, released: false, atEnd: false, landed: false, moved: false,
+    angle: 25, hover: true, atm: false, showF: true, showV: true
+  };
+  var C = { state: "idle", points: [], k: 0 };            // chronophotographie
+  var MEAS = { active: false, pts: [], text: "" };
+  var GM = { phase: "setup", n: 1, cur: 0, scores: [0], stones: [0], status: "ready", pts: null, msg: "" };
+
+  var cv = $("cv"), ctx = cv.getContext("2d");
+  var dark = window.matchMedia("(prefers-color-scheme: dark)");
+
+  /* ------------------------------------------------------------------ géométrie */
+  function geom(angleDeg) {
+    var th = angleDeg * Math.PI / 180, sx = 50;
+    var sy = GROUND - (W - 100) * Math.tan(th);
+    if (sy < 50) sy = 50;
+    var smax = Math.min((W - 100) / Math.cos(th), (GROUND - sy) / Math.sin(th)) / SC; // m
+    return { th: th, sx: sx, sy: sy, smax: smax };
+  }
+  function inclineStop() { return geom(S.angle).smax - 0.4; }  // l'avant du palet s'arrête au bout du plan
+
+  function place(q) {
+    var k = S.kind;
+    if (k === "horizontal") return { cx: q * SC, cy: GROUND - 15 };
+    if (k === "curling") return { cx: q * SC, cy: GROUND - 10 };
+    if (k === "vertical") return { cx: W / 2, cy: q * SC };
+    var g = geom(S.angle), px = g.sx + q * SC * Math.cos(g.th), py = g.sy + q * SC * Math.sin(g.th);
+    return { px: px, py: py, th: g.th, cx: px - 15 * Math.sin(g.th), cy: py - 15 * Math.cos(g.th) };
+  }
+
+  /* ------------------------------------------------------------------ physique (pas fixe) */
+  // Frottement de glissement avec adhérence : `drive` = résultante des autres forces suivant l'axe.
+  function slide(v, drive, fmax, m, dt) {
+    var fr, nv;
+    if (Math.abs(v) < 1e-9) {
+      if (Math.abs(drive) <= fmax) return { v: 0, fric: -drive, net: 0 };       // le mobile reste au repos
+      fr = -Math.sign(drive) * fmax;
+      return { v: (drive + fr) / m * dt, fric: fr, net: drive + fr };
+    }
+    fr = -Math.sign(v) * fmax;
+    nv = v + (drive + fr) / m * dt;
+    if (Math.sign(nv) !== Math.sign(v) && Math.abs(drive) <= fmax) return { v: 0, fric: -drive, net: 0 }; // le frottement ne fait pas repartir en arrière
+    return { v: nv, fric: fr, net: drive + fr };
+  }
+  function apply(r) { S.v = r.v; S.fric = r.fric; S.net = r.net; }
+
+  function physics() {
+    var k = S.kind, M = MODES[k], Wt = M.m * GRAV, r, v0;
+    S.push = 0;
+    if (k === "horizontal") {
+      S.push = S.pushing ? M.push : 0;
+      v0 = S.v;
+      apply(slide(S.v, S.push, S.hover ? 0 : M.mu * Wt, M.m, DT));
+      S.q += 0.5 * (v0 + S.v) * DT;
+      if (S.q * SC > W + 50) S.q = -50 / SC;
+    } else if (k === "curling") {
+      S.push = (S.pushing && S.q * SC < ZONE1) ? M.push : 0;
+      v0 = S.v;
+      apply(slide(S.v, S.push, S.q * SC >= ZONE3 ? M.fz3 : 0, M.m, DT));
+      S.q += 0.5 * (v0 + S.v) * DT;
+      if (S.q * SC > W + 50) { S.q = (W + 50) / SC; S.v = 0; S.atEnd = true; S.net = 0; S.fric = 0; }
+    } else if (k === "vertical") {
+      if (!S.released || S.landed) { S.v = 0; S.net = 0; S.fric = 0; return; }
+      S.fric = S.atm ? -M.k * S.v : 0;
+      S.net = Wt + S.fric;
+      v0 = S.v;
+      S.v += S.net / M.m * DT;
+      S.q += 0.5 * (v0 + S.v) * DT;
+      if (S.q >= VFLOOR) { S.q = VFLOOR; S.v = 0; S.landed = true; S.net = 0; S.fric = 0; }
+    } else {
+      if (!S.released || S.atEnd) { S.v = 0; S.net = 0; S.fric = 0; return; }
+      var th = S.angle * Math.PI / 180;
+      v0 = S.v;
+      r = slide(S.v, Wt * Math.sin(th), S.hover ? 0 : M.mu * Wt * Math.cos(th), M.m, DT);
+      apply(r);
+      S.q += 0.5 * (v0 + S.v) * DT;
+      var stop = inclineStop();
+      if (S.q >= stop) { S.q = stop; S.v = 0; S.atEnd = true; S.net = 0; S.fric = 0; }
+    }
+    if (S.v !== 0) S.moved = true;
+  }
+
+  /* Chronophotographie : une position toutes les n pas, donc exactement tous les Δt de temps simulé. */
+  function chronoPost() {
+    if (C.state !== "recording") return;
+    C.k++;
+    if (C.k % MODES[S.kind].n === 0) C.points.push(S.q);
+    var stop = S.v === 0 || S.atEnd || S.landed || C.points.length >= CHRONO_MAX ||
+      (S.kind === "horizontal" && S.q * SC > W - 50);
+    if (stop) C.state = "done";
+  }
+
+  function step() {
+    var q0 = S.q;
+    physics();
+    // t = 0 : position au début du pas pendant lequel le mouvement commence
+    if (C.state === "armed" && S.v !== 0) { C.state = "recording"; C.points = [q0]; C.k = 0; }
+    chronoPost();
+    if (S.mode === "game") gameCheck();
+  }
+
+  /* ------------------------------------------------------------------ commandes */
+  function pushStart() {
+    if (S.mode === "horizontal") { S.pushing = true; return; }
+    if (S.kind === "curling") {
+      if (S.q * SC >= ZONE1) return;
+      if (S.mode === "game" && !(GM.phase === "playing" && GM.status === "ready")) return;
+      S.pushing = true;
+      GM.msg = "";
+    }
+  }
+  function pushEnd() {
+    if (!S.pushing) return;
+    S.pushing = false;
+    if (S.mode === "game" && GM.status === "ready" && S.v > 0) {
+      if (S.v < 0.3) { resetStone(); GM.msg = "Poussée trop courte : la pierre n'a pas été lancée, recommence."; }
+      else GM.status = "sliding";
+      syncGame();
+    }
+  }
+  function bindPush(btn) {
+    btn.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      if (btn.setPointerCapture) { try { btn.setPointerCapture(e.pointerId); } catch (x) {} }
+      pushStart();
+    });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (ev) { btn.addEventListener(ev, pushEnd); });
+  }
+  window.addEventListener("blur", pushEnd);
+
+  function pushingAllowedByKey() { return S.mode === "horizontal" || S.kind === "curling"; }
+  function spaceIgnored(e) {
+    var t = e.target;
+    if (!t || t === document.body) return false;
+    var tag = t.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+    if (tag === "BUTTON" && !t.hasAttribute("data-space-ok")) return true;   // on laisse Espace activer le bouton ciblé au clavier
+    return false;
+  }
+  window.addEventListener("keydown", function (e) {
+    if (e.code !== "Space" || spaceIgnored(e) || !pushingAllowedByKey()) return;
+    e.preventDefault();
+    if (!e.repeat) pushStart();
+  });
+  window.addEventListener("keyup", function (e) {
+    if (e.code !== "Space" || spaceIgnored(e) || !pushingAllowedByKey()) return;
+    e.preventDefault();
+    pushEnd();
+  });
+  // après un clic souris, on retire le focus des boutons pour que la barre Espace reste dédiée au lancer
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("button");
+    if (b && e.detail > 0) b.blur();
+  });
+
+  function resetStone() {
+    var M = MODES.curling;
+    S.q = M.q0; S.v = 0; S.net = 0; S.fric = 0; S.push = 0; S.pushing = false; S.moved = false; S.atEnd = false;
+  }
+  function resetState() {
+    var M = MODES[S.kind];
+    S.q = M.q0; S.v = 0; S.net = 0; S.fric = 0; S.push = 0;
+    S.pushing = false; S.released = false; S.atEnd = false; S.landed = false; S.moved = false;
+    C.state = "idle"; C.points = []; C.k = 0;
+    MEAS.active = false; MEAS.pts = []; MEAS.text = "";
+  }
+
+  function setMode(m) {
+    if (m === S.mode) return;
+    S.mode = m; S.kind = m === "game" ? "curling" : m;
+    resetState();
+    S.showF = m !== "game"; S.showV = m !== "game";
+    if (m === "game") { GM.phase = "setup"; GM.status = "ready"; GM.pts = null; GM.msg = ""; }
+    applyModeUI();
+  }
+
+  /* ------------------------------------------------------------------ jeu */
+  function startGame(n) {
+    GM.n = n; GM.cur = 0; GM.scores = []; GM.stones = [];
+    for (var i = 0; i < n; i++) { GM.scores.push(0); GM.stones.push(0); }
+    GM.phase = "playing"; GM.status = "ready"; GM.pts = null; GM.msg = "";
+    resetStone();
+    syncGame();
+  }
+  function gameCheck() {
+    if (GM.phase !== "playing") return;
+    if ((GM.status === "ready" || GM.status === "sliding") && S.moved && S.v === 0) {
+      var x = S.q * SC, d = Math.abs(x - 850), pts = 0;
+      if (d <= 15) pts = 100; else if (d <= 35) pts = 50; else if (d <= 50) pts = 20;
+      GM.pts = pts; GM.scores[GM.cur] += pts; GM.stones[GM.cur]++;
+      GM.status = GM.stones.every(function (s) { return s >= 5; }) ? "gameover" : "scored";
+      S.pushing = false;
+      syncGame();
+    }
+  }
+  function nextStone() {
+    GM.cur = (GM.cur + 1) % GM.n; GM.status = "ready"; GM.pts = null; GM.msg = "";
+    resetStone(); syncGame();
+  }
+  function syncGame() {
+    var setup = S.mode === "game" && GM.phase === "setup";
+    $("setup").hidden = !setup;
+    $("score").hidden = !(S.mode === "game" && GM.phase === "playing");
+    $("gpanel").hidden = S.mode !== "game";
+    $("gReady").hidden = !(GM.phase === "playing" && GM.status === "ready");
+    $("gSliding").hidden = GM.status !== "sliding" || GM.phase !== "playing";
+    $("gScored").hidden = GM.status !== "scored" || GM.phase !== "playing";
+    $("gOver").hidden = GM.status !== "gameover" || GM.phase !== "playing";
+    if (GM.phase !== "playing") { $("gReady").hidden = true; return; }
+
+    var html = "";
+    GM.scores.forEach(function (sc, i) {
+      var cur = i === GM.cur && GM.status !== "gameover";
+      var dots = "";
+      for (var j = 0; j < 5; j++) dots += '<i class="' + (j < 5 - GM.stones[i] ? "" : "used") + '"></i>';
+      html += '<div class="pcard' + (cur ? " cur" : "") + '" style="' + (cur ? "border-color:" + PCOL[i] : "") + '">' +
+        '<span class="nm" style="color:' + (cur ? PCOL[i] : "#94A3B8") + '">Joueur ' + (i + 1) + '</span>' +
+        '<span class="sc">' + ("00" + sc).slice(-3) + '</span><span class="st" aria-label="' + (5 - GM.stones[i]) + ' pierres restantes">' + dots + '</span></div>';
+    });
+    html += '<button type="button" class="newgame" id="btnNewGame">Nouvelle partie</button>';
+    $("score").innerHTML = html;
+    $("btnNewGame").addEventListener("click", function () { GM.phase = "setup"; syncGame(); resetStone(); });
+
+    var t = $("gTurn"); t.textContent = "Au tour du joueur " + (GM.cur + 1); t.style.color = PCOL[GM.cur];
+    $("gMsg").textContent = GM.msg || "";
+    if (GM.status === "scored") {
+      var p = GM.pts, g = $("gPts");
+      g.textContent = p > 0 ? "+" + p + " pts" : "0 pt";
+      g.style.color = p === 100 ? "#FBBF24" : (p > 0 ? "#34D399" : "#F43F5E");
+      $("gPtsTxt").textContent = p === 100 ? "En plein dans le mille !" : (p > 0 ? "Bien joué !" : "Hors de la cible…");
+      $("gNext").textContent = GM.n > 1 ? "Au joueur " + ((GM.cur + 1) % GM.n + 1) : "Pierre suivante";
+    }
+    if (GM.status === "gameover") {
+      var max = Math.max.apply(null, GM.scores), win = [];
+      GM.scores.forEach(function (s, i) { if (s === max) win.push(i + 1); });
+      var w = $("gWin");
+      if (win.length === 1) { w.textContent = "Joueur " + win[0] + " gagne !"; w.style.color = PCOL[win[0] - 1]; }
+      else { w.textContent = "Égalité : joueurs " + win.join(" et "); w.style.color = "#fff"; }
+      $("gWinPts").textContent = "avec " + max + " point" + (max > 1 ? "s" : "");
+      $("gAgain").textContent = "Rejouer (" + GM.n + (GM.n > 1 ? " joueurs" : " joueur") + ")";
+    }
+  }
+
+  /* ------------------------------------------------------------------ dessin */
+  function rr(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function shape(c, p, paint) {
+    var k = S.kind;
+    c.save();
+    if (k === "incline") { c.translate(p.px, p.py); c.rotate(p.th); rr(c, -40, -30, 80, 30, 8); }
+    else if (k === "horizontal") rr(c, p.cx - 40, GROUND - 30, 80, 30, 8);
+    else if (k === "curling") rr(c, p.cx - 25, GROUND - 20, 50, 20, 10);
+    else { c.beginPath(); c.arc(p.cx, p.cy, 15, 0, 2 * Math.PI); }
+    paint();
+    c.restore();
+  }
+  function cross(c, x, y, col) {
+    c.strokeStyle = col; c.lineWidth = 2; c.lineCap = "butt";
+    c.beginPath(); c.moveTo(x - 6, y); c.lineTo(x + 6, y); c.moveTo(x, y - 6); c.lineTo(x, y + 6); c.stroke();
+  }
+  function vlabel(c, pal, txt, sub, cx, cy, color) {
+    c.font = fnt(600, 18); c.textAlign = "center"; c.textBaseline = "middle";
+    var w = c.measureText(txt).width;
+    c.lineJoin = "round"; c.lineWidth = 4; c.strokeStyle = pal.halo; c.strokeText(txt, cx, cy);
+    c.fillStyle = color; c.fillText(txt, cx, cy);
+    var ay = cy - 13, x1 = cx - w / 2 - 1, x2 = cx + w / 2 + 2;
+    c.lineWidth = 1.6; c.strokeStyle = color; c.lineCap = "butt";
+    c.beginPath(); c.moveTo(x1, ay); c.lineTo(x2, ay); c.moveTo(x2 - 4, ay - 3); c.lineTo(x2, ay); c.lineTo(x2 - 4, ay + 3); c.stroke();
+    if (sub) {
+      c.font = fnt(600, 11); c.textAlign = "left";
+      c.lineWidth = 3; c.strokeStyle = pal.halo; c.strokeText(sub, cx + w / 2 + 1, cy + 6);
+      c.fillStyle = color; c.fillText(sub, cx + w / 2 + 1, cy + 6);
+    }
+    c.textAlign = "left"; c.textBaseline = "alphabetic";
+  }
+  function arrow(c, pal, x1, y1, x2, y2, color, lab, sub) {
+    var dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+    if (L < 1.5) return;
+    var a = Math.atan2(dy, dx), hl = Math.max(5, Math.min(11, L * 0.5));
+    c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - hl * 0.7 * Math.cos(a), y2 - hl * 0.7 * Math.sin(a)); c.stroke();
+    c.beginPath(); c.moveTo(x2, y2);
+    c.lineTo(x2 - hl * Math.cos(a - 0.45), y2 - hl * Math.sin(a - 0.45));
+    c.lineTo(x2 - hl * Math.cos(a + 0.45), y2 - hl * Math.sin(a + 0.45));
+    c.closePath(); c.fill();
+    if (lab) {
+      if (Math.abs(dx) >= Math.abs(dy)) vlabel(c, pal, lab, sub, x2 + (dx > 0 ? 16 : -16), y2 + 2, color);
+      else vlabel(c, pal, lab, sub, x2 + 16, y2 + (dy > 0 ? 4 : -2), color);
+    }
+  }
+
+  function drawVectors(c, pal, p) {
+    var k = S.kind, M = MODES[k], Wt = M.m * GRAV, fs = FSCALE[k], th, cs, sn, vv;
+    if (S.showF) {
+      if (k === "horizontal" || k === "curling") {
+        arrow(c, pal, p.cx, p.cy, p.cx, p.cy + Wt * fs, pal.P, "P");
+        arrow(c, pal, p.cx, p.cy, p.cx, p.cy - Wt * fs, pal.R, "R");
+        if (S.push) arrow(c, pal, p.cx, p.cy, p.cx + S.push * fs, p.cy, pal.F, "F");
+        if (S.fric) arrow(c, pal, p.cx, p.cy, p.cx + S.fric * fs, p.cy, pal.f, "f");
+      } else if (k === "vertical") {
+        arrow(c, pal, p.cx, p.cy, p.cx, p.cy + Wt * fs, pal.P, "P");
+        if (!S.released) arrow(c, pal, p.cx, p.cy, p.cx, p.cy - Wt * fs, pal.F, "F", "maintien");
+        else if (S.landed) arrow(c, pal, p.cx, p.cy, p.cx, p.cy - Wt * fs, pal.R, "R");
+        else if (S.fric) arrow(c, pal, p.cx, p.cy, p.cx, p.cy + S.fric * fs, pal.f, "f");
+      } else {
+        th = p.th; cs = Math.cos(th); sn = Math.sin(th);
+        arrow(c, pal, p.cx, p.cy, p.cx, p.cy + Wt * fs, pal.P, "P");
+        arrow(c, pal, p.cx, p.cy, p.cx + Wt * cs * fs * sn, p.cy - Wt * cs * fs * cs, pal.R, "R");
+        if (!S.released) arrow(c, pal, p.cx, p.cy, p.cx - Wt * sn * fs * cs, p.cy - Wt * sn * fs * sn, pal.F, "F", "maintien");
+        else if (S.fric) arrow(c, pal, p.cx, p.cy, p.cx + S.fric * fs * cs, p.cy + S.fric * fs * sn, pal.f, "f");
+      }
+    }
+    if (S.showV && Math.abs(S.v) > 0.05) {
+      vv = Math.max(-300, Math.min(300, S.v * V_SCALE));
+      if (k === "horizontal" || k === "curling") arrow(c, pal, p.cx, p.cy - 45, p.cx + vv, p.cy - 45, pal.v, "v");
+      else if (k === "vertical") arrow(c, pal, p.cx + 40, p.cy, p.cx + 40, p.cy + vv, pal.v, "v");
+      else {
+        th = p.th; cs = Math.cos(th); sn = Math.sin(th);
+        var ox = p.cx - 40 * sn, oy = p.cy - 40 * cs;
+        arrow(c, pal, ox, oy, ox + vv * cs, oy + vv * sn, pal.v, "v");
+      }
+    }
+  }
+
+  function drawScene(c, pal, o) {
+    var k = S.kind, curl = k === "curling", arcade = S.mode === "game", i, p;
+    c.clearRect(0, 0, W, H);
+    var sky = pal.sky;
+    if ((k === "horizontal" || k === "incline") && S.hover) sky = pal.skyHover;
+    if (k === "vertical" && S.atm) sky = pal.skyAtm;
+    c.fillStyle = sky; c.fillRect(0, 0, W, H);
+
+    c.textAlign = "left"; c.textBaseline = "alphabetic";
+    if (curl) {
+      c.fillStyle = pal.z1; c.fillRect(0, GROUND, ZONE1, H - GROUND);
+      c.fillStyle = pal.z2; c.fillRect(ZONE1, GROUND, ZONE3 - ZONE1, H - GROUND);
+      c.fillStyle = pal.z3; c.fillRect(ZONE3, GROUND, W - ZONE3, H - GROUND);
+      var th = arcade ? H - GROUND : 22;     // la cible ne masque pas les graduations
+      c.fillStyle = "#2563EB"; c.fillRect(800, GROUND, 100, th);
+      c.fillStyle = "#FFFFFF"; c.fillRect(815, GROUND, 70, th);
+      c.fillStyle = "#DC2626"; c.fillRect(835, GROUND, 30, th);
+      c.fillStyle = pal.zline; c.fillRect(ZONE1 - 2, GROUND, 4, H - GROUND); c.fillRect(ZONE3 - 2, GROUND, 4, H - GROUND);
+      c.font = fnt(700, 14); c.fillStyle = pal.ztxt;
+      var zy = arcade ? GROUND + 36 : GROUND + 53;
+      c.fillText("Zone 1 : lancer", 60, zy);
+      c.fillText("Zone 2 : glace balayée", 330, zy);
+      c.fillText("Zone 3 : glace rugueuse", 618, zy);
+    } else {
+      c.fillStyle = pal.ground; c.fillRect(0, GROUND, W, H - GROUND);
+    }
+
+    // graduations
+    c.strokeStyle = pal.grid; c.lineWidth = 1; c.fillStyle = pal.txt; c.font = fnt(500, 13);
+    if (k === "horizontal" || curl) {
+      for (i = 0; i < W; i += 50) {
+        var major = i % 100 === 0;
+        c.beginPath(); c.moveTo(i + .5, GROUND); c.lineTo(i + .5, GROUND + (major ? 14 : 8)); c.stroke();
+        if (major && !arcade) { c.textAlign = "left"; c.fillText(fmt(i / SC, 1) + " m", i + 4, GROUND + (curl ? 33 : 34)); }
+      }
+    } else if (k === "vertical") {
+      var rx = W / 2 - 80;
+      c.beginPath(); c.moveTo(rx, 0); c.lineTo(rx, GROUND); c.stroke();
+      c.textAlign = "right";
+      for (i = 0; i <= GROUND; i += 50) {
+        c.beginPath(); c.moveTo(rx - 5, i + .5); c.lineTo(rx + 5, i + .5); c.stroke();
+        if (i % 100 === 0) c.fillText(fmt(i / SC, 1) + " m", rx - 10, i === 0 ? 15 : i + 4);
+      }
+      c.textAlign = "left";
+    } else {
+      var g = geom(S.angle), ex = g.sx + g.smax * SC * Math.cos(g.th), ey = g.sy + g.smax * SC * Math.sin(g.th);
+      c.fillStyle = pal.plane; c.beginPath(); c.moveTo(g.sx, GROUND); c.lineTo(ex, GROUND); c.lineTo(g.sx, g.sy); c.closePath(); c.fill();
+      c.strokeStyle = S.hover ? pal.planeLineHover : pal.planeLine; c.lineWidth = 4; c.lineCap = "round";
+      c.beginPath(); c.moveTo(g.sx, g.sy); c.lineTo(ex, ey); c.stroke();
+      c.strokeStyle = pal.grid; c.lineWidth = 1; c.fillStyle = pal.txt; c.textAlign = "center"; c.textBaseline = "middle";
+      for (i = 0; i <= g.smax * SC; i += 50) {
+        var tx = g.sx + i * Math.cos(g.th), ty = g.sy + i * Math.sin(g.th);
+        c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx + 9 * Math.sin(g.th), ty - 9 * Math.cos(g.th)); c.stroke();
+        if (i % 100 === 0 && i > 0) c.fillText(fmt(i / SC, 1) + " m", tx - 24 * Math.sin(g.th), ty + 24 * Math.cos(g.th));
+      }
+      c.textAlign = "left"; c.textBaseline = "alphabetic";
+    }
+
+    // positions de la chronophotographie
+    for (i = 0; i < C.points.length; i++) {
+      p = place(C.points[i]);
+      shape(c, p, function () { c.fillStyle = pal.ghost; c.fill(); c.strokeStyle = pal.ghostLine; c.lineWidth = 1; c.stroke(); });
+      cross(c, p.cx, p.cy, pal.cross);
+    }
+    if (o && o.clean) return;
+
+    if (MEAS.active) {
+      c.fillStyle = pal.mline;
+      MEAS.pts.forEach(function (m) { c.beginPath(); c.arc(m.x, m.y, 5, 0, 2 * Math.PI); c.fill(); });
+      if (MEAS.pts.length === 2) {
+        var a = MEAS.pts[0], b = MEAS.pts[1];
+        c.strokeStyle = pal.mline; c.lineWidth = 2; c.setLineDash([5, 5]);
+        c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.setLineDash([]);
+        var txt = "d = " + fmt(Math.hypot(b.x - a.x, b.y - a.y) / SC, 2) + " m";
+        c.font = fnt(700, 15); var tw = c.measureText(txt).width, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - 16;
+        c.fillStyle = pal.mbg; rr(c, mx - tw / 2 - 6, my - 14, tw + 12, 22, 4); c.fill();
+        c.fillStyle = pal.mtxt; c.textAlign = "center"; c.fillText(txt, mx, my + 2); c.textAlign = "left";
+      }
+      return;
+    }
+
+    // mobile
+    p = place(S.q);
+    if (S.hover && (k === "horizontal" || k === "incline")) {
+      c.save();
+      if (k === "incline") { c.translate(p.px, p.py); c.rotate(p.th); c.fillStyle = pal.cushion; c.fillRect(-35, -6, 70, 6); }
+      else { c.fillStyle = pal.cushion; c.fillRect(p.cx - 35, GROUND - 2, 70, 6); }
+      c.restore();
+    }
+    shape(c, p, function () { c.fillStyle = curl ? pal.stone : pal.body; c.fill(); });
+    var cgCol = pal.cg;
+    if (curl) {
+      c.fillStyle = arcade ? PCOL[GM.cur] : pal.handle; rr(c, p.cx - 10, GROUND - 28, 20, 8, 3); c.fill();
+      if (arcade) cgCol = PCOL[GM.cur];
+    }
+    c.fillStyle = cgCol; c.beginPath(); c.arc(p.cx, p.cy, 4, 0, 2 * Math.PI); c.fill();
+    if (!arcade) drawVectors(c, pal, p);
+  }
+
+  function palette() { return S.mode === "game" ? PAL.arcade : (dark.matches ? PAL.dark : PAL.light); }
+  function render() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), vt = VT[S.kind], vh = H - vt;
+    TS = Math.max(1, Math.min(2, 720 / Math.max(cv.clientWidth, 320)));
+    var cw = Math.round(W * dpr), ch = Math.round(vh * dpr);
+    if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; cv.style.aspectRatio = W + " / " + vh; }
+    ctx.setTransform(cw / W, 0, 0, ch / vh, 0, -vt * ch / vh);
+    drawScene(ctx, palette(), null);
+  }
+
+  /* ------------------------------------------------------------------ messages */
+  function observation() {
+    var still = Math.abs(S.v) < 1e-6, x = S.q * SC;
+    function T(tone, html) { return { tone: tone, html: html }; }
+    switch (S.mode) {
+      case "horizontal":
+        if (S.pushing) return T("info", "Une force de poussée " + V("F") + " s'exerce : les forces ne se compensent pas (" + SIGMAF + " ≠ " + ZERO + ") et la vitesse varie.");
+        if (still) return T("neutral", "Le mobile est immobile : " + V("P") + " et " + V("R") + " se compensent (" + SIGMAF + " = " + ZERO + "). Pousse-le avec le bouton ou la barre Espace.");
+        if (S.hover) return T("ok", "Mouvement rectiligne uniforme : la vitesse reste constante et les forces se compensent (" + SIGMAF + " = " + ZERO + "). C'est le principe d'inertie.");
+        return T("warn", "Le mobile ralentit : son mouvement n'est plus rectiligne uniforme, donc les forces ne se compensent pas (contraposée du principe d'inertie). La force de frottement " + V("f") + " en est responsable.");
+      case "curling":
+        if (S.pushing && x < ZONE1) return T("info", "Zone de lancer : tu exerces une force " + V("F") + " sur la pierre. " + SIGMAF + " ≠ " + ZERO + ", la vitesse augmente.");
+        if (still && !S.moved) return T("neutral", "La pierre est prête. Maintiens le bouton (zone 1 uniquement), puis relâche pour la lancer.");
+        if (still) {
+          if (x >= 800 && x <= 900) return T("ok", "Dans la maison ! La pierre est arrêtée : " + V("P") + " et " + V("R") + " se compensent (" + SIGMAF + " = " + ZERO + ").");
+          if (x < 800) return T("bad", "Pierre trop courte : tu n'as pas poussé assez longtemps dans la zone 1.");
+          return T("bad", "Trop fort ! La pierre a dépassé la cible.");
+        }
+        if (x < ZONE1) return T("ok", "Plus de poussée : la pierre glisse librement, " + SIGMAF + " = " + ZERO + " et sa vitesse reste constante.");
+        if (x < ZONE3) return T("ok", "Glace balayée : mouvement rectiligne uniforme, les forces se compensent (" + SIGMAF + " = " + ZERO + ").");
+        return T("warn", "Glace rugueuse : la force de frottement " + V("f") + " apparaît, la pierre ralentit (contraposée du principe d'inertie).");
+      case "vertical":
+        if (!S.released) return T("neutral", "L'objet est immobile, retenu en l'air : le poids " + V("P") + " est compensé par la force de maintien " + V("F") + " (" + SIGMAF + " = " + ZERO + ").");
+        if (S.landed) return T("neutral", "L'objet est posé au sol : " + V("P") + " et " + V("R") + " se compensent (" + SIGMAF + " = " + ZERO + ").");
+        if (!S.atm) return T("info", "Chute libre : seul le poids s'exerce (" + SIGMAF + " = " + V("P") + " ≠ " + ZERO + "). La vitesse augmente : le mouvement est rectiligne accéléré.");
+        return T("warn", "Chute dans l'air : la force de frottement " + V("f") + " s'oppose au poids et grandit avec la vitesse. " + SIGMAF + " ≠ " + ZERO + " : la vitesse augmente, mais de moins en moins vite.");
+      default:
+        if (!S.released) return T("neutral", "Le palet est maintenu en haut du plan : " + V("P") + ", " + V("R") + " et la force de maintien " + V("F") + " se compensent (" + SIGMAF + " = " + ZERO + ").");
+        if (S.atEnd) return T("neutral", "Le palet a atteint la butée en bas du plan. Relance pour recommencer.");
+        if (still && !S.hover) return T("warn", "Le palet ne glisse pas ! L'angle est trop faible : la force de frottement " + V("f") + " compense la composante du poids le long du plan (" + SIGMAF + " = " + ZERO + ").");
+        if (S.hover) return T("info", "Descente sans frottement : " + V("P") + " et " + V("R") + " ne se compensent pas, leur somme est dirigée le long du plan. " + SIGMAF + " ≠ " + ZERO + " : le mouvement est rectiligne accéléré.");
+        return T("info", "Le palet glisse avec frottements : " + V("f") + " réduit l'accélération, mais " + SIGMAF + " ≠ " + ZERO + " donc le mouvement reste accéléré.");
+    }
+  }
+  function motionKind() {
+    if (S.atEnd) return "arrêt en fin de course";
+    if (Math.abs(S.v) < 1e-6) return "immobile";
+    if (Math.abs(S.net) < 0.05) return "rectiligne uniforme";
+    return S.net * S.v > 0 ? "rectiligne accéléré" : "rectiligne ralenti";
+  }
+
+  /* ------------------------------------------------------------------ interface */
+  var cache = {};
+  function setText(id, v) { if (cache[id] !== v) { cache[id] = v; $(id).textContent = v; } }
+  function setHTML(id, v) { if (cache[id] !== v) { cache[id] = v; $(id).innerHTML = v; } }
+  function setProp(id, prop, v) { var k = id + prop; if (cache[k] !== v) { cache[k] = v; $(id)[prop] = v; } }
+  function setAttr(id, a, v) { var k = id + "@" + a; if (cache[k] !== v) { cache[k] = v; $(id).setAttribute(a, v); } }
+
+  var LEGEND = {
+    horizontal: [["P", "Poids", "cP"], ["R", "Réaction du support", "cR"], ["F", "Force de poussée", "cF"], ["f", "Frottements", "cf"], ["v", "Vitesse", "cv"]],
+    curling:    [["P", "Poids", "cP"], ["R", "Réaction de la glace", "cR"], ["F", "Force de poussée", "cF"], ["f", "Frottements", "cf"], ["v", "Vitesse", "cv"]],
+    incline:    [["P", "Poids", "cP"], ["R", "Réaction du plan", "cR"], ["F", "Force de maintien", "cF"], ["f", "Frottements", "cf"], ["v", "Vitesse", "cv"]],
+    vertical:   [["P", "Poids", "cP"], ["F", "Force de maintien", "cF"], ["R", "Réaction du sol", "cR"], ["f", "Frottements de l'air", "cf"], ["v", "Vitesse", "cv"]]
+  };
+  function buildLegend() {
+    var h = "";
+    LEGEND[S.kind].forEach(function (l) { h += '<span class="lg" style="color:var(--' + l[2] + ')"><i></i><span style="color:var(--ink)">' + V(l[0]) + " " + l[1] + "</span></span>"; });
+    h += '<span class="note">Les flèches de forces sont à la même échelle entre elles ; la flèche de vitesse a sa propre échelle.</span>';
+    $("legend").innerHTML = h;
+  }
+
+  function applyModeUI() {
+    var m = S.mode, k = S.kind, game = m === "game";
+    document.querySelectorAll(".tab").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-mode") === m ? "true" : "false"); });
+    $("stage").classList.toggle("arcade", game);
+    $("stagebar").hidden = game; $("legend").hidden = game;
+    $("sci").hidden = game;
+    $("swHover").hidden = !(k === "horizontal" || k === "incline");
+    $("swAtm").hidden = k !== "vertical";
+    $("ctlPush").hidden = !(k === "horizontal" || k === "curling");
+    $("ctlIncline").hidden = k !== "incline";
+    $("ctlVertical").hidden = k !== "vertical";
+    setAttr("tgForces", "aria-pressed", String(S.showF)); setAttr("tgVel", "aria-pressed", String(S.showV));
+    $("pushHelp").innerHTML = k === "curling"
+      ? "Tu ne peux pousser que dans la zone 1 (avant la ligne rouge). Relâche pour laisser glisser la pierre."
+      : "Tant que tu maintiens, une force de poussée constante s'exerce. Relâche pour laisser glisser le mobile.";
+    $("dtTxt").textContent = fmt(MODES[k].dt * 1000, 0) + " ms";
+    buildLegend();
+    cache = {};
+    syncGame();
+  }
+
+  function updateUI() {
+    if (S.mode === "game") {
+      setProp("gPush", "className", "pushbtn" + (S.pushing ? " on" : ""));
+      return;
+    }
+    // afficheurs
+    setText("rV", fmt(Math.abs(S.v), 2));
+    if (S.atEnd) { setText("rF", "—"); setText("rFu", ""); }
+    else { setText("rF", Math.abs(S.net) < 0.05 ? "0" : fmt(Math.abs(S.net), 1)); setText("rFu", "N"); }
+    setText("rB1", S.atEnd ? "Fin de course" : (Math.abs(S.net) < 0.05 ? "Forces compensées" : "Forces non compensées"));
+    setText("rB2", "mouvement : " + motionKind());
+
+    // commandes
+    var k = S.kind;
+    if (k === "horizontal" || k === "curling") {
+      var blocked = k === "curling" && S.q * SC >= ZONE1;
+      setProp("btnPush", "disabled", blocked);
+      setText("btnPush", blocked ? "Zone de poussée dépassée" : "Maintenir Espace ou cliquer");
+      setProp("btnPush", "className", "pushbtn" + (S.pushing && !blocked ? " on" : ""));
+    }
+    setProp("btnDrop", "disabled", S.released);
+    setText("btnDrop", S.released ? "Palet lâché…" : "Lâcher le palet");
+    setProp("btnFall", "disabled", S.released);
+    setText("btnFall", S.released ? "Objet lâché…" : "Lâcher l'objet");
+
+    // chronophotographie
+    var n = C.points.length, label, status = "";
+    if (C.state === "idle") label = "Démarrer l'enregistrement";
+    else if (C.state === "armed") { label = "Annuler l'enregistrement"; status = "En attente du mouvement… l'enregistrement démarre dès que le mobile bouge."; }
+    else if (C.state === "recording") { label = "Arrêter l'enregistrement"; status = "Enregistrement en cours : " + n + " position" + (n > 1 ? "s" : "") + "."; }
+    else { label = "Nouvel enregistrement"; status = n + " position" + (n > 1 ? "s" : "") + " enregistrée" + (n > 1 ? "s" : "") + " (Δt = " + fmt(MODES[k].dt, 2) + " s)."; }
+    setText("btnChrono", label);
+    if (!cache.chronoErr) setText("chronoStatus", status);
+    setProp("chronoMore", "hidden", !(C.state === "done" && n >= 2));
+    setText("btnMeasureTxt", MEAS.active ? "Quitter le mode mesure" : "Mesurer sur l'écran");
+    cv.classList.toggle("measuring", MEAS.active);
+    var hint = MEAS.active ? (MEAS.text || "Clique sur deux croix rouges pour mesurer la distance qui les sépare.") : "";
+    setProp("mHint", "hidden", !MEAS.active); setText("mHint", hint);
+
+    // observation
+    var o = observation();
+    if (cache.obsH !== o.html) { cache.obsH = o.html; $("obsText").innerHTML = o.html; }
+    setAttr("obs", "data-tone", o.tone);
+  }
+
+  /* ------------------------------------------------------------------ document élève */
+  function printSheet() {
+    var k = S.kind, M = MODES[k];
+    var vt = VT[k], off = document.createElement("canvas"); off.width = W * 2; off.height = (H - vt) * 2;
+    var c = off.getContext("2d"); c.setTransform(2, 0, 0, 2, 0, -vt * 2);
+    drawScene(c, PAL.print, { clean: true });
+    var url = off.toDataURL("image/png");
+    var typeText = { horizontal: "Mouvement horizontal", incline: "Descente sur plan incliné", vertical: "Chute verticale", curling: "Mouvement d'une pierre de curling (trois zones : poussée, glace balayée, glace rugueuse)" }[k];
+    var scaleText = k === "vertical" ? "L'axe vertical est gradué en mètres (m), l'origine est en haut de l'image."
+      : (k === "incline" ? "La graduation se lit le long du plan incliné, en mètres (m)." : "L'axe horizontal est gradué en mètres (m).");
+    var angleInfo = k === "incline" ? "<li><strong>Angle du plan :</strong> α = " + S.angle + "°</li>" : "";
+    var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Document élève · Chronophotographie</title><style>' +
+      "body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:36px;color:#1e293b;line-height:1.6}" +
+      ".header{border-bottom:2px solid #e2e8f0;padding-bottom:18px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}" +
+      "h1{margin:0;font-size:24px;color:#0f172a}.sub{margin:4px 0 0;color:#64748b}" +
+      "img{max-width:100%;border:2px solid #cbd5e1;border-radius:4px}ol li{margin:10px 0}" +
+      ".info{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 20px;margin:24px 0}" +
+      ".name{border-bottom:1px dotted #94a3b8;width:250px;display:inline-block;height:20px}" +
+      ".vec{position:relative;display:inline-block}.vec::before{content:'→';position:absolute;left:50%;top:-.72em;transform:translateX(-50%);font-size:.7em;line-height:1}" +
+      ".pbtn{padding:12px 24px;font-size:16px;font-weight:700;background:#1b5e8c;color:#fff;border:0;border-radius:8px;cursor:pointer;display:block;margin:0 auto 24px}" +
+      "@media print{.noprint{display:none!important}body{padding:0}}</style></head><body>" +
+      '<div class="noprint"><button class="pbtn" onclick="window.print()">Imprimer le document élève</button></div>' +
+      '<div class="header"><div><h1>TP · Exploitation d\'une chronophotographie</h1><p class="sub">Chapitre : le principe d\'inertie</p></div><div>Nom / Prénom : <span class="name"></span></div></div>' +
+      '<div class="info"><h3>Données de l\'acquisition (' + typeText + ')</h3><ul>' +
+      "<li><strong>Intervalle de temps entre deux positions successives :</strong> Δt = " + fmt(M.dt * 1000, 0) + " ms = " + fmt(M.dt, 2) + " s</li>" +
+      "<li><strong>Échelle de l'image :</strong> " + scaleText + "</li>" + angleInfo +
+      "<li><strong>Masse du mobile :</strong> m = " + M.m + " kg</li></ul></div>" +
+      '<img src="' + url + '" alt="Chronophotographie à compléter">' +
+      '<h3 style="margin-top:28px">Travail à réaliser</h3><ol>' +
+      "<li>Mesure la distance parcourue par le centre de masse entre deux positions successives (croix rouges).</li>" +
+      "<li>Calcule la valeur de la vitesse <em>v</em> sur chaque intervalle de temps : v = d / Δt.</li>" +
+      "<li>Le mouvement du mobile est-il uniforme ? accéléré ? ralenti ? Justifie.</li>" +
+      "<li>Que peux-tu en déduire sur la somme des forces Σ<span class=\"vec\">F</span> qui s'exercent sur le mobile (principe d'inertie ou sa contraposée) ?</li>" +
+      "</ol></body></html>";
+    var w = window.open("", "_blank");
+    if (!w) {
+      cache.chronoErr = true; setText("chronoStatus", "Le navigateur a bloqué l'ouverture du document. Autorise les fenêtres pop-up pour ce site, puis réessaie.");
+      $("chronoStatus").classList.add("err");
+      setTimeout(function () { cache.chronoErr = false; $("chronoStatus").classList.remove("err"); }, 6000);
+      return;
+    }
+    w.document.write(html); w.document.close();
+  }
+
+  /* ------------------------------------------------------------------ événements */
+  document.querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); }); });
+  $("btnReset").addEventListener("click", function () { resetState(); });
+  $("swHover").addEventListener("click", function () { S.hover = !S.hover; $("swHover").setAttribute("aria-checked", String(S.hover)); });
+  $("swAtm").addEventListener("click", function () { S.atm = !S.atm; $("swAtm").setAttribute("aria-checked", String(S.atm)); });
+  $("tgForces").addEventListener("click", function () { S.showF = !S.showF; $("tgForces").setAttribute("aria-pressed", String(S.showF)); });
+  $("tgVel").addEventListener("click", function () { S.showV = !S.showV; $("tgVel").setAttribute("aria-pressed", String(S.showV)); });
+  $("angle").addEventListener("input", function () {
+    S.angle = parseInt($("angle").value, 10); $("angleVal").textContent = S.angle + "°"; resetState();
+  });
+  $("btnDrop").addEventListener("click", function () { S.released = true; });
+  $("btnFall").addEventListener("click", function () { S.released = true; });
+  bindPush($("btnPush")); bindPush($("gPush"));
+
+  $("btnChrono").addEventListener("click", function () {
+    if (C.state === "idle" || C.state === "done") {
+      C.state = "armed"; C.points = []; C.k = 0; MEAS.active = false; MEAS.pts = []; MEAS.text = "";
+    } else if (C.state === "armed") { C.state = "idle"; }
+    else { C.state = C.points.length >= 2 ? "done" : "idle"; if (C.state === "idle") C.points = []; }
+  });
+  $("btnMeasure").addEventListener("click", function () { MEAS.active = !MEAS.active; MEAS.pts = []; MEAS.text = ""; });
+  $("btnPrint").addEventListener("click", printSheet);
+  cv.addEventListener("click", function (e) {
+    if (!MEAS.active) return;
+    var r = cv.getBoundingClientRect(), pt = { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * (H - VT[S.kind]) / r.height + VT[S.kind] };
+    var best = null, bd = 18;
+    C.points.forEach(function (q) { var p = place(q), d = Math.hypot(p.cx - pt.x, p.cy - pt.y); if (d < bd) { bd = d; best = { x: p.cx, y: p.cy }; } });
+    if (best) pt = best;
+    if (MEAS.pts.length >= 2) MEAS.pts = [pt]; else MEAS.pts.push(pt);
+    MEAS.text = MEAS.pts.length === 2 ? "d = " + fmt(Math.hypot(MEAS.pts[1].x - MEAS.pts[0].x, MEAS.pts[1].y - MEAS.pts[0].y) / SC, 2) + " m" : "";
+  });
+
+  $("count").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) startGame(parseInt(b.getAttribute("data-n"), 10)); });
+  $("gNext").addEventListener("click", nextStone);
+  $("gAgain").addEventListener("click", function () { startGame(GM.n); });
+  $("gChange").addEventListener("click", function () { GM.phase = "setup"; resetStone(); syncGame(); });
+
+  /* ------------------------------------------------------------------ boucle */
+  var last = performance.now(), acc = 0;
+  function frame(now) {
+    var dt = Math.min((now - last) / 1000, 0.1); last = now;
+    if (!MEAS.active) { acc += dt; while (acc >= DT) { step(); acc -= DT; } } else acc = 0;
+    render(); updateUI();
+    requestAnimationFrame(frame);
+  }
+  applyModeUI();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
