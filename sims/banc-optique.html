@@ -116,7 +116,8 @@ button.primary:hover { filter: brightness(1.08); }
 button.danger { color: var(--danger); }
 button:disabled { opacity: .45; cursor: not-allowed; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--ink); }
 .check input { width: 18px; height: 18px; accent-color: var(--accent); }
 
 .table-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
@@ -150,10 +151,15 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   <section class="stage" aria-label="Banc d'optique">
     <svg id="bench" viewBox="0 0 900 310" role="img" aria-label="Source lumineuse à gauche et cellule photovoltaïque mobile sur un rail gradué en centimètres">
       <defs>
-        <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#FFD36B" stop-opacity=".95"/>
-          <stop offset="1" stop-color="#F2A81D" stop-opacity=".28"/>
+        <linearGradient id="beamGrad" gradientUnits="userSpaceOnUse" x1="100" y1="0" x2="900" y2="0">
+          <stop offset="0" stop-color="#FFD36B" stop-opacity=".62"/>
+          <stop offset="1" stop-color="#F2A81D" stop-opacity=".36"/>
         </linearGradient>
+        <clipPath id="clipBeam"><rect x="0" y="0" width="900" height="250"/></clipPath>
+        <mask id="shadowMask" maskUnits="userSpaceOnUse" x="0" y="0" width="900" height="310">
+          <rect x="0" y="0" width="900" height="310" fill="#fff"/>
+          <polygon id="shadow" fill="#000"/>
+        </mask>
         <linearGradient id="railGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="#C9D3DA"/>
           <stop offset=".5" stop-color="#9FB0BB"/>
@@ -184,7 +190,13 @@ details p { margin: 8px 0 0; max-width: 70ch; }
       <ellipse cx="98" cy="150" rx="8" ry="24" fill="url(#lensGrad)"/>
 
       <!-- faisceau -->
-      <g id="beamG"><polygon id="beam" fill="url(#beamGrad)"/></g>
+      <g clip-path="url(#clipBeam)">
+        <g id="beamG" mask="url(#shadowMask)"><polygon id="beam" fill="url(#beamGrad)"/></g>
+        <g id="capG" style="display:none">
+          <polygon id="cap" fill="url(#beamGrad)"/>
+          <polyline id="capEdges" fill="none" stroke="#FFE19A" stroke-opacity=".9" stroke-width="1.3" stroke-linejoin="round"/>
+        </g>
+      </g>
 
       <!-- cote de distance -->
       <g id="dim" stroke="#8EA2AF" stroke-width="1.5" fill="none">
@@ -195,7 +207,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
       <text id="dimText" y="216" font-size="16" text-anchor="middle" font-family="IBM Plex Mono, monospace" class="halo"></text>
 
       <!-- cellule -->
-      <text id="cellLabel" y="56" font-size="17" font-weight="600" text-anchor="middle">Cellule photovoltaïque</text>
+      <text id="cellLabel" y="96" font-size="17" font-weight="600" text-anchor="middle" class="halo">Cellule photovoltaïque</text>
       <g id="cellG">
         <rect id="stand" x="-5" y="0" width="10" height="86" fill="#7E909B"/>
         <rect id="rider" x="-16" y="86" width="32" height="14" rx="2" fill="#566874"/>
@@ -205,19 +217,19 @@ details p { margin: 8px 0 0; max-width: 70ch; }
         <text id="normalText" font-size="13" text-anchor="middle" class="halo">normale</text>
         <text id="thetaText" font-size="17" font-style="italic" font-weight="600" text-anchor="middle" class="halo" style="fill:#FFC24A">θ</text>
         <g id="cellRot">
-          <rect x="-4" y="-50" width="12" height="100" rx="2" fill="#2C3B46"/>
-          <rect x="-9" y="-50" width="6" height="100" rx="1.5" fill="url(#cellGrad)"/>
+          <rect x="-4" y="-30" width="12" height="60" rx="2" fill="#2C3B46"/>
+          <rect x="-9" y="-30" width="6" height="60" rx="1.5" fill="url(#cellGrad)"/>
           <g stroke="#9CCBEA" stroke-opacity=".6" stroke-width="1">
-            <line x1="-9" x2="-3" y1="-30" y2="-30"/><line x1="-9" x2="-3" y1="-10" y2="-10"/>
-            <line x1="-9" x2="-3" y1="10" y2="10"/><line x1="-9" x2="-3" y1="30" y2="30"/>
+            <line x1="-9" x2="-3" y1="-15" y2="-15"/><line x1="-9" x2="-3" y1="0" y2="0"/>
+            <line x1="-9" x2="-3" y1="15" y2="15"/>
           </g>
           <circle r="4" fill="#B6C5CE"/>
         </g>
-        <rect id="hit" x="-30" y="-62" width="60" height="124" fill="transparent" style="cursor:ew-resize;touch-action:none"/>
+        <rect id="hit" x="-30" y="-44" width="60" height="88" fill="transparent" style="cursor:ew-resize;touch-action:none"/>
       </g>
     </svg>
   </section>
-  <p class="hint">Astuce : tu peux aussi faire glisser la cellule le long du banc.</p>
+  <p class="hint">Le faisceau a une ouverture fixe de 50°. La cellule n'en intercepte qu'une partie, qui dépend de sa distance et de son angle. Tu peux aussi faire glisser la cellule le long du banc.</p>
 
   <div class="panel">
     <section class="card" aria-label="Réglages">
@@ -232,7 +244,10 @@ details p { margin: 8px 0 0; max-width: 70ch; }
         <div class="num"><input id="aNum" type="number" min="0" max="90" step="1" inputmode="numeric"><span class="unit">°</span></div>
         <input id="aRange" type="range" min="0" max="90" step="1" aria-label="Angle d'incidence en degrés">
       </div>
-      <label class="check" for="noise"><input id="noise" type="checkbox">Mesures bruitées (±&#8239;1&#8239;%)</label>
+      <div class="opts">
+        <label class="check" for="cone"><input id="cone" type="checkbox">Visualiser le faisceau intercepté par la cellule</label>
+        <label class="check" for="noise"><input id="noise" type="checkbox">Mesures bruitées (±&#8239;1&#8239;%)</label>
+      </div>
     </section>
 
     <section class="card" aria-label="Mesures en direct">
@@ -271,6 +286,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   <details>
     <summary>Modèle utilisé par la simulation</summary>
     <p>La puissance reçue suit la loi <span class="formula">P = P₀ · (d₀ / d)² · cos θ</span> avec P₀ = 50 mW pour d₀ = 20 cm. Elle diminue comme l'inverse du carré de la distance et proportionnellement au cosinus de l'angle d'incidence θ, mesuré entre la normale à la cellule et la direction de la lumière.</p>
+    <p>Le faisceau de la source a une ouverture fixe. La cellule intercepte seulement la partie du faisceau comprise entre les rayons qui passent par ses deux bords. Plus la cellule est loin ou inclinée, plus cette partie est étroite (dans l'espace, l'angle solide intercepté varie comme cos θ / d²). Avec l'option « Visualiser le faisceau intercepté », le faisceau est atténué et seule la partie captée garde sa luminosité.</p>
     <p>Le même raisonnement s'applique au rayonnement solaire : la constante solaire est l'éclairement reçu en incidence normale (θ = 0°) à la distance Terre-Soleil, environ 1&#8239;361 W·m⁻².</p>
   </details>
 </div>
@@ -278,8 +294,9 @@ details p { margin: 8px 0 0; max-width: 70ch; }
 <script>
 (function () {
   var X0 = 100, SC = 7.4, CY = 150, DMIN = 10, DMAX = 100;
+  var ALPHA = 25, T = Math.tan(ALPHA * Math.PI / 180), H = 30; /* demi-ouverture du faisceau (°), demi-hauteur de la cellule (px) */
   var KEY = "banc-optique-photovoltaique-v1";
-  var state = { d: 40, th: 0, noise: false, rows: [] };
+  var state = { d: 40, th: 0, noise: false, cone: false, rows: [] };
   var eps = 1;
 
   function $(id) { return document.getElementById(id); }
@@ -314,11 +331,17 @@ details p { margin: 8px 0 0; max-width: 70ch; }
     $("cellRot").setAttribute("transform", "rotate(" + th + ")");
     $("stand").setAttribute("height", 86);
 
-    /* faisceau */
-    var pts = [X0, 128, x + 50 * s, CY - 50 * c, x - 50 * s, CY + 50 * c, X0, 172]
-      .map(function (v) { return Math.round(v * 10) / 10; });
-    $("beam").setAttribute("points", pts[0] + "," + pts[1] + " " + pts[2] + "," + pts[3] + " " + pts[4] + "," + pts[5] + " " + pts[6] + "," + pts[7]);
-    $("beamG").setAttribute("opacity", (0.2 + 0.8 * Math.min(1, Math.pow(20 / d, 2))).toFixed(2));
+    /* faisceau d'ouverture fixe, ombre de la cellule et partie interceptée */
+    var e1x = x + H * s, e1y = CY - H * c, e2x = x - H * s, e2y = CY + H * c;
+    var XE = 900, FAR = (XE - X0) * T;
+    function P(px, py) { return px.toFixed(1) + "," + py.toFixed(1); }
+    function far(ex, ey) { return P(XE, CY + (ey - CY) * (XE - X0) / (ex - X0)); }
+    $("beam").setAttribute("points", P(X0, CY) + " " + P(XE, CY - FAR) + " " + P(XE, CY + FAR));
+    $("shadow").setAttribute("points", P(e1x, e1y) + " " + far(e1x, e1y) + " " + far(e2x, e2y) + " " + P(e2x, e2y));
+    $("cap").setAttribute("points", P(X0, CY) + " " + P(e1x, e1y) + " " + P(e2x, e2y));
+    $("capEdges").setAttribute("points", P(e1x, e1y) + " " + P(X0, CY) + " " + P(e2x, e2y));
+    $("beamG").setAttribute("opacity", state.cone ? "0.3" : "1");
+    $("capG").style.display = state.cone ? "" : "none";
 
     /* normale et angle (coordonnées locales, origine = centre de la cellule) */
     var nl = 66;
@@ -363,6 +386,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   $("dNum").addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setD(v); else render(); e.target.value = state.d; });
   $("aNum").addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setA(v); else render(); e.target.value = state.th; });
   $("noise").addEventListener("change", function (e) { state.noise = e.target.checked; resample(); persist(); render(); });
+  $("cone").addEventListener("change", function (e) { state.cone = e.target.checked; persist(); render(); });
 
   /* glisser la cellule */
   var bench = $("bench"), dragging = false;
@@ -383,7 +407,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
 
   /* tableau */
   function persist() {
-    try { localStorage.setItem(KEY, JSON.stringify({ rows: state.rows, noise: state.noise })); } catch (e) {}
+    try { localStorage.setItem(KEY, JSON.stringify({ rows: state.rows, noise: state.noise, cone: state.cone })); } catch (e) {}
   }
   function load() {
     try {
@@ -394,6 +418,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
         state.rows = o.rows.filter(function (r) { return r && isFinite(r.d) && isFinite(r.th) && isFinite(r.p); }).slice(0, 500);
       }
       state.noise = !!(o && o.noise);
+      state.cone = !!(o && o.cone);
     } catch (e) {}
   }
   function say(t) { $("status").textContent = t; }
@@ -452,6 +477,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
 
   load();
   $("noise").checked = state.noise;
+  $("cone").checked = state.cone;
   resample();
   renderRows();
   render();
