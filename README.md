@@ -40,7 +40,7 @@ README.md
 
 - `theme` : `matiere`, `mouvement`, `energie`, `ondes`
 - `statut` : `dispo` (fiche cliquable) ou `prepa` (fiche « en préparation », sans lien)
-- `glyph` (vignette) : `bench`, `chrono`, `chrono-droite`, `refraction`, `spectrum`, `beaker`, `gas`, `circuit`, `orbit`, `pendulum`
+- `glyph` (vignette) : `bench`, `chrono`, `chrono-droite`, `refraction`, `spectrum`, `beaker`, `titration`, `gas`, `circuit`, `orbit`, `pendulum`
 
 ## Hébergement
 
