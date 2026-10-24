@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Combustion et énergie de liaison</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Deux zones côte à côte sur grand écran (diagramme d'énergie, molécules), empilées sur mobile.
+   Les canvas gardent un ratio interne 450 x 350 et s'adaptent à la largeur disponible. */
+:root {
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --accent: #1B5E8C;
+  --ok: #17734A;
+  --warn: #B45309;
+  --err: #B42318;
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --accent: #6BB4E8; --ok: #67D39B; --warn: #F2B94B; --err: #F2877F;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font-body); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 16px 16px 40px; display: flex; flex-direction: column; gap: 18px; }
+.back { display: inline-block; margin-bottom: 10px; color: var(--accent); font-weight: 600; font-size: 14px; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.kicker { margin: 0 0 4px; font: 500 12px var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0 0 6px; font: 600 clamp(28px, 5vw, 40px)/1.1 var(--font-head); }
+.sub { margin: 0; color: var(--muted); max-width: 72ch; }
+.sub sub { font-size: .75em; }
+
+.grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .grid { grid-template-columns: 1fr 1fr; gap: 22px; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.panel h2 { margin: 0 0 10px; font: 600 18px var(--font-head); text-align: center; }
+/* les canvas restent blancs : leur contenu est dessiné pour un fond clair */
+canvas { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; touch-action: pan-y; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #6B7280; display: inline-block; }
+.legend .c { background: #1F2937; }
+.legend .h { background: #F3F4F6; }
+.legend .o { background: #DC2626; }
+
+.controls { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.marks { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; font: 600 12px/1.3 var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.marks span { flex: 1; }
+.marks .mid { text-align: center; color: var(--warn); }
+.marks .end { text-align: right; }
+.marks small { display: block; font-weight: 500; text-transform: none; letter-spacing: 0; }
+input[type=range] { width: 100%; height: 32px; margin: 0; cursor: pointer; accent-color: var(--accent); }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; margin-top: 12px; }
+#explanation { flex: 1 1 320px; margin: 0; font: 500 18px/1.4 var(--font-body); min-height: 3.2em; }
+#explanation sub { font-size: .75em; }
+#explanation.t-neutral { color: var(--accent); }
+#explanation.t-red { color: var(--err); }
+#explanation.t-orange { color: var(--warn); }
+#explanation.t-green { color: var(--ok); }
+.hint { color: var(--muted); font-size: 14px; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../index.html">← Catalogue des simulations</a>
+    <p class="kicker">Énergie · Première spécialité</p>
+    <h1>Combustion et énergie de liaison</h1>
+    <p class="sub">Combustion du méthane (modèle simplifié) : CH<sub>4</sub> + 2 O<sub>2</sub> → CO<sub>2</sub> + 2 H<sub>2</sub>O. Fais glisser le curseur pour voir les liaisons se rompre, puis se former, et suis l'énergie sur le diagramme.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="Diagramme énergétique">
+      <h2>1. Diagramme énergétique</h2>
+      <canvas id="energyChart" width="450" height="350" role="img" aria-label="Diagramme d'énergie de la réaction : l'énergie monte pendant la rupture des liaisons puis descend pendant leur formation, jusqu'à un niveau inférieur à celui des réactifs."></canvas>
+    </section>
+
+    <section class="panel" aria-label="Réarrangement atomique">
+      <h2>2. Réarrangement atomique</h2>
+      <canvas id="moleculeChart" width="450" height="350" role="img" aria-label="Atomes de la réaction : une molécule de méthane et deux molécules de dioxygène se transforment en une molécule de dioxyde de carbone et deux molécules d'eau."></canvas>
+      <div class="legend">
+        <span><i class="c"></i> Carbone (C)</span>
+        <span><i class="h"></i> Hydrogène (H)</span>
+        <span><i class="o"></i> Oxygène (O)</span>
+      </div>
+    </section>
+  </div>
+
+  <section class="controls" aria-label="Avancement de la réaction">
+    <div class="marks" aria-hidden="true">
+      <span>Réactifs<small>(stable)</small></span>
+      <span class="mid">Transition<small>(instable)</small></span>
+      <span class="end">Produits<small>(stable)</small></span>
+    </div>
+    <input type="range" id="progressSlider" min="0" max="100" value="0" aria-label="Avancement de la réaction, de 0 à 100 %" aria-controls="explanation">
+    <div class="foot">
+      <p id="explanation" class="t-neutral" aria-live="polite">En attente...</p>
+      <span class="hint">← Glisse le curseur →</span>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var cEnergy = document.getElementById('energyChart');
+  var ctxE = cEnergy.getContext('2d');
+  var cMol = document.getElementById('moleculeChart');
+  var ctxM = cMol.getContext('2d');
+  var slider = document.getElementById('progressSlider');
+  var explanation = document.getElementById('explanation');
+
+  // Netteté sur écrans haute densité : on garde le repère 450 x 350 pour le dessin.
+  var W = 450, H = 350;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  [cEnergy, cMol].forEach(function (c) { c.width = W * dpr; c.height = H * dpr; });
+  ctxE.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctxM.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Moins de tremblement si la personne demande moins d'animation.
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Configuration de la réaction (exothermique) : niveaux d'énergie en échelle qualitative
+  var E_START = 100;
+  var E_PEAK = 300;
+  var E_END = 40;
+
+  // Configuration des atomes
+  var atoms = [
+    { id: 'C',  type: 'C', start: [100, 175], peak: [225, 120], end: [350, 175] },
+    { id: 'H1', type: 'H', start: [100, 140], peak: [180, 80],  end: [380, 100] },
+    { id: 'H2', type: 'H', start: [135, 175], peak: [270, 80],  end: [420, 100] },
+    { id: 'H3', type: 'H', start: [100, 210], peak: [180, 270], end: [380, 250] },
+    { id: 'H4', type: 'H', start: [65, 175],  peak: [270, 270], end: [420, 250] },
+    { id: 'O1', type: 'O', start: [250, 100], peak: [200, 150], end: [315, 175] },
+    { id: 'O2', type: 'O', start: [280, 100], peak: [250, 150], end: [400, 120] },
+    { id: 'O3', type: 'O', start: [250, 250], peak: [200, 200], end: [385, 175] },
+    { id: 'O4', type: 'O', start: [280, 250], peak: [250, 200], end: [400, 230] }
+  ];
+
+  function getAtomColor(type) {
+    if (type === 'C') return '#1f2937';
+    if (type === 'O') return '#dc2626';
+    if (type === 'H') return '#f3f4f6';
+    return 'black';
+  }
+  function getAtomRadius(type) {
+    if (type === 'C') return 18;
+    if (type === 'O') return 16;
+    return 10;
+  }
+
+  function getEnergyY(t) {
+    var y = 0, progress;
+    if (t <= 50) {
+      progress = t / 50;
+      progress = (1 - Math.cos(progress * Math.PI)) / 2;
+      y = E_START + (E_PEAK - E_START) * progress;
+    } else {
+      progress = (t - 50) / 50;
+      progress = (1 - Math.cos(progress * Math.PI)) / 2;
+      y = E_PEAK - (E_PEAK - E_END) * progress;
+    }
+    return H - y;
+  }
+
+  function drawDoubleArrow(ctx, x, yTop, yBottom, color, labelTop, labelBottom) {
+    ctx.beginPath();
+    ctx.moveTo(x, yTop);
+    ctx.lineTo(x, yBottom);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x - 5, yTop + 10);
+    ctx.lineTo(x, yTop);
+    ctx.lineTo(x + 5, yTop + 10);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x - 5, yBottom - 10);
+    ctx.lineTo(x, yBottom);
+    ctx.lineTo(x + 5, yBottom - 10);
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText(labelTop, x + 12, (yTop + yBottom) / 2 - 5);
+    ctx.font = 'italic 12px Arial';
+    ctx.fillText(labelBottom, x + 12, (yTop + yBottom) / 2 + 12);
+  }
+
+  function drawEnergyGraph(val) {
+    ctxE.clearRect(0, 0, W, H);
+    ctxE.textBaseline = 'alphabetic';
+
+    // Axes
+    ctxE.beginPath();
+    ctxE.moveTo(40, 20); ctxE.lineTo(40, 320);
+    ctxE.moveTo(40, 320); ctxE.lineTo(430, 320);
+    ctxE.strokeStyle = '#9ca3af';
+    ctxE.lineWidth = 2;
+    ctxE.stroke();
+
+    // Légende de l'axe : les valeurs sont qualitatives (pas de graduation en joules)
+    ctxE.fillStyle = '#6b7280';
+    ctxE.font = '14px Arial';
+    ctxE.textAlign = 'left';
+    ctxE.fillText('Énergie', 50, 25);
+    ctxE.font = 'italic 12px Arial';
+    ctxE.fillText('(échelle qualitative)', 50, 40);
+
+    // Courbe complète (grisée)
+    ctxE.beginPath();
+    ctxE.moveTo(40, H - E_START);
+    for (var i = 0; i <= 100; i++) {
+      ctxE.lineTo(40 + (i / 100) * 390, getEnergyY(i));
+    }
+    ctxE.strokeStyle = '#e5e7eb';
+    ctxE.lineWidth = 5;
+    ctxE.stroke();
+
+    // Partie déjà parcourue
+    ctxE.beginPath();
+    ctxE.moveTo(40, H - E_START);
+    for (var j = 0; j <= val; j++) {
+      ctxE.lineTo(40 + (j / 100) * 390, getEnergyY(j));
+    }
+    ctxE.strokeStyle = val <= 50 ? '#ef4444' : '#22c55e';
+    ctxE.lineWidth = 5;
+    ctxE.stroke();
+
+    // Point courant
+    var curX = 40 + (val / 100) * 390;
+    var curY = getEnergyY(val);
+    ctxE.beginPath();
+    ctxE.arc(curX, curY, 8, 0, Math.PI * 2);
+    ctxE.fillStyle = val <= 50 ? '#ef4444' : '#22c55e';
+    ctxE.fill();
+    ctxE.lineWidth = 2;
+    ctxE.strokeStyle = '#fff';
+    ctxE.stroke();
+
+    // Annotations
+    ctxE.fillStyle = '#374151';
+    ctxE.font = 'bold 16px Arial';
+    ctxE.textAlign = 'left';
+    ctxE.fillText('Réactifs', 50, H - E_START + 28);
+    ctxE.fillText('Produits', 350, H - E_END + 28);
+
+    // Flèches d'énergie
+    var yReactants = H - E_START;
+    var yTransition = H - E_PEAK;
+    var yProducts = H - E_END;
+
+    if (val > 45) {
+      ctxE.fillStyle = '#1e3a8a';
+      ctxE.textAlign = 'center';
+      ctxE.font = 'bold 15px Arial';
+      ctxE.fillText('État de transition', 235, 25);
+      ctxE.font = 'italic 13px Arial';
+      ctxE.fillText('(instable)', 235, 42);
+
+      var arrowX1 = 85;
+      ctxE.setLineDash([4, 4]);
+      ctxE.strokeStyle = '#9ca3af';
+      ctxE.lineWidth = 1;
+      ctxE.beginPath(); ctxE.moveTo(40, yReactants); ctxE.lineTo(arrowX1 + 10, yReactants); ctxE.stroke();
+      ctxE.beginPath(); ctxE.moveTo(arrowX1 - 20, yTransition); ctxE.lineTo(arrowX1 + 10, yTransition); ctxE.stroke();
+      ctxE.setLineDash([]);
+
+      drawDoubleArrow(ctxE, arrowX1, yTransition, yReactants, '#1e3a8a', 'Énergie apportée', '(flamme)');
+    }
+
+    if (val > 90) {
+      var arrowX2 = 320;
+      ctxE.setLineDash([4, 4]);
+      ctxE.strokeStyle = '#9ca3af';
+      ctxE.lineWidth = 1;
+      ctxE.beginPath(); ctxE.moveTo(235, yTransition); ctxE.lineTo(arrowX2 + 10, yTransition); ctxE.stroke();
+      ctxE.beginPath(); ctxE.moveTo(arrowX2 - 20, yProducts); ctxE.lineTo(430, yProducts); ctxE.stroke();
+      ctxE.setLineDash([]);
+
+      drawDoubleArrow(ctxE, arrowX2, yTransition, yProducts, '#1e3a8a', 'Énergie libérée', '(formation liaisons)');
+    }
+  }
+
+  function line(ctx, a, b) {
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+
+  function drawMolecules(val) {
+    ctxM.clearRect(0, 0, W, H);
+
+    var energyLevel = H - getEnergyY(val);
+    var amp = reduceMotion ? 0 : energyLevel / 40; // tremblement lié à l'énergie
+    var currentAtoms = atoms.map(function (atom) {
+      var x, y, p, ease;
+      var jitter = (Math.random() - 0.5) * amp;
+      if (val <= 50) {
+        p = val / 50;
+        ease = p * p * p;
+        x = atom.start[0] + (atom.peak[0] - atom.start[0]) * ease;
+        y = atom.start[1] + (atom.peak[1] - atom.start[1]) * ease;
+      } else {
+        p = (val - 50) / 50;
+        ease = 1 - Math.pow(1 - p, 3);
+        x = atom.peak[0] + (atom.end[0] - atom.peak[0]) * ease;
+        y = atom.peak[1] + (atom.end[1] - atom.peak[1]) * ease;
+      }
+      return { type: atom.type, x: x + jitter, y: y + jitter };
+    });
+
+    var opacity;
+    if (val < 50) {
+      // liaisons des réactifs : elles s'effacent
+      opacity = Math.max(0, 1 - val / 40);
+      ctxM.strokeStyle = 'rgba(50, 50, 50, ' + opacity + ')';
+      ctxM.lineWidth = 4;
+
+      var c = currentAtoms[0];
+      [1, 2, 3, 4].forEach(function (i) { line(ctxM, c, currentAtoms[i]); });
+      line(ctxM, currentAtoms[5], currentAtoms[6]);
+      line(ctxM, currentAtoms[7], currentAtoms[8]);
+    }
+
+    if (val > 50) {
+      // liaisons des produits : elles apparaissent
+      opacity = Math.min(1, Math.max(0, (val - 60) / 40));
+      ctxM.strokeStyle = 'rgba(50, 50, 50, ' + opacity + ')';
+      ctxM.lineWidth = 4;
+
+      var cc = currentAtoms[0];
+      line(ctxM, cc, currentAtoms[5]);
+      line(ctxM, cc, currentAtoms[7]);
+
+      var oTop = currentAtoms[6];
+      line(ctxM, oTop, currentAtoms[1]);
+      line(ctxM, oTop, currentAtoms[2]);
+
+      var oBot = currentAtoms[8];
+      line(ctxM, oBot, currentAtoms[3]);
+      line(ctxM, oBot, currentAtoms[4]);
+
+      if (val > 60 && val < 90) {
+        ctxM.fillStyle = 'rgba(255, 230, 0, ' + (0.4 * Math.sin((val - 60) * 0.2)) + ')';
+        ctxM.fillRect(0, 0, W, H);
+      }
+    }
+
+    currentAtoms.forEach(function (atom) {
+      ctxM.beginPath();
+      ctxM.arc(atom.x, atom.y, getAtomRadius(atom.type), 0, Math.PI * 2);
+      ctxM.fillStyle = getAtomColor(atom.type);
+      ctxM.fill();
+      ctxM.strokeStyle = '#374151';
+      ctxM.lineWidth = 1;
+      ctxM.stroke();
+
+      ctxM.beginPath();
+      ctxM.arc(atom.x - 3, atom.y - 3, getAtomRadius(atom.type) / 3, 0, Math.PI * 2);
+      ctxM.fillStyle = 'rgba(255,255,255,0.3)';
+      ctxM.fill();
+
+      ctxM.fillStyle = atom.type === 'H' ? 'black' : 'white';
+      ctxM.font = 'bold 12px Arial';
+      ctxM.textAlign = 'center';
+      ctxM.textBaseline = 'middle';
+      ctxM.fillText(atom.type, atom.x, atom.y);
+    });
+  }
+
+  function updateText(val) {
+    var text, tone = 't-neutral';
+    if (val < 10) {
+      text = 'État initial : le méthane et le dioxygène sont stables. Rien ne se passe sans étincelle.';
+    } else if (val < 45) {
+      text = 'Rupture (endothermique) : on apporte de la chaleur (étincelle). Les atomes vibrent, les liaisons C–H et O=O se brisent.';
+      tone = 't-red';
+    } else if (val <= 55) {
+      text = 'État de transition : haute énergie. Tous les atomes sont séparés et instables.';
+      tone = 't-orange';
+    } else if (val < 90) {
+      text = 'Recombinaison (exothermique) : les atomes s’attirent pour former CO<sub>2</sub> et H<sub>2</sub>O. L’énergie est libérée (chaleur, lumière).';
+      tone = 't-green';
+    } else {
+      text = 'État final : les produits (CO<sub>2</sub>, H<sub>2</sub>O) sont stables. L’énergie libérée est supérieure à l’énergie fournie au départ.';
+    }
+    explanation.innerHTML = text;
+    explanation.className = tone;
+  }
+
+  var pending = false;
+  function update() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () {
+      pending = false;
+      var val = parseInt(slider.value, 10);
+      drawEnergyGraph(val);
+      drawMolecules(val);
+      updateText(val);
+    });
+  }
+
+  slider.addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>

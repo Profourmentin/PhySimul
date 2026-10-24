@@ -390,6 +390,14 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     "statut": "dispo", "url": "sims/titrage.html", "date": "2026-10-24", "glyph": "titration"
   },
   {
+    "id": "combustion-energie-liaison",
+    "titre": "Combustion et énergie de liaison",
+    "resume": "Fais glisser le curseur : les liaisons du méthane et du dioxygène se rompent, celles du dioxyde de carbone et de l'eau se forment, et le diagramme d'énergie suit.",
+    "theme": "energie", "niveau": "Première spé", "type": "Simulation", "duree": 10,
+    "notions": ["combustion", "énergie de liaison", "rupture et formation de liaisons", "diagramme d'énergie", "réaction exothermique"],
+    "statut": "dispo", "url": "sims/combustion.html", "date": "2026-10-25", "glyph": "reaction"
+  },
+  {
     "id": "description-mouvement",
     "titre": "Description d'un mouvement",
     "resume": "Le cours en pages interactives, avec un exercice d'application et sa correction pour chaque partie.",
@@ -556,6 +564,9 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     } else if (g === "orbit") {
       s += '<ellipse class="s dash" cx="100" cy="60" rx="72" ry="40"/><circle class="sun" cx="46" cy="60" r="11"/>';
       s += '<circle class="f" cx="156" cy="32" r="6"/><line class="v" x1="150" y1="35" x2="108" y2="52"/>';
+    } else if (g === "reaction") {
+      s += '<line class="s dash" x1="16" y1="80" x2="184" y2="80"/><path class="s" d="M16 80H48C74 80 80 20 100 20C120 20 126 98 152 98H184"/>';
+      s += '<line class="v" x1="168" y1="83" x2="168" y2="96"/><line class="v" x1="164" y1="91" x2="168" y2="96"/><line class="v" x1="172" y1="91" x2="168" y2="96"/><circle class="f" cx="100" cy="20" r="4.5"/>';
     } else if (g === "pendulum") {
       s += '<line class="s dash" x1="100" y1="12" x2="100" y2="100"/><path class="s dash" d="M52 78Q100 118 148 78"/>';
       s += '<line class="s" x1="100" y1="12" x2="54" y2="78"/><circle class="f" cx="54" cy="78" r="10"/><circle class="f" cx="100" cy="12" r="3.5"/>';
