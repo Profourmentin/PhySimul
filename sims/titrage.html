@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Titrage colorimétrique</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout : la paillasse (SVG) à gauche, collante sur grand écran ; à droite la fiche de l'étape en cours.
+   Les consignes sont courtes (FALC) : une idée par ligne, un verbe d'action, la raison en petit dessous. */
+:root {
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --accent: #1B5E8C;
+  --accent-ink: #FFFFFF;
+  --ok: #17734A;   --ok-bg: #DDF1E6;
+  --warn: #7A4F00; --warn-bg: #FBEBCB;
+  --err: #A8281F;  --err-bg: #F9E0DD;
+  --info-bg: #DCEAF4;
+  --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-label: #8FA3AF;
+  --stage-a: #121C24; --stage-b: #1B2832; --stage-ink: #DCE6EC; --stage-muted: #8EA2AF;
+  --c-fe2: #2E7D5B; --c-mno4: #8B2FA0; --c-fe3: #B56F00; --c-mn2: #1B5E8C;
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --accent: #6BB4E8; --accent-ink: #0B1A24;
+    --ok: #67D39B; --ok-bg: #12301F; --warn: #F2B94B; --warn-bg: #3A2A0C;
+    --err: #F2877F; --err-bg: #3A1814; --info-bg: #14293A;
+    --lcd-bg: #070C10; --stage-a: #0A1015; --stage-b: #141F27;
+    --c-fe2: #5CCB9A; --c-mno4: #D58BE8; --c-fe3: #F2A81D; --c-mn2: #6BB4E8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+  --accent: #6BB4E8; --accent-ink: #0B1A24;
+  --ok: #67D39B; --ok-bg: #12301F; --warn: #F2B94B; --warn-bg: #3A2A0C;
+  --err: #F2877F; --err-bg: #3A1814; --info-bg: #14293A;
+  --lcd-bg: #070C10; --stage-a: #0A1015; --stage-b: #141F27;
+  --c-fe2: #5CCB9A; --c-mno4: #D58BE8; --c-fe3: #F2A81D; --c-mn2: #6BB4E8;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { font: 600 clamp(28px, 5vw, 40px)/1.05 var(--font-head); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h2 { font: 600 22px/1.2 var(--font-head); margin: 0; letter-spacing: .02em; }
+h3 { font: 600 17px/1.25 var(--font-head); margin: 0; letter-spacing: .02em; }
+.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.back { display: inline-block; margin-bottom: 10px; color: var(--accent); font-weight: 600; font-size: 14px; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+sup, sub { line-height: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Étapes */
+.steps { position: relative; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin: 0; list-style: none; padding-left: 0; }
+.steps li { flex: 0 0 auto; }
+.pill {
+  display: flex; align-items: center; gap: 8px; font: 600 14px var(--font-body); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 6px; cursor: pointer; white-space: nowrap;
+}
+.pill .n { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); font: 600 12px var(--font-data); }
+.pill[aria-current="step"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pill[aria-current="step"] .n { background: transparent; color: var(--accent-ink); border-color: currentColor; }
+.pill.done .n { background: var(--ok); color: #fff; border-color: var(--ok); }
+.pill:disabled { opacity: .45; cursor: not-allowed; }
+
+.layout { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+@media (min-width: 940px) { .layout { grid-template-columns: minmax(380px, 460px) 1fr; } .stagecol { position: sticky; top: 12px; } }
+
+/* Paillasse */
+.stagecol { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.stage { background: linear-gradient(180deg, var(--stage-a), var(--stage-b)); border-radius: 10px; border: 1px solid var(--line); overflow: hidden; }
+.stage svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
+.stage text { font-family: var(--font-data); fill: var(--stage-ink); }
+.bench { fill: #2A3944; }
+.glass { fill: rgba(255,255,255,.05); stroke: #B9CBD6; stroke-width: 1.6; stroke-linejoin: round; }
+.metal { fill: #8EA2AF; stroke: #5E7280; stroke-width: 1; }
+.dark { fill: #2B3944; stroke: #1A252D; }
+.tickline { stroke: #B9CBD6; stroke-width: 1; }
+.halo { paint-order: stroke; stroke: var(--stage-a); stroke-width: 3px; stroke-linejoin: round; }
+#fLiq { transition: fill 1.6s ease, fill-opacity 1.6s ease; }
+#stream { stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 6 5; opacity: 0; }
+#stream.on { opacity: 1; animation: flow .3s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -11; } }
+#drop { opacity: 0; }
+@keyframes dropfall { 0% { transform: translateY(0); opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(var(--fall)); opacity: 0; } }
+#handle { transition: transform .2s; transform-box: view-box; transform-origin: 294px 357px; }
+#handle.open { transform: rotate(-75deg); }
+#bar { transform-box: fill-box; transform-origin: center; }
+#bar.s1 { animation: spin 1.5s ease-in-out infinite alternate; }
+#bar.s2 { animation: spin .6s ease-in-out infinite alternate; }
+#bar.s3 { animation: spin .22s ease-in-out infinite alternate; }
+@keyframes spin { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
+#warnIco { animation: pulse 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { 50% { transform: scale(1.25); } }
+#knobPtr { transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  #stream.on, #bar.s1, #bar.s2, #bar.s3, #warnIco { animation: none; }
+  #fLiq { transition: none; }
+}
+
+.obs { background: var(--lcd-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; color: var(--lcd-fg); font: 500 14px/1.5 var(--font-data); min-height: 3.6em; }
+.obs .l { color: var(--lcd-label); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: block; }
+.obs b { font-weight: 600; }
+.obs .row2 { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+
+/* Fiche */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card header { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font: 500 12px/1 var(--font-data); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.lead { margin: 0; max-width: 64ch; }
+.small { font-size: 14px; color: var(--muted); margin: 0; }
+.msg { margin: 0; padding: 10px 14px; border-radius: 8px; border: 1px solid; font-size: 15px; display: flex; gap: 10px; }
+.msg::before { font-weight: 700; flex: 0 0 auto; }
+.msg.info { background: var(--info-bg); border-color: var(--accent); }
+.msg.info::before { content: "i"; font-family: var(--font-data); }
+.msg.ok { background: var(--ok-bg); border-color: var(--ok); }
+.msg.ok::before { content: "✓"; color: var(--ok); }
+.msg.warn { background: var(--warn-bg); border-color: var(--warn); }
+.msg.warn::before { content: "⚠"; color: var(--warn); }
+.msg.err { background: var(--err-bg); border-color: var(--err); }
+.msg.err::before { content: "✗"; color: var(--err); }
+.msg > div { min-width: 0; }
+
+ol.tasks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.task { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+.task.cur { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.task.done { opacity: .78; }
+.tk { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); font: 600 12px var(--font-data); background: var(--bg); }
+.task.done .tk { background: var(--ok); color: #fff; border-color: var(--ok); }
+.task.cur .tk { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tt { margin: 0; font-weight: 600; }
+.why { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+.task .row { margin-top: 8px; }
+
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button {
+  font: 600 15px var(--font-body); border-radius: 8px; padding: 9px 14px; cursor: pointer; min-height: 40px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+}
+button:hover:not(:disabled) { border-color: var(--muted); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+button.ghost { background: transparent; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line); background: var(--bg); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.check { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.opts { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+
+/* Matériel */
+.mats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; }
+.mat { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 10px 8px; font-weight: 500; font-size: 14px; line-height: 1.3; }
+.mat svg { width: 44px; height: 56px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
+.mat[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); background: var(--info-bg); }
+.mat[aria-checked="true"] svg { color: var(--accent); }
+.mat small { color: var(--muted); font-weight: 400; }
+.mat.bad { border-color: var(--err); box-shadow: 0 0 0 2px var(--err); }
+
+/* Équations */
+.eqn { font-size: 17px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 4px 0; }
+.eqn .sp { white-space: nowrap; }
+.cf { width: 3em; font: 600 16px var(--font-data); text-align: center; padding: 5px 4px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.cf.good { border-color: var(--ok); background: var(--ok-bg); }
+.cf.bad { border-color: var(--err); background: var(--err-bg); }
+.cf.wide { width: 8em; text-align: right; }
+.tbl-colors { border-collapse: collapse; width: 100%; font-size: 14px; }
+.tbl-colors td, .tbl-colors th { border: 1px solid var(--line); padding: 5px 8px; text-align: left; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line); vertical-align: -2px; margin-right: 6px; }
+fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px 10px; margin: 0; }
+legend { font-weight: 600; padding: 0 6px; }
+
+/* Tables de résultats */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.data { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.data th { font: 600 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+table.data td { font-family: var(--font-data); font-size: 15px; }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data td.txt { font-family: var(--font-body); }
+table.data tbody tr:last-child td { border-bottom: 0; }
+table.av td, table.av th { white-space: normal; text-align: center; }
+table.av th { text-transform: none; font-size: 13px; }
+table.av td:first-child, table.av th:first-child { text-align: left; }
+.formula { font-family: var(--font-data); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; overflow-x: auto; }
+.lcd { display: inline-flex; align-items: baseline; gap: 8px; background: var(--lcd-bg); border-radius: 8px; padding: 6px 12px; color: var(--lcd-fg); font: 600 22px var(--font-data); }
+.lcd small { color: var(--lcd-label); font-size: 12px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); height: 30px; margin: 0; }
+.chart { width: 100%; height: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.chart text { font: 500 11px var(--font-data); fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 0; padding: 0; list-style: none; }
+.legend svg { width: 34px; height: 10px; vertical-align: middle; margin-right: 6px; }
+.res { font-size: 18px; }
+.pipette { display: flex; gap: 14px; align-items: center; }
+.pipette svg { width: 80px; flex: 0 0 auto; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
+details { color: var(--muted); font-size: 14px; }
+details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+details p, details ul { max-width: 74ch; }
+footer { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../index.html">← Catalogue des simulations</a>
+    <p class="kicker">TP de physique-chimie · Première spécialité</p>
+    <h1>Titrage colorimétrique</h1>
+    <p class="sub">Dose les ions fer (II) d'une solution avec du permanganate de potassium. Prépare la verrerie, repère le virage, puis calcule la concentration et son incertitude.</p>
+  </header>
+
+  <ol class="steps" id="steps" aria-label="Étapes du TP"></ol>
+
+  <div class="layout">
+    <div class="stagecol">
+      <section class="stage" aria-label="Paillasse virtuelle">
+        <svg id="scene" viewBox="0 0 560 620" role="img" aria-label="Paillasse : une burette fixée à une potence, au-dessus d'un erlenmeyer posé sur un agitateur magnétique">
+          <defs>
+            <clipPath id="clipErlen"><path d="M262 410V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V410Z"/></clipPath>
+            <clipPath id="clipBecher"><path d="M214 420V528Q214 538 224 538H336Q346 538 346 528V420Z"/></clipPath>
+          </defs>
+          <rect class="bench" x="0" y="600" width="560" height="20"/>
+          <g id="gAll">
+            <g id="gStand">
+              <rect class="metal" x="60" y="588" width="150" height="12" rx="3"/>
+              <rect class="metal" x="126" y="20" width="9" height="568"/>
+              <rect class="metal" x="120" y="140" width="21" height="22" rx="3"/>
+              <rect class="metal" x="141" y="146" width="128" height="9"/>
+              <rect class="metal" x="262" y="136" width="34" height="28" rx="5"/>
+              <circle cx="279" cy="150" r="3" fill="#2B3944"/>
+            </g>
+            <g id="gBurette">
+              <rect class="glass" x="271" y="38" width="18" height="306" rx="3"/>
+              <polygon class="glass" points="271,344 289,344 283,352 277,352"/>
+              <g id="ticks"></g>
+              <rect id="buLiq" x="273" y="90" width="14" height="0"/>
+              <rect id="tipLiq" x="278" y="344" width="4" height="0"/>
+              <ellipse id="bubble" cx="280" cy="372" rx="2.4" ry="3.6" fill="#EAF2F6" opacity="0"/>
+              <rect class="metal" x="266" y="352" width="28" height="10" rx="2"/>
+              <rect id="handle" class="metal" x="294" y="355" width="26" height="4" rx="1.5"/>
+              <path class="glass" d="M277 362V378L280 387L283 378V362Z"/>
+              <path id="meniscus" d="" fill="none" stroke="#EAF2F6" stroke-width="1.4"/>
+            </g>
+            <g id="gStirrer">
+              <rect class="dark" x="190" y="556" width="180" height="44" rx="6"/>
+              <rect x="180" y="540" width="200" height="16" rx="3" fill="#3A4A55" stroke="#1A252D"/>
+              <circle cx="345" cy="580" r="11" fill="#55697A" stroke="#1A252D"/>
+              <line id="knobPtr" x1="345" y1="580" x2="345" y2="571" stroke="#EAF2F6" stroke-width="2" stroke-linecap="round"/>
+              <circle id="led" cx="215" cy="580" r="3.5" fill="#33423D"/>
+            </g>
+            <g id="gPaper">
+              <rect x="196" y="402" width="168" height="136" rx="6" fill="#FFFFFF" opacity=".93"/>
+              <rect x="176" y="538" width="208" height="3" fill="#FFFFFF"/>
+            </g>
+            <g id="gFlask">
+              <rect id="fLiq" x="190" y="500" width="180" height="40" fill="rgb(196,224,190)" fill-opacity=".3"/>
+              <path id="glassErlen" d="M258 408H302M262 408V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V408" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+              <path id="glassBecher" d="M208 418H220M214 418V528Q214 538 224 538H336Q346 538 346 528V418M340 418H352" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+              <ellipse id="bar" cx="280" cy="533" rx="14" ry="3.2" fill="#F4F7F9" stroke="#8EA2AF"/>
+              <line id="stream" x1="280" y1="387" x2="280" y2="500" stroke="#9B2FB0"/>
+              <circle id="drop" cx="280" cy="392" r="3.2" fill="#9B2FB0"/>
+            </g>
+            <g id="gWarn">
+              <g id="warnIco">
+                <path d="M322 338 L341 372 L303 372 Z" fill="#F2A81D" stroke="#14222C" stroke-width="1.5" stroke-linejoin="round"/>
+                <text x="322" y="368" text-anchor="middle" style="fill:#14222C;font-weight:700;font-size:15px;font-family:var(--font-body)">!</text>
+              </g>
+              <text x="350" y="355" style="font-size:12px;fill:#F2A81D" class="halo">Regarde sous le robinet</text>
+            </g>
+            <g id="gLoupe"></g>
+          </g>
+        </svg>
+      </section>
+      <div class="obs" id="obs" aria-live="off"></div>
+    </div>
+
+    <section class="card" aria-labelledby="panelTitle">
+      <header>
+        <span class="eyebrow" id="panelEyebrow"></span>
+        <h2 id="panelTitle"></h2>
+      </header>
+      <div id="msg" role="status" aria-live="polite"></div>
+      <div id="panelBody" style="display:flex;flex-direction:column;gap:14px"></div>
+    </section>
+  </div>
+
+  <details>
+    <summary>Hypothèses du modèle</summary>
+    <ul>
+      <li>Titrant : permanganate de potassium, c₂ = 2,00×10⁻² mol·L⁻¹. Solution titrée : sulfate de fer (II) acidifié, V₁ = 10,0 mL. La concentration c₁ est tirée au hasard à chaque séance.</li>
+      <li>Une goutte vaut 0,05 mL en moyenne, avec une petite dispersion. La pipette jaugée a une tolérance de ± 0,02 mL.</li>
+      <li>La couleur est calculée à partir de la concentration en ions permanganate en excès (loi de Beer-Lambert). Sans papier blanc, la couleur est vue un peu plus tard.</li>
+      <li>L'incertitude-type calculée est celle de répétabilité : u(V<sub>E</sub>) = s / √n. Elle ne détecte pas une erreur systématique (bulle d'air, par exemple).</li>
+    </ul>
+  </details>
+  <footer>Simulabo PhCh · Aucun compte · aucune donnée collectée</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- constantes physiques et géométrie ---------- */
+  var C2 = 0.0200;          // mol/L, permanganate
+  var V1N = 10.0;           // mL, pipette jaugée
+  var DROP = 0.05, DROP_SD = 0.004;   // mL
+  var BUB = 0.20;           // mL perdus à remplir la pointe si une bulle y reste
+  var K = 10, Y0 = 90;      // px par mL, ordonnée du zéro dans la scène
+
+  var F2 = 'Fe<sup>2+</sup>', F3 = 'Fe<sup>3+</sup>', MN = 'MnO<sub>4</sub><sup>−</sup>', M2 = 'Mn<sup>2+</sup>',
+      HP = 'H<sup>+</sup>', H2O = 'H<sub>2</sub>O', EM = 'e<sup>−</sup>';
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function randn() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function r6(x) { return Math.round(x * 1e6) / 1e6; }
+  function fmt(v, n) { return (v < 0 ? "−" : "") + Math.abs(v).toFixed(n).replace(".", ","); }
+  function num(s) { s = String(s == null ? "" : s).trim().replace(/\s/g, "").replace(",", "."); return s === "" ? NaN : Number(s); }
+  function yOf(r) { return Y0 + K * r; }
+
+  var STEPS = [
+    { t: "Réaction", h: "Comprendre la réaction du titrage" },
+    { t: "Matériel", h: "Choisir le matériel" },
+    { t: "Burette", h: "Préparer la burette" },
+    { t: "Prélèvement", h: "Prélever la solution à titrer" },
+    { t: "Titrage rapide", h: "Titrage rapide : repérer le virage" },
+    { t: "Titrage précis", h: "Titrage précis, goutte à goutte" },
+    { t: "Résultats", h: "Exploiter les résultats" }
+  ];
+
+  /* ---------- état ---------- */
+  var S;
+  function newSession() {
+    S = {
+      step: 0, maxStep: 0, done: [],
+      c1: Math.round(rnd(0.050, 0.120) * 1000) / 1000,     // concentration cachée, mol/L
+      form: {}, eq: { res: {}, done: false },
+      picks: {}, matOK: false, matBad: {},
+      bu: { rW: false, rT: false, filled: false, level: 0, bubble: false, checked: false, purged: false, zeroOK: false, anim: null },
+      pi: { rW: false, rS: false, up: false, adj: false, anim: null },
+      flask: { has: false, bar: false, Vs: 10, thr: 1, poured: 0 },
+      stir: 0, paper: false, aide: false,
+      rapid: { rows: [], zone: null },
+      pr: { reading: false, recorded: false, runs: [] },
+      res: { tabOK: false, tabRes: {}, c1OK: false, evolV: 0 },
+      msg: null
+    };
+  }
+
+  /* ---------- modèle chimique ---------- */
+  // Réaction : 5 Fe2+ + MnO4- + 8 H+ -> 5 Fe3+ + Mn2+ + 4 H2O   (volumes en mL, concentrations en mol/L, quantités en mmol)
+  function chem(liq, Vs) {
+    var n1 = S.c1 * Vs, nA = C2 * liq, xmax = n1 / 5, x = Math.min(nA, xmax), nMn = nA - x, Vt = Vs + liq;
+    var conc = nMn / Vt;
+    return {
+      n1: n1, nA: nA, xmax: xmax, x: x, nFe2: n1 - 5 * x, nMn: nMn, nFe3: 5 * x, nMn2: x, Vt: Vt, conc: conc,
+      alpha: 1 - Math.exp(-conc / 1e-4),
+      phase: nA < xmax - 1e-12 ? "avant" : (nA > xmax + 1e-12 ? "apres" : "equiv")
+    };
+  }
+  function veExact(Vs) { return S.c1 * Vs / (5 * C2); }
+  function mix() {
+    var f = S.flask; if (!f.has) return null;
+    var liq = Math.max(0, f.poured - (S.bu.bubble ? BUB : 0));
+    var m = chem(liq, f.Vs);
+    m.liq = liq;
+    m.persist = m.alpha >= (S.paper ? 0.08 : 0.16) * f.thr;
+    return m;
+  }
+  function colorOf(m) {
+    var a = m ? m.alpha : 0, base = [196, 224, 190], vio = [122, 28, 140];
+    var c = base.map(function (b, i) { return Math.round(b * (1 - a) + vio[i] * a); });
+    return { fill: "rgb(" + c.join(",") + ")", op: 0.30 + 0.55 * a };
+  }
+  function colorWord(m) {
+    if (!m.persist) return "presque incolore";
+    return m.alpha < 0.3 ? "rose très pâle" : m.alpha < 0.6 ? "rose" : m.alpha < 0.9 ? "rose-violet" : "violet";
+  }
+
+  /* ---------- messages ---------- */
+  function say(kind, html) { S.msg = { k: kind, h: html }; renderMsg(); }
+  function renderMsg() {
+    $("msg").innerHTML = S.msg ? '<p class="msg ' + S.msg.k + '"><span class="sr">' + ({ ok: "Bravo. ", err: "Erreur. ", warn: "Attention. ", info: "Info. " })[S.msg.k] + '</span><span>' + S.msg.h + '</span></p>' : "";
+  }
+
+  /* ---------- briques HTML ---------- */
+  function btn(act, label, o) {
+    o = o || {};
+    return '<button type="button" data-act="' + act + '"' + (o.val != null ? ' data-val="' + o.val + '"' : '') +
+      (o.dis ? " disabled" : "") + (o.pressed != null ? ' aria-pressed="' + o.pressed + '"' : "") +
+      ' class="' + (o.cls || "") + '">' + label + '</button>';
+  }
+  function task(n, done, cur, title, why, ctl) {
+    return '<li class="task' + (done ? " done" : "") + (cur ? " cur" : "") + '"><span class="tk" aria-hidden="true">' + (done ? "✓" : n) + '</span><div>' +
+      '<p class="tt">' + title + (done ? '<span class="sr"> (fait)</span>' : "") + '</p>' + (why ? '<p class="why">' + why + '</p>' : "") +
+      (ctl ? '<div class="row">' + ctl + '</div>' : "") + '</div></li>';
+  }
+  function firstCur(flags) { for (var i = 0; i < flags.length; i++) if (!flags[i]) return i; return -1; }
+  function cf(name, label, cls) {
+    return '<input class="cf' + (cls || "") + '" data-f="' + name + '" inputmode="numeric" autocomplete="off" maxlength="2" value="' + (S.form[name] || "") + '" aria-label="' + label + '">';
+  }
+  function stirSeg() {
+    var labels = ["Arrêt", "Lente", "Modérée", "Rapide"];
+    return '<div class="seg" role="group" aria-label="Vitesse d\'agitation">' + labels.map(function (l, i) { return btn("stir", l, { val: i, pressed: S.stir === i }); }).join("") + '</div>';
+  }
+  function options() {
+    return '<div class="opts"><label class="check"><input type="checkbox" data-act="paper"' + (S.paper ? " checked" : "") + '> Poser un papier blanc sous l\'erlenmeyer</label>' +
+      '<label class="check"><input type="checkbox" data-act="aide"' + (S.aide ? " checked" : "") + '> Aide : afficher le volume lu</label></div>';
+  }
+
+  /* ---------- commande de remise à zéro (burette) ---------- */
+  function zeroBlock() {
+    var b = S.bu;
+    if (b.zeroOK) return "";
+    if (b.level > 0.05) return btn("buRefill", "Remplir la burette au-dessus du zéro", { cls: "primary" });
+    return btn("drain", "Laisser couler 1 mL", { val: "1" }) + btn("drain", "0,1 mL", { val: "0.1" }) + btn("drain", "1 goutte", { val: "d" }) +
+      btn("buRefill", "Remplir un peu", { dis: b.level < -4.4 }) + btn("buZero", "Valider le zéro", { cls: "primary" });
+  }
+
+  /* ---------- panneaux ---------- */
+  function panelReaction() {
+    var e = S.eq, r = e.res, c = function (n) { return r[n] === true ? " good" : r[n] === false ? " bad" : ""; };
+    var ox = S.form.ox || "";
+    var h = '<p class="lead">Le titrage utilise une réaction d\'oxydoréduction. Il y a un transfert d\'électrons.</p>' +
+      '<table class="tbl-colors"><caption class="sr">Couleurs des espèces</caption><thead><tr><th>Espèce</th><th>Rôle</th><th>Couleur en solution</th></tr></thead><tbody>' +
+      '<tr><td>' + MN + '</td><td>titrant (dans la burette)</td><td><span class="sw" style="background:#7A1C8C"></span>violet</td></tr>' +
+      '<tr><td>' + F2 + '</td><td>espèce titrée (dans l\'erlenmeyer)</td><td><span class="sw" style="background:#C4E0BE"></span>vert très pâle, presque incolore</td></tr>' +
+      '<tr><td>' + F3 + '</td><td>produit</td><td><span class="sw" style="background:#EDE3B0"></span>jaune très pâle</td></tr>' +
+      '<tr><td>' + M2 + '</td><td>produit</td><td><span class="sw" style="background:#fff"></span>incolore</td></tr></tbody></table>' +
+      '<p class="small">Couples : ' + MN + ' / ' + M2 + ' et ' + F3 + ' / ' + F2 + '. La solution est acidifiée : il y a des ions ' + HP + '.</p>' +
+      '<fieldset><legend>1. Quelle espèce capte des électrons ?</legend><div class="opts">' +
+      [["mno4", MN], ["fe2", F2]].map(function (o) {
+        return '<label class="check"><input type="radio" name="ox" data-f="ox" value="' + o[0] + '"' + (ox === o[0] ? " checked" : "") + '><span>' + o[1] + '</span></label>';
+      }).join("") + '</div>' + (r.ox === true ? '<p class="small">✓ ' + MN + ' est l\'oxydant : il capte des électrons.</p>' : r.ox === false ? '<p class="small">✗ Regarde les couples : l\'oxydant capte des électrons.</p>' : "") + '</fieldset>' +
+      '<fieldset><legend>2. Écris les demi-équations</legend>' +
+      '<div class="eqn"><span class="sp">' + MN + ' + ' + cf("a", "coefficient devant H+", c("a")) + ' ' + HP + ' + ' + cf("b", "coefficient devant les électrons", c("b")) + ' ' + EM + '</span><span>=</span><span class="sp">' + M2 + ' + ' + cf("c", "coefficient devant H2O", c("c")) + ' ' + H2O + '</span></div>' +
+      '<div class="eqn"><span class="sp">' + F2 + '</span><span>=</span><span class="sp">' + F3 + ' + ' + cf("d", "nombre d\'électrons échangés par ion fer", c("d")) + ' ' + EM + '</span></div></fieldset>' +
+      '<fieldset><legend>3. Écris l\'équation de la réaction</legend>' +
+      '<div class="eqn"><span class="sp">' + cf("e", "coefficient devant Fe2+", c("e")) + ' ' + F2 + ' + ' + MN + ' + ' + cf("f", "coefficient devant H+", c("f")) + ' ' + HP + '</span><span>→</span><span class="sp">' + cf("g", "coefficient devant Fe3+", c("g")) + ' ' + F3 + ' + ' + M2 + ' + ' + cf("h", "coefficient devant H2O", c("h")) + ' ' + H2O + '</span></div>' +
+      '<p class="small">Astuce : les électrons captés par ' + MN + ' viennent des ions ' + F2 + '. Il faut le même nombre d\'électrons des deux côtés.</p></fieldset>' +
+      '<div class="row">' + btn("eqCheck", "Vérifier mes réponses", { cls: "primary", dis: e.done }) + btn("eqSolve", "Voir la correction", { cls: "ghost", dis: e.done }) +
+      btn("go", "Étape suivante : le matériel", { val: 1, cls: "primary", dis: !e.done }) + '</div>';
+    return h;
+  }
+
+  var ICONS = {
+    burette: '<path d="M20 4V40M26 4V40"/><path d="M20 40L22 46H24L26 40"/><path d="M16 46H30M23 46V52"/><path d="M20 10H23M20 16H23M20 22H23M20 28H23M20 34H23"/>',
+    potence: '<path d="M10 52H34M16 52V4M16 12H36"/><circle cx="36" cy="12" r="3"/>',
+    erlen: '<path d="M18 6H28M19 6V22L7 46Q5 52 12 52H34Q41 52 39 46L27 22V6"/><path d="M12 42H34"/>',
+    becher: '<path d="M10 8V48Q10 52 14 52H32Q36 52 36 48V8M8 8H38"/><path d="M10 34H36"/>',
+    pipj: '<path d="M20 2H26V12M23 12V18M19 18Q19 24 19 28Q19 34 23 34Q27 34 27 28Q27 24 27 18M23 34V50L23 54"/><path d="M17 12H29"/>',
+    pipg: '<path d="M20 2H26V12M23 12V54"/><path d="M20 20H23M20 26H23M20 32H23M20 38H23M20 44H23"/><path d="M23 54V56"/>',
+    eprou: '<path d="M14 6V50Q14 54 18 54H28Q32 54 32 50V6M11 6H35"/><path d="M14 18H22M14 26H22M14 34H22M14 42H22"/>',
+    fiole: '<path d="M19 4H27V18Q40 26 40 40Q40 54 23 54Q6 54 6 40Q6 26 19 18Z"/><path d="M19 12H27"/>',
+    barreau: '<rect x="8" y="23" width="30" height="10" rx="5"/><path d="M14 28H32"/>',
+    agit: '<rect x="6" y="38" width="34" height="14" rx="3"/><path d="M4 38H42"/><circle cx="32" cy="45" r="3"/>',
+    thermo: '<path d="M20 6Q20 4 23 4Q26 4 26 6V36Q31 39 31 45Q31 52 23 52Q15 52 15 45Q15 39 20 36Z"/><path d="M23 14V44"/>'
+  };
+  var MATS = [
+    { id: "burette", n: "Burette graduée 25 mL", t: "req" },
+    { id: "potence", n: "Potence et pince", t: "req" },
+    { id: "erlen", n: "Erlenmeyer 150 mL", t: "cont" },
+    { id: "becher", n: "Bécher 150 mL", t: "cont" },
+    { id: "pipj", n: "Pipette jaugée 10,0 mL", s: "avec propipette", t: "req" },
+    { id: "pipg", n: "Pipette graduée 10 mL", t: "no", why: "Elle est moins précise qu'une pipette jaugée." },
+    { id: "eprou", n: "Éprouvette graduée 50 mL", t: "no", why: "Elle n'est pas assez précise pour prélever un volume exact." },
+    { id: "fiole", n: "Fiole jaugée 100 mL", t: "no", why: "Elle sert à préparer une solution, pas à faire un titrage." },
+    { id: "barreau", n: "Barreau aimanté", t: "req" },
+    { id: "agit", n: "Agitateur magnétique", t: "req" },
+    { id: "thermo", n: "Thermomètre", t: "no", why: "On ne mesure pas de température ici." }
+  ];
+  function panelMateriel() {
+    var h = '<p class="lead">Choisis le matériel pour un titrage direct. Clique sur chaque objet utile.</p>' +
+      '<ul class="mats" role="group" aria-label="Matériel disponible">' + MATS.map(function (m) {
+        var on = !!S.picks[m.id];
+        return '<li><button type="button" class="mat' + (S.matBad[m.id] ? " bad" : "") + '" role="checkbox" aria-checked="' + on + '" data-act="pick" data-val="' + m.id + '"' + (S.matOK ? " disabled" : "") + '>' +
+          '<svg viewBox="0 0 46 58" aria-hidden="true">' + ICONS[m.id] + '</svg><span>' + m.n + '</span>' + (m.s ? '<small>' + m.s + '</small>' : "") + '</button></li>';
+      }).join("") + '</ul>' +
+      '<p class="small">Tu peux choisir un erlenmeyer ou un bécher pour la solution à titrer.</p>' +
+      '<div class="row">' + btn("matCheck", "Valider mon choix", { cls: "primary", dis: S.matOK }) + btn("go", "Étape suivante : la burette", { val: 2, cls: "primary", dis: !S.matOK }) + '</div>';
+    return h;
+  }
+
+  function panelBurette() {
+    var b = S.bu, flags = [b.rW, b.rT, b.filled, b.checked, b.zeroOK], cur = firstCur(flags);
+    var l = '<p class="lead">Prépare la burette dans l\'ordre. Chaque geste a une raison.</p><ol class="tasks">';
+    l += task(1, b.rW, cur === 0, "Rince la burette à l'eau distillée.", "Pour nettoyer la verrerie.", btn("buRW", "Rincer à l'eau distillée", { dis: b.rW }));
+    l += task(2, b.rT, cur === 1, "Rince la burette avec la solution titrante.", "Il reste de l'eau sur les parois. Sans ce rinçage, la solution serait diluée.", btn("buRT", "Rincer avec le permanganate", { dis: !b.rW || b.rT }));
+    l += task(3, b.filled, cur === 2, "Remplis la burette au-dessus du zéro.", "On remplit un peu trop. On ajustera ensuite.", btn("buFill", "Remplir la burette", { dis: !b.rT || b.filled }));
+    var ctl = btn("buCheck", "Regarder sous le robinet", { dis: !b.filled || b.checked });
+    if (b.checked && b.bubble && !b.purged) ctl += btn("buPurge", "Chasser la bulle", { cls: "primary" });
+    l += task(4, b.checked && !(b.bubble && !b.purged), cur === 3 || (b.checked && b.bubble && !b.purged), "Vérifie qu'il n'y a pas de bulle d'air sous le robinet.", "Une bulle fausse le volume lu : elle se remplit à la place de la solution.", ctl);
+    l += task(5, b.zeroOK, cur === 4, "Mets le bas du ménisque sur le zéro.", "Lis sur la loupe, l'œil à la hauteur du ménisque. Il reste du liquide à vider.", b.filled ? zeroBlock() : "");
+    l += '</ol>';
+    l += '<div class="row">' + btn("go", "Étape suivante : le prélèvement", { val: 3, cls: "primary", dis: !b.zeroOK }) + '</div>';
+    return l;
+  }
+
+  function pipetteSvg() {
+    var p = S.pi, liq = null, y = 0;
+    if (p.anim === "water") { liq = "rgba(150,210,235,.7)"; y = 90; }
+    else if (p.anim === "sample") { liq = "rgba(180,220,170,.75)"; y = 90; }
+    else if (p.up) { liq = "rgba(180,220,170,.75)"; y = p.adj ? 74 : 56; }
+    if (S.flask.has && !p.up) liq = null;
+    return '<svg viewBox="0 0 80 250" role="img" aria-label="Pipette jaugée">' +
+      '<rect x="22" y="4" width="36" height="34" rx="14" fill="var(--accent)" opacity=".85"/>' +
+      '<path d="M34 38V96Q28 104 28 118Q28 130 40 130Q52 130 52 118Q52 104 46 96V38" fill="none" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M40 130V228L40 240" fill="none" stroke="currentColor" stroke-width="2"/><path d="M36 128V220L40 238L44 220V128" fill="none" stroke="currentColor" stroke-width="2"/>' +
+      '<line x1="28" y1="74" x2="52" y2="74" stroke="var(--err)" stroke-width="2.4"/>' +
+      (liq ? '<path d="M35 ' + y + 'H45V220L40 238L36 220ZM29 118Q29 130 40 130Q51 130 51 118V' + Math.max(y, 98) + 'H29Z" fill="' + liq + '"/>' : "") +
+      '</svg>';
+  }
+  function panelPipette() {
+    var p = S.pi, f = S.flask, flags = [p.rW, p.rS, p.up, p.adj, f.has, f.bar], cur = firstCur(flags);
+    var l = '<div class="pipette"><div class="small" style="min-width:0">Trait de jauge en rouge. La pipette prélève un volume exact de 10,0 mL.</div></div>' +
+      '<div class="pipette">' + pipetteSvg() + '<ol class="tasks" style="flex:1;min-width:0">';
+    l += task(1, p.rW, cur === 0, "Rince la pipette à l'eau distillée.", "", btn("pwRW", "Rincer à l'eau", { dis: p.rW }));
+    l += task(2, p.rS, cur === 1, "Rince la pipette avec la solution à titrer.", "Pour ne pas la diluer. Vide dans un bécher de récupération.", btn("pwRS", "Rincer avec " + F2, { dis: !p.rW || p.rS }));
+    l += task(3, p.up, cur === 2, "Aspire la solution un peu au-dessus du trait de jauge.", "Utilise la propipette.", btn("pwUp", "Aspirer", { dis: !p.rS || p.up }));
+    l += task(4, p.adj, cur === 3, "Ajuste le bas du ménisque sur le trait de jauge.", "", btn("pwAdj", "Ajuster au trait", { dis: !p.up || p.adj }));
+    l += task(5, f.has, cur === 4, "Vide la pipette dans l'erlenmeyer.", "Appuie la pointe contre la paroi. Ne souffle pas la dernière goutte.", btn("pwEmpty", "Vider dans l'erlenmeyer", { dis: !p.adj || f.has }));
+    l += task(6, f.bar, cur === 5, "Ajoute le barreau aimanté.", "Il permet d'agiter pendant le titrage.", btn("pwBar", "Ajouter le barreau", { dis: !f.has || f.bar }));
+    l += '</ol></div><div class="row">' + btn("go", "Étape suivante : le titrage rapide", { val: 4, cls: "primary", dis: !(f.has && f.bar) }) + '</div>';
+    return l;
+  }
+
+  function lcdRead() { return S.aide ? '<span class="lcd"><small>Volume lu</small>' + fmt(S.bu.level, 2) + '<small>mL</small></span>' : ""; }
+  function canPour() { return S.bu.zeroOK && S.flask.has && S.flask.bar; }
+
+  function panelRapide() {
+    var R = S.rapid, can = canPour() && !R.zone && 25 - S.bu.level >= 1 - 1e-9;
+    var h = '<ol class="tasks"><li class="task cur"><span class="tk" aria-hidden="true">→</span><div><p class="tt">Trouve vite la zone de virage.</p>' +
+      '<p class="why">1. Mets l\'agitation sur « Modérée ». 2. Verse 1 mL à la fois. 3. Regarde la couleur du milieu. 4. Note quand elle change pour de bon.</p></div></li></ol>' +
+      '<div class="row"><span class="small">Agitation :</span>' + stirSeg() + '</div>';
+    if (S.stir === 1) h += '<p class="small">Trop lente : le mélange se fait mal. Choisis « Modérée ».</p>';
+    if (S.stir === 3) h += '<p class="small">Trop rapide : le liquide gicle. Choisis « Modérée ».</p>';
+    h += options() + '<div class="row">' + btn("pour1", "Verser 1 mL", { cls: "primary", dis: !can }) + lcdRead() + '</div>';
+    if (R.rows.length) {
+      h += '<div class="tablewrap"><table class="data"><caption class="sr">Titrage rapide</caption><thead><tr><th>Volume versé (mL)</th><th>Couleur du milieu</th></tr></thead><tbody>' +
+        R.rows.map(function (r) { return '<tr><td>' + fmt(r.v, 0) + '</td><td class="txt">' + r.w + '</td></tr>'; }).join("") + '</tbody></table></div>';
+    }
+    if (R.zone) h += '<p class="msg ok"><span>Le virage a lieu <b>entre ' + fmt(R.zone[0], 0) + ' mL et ' + fmt(R.zone[1], 0) + ' mL</b>. Tu peux passer au titrage précis.</span></p>';
+    h += '<div class="row">' + btn("toPrecise", "Passer au titrage précis", { cls: "primary", dis: !R.zone }) + '</div>';
+    return h;
+  }
+
+  function panelPrecis() {
+    var b = S.bu, f = S.flask, P = S.pr, lo = S.rapid.zone ? S.rapid.zone[0] : 0;
+    var titrating = canPour() && !P.recorded;
+    var can = titrating && !P.reading;
+    var runN = P.runs.length + (P.recorded ? 0 : 1);
+    var h = '<p class="lead">Titrage n° ' + runN + '. Le virage est entre ' + fmt(lo, 0) + ' et ' + fmt(lo + 1, 0) + ' mL.</p><ol class="tasks">';
+    h += task(1, b.zeroOK, !b.zeroOK, "Remets la burette à zéro.", "On recommence avec un niveau de départ propre.", b.zeroOK ? "" : zeroBlock());
+    h += task(2, f.has && f.bar, b.zeroOK && !(f.has && f.bar), "Prélève une nouvelle prise d'essai de 10,0 mL.", "La pipette est déjà rincée. Le barreau est ajouté.", btn("newSample", "Prélever 10,0 mL", { dis: f.has || P.recorded }));
+    var ctl = '<div class="row" style="width:100%"><span class="small">Agitation :</span>' + stirSeg() + '</div>';
+    ctl += '<div style="width:100%">' + options() + '</div>';
+    ctl += btn("pour1", "+ 1 mL", { dis: !can }) + btn("pourD", "+ 5 gouttes", { val: 5, dis: !can }) + btn("pourD", "+ 1 goutte", { val: 1, dis: !can }) + lcdRead();
+    h += task(3, P.recorded, b.zeroOK && f.has && f.bar && !P.recorded, "Verse la solution titrante.", "Verse vite jusqu'à " + fmt(Math.max(0, lo - 1), 0) + " mL. Puis ajoute les gouttes une par une. Arrête-toi quand la couleur change pour de bon.", ctl);
+    var rd = btn("seeEnd", "J'ai vu le virage", { cls: "primary", dis: !titrating || P.reading });
+    if (P.reading) rd = '<label class="small" for="vRead">Volume équivalent lu (mL) :</label><input id="vRead" class="cf wide" data-f="vRead" inputmode="decimal" autocomplete="off" value="' + (S.form.vRead || "") + '" placeholder="ex. 9,85">' + btn("record", "Enregistrer", { cls: "primary" });
+    h += task(4, P.recorded, titrating && !P.recorded, "Relève le volume équivalent sur la burette.", "Lis le bas du ménisque avec la loupe. Précision : 0,05 mL.", rd);
+    h += '</ol>';
+    if (P.runs.length) h += runsTable();
+    h += '<div class="row">' + btn("nextRun", "Faire un autre titrage", { dis: !P.recorded }) + btn("go", "Exploiter mes résultats", { val: 6, cls: "primary", dis: !P.runs.length }) + '</div>' +
+      '<p class="small">Pour estimer l\'incertitude, fais au moins 3 titrages.</p>';
+    return h;
+  }
+  function runsTable() {
+    var P = S.pr;
+    return '<div class="tablewrap"><table class="data"><caption class="sr">Volumes équivalents mesurés</caption><thead><tr><th>Titrage</th><th>V<sub>E</sub> (mL)</th></tr></thead><tbody>' +
+      P.runs.map(function (r, i) { return '<tr><td>n° ' + (i + 1) + '</td><td>' + fmt(r.v, 2) + '</td></tr>'; }).join("") + '</tbody></table></div>';
+  }
+
+  /* ---------- statistiques ---------- */
+  function stats() {
+    var v = S.pr.runs.map(function (r) { return r.v; }), n = v.length;
+    var m = v.reduce(function (a, b) { return a + b; }, 0) / n;
+    var s = n > 1 ? Math.sqrt(v.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / (n - 1)) : NaN;
+    return { n: n, m: m, s: s, u: n > 1 ? s / Math.sqrt(n) : NaN };
+  }
+  function fmtUnc(c, u) {
+    if (!(u > 0)) return fmt(c, 4);
+    var dec = Math.max(0, -Math.floor(Math.log10(u))), q = Math.pow(10, -dec);
+    var uu = Math.ceil(u / q - 1e-9) * q;
+    return fmt(c, dec) + " ± " + fmt(uu, dec);
+  }
+
+  function evolChart(V, VE, xmax) {
+    var W = 360, H = 210, L = 44, B = 32, T = 26, R = 12, n1 = S.c1 * V1N, ymax = n1 * 1.08;
+    var X = function (v) { return L + (W - L - R) * v / xmax; }, Y = function (n) { return H - B - (H - B - T) * n / ymax; };
+    function path(fn) { var d = ""; for (var i = 0; i <= 120; i++) { var v = xmax * i / 120; d += (i ? "L" : "M") + X(v).toFixed(1) + " " + Y(fn(chem(v, V1N))).toFixed(1); } return d; }
+    var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Quantités de matière des quatre espèces en fonction du volume de titrant versé">';
+    for (var k = 0; k <= 4; k++) { var yv = ymax * k / 4 / 1.0; s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(yv).toFixed(1) + '" y2="' + Y(yv).toFixed(1) + '" stroke="var(--line)"/><text x="' + (L - 6) + '" y="' + (Y(yv) + 4).toFixed(1) + '" text-anchor="end">' + fmt(yv, 2) + '</text>'; }
+    var step = xmax > 14 ? 5 : 2;
+    for (var t = 0; t <= xmax; t += step) s += '<text x="' + X(t).toFixed(1) + '" y="' + (H - B + 16) + '" text-anchor="middle">' + t + '</text>';
+    s += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 4) + '" text-anchor="middle">volume de MnO₄⁻ versé (mL)</text><text x="6" y="12">n (mmol)</text>';
+    s += '<line x1="' + X(VE).toFixed(1) + '" x2="' + X(VE).toFixed(1) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="' + (X(VE) + 4).toFixed(1) + '" y="' + (T + 10) + '">V<tspan dy="3" font-size="8">E</tspan></text>';
+    s += '<path d="' + path(function (m) { return m.nFe2; }) + '" fill="none" stroke="var(--c-fe2)" stroke-width="2.4"/>';
+    s += '<path d="' + path(function (m) { return m.nMn; }) + '" fill="none" stroke="var(--c-mno4)" stroke-width="2.4"/>';
+    s += '<path d="' + path(function (m) { return m.nFe3; }) + '" fill="none" stroke="var(--c-fe3)" stroke-width="2.4" stroke-dasharray="7 4"/>';
+    s += '<path d="' + path(function (m) { return m.nMn2; }) + '" fill="none" stroke="var(--c-mn2)" stroke-width="2.4" stroke-dasharray="2 4" stroke-linecap="round"/>';
+    s += '<line x1="' + X(V).toFixed(1) + '" x2="' + X(V).toFixed(1) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--accent)" stroke-width="2"/>';
+    var m = chem(V, V1N);
+    [[m.nFe2, "var(--c-fe2)"], [m.nMn, "var(--c-mno4)"], [m.nFe3, "var(--c-fe3)"], [m.nMn2, "var(--c-mn2)"]].forEach(function (p) { s += '<circle cx="' + X(V).toFixed(1) + '" cy="' + Y(p[0]).toFixed(1) + '" r="4.2" fill="' + p[1] + '" stroke="var(--surface)" stroke-width="1.5"/>'; });
+    return s + '</svg>';
+  }
+  function evolText(V, VE) {
+    if (Math.abs(V - VE) < 0.05) return '<b>À l\'équivalence.</b> ' + F2 + ' et ' + MN + ' ont été introduits dans les proportions de l\'équation : ils sont tous les deux entièrement consommés. Le milieu vire.';
+    if (V < VE) return '<b>Avant l\'équivalence.</b> ' + MN + ' est le réactif limitant : il est entièrement consommé dès qu\'il arrive. ' + F2 + ' est en excès. Le milieu a la couleur de ' + F2 + ' : presque incolore.';
+    return '<b>Après l\'équivalence.</b> ' + F2 + ' est le réactif limitant : il a disparu. ' + MN + ' n\'est plus consommé, il s\'accumule : le milieu devient violet.';
+  }
+
+  function panelResultats() {
+    var st = stats(), VE = st.m, e = S.res;
+    var cexp = 5 * C2 * VE / V1N, VEt = veExact(V1N), xmax = Math.ceil(VEt * 2);
+    var h = '<p class="lead">Tu as fait ' + st.n + ' titrage' + (st.n > 1 ? "s" : "") + '. Le volume équivalent retenu est la moyenne : <b>V<sub>E</sub> = ' + fmt(VE, 2) + ' mL</b>.</p>' + runsTable();
+
+    // tableau d'avancement
+    var tc = function (n) { return e.tabRes[n] === true ? " good" : e.tabRes[n] === false ? " bad" : ""; };
+    h += '<hr><h3>1. Tableau d\'avancement à l\'équivalence</h3>' +
+      '<div class="formula">5 ' + F2 + ' + ' + MN + ' + 8 ' + HP + ' → 5 ' + F3 + ' + ' + M2 + ' + 4 ' + H2O + '</div>' +
+      '<div class="tablewrap"><table class="data av"><caption class="sr">Tableau d\'avancement</caption><thead><tr><th>État</th><th>x</th><th>n(' + F2 + ')</th><th>n(' + MN + ')</th><th>n(' + F3 + ')</th><th>n(' + M2 + ')</th></tr></thead><tbody>' +
+      '<tr><td>Initial</td><td>0</td><td>n₁ = c₁·V₁</td><td>n₂ = c₂·V<sub>E</sub></td><td>0</td><td>0</td></tr>' +
+      '<tr><td>À l\'équivalence</td><td>x<sub>E</sub></td><td>n₁ − ' + cf("ta", "coefficient de xE pour Fe2+", tc("ta")) + ' x<sub>E</sub></td><td>n₂ − ' + cf("tb", "coefficient de xE pour MnO4-", tc("tb")) + ' x<sub>E</sub></td><td>' + cf("tc", "coefficient de xE pour Fe3+", tc("tc")) + ' x<sub>E</sub></td><td>x<sub>E</sub></td></tr></tbody></table></div>' +
+      '<p class="small">À l\'équivalence, les deux réactifs sont entièrement consommés : n₁ − … x<sub>E</sub> = 0 et n₂ − … x<sub>E</sub> = 0.</p>' +
+      '<div class="eqn"><span class="sp">Donc n₁ = ' + cf("td", "nombre par lequel on multiplie n2", tc("td")) + ' × n₂,</span><span>soit n(' + F2 + ')<sub>initial</sub> = … × n(' + MN + ')<sub>versé</sub></span></div>' +
+      '<div class="row">' + btn("tabCheck", "Vérifier le tableau", { cls: "primary", dis: e.tabOK }) + '</div>';
+
+    if (e.tabOK) {
+      h += '<hr><h3>2. Concentration de la solution titrée</h3>' +
+        '<div class="formula">n₁ = 5 × n₂ &nbsp;⇒&nbsp; c₁ · V₁ = 5 · c₂ · V<sub>E</sub> &nbsp;⇒&nbsp; c₁ = 5 · c₂ · V<sub>E</sub> / V₁</div>' +
+        '<p class="small">Données : c₂ = 2,00×10⁻² mol·L⁻¹ ; V₁ = 10,0 mL ; V<sub>E</sub> = ' + fmt(VE, 2) + ' mL.</p>' +
+        '<div class="row"><label for="c1In" class="small">c₁ =</label><input id="c1In" class="cf wide' + (e.c1OK ? " good" : "") + '" data-f="c1" inputmode="decimal" autocomplete="off" value="' + (S.form.c1 || "") + '" placeholder="ex. 0,085"' + (e.c1OK ? " disabled" : "") + '><span class="small">mol·L⁻¹</span>' + btn("c1Check", "Vérifier", { cls: "primary", dis: e.c1OK }) + '</div>';
+    }
+    if (e.c1OK) {
+      var unc = "";
+      if (st.n >= 2) {
+        var uc = cexp * st.u / VE;
+        unc = '<h3>3. Incertitude-type</h3><p class="small">Avec ' + st.n + ' mesures, on estime la dispersion avec l\'écart-type expérimental s, puis l\'incertitude-type u(V<sub>E</sub>) = s / √n.</p>' +
+          '<div class="tablewrap"><table class="data"><tbody>' +
+          '<tr><td>Moyenne V<sub>E</sub></td><td>' + fmt(st.m, 3) + ' mL</td></tr>' +
+          '<tr><td>Écart-type expérimental s</td><td>' + fmt(st.s, 3) + ' mL</td></tr>' +
+          '<tr><td>u(V<sub>E</sub>) = s / √' + st.n + '</td><td>' + fmt(st.u, 3) + ' mL</td></tr>' +
+          '<tr><td>u(c₁) = c₁ · u(V<sub>E</sub>) / V<sub>E</sub></td><td>' + fmt(uc, 4) + ' mol·L⁻¹</td></tr></tbody></table></div>' +
+          '<p class="res"><b>c₁ = ' + fmtUnc(cexp, uc) + ' mol·L⁻¹</b></p>' +
+          (st.s === 0 ? '<p class="small">Tes valeurs sont toutes égales : s = 0. Pense aussi à la précision de lecture de la burette (± 0,05 mL).</p>' : '<p class="small">Cette incertitude traduit seulement la dispersion de tes mesures. Elle ne détecte pas une erreur de méthode.</p>');
+      } else unc = '<p class="small">Avec un seul titrage, on ne peut pas estimer l\'incertitude. Fais au moins 3 titrages pour calculer s et u(V<sub>E</sub>).</p><p class="res"><b>c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹</b></p>';
+      var gap = Math.abs(cexp - S.c1) / S.c1 * 100;
+      h += '<p class="msg ok"><span>Bien vu. c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹.</span></p>' + unc +
+        '<hr><h3>Comparaison avec la valeur de référence</h3><p class="lead">L\'étiquette du flacon indique c₁ = <b>' + fmt(S.c1, 3) + ' mol·L⁻¹</b>. Ton écart relatif est de <b>' + fmt(gap, 1) + ' %</b> : ' +
+        (gap < 2 ? "très bon résultat." : gap < 5 ? "résultat correct. Cherche ce qui peut l'expliquer." : "écart important. Regarde les causes possibles ci-dessous.") + '</p>' + debrief();
+    }
+
+    // évolution du système
+    var V = Math.min(xmax, Math.max(0, e.evolV)), m = chem(V, V1N), col = colorOf(m);
+    h += '<hr><h3>' + (e.c1OK ? "4" : e.tabOK ? "3" : "2") + '. Comment le système évolue</h3><p class="small">Déplace le curseur : tu verses du permanganate dans l\'erlenmeyer. Observe qui est le réactif limitant et la couleur du milieu.</p>' +
+      '<label for="evol" class="small">Volume versé : <b id="evolV">' + fmt(V, 1) + '</b> mL</label><input id="evol" type="range" min="0" max="' + xmax + '" step="0.1" value="' + V + '" data-evol>' +
+      '<div id="evolChart">' + evolChart(V, VEt, xmax) + '</div>' +
+      '<ul class="legend"><li><svg viewBox="0 0 34 10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--c-fe2)" stroke-width="2.4"/></svg>' + F2 + '</li><li><svg viewBox="0 0 34 10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--c-mno4)" stroke-width="2.4"/></svg>' + MN + '</li><li><svg viewBox="0 0 34 10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--c-fe3)" stroke-width="2.4" stroke-dasharray="7 4"/></svg>' + F3 + '</li><li><svg viewBox="0 0 34 10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--c-mn2)" stroke-width="2.4" stroke-dasharray="2 4" stroke-linecap="round"/></svg>' + M2 + '</li></ul>' +
+      '<p class="msg info" id="evolTxt"><span><span class="sw" id="evolSw" style="background:' + col.fill + ';opacity:' + (0.4 + col.op * 0.6).toFixed(2) + '"></span>' + evolText(V, VEt) + '</span></p>';
+    h += '<hr><div class="row">' + btn("restart", "Recommencer avec une nouvelle solution", {}) + '</div>';
+    return h;
+  }
+  function debrief() {
+    var P = S.pr, items = [], noPaper = P.runs.filter(function (r) { return !r.paper; }).length;
+    var err = P.runs.reduce(function (a, r) { return a + (r.v - r.ve); }, 0) / P.runs.length;
+    if (S.bu.bubble && !S.bu.purged) items.push("Une bulle d'air est restée sous le robinet. Le volume lu est trop grand d'environ 0,2 mL.");
+    if (noPaper) items.push("Tu as fait " + noPaper + " titrage" + (noPaper > 1 ? "s" : "") + " sans papier blanc. Une couleur très pâle est repérée un peu trop tard : V<sub>E</sub> est un peu surestimé.");
+    if (!(S.bu.bubble && !S.bu.purged) && err > 0.12) items.push("En moyenne, tu as versé " + fmt(err, 2) + " mL de trop. Arrête-toi dès que la couleur change pour de bon.");
+    if (err < -0.08) items.push("Tes volumes sont trop petits. Relis le bas du ménisque avec la loupe.");
+    return '<h3>Ce qui a pu fausser ta mesure</h3>' + (items.length ? '<ul>' + items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + '</ul>' : '<p class="small">Rien à signaler : tes gestes étaient corrects.</p>');
+  }
+
+  /* ---------- rendu ---------- */
+  var PANELS = [panelReaction, panelMateriel, panelBurette, panelPipette, panelRapide, panelPrecis, panelResultats];
+  function renderSteps() {
+    $("steps").innerHTML = STEPS.map(function (s, i) {
+      var locked = i > S.maxStep;
+      return '<li><button type="button" class="pill' + (S.done[i] ? " done" : "") + '" data-act="go" data-val="' + i + '"' + (locked ? " disabled" : "") + (i === S.step ? ' aria-current="step"' : "") + '><span class="n" aria-hidden="true">' + (S.done[i] ? "✓" : i + 1) + '</span>' + s.t + '<span class="sr">' + (S.done[i] ? " (terminé)" : "") + '</span></button></li>';
+    }).join("");
+  }
+  function renderPanel() {
+    var a = document.activeElement, key = a && a.getAttribute && a.getAttribute("data-act") ? a.getAttribute("data-act") + "|" + (a.getAttribute("data-val") || "") : null;
+    $("panelEyebrow").textContent = "Étape " + (S.step + 1) + " sur " + STEPS.length;
+    $("panelTitle").textContent = STEPS[S.step].h;
+    $("panelBody").innerHTML = PANELS[S.step]();
+    if (key) {
+      var p = key.split("|"), n = $("panelBody").querySelector('[data-act="' + p[0] + '"]' + (p[1] ? '[data-val="' + p[1] + '"]' : "") + ":not(:disabled)");
+      if (n) n.focus();
+    }
+  }
+  function renderObs() {
+    var m = mix(), h = "";
+    if (S.step >= 4 && m) {
+      h = '<div class="row2"><span><span class="l">Couleur du milieu</span><b>' + colorWord(m) + '</b></span><span><span class="l">Agitation</span><b>' + ["arrêt", "lente", "modérée", "rapide"][S.stir] + '</b></span>' + (S.paper ? '<span><span class="l">Papier blanc</span><b>posé</b></span>' : "") + '</div>';
+    } else h = '<span class="l">Observation</span>' + (S.step < 1 ? "Choisis le matériel à l'étape 2 : la paillasse se remplira." : S.step < 4 ? "Prépare la verrerie. Le titrage commence à l'étape 5." : "Prépare l'erlenmeyer pour observer la couleur.");
+    $("obs").innerHTML = h;
+  }
+
+  /* ---------- scène ---------- */
+  function buildTicks() {
+    var s = "";
+    for (var m = 0; m <= 25; m++) {
+      var y = yOf(m), L = m % 5 === 0 ? 9 : 5;
+      s += '<line class="tickline" x1="' + (271 - L) + '" x2="271" y1="' + y + '" y2="' + y + '"/>';
+      if (m % 5 === 0) s += '<text x="' + (271 - L - 4) + '" y="' + (y + 4) + '" text-anchor="end" style="font-size:11px">' + m + '</text>';
+    }
+    s += '<text x="226" y="' + (Y0 - 24) + '" style="font-size:11px;fill:#8EA2AF">mL</text>';
+    $("ticks").innerHTML = s;
+  }
+  function drawLoupe() {
+    var g = $("gLoupe"), b = S.bu;
+    if (!(b.filled && S.step >= 2 && S.step <= 5)) { g.innerHTML = ""; return; }
+    var r = b.level, cx = 470, cy = 130, R = 72, P = 100, s = "";
+    s += '<defs><clipPath id="lc"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>';
+    s += '<line x1="289" y1="' + yOf(r).toFixed(1) + '" x2="' + (cx - R) + '" y2="' + cy + '" stroke="#8EA2AF" stroke-dasharray="3 4"/><circle cx="283" cy="' + yOf(r).toFixed(1) + '" r="2.5" fill="#EAF2F6"/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 2) + '" fill="#0F1A21" stroke="#B9CBD6" stroke-width="2"/><g clip-path="url(#lc)">';
+    s += '<rect x="' + (cx - 30) + '" y="' + (cy - R) + '" width="60" height="' + (2 * R) + '" fill="rgba(255,255,255,.07)"/>';
+    s += '<rect x="' + (cx - 29) + '" y="' + cy + '" width="58" height="' + R + '" fill="rgb(122,28,140)" fill-opacity=".85"/>';
+    for (var i = Math.ceil((r - 0.75) * 10); i <= Math.floor((r + 0.75) * 10); i++) {
+      var q = i / 10; if (q < -1e-9) continue;
+      var y = cy + (q - r) * P, isInt = Math.abs(q - Math.round(q)) < 1e-6, isHalf = Math.abs(q * 2 - Math.round(q * 2)) < 1e-6, L = isInt ? 26 : isHalf ? 18 : 11;
+      s += '<line x1="' + (cx - 30) + '" x2="' + (cx - 30 + L) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="#EAF2F6" stroke-width="' + (isInt ? 2 : 1.2) + '"/>';
+      if (isInt) s += '<text x="' + (cx - 30 + L + 5) + '" y="' + (y + 5).toFixed(1) + '" class="halo" style="font-size:15px;font-weight:600">' + Math.round(q) + '</text>';
+    }
+    s += '<path d="M' + (cx - 29) + ' ' + (cy - 9) + ' Q' + cx + ' ' + (cy + 9) + ' ' + (cx + 29) + ' ' + (cy - 9) + '" fill="none" stroke="#EAF2F6" stroke-width="2"/></g>';
+    s += '<text x="' + cx + '" y="' + (cy + R + 22) + '" text-anchor="middle" style="font-size:11px;fill:#8EA2AF">loupe (bas du ménisque)</text>';
+    g.innerHTML = s;
+  }
+  var timers = {};
+  function updateScene() {
+    var P = S.picks, all = S.matOK || S.step >= 2;
+    var show = function (id, on) { $(id).style.display = on ? "" : "none"; };
+    var preview = S.step === 0 && !S.matOK;
+    $("gAll").style.opacity = preview ? ".25" : "1";
+    var have = function (k) { return preview || P[k] || S.matOK; };
+    show("gStand", have("potence")); show("gBurette", have("burette")); show("gStirrer", have("agit"));
+    var cont = P.erlen || (S.matOK && P.erlen) ? "erlen" : (P.becher ? "becher" : (preview ? "erlen" : null));
+    if (S.matOK) cont = P.erlen ? "erlen" : "becher";
+    show("glassErlen", cont === "erlen"); show("glassBecher", cont === "becher");
+    show("fLiq", cont && S.flask.has); show("gPaper", S.paper && !!cont);
+    show("bar", !!cont && (S.flask.bar || preview));
+    var b = S.bu, m = mix();
+    // burette
+    var bl = $("buLiq"), tl = $("tipLiq"), bub = $("bubble");
+    var water = b.anim === "water", tit = b.anim === "titrant";
+    if (water || tit) {
+      bl.setAttribute("y", yOf(8)); bl.setAttribute("height", 342 - yOf(8)); bl.setAttribute("fill", water ? "rgb(150,210,235)" : "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".7");
+      tl.setAttribute("height", 0);
+    } else if (b.filled) {
+      var y = Math.max(yOf(b.level), 40);
+      bl.setAttribute("y", y); bl.setAttribute("height", Math.max(0, 344 - y)); bl.setAttribute("fill", "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".8");
+      tl.setAttribute("height", 42); tl.setAttribute("y", 344); tl.setAttribute("fill", "rgb(122,28,140)"); tl.setAttribute("fill-opacity", ".8");
+    } else { bl.setAttribute("height", 0); tl.setAttribute("height", 0); }
+    var showB = b.filled && b.bubble && b.checked && !water && !tit;
+    bub.setAttribute("opacity", showB ? 1 : 0);
+    if (showB) tl.setAttribute("height", 42);
+    var men = $("meniscus");
+    if (b.filled && !water && !tit) { var ym = yOf(b.level); men.setAttribute("d", "M273 " + (ym - 2).toFixed(1) + " Q280 " + (ym + 3).toFixed(1) + " 287 " + (ym - 2).toFixed(1)); } else men.setAttribute("d", "");
+    show("gWarn", b.filled && !b.checked && S.step === 2);
+    // flask
+    var lq = $("fLiq");
+    if (S.flask.has) {
+      var Vt = m ? m.Vt : S.flask.Vs, top = 536 - (6 + Vt * 1.7), col = colorOf(m);
+      lq.setAttribute("y", top.toFixed(1)); lq.setAttribute("height", (542 - top).toFixed(1));
+      lq.setAttribute("clip-path", cont === "becher" ? "url(#clipBecher)" : "url(#clipErlen)");
+      lq.style.fill = col.fill; lq.style.fillOpacity = col.op;
+      $("stream").setAttribute("y2", top.toFixed(1));
+      $("drop").style.setProperty("--fall", (top - 392).toFixed(0) + "px");
+    }
+    var bar = $("bar"); bar.setAttribute("class", S.stir ? "s" + S.stir : "");
+    $("led").setAttribute("fill", S.stir ? "#4CE08A" : "#33423D");
+    $("knobPtr").style.transform = "rotate(" + [0, -50, 20, 110][S.stir] + "deg)";
+    drawLoupe();
+  }
+  function flowAnim(vol) {
+    var st = $("stream"), dr = $("drop"), h = $("handle"), small = vol <= 0.3;
+    clearTimeout(timers.flow); st.classList.remove("on"); h.classList.add("open");
+    if (small) {
+      var n = Math.max(1, Math.min(5, Math.round(vol / DROP)));
+      dr.style.animation = "none"; void dr.getBoundingClientRect(); dr.style.animation = "dropfall .26s ease-in " + n + " forwards";
+      timers.flow = setTimeout(function () { h.classList.remove("open"); }, 280 * n);
+    } else {
+      st.classList.add("on");
+      timers.flow = setTimeout(function () { st.classList.remove("on"); h.classList.remove("open"); }, 700);
+    }
+  }
+  function refresh() { renderSteps(); renderPanel(); updateScene(); renderObs(); }
+
+  /* ---------- actions ---------- */
+  var A = {};
+  A.go = function (el) {
+    var i = Number(el.getAttribute("data-val"));
+    if (i > S.maxStep) return;
+    var changed = i !== S.step; S.step = i;
+    if (changed) { S.msg = null; renderMsg(); }
+    refresh();
+    if (changed) { var t = $("panelTitle"); t.setAttribute("tabindex", "-1"); t.focus({ preventScroll: true }); }
+  };
+  function unlock(i) { S.done[i - 1] = true; S.maxStep = Math.max(S.maxStep, i); }
+
+  var ANS = { a: 8, b: 5, c: 4, d: 1, e: 5, f: 8, g: 5, h: 4 };
+  A.eqCheck = function () {
+    var r = {}, ok = true, miss = 0;
+    Object.keys(ANS).forEach(function (k) { var v = num(S.form[k]); if (isNaN(v)) miss++; r[k] = v === ANS[k]; if (!r[k]) ok = false; });
+    r.ox = S.form.ox === "mno4"; if (!r.ox) ok = false;
+    S.eq.res = r;
+    if (ok) { S.eq.done = true; unlock(1); say("ok", "Toutes les réponses sont justes. Tu peux passer au matériel."); }
+    else say("err", (miss ? "Il manque des réponses. " : "") + "Les cases rouges sont à corriger. Vérifie que les électrons sont en même nombre des deux côtés.");
+    refresh();
+  };
+  A.eqSolve = function () {
+    Object.keys(ANS).forEach(function (k) { S.form[k] = String(ANS[k]); S.eq.res[k] = true; });
+    S.form.ox = "mno4"; S.eq.res.ox = true; S.eq.done = true; unlock(1);
+    say("info", "Correction affichée. Relis-la : 5 ions " + F2 + " donnent 5 électrons, que capte 1 ion " + MN + ".");
+    refresh();
+  };
+
+  A.pick = function (el) { var id = el.getAttribute("data-val"); S.picks[id] = !S.picks[id]; S.matBad = {}; refresh(); };
+  A.matCheck = function () {
+    var P = S.picks, miss = [], bad = [];
+    MATS.forEach(function (m) { if (m.t === "req" && !P[m.id]) miss.push(m.n); if (m.t === "no" && P[m.id]) bad.push(m); });
+    if (!P.erlen && !P.becher) miss.push("un erlenmeyer (ou un bécher)");
+    S.matBad = {}; bad.forEach(function (m) { S.matBad[m.id] = true; });
+    if (!miss.length && !bad.length) { S.matOK = true; unlock(2); say("ok", "Le matériel est complet et adapté. La paillasse est prête."); }
+    else {
+      var t = "";
+      if (bad.length) t += "À retirer : " + bad.map(function (m) { return "<b>" + m.n + "</b> (" + m.why.toLowerCase() + ")"; }).join(" ") + " ";
+      if (miss.length) t += "Il manque : " + miss.join(", ") + ".";
+      say("err", t);
+    }
+    refresh();
+  };
+
+  function anim(obj, key, name, ms) {
+    obj[key] = name; refresh();
+    clearTimeout(timers[key + name]);
+    timers[key + name] = setTimeout(function () { obj[key] = null; refresh(); }, ms);
+  }
+  A.buRW = function () { S.bu.rW = true; say("info", "Burette rincée à l'eau distillée. Le liquide est jeté dans un bécher de récupération."); anim(S.bu, "anim", "water", 900); };
+  A.buRT = function () { S.bu.rT = true; say("info", "Burette rincée avec le permanganate. Les parois sont maintenant en contact avec la bonne solution."); anim(S.bu, "anim", "titrant", 900); };
+  A.buFill = function () {
+    S.bu.filled = true; S.bu.level = -Math.round(rnd(2, 4) * 20) / 20; S.bu.bubble = Math.random() < 0.65; S.bu.checked = false; S.bu.purged = false;
+    say("warn", "Attention : regarde sous le robinet. Y a-t-il une bulle d'air ?"); refresh();
+  };
+  A.buCheck = function () {
+    S.bu.checked = true;
+    if (S.bu.bubble) say("warn", "Il y a une <b>bulle d'air</b> dans la pointe. Elle fausserait le volume. Chasse-la en ouvrant le robinet un instant.");
+    else say("ok", "Pas de bulle d'air sous le robinet. C'est bon.");
+    refresh();
+  };
+  A.buPurge = function () {
+    S.bu.bubble = false; S.bu.purged = true; S.bu.level = r6(S.bu.level + 0.5); flowAnim(0.5);
+    say("ok", "La bulle est partie. Un peu de liquide a coulé : vérifie où est le ménisque."); refresh();
+  };
+  A.drain = function (el) {
+    var v = el.getAttribute("data-val"), amt = v === "d" ? Math.max(0.03, DROP + randn() * DROP_SD) : Number(v);
+    if (S.bu.level + amt > 25) return;
+    S.bu.level = r6(S.bu.level + amt); flowAnim(amt);
+    if (S.bu.level > 0.05) say("warn", "Tu as dépassé le zéro. Remplis la burette et recommence."); else renderMsgClear();
+    refresh();
+  };
+  function renderMsgClear() { S.msg = null; renderMsg(); }
+  A.buRefill = function () {
+    var b = S.bu;
+    if (b.level > 0.05) b.level = -Math.round(rnd(0.5, 3.5) * 20) / 20; else b.level = Math.max(-5, r6(b.level - 1));
+    b.zeroOK = false; renderMsgClear(); refresh();
+  };
+  A.buZero = function () {
+    var b = S.bu;
+    if (S.step === 2 && !b.checked) { say("warn", "Vérifie d'abord sous le robinet : y a-t-il une bulle d'air ?"); return; }
+    if (b.level < -0.05) { say("err", "Le ménisque est encore au-dessus du zéro. Laisse couler un peu de liquide."); return; }
+    if (b.level > 0.05) { say("err", "Tu as dépassé le zéro. Remplis la burette un peu et recommence."); return; }
+    b.level = 0; b.zeroOK = true;
+    if (S.step === 2) { unlock(3); say("ok", b.bubble ? "Zéro réglé. Mais tu continues avec une bulle d'air : le volume lu sera trop grand." : "Zéro réglé. La burette est prête."); }
+    else say("ok", "Zéro réglé.");
+    refresh();
+  };
+
+  A.pwRW = function () { S.pi.rW = true; say("info", "Pipette rincée à l'eau distillée."); anim(S.pi, "anim", "water", 800); };
+  A.pwRS = function () { S.pi.rS = true; say("info", "Pipette rincée avec la solution à titrer."); anim(S.pi, "anim", "sample", 800); };
+  A.pwUp = function () { S.pi.up = true; say("info", "La solution est au-dessus du trait de jauge."); refresh(); };
+  A.pwAdj = function () { S.pi.adj = true; say("info", "Le bas du ménisque est sur le trait de jauge : la pipette contient 10,0 mL."); refresh(); };
+  function sample() { S.flask.has = true; S.flask.Vs = V1N + rnd(-0.02, 0.02); S.flask.thr = rnd(0.85, 1.15); S.flask.poured = 0; }
+  A.pwEmpty = function () { sample(); S.pi.up = false; S.pi.adj = false; say("info", "10,0 mL de solution sont dans l'erlenmeyer."); refresh(); };
+  A.pwBar = function () { S.flask.bar = true; unlock(4); say("ok", "L'erlenmeyer est prêt, avec son barreau aimanté."); refresh(); };
+
+  A.stir = function (el) {
+    S.stir = Number(el.getAttribute("data-val"));
+    if (S.stir === 3) say("warn", "Trop rapide : le liquide gicle. Choisis « Modérée »."); else if (S.stir === 1) say("info", "Un peu lente : le mélange est lent. Choisis « Modérée »."); else renderMsgClear();
+    refresh();
+  };
+  A.paper = function (el) { S.paper = el.checked; refresh(); };
+  A.aide = function (el) { S.aide = el.checked; refresh(); };
+
+  function pour(amount) {
+    var b = S.bu, f = S.flask;
+    if (!canPour() || S.stir !== 2) return false;
+    if (25 - b.level < amount - 1e-9) { say("err", "La burette est presque vide. Il faut la remplir de nouveau."); return false; }
+    b.level = r6(b.level + amount); f.poured = r6(f.poured + amount);
+    var m = mix(), lq = $("fLiq");
+    lq.style.transition = "none"; lq.style.fill = "rgb(150,40,170)"; lq.style.fillOpacity = Math.min(0.85, 0.35 + amount * 2); void lq.getBoundingClientRect(); lq.style.transition = "";
+    flowAnim(amount);
+    return m;
+  }
+  A.pour1 = function () {
+    var m = pour(1); if (!m) { if (S.stir !== 2) say("warn", "Mets l'agitation sur « Modérée » avant de verser."); return; }
+    if (S.step === 4) {
+      var R = S.rapid, v = Math.round(S.bu.level);
+      R.rows.push({ v: v, w: colorWord(m) });
+      if (m.persist && !R.zone) { R.zone = [v - 1, v]; say("ok", "La couleur ne disparaît plus : le virage a eu lieu entre " + fmt(v - 1, 0) + " et " + fmt(v, 0) + " mL."); }
+      else if (m.persist) say("ok", "La couleur reste.");
+      else renderMsgClear();
+    } else if (m.persist) say("info", "La couleur reste après l'ajout. Tu approches du virage ou tu l'as dépassé.");
+    refresh();
+  };
+  A.pourD = function (el) {
+    if (S.stir !== 2) { say("warn", "Mets l'agitation sur « Modérée » avant de verser."); return; }
+    var n = Number(el.getAttribute("data-val")), tot = 0;
+    for (var i = 0; i < n; i++) tot += Math.max(0.03, DROP + randn() * DROP_SD);
+    if (pour(tot)) { var m = mix(); if (m.persist) say("ok", "La couleur ne disparaît plus. Tu peux relever le volume."); else renderMsgClear(); }
+    refresh();
+  };
+  A.toPrecise = function () {
+    S.flask = { has: false, bar: false, Vs: V1N, thr: 1, poured: 0 };
+    S.bu.zeroOK = false; S.pr.reading = false; S.pr.recorded = false;
+    unlock(5); S.step = 5; S.msg = null; renderMsg();
+    say("info", "L'erlenmeyer est vidé et rincé. Remets la burette à zéro, puis prélève une nouvelle prise d'essai."); refresh();
+  };
+  A.newSample = function () { sample(); S.flask.bar = true; say("info", "10,0 mL de solution et un barreau aimanté sont dans l'erlenmeyer."); refresh(); };
+  A.seeEnd = function () {
+    var m = mix();
+    if (!m || !m.persist) { say("warn", "Je ne vois pas de changement de couleur qui reste. Continue de verser, goutte à goutte."); return; }
+    S.pr.reading = true; S.form.vRead = ""; say("info", "Regarde la loupe et lis le bas du ménisque. Écris le volume en mL."); refresh();
+  };
+  A.record = function () {
+    var v = num(S.form.vRead);
+    if (isNaN(v)) { say("err", "Écris le volume lu, par exemple 9,85."); return; }
+    if (Math.abs(v - S.bu.level) > 0.06) { say("err", "Ce n'est pas la valeur de la burette. Relis le bas du ménisque avec la loupe."); return; }
+    S.pr.runs.push({ v: v, ve: veExact(S.flask.Vs) + (S.bu.bubble ? BUB : 0), paper: S.paper });
+    S.pr.reading = false; S.pr.recorded = true; unlock(6);
+    say("ok", "Titrage n° " + S.pr.runs.length + " enregistré : V<sub>E</sub> = " + fmt(v, 2) + " mL." + (S.pr.runs.length < 3 ? " Fais-en d'autres pour estimer l'incertitude." : ""));
+    refresh();
+  };
+  A.nextRun = function () {
+    S.flask = { has: false, bar: false, Vs: V1N, thr: 1, poured: 0 };
+    S.bu.zeroOK = false; S.pr.reading = false; S.pr.recorded = false;
+    say("info", "Nouveau titrage : remets la burette à zéro, puis prélève 10,0 mL."); refresh();
+  };
+
+  A.tabCheck = function () {
+    var ex = { ta: 5, tb: 1, tc: 5, td: 5 }, r = {}, ok = true;
+    Object.keys(ex).forEach(function (k) { r[k] = num(S.form[k]) === ex[k]; if (!r[k]) ok = false; });
+    S.res.tabRes = r; S.res.tabOK = ok;
+    say(ok ? "ok" : "err", ok ? "Le tableau est juste : à l'équivalence, n(" + F2 + ") = 5 × n(" + MN + ")." : "Regarde les coefficients de l'équation : ils donnent les quantités consommées pour une avancement x.");
+    refresh();
+  };
+  A.c1Check = function () {
+    var st = stats(), cexp = 5 * C2 * st.m / V1N, v = num(S.form.c1);
+    if (isNaN(v)) { say("err", "Écris la valeur de c₁ en mol·L⁻¹, par exemple 0,085."); return; }
+    if (Math.abs(v - cexp) / cexp <= 0.02) { S.res.c1OK = true; unlock(7); say("ok", "C'est juste."); }
+    else if (Math.abs(v / cexp - 10) < 0.2 || Math.abs(v / cexp - 0.1) < 0.02) say("err", "L'ordre de grandeur est faux. Vérifie les unités : les volumes sont en mL, la concentration en mol·L⁻¹.");
+    else say("err", "Pas encore. Utilise c₁ = 5 × c₂ × V<sub>E</sub> / V₁ avec c₂ = 0,0200 mol·L⁻¹ et V₁ = 10,0 mL.");
+    refresh();
+  };
+  A.restart = function () { newSession(); renderMsg(); refresh(); };
+
+  /* ---------- événements ---------- */
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]");
+    if (!el || el.disabled || el.type === "checkbox") return;
+    var f = A[el.getAttribute("data-act")]; if (f) f(el);
+  });
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.type === "checkbox" && t.getAttribute("data-act")) A[t.getAttribute("data-act")](t);
+    else if (t.name === "ox") S.form.ox = t.value;
+  });
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.hasAttribute("data-f")) S.form[t.getAttribute("data-f")] = t.value;
+    if (t.hasAttribute("data-evol")) {
+      var V = Number(t.value), VEt = veExact(V1N), m = chem(V, V1N), col = colorOf(m);
+      S.res.evolV = V; $("evolV").textContent = fmt(V, 1);
+      $("evolChart").innerHTML = evolChart(V, VEt, Math.ceil(VEt * 2));
+      $("evolTxt").innerHTML = '<span><span class="sw" style="background:' + col.fill + ';opacity:' + (0.4 + col.op * 0.6).toFixed(2) + '"></span>' + evolText(V, VEt) + '</span>';
+    }
+  });
+
+  /* ---------- démarrage ---------- */
+  newSession(); buildTicks(); refresh();
+  window.__titrage = { get S() { return S; }, chem: chem, veExact: veExact, mix: mix, stats: stats, A: A };
+})();
+</script>
+</body>
+</html>

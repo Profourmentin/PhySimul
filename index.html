@@ -382,6 +382,14 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     "statut": "dispo", "url": "sims/banc-optique.html", "date": "2026-10-24", "glyph": "bench"
   },
   {
+    "id": "titrage-colorimetrique",
+    "titre": "Titrage colorimétrique",
+    "resume": "Dose les ions fer (II) avec du permanganate : prépare la burette, repère le virage, détermine la concentration et son incertitude.",
+    "theme": "matiere", "niveau": "Première spé", "type": "Simulation", "duree": 45,
+    "notions": ["titrage", "équivalence", "oxydoréduction", "tableau d'avancement", "incertitude-type"],
+    "statut": "dispo", "url": "sims/titrage.html", "date": "2026-10-24", "glyph": "titration"
+  },
+  {
     "id": "description-mouvement",
     "titre": "Description d'un mouvement",
     "resume": "Le cours en pages interactives, avec un exercice d'application et sa correction pour chaque partie.",
@@ -534,6 +542,10 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     } else if (g === "beaker") {
       s += '<path class="water" d="M65 56H135V92Q135 103 124 103H76Q65 103 65 92Z" style="opacity:.3"/><path class="s" d="M62 18V92Q62 106 76 106H124Q138 106 138 92V18"/><line class="s" x1="56" y1="18" x2="144" y2="18"/>';
       s += '<circle class="f" cx="82" cy="94" r="4"/><circle class="f" cx="100" cy="97" r="4"/><circle class="f" cx="117" cy="93" r="4"/><circle class="f" cx="96" cy="78" r="3"/>';
+    } else if (g === "titration") {
+      s += '<path class="s" d="M94 8V62M106 8V62"/><path class="s" d="M94 62L98 68H102L106 62"/><line class="s" x1="88" y1="70" x2="112" y2="70"/>';
+      s += '<path class="s" style="stroke-width:1.5" d="M94 18H99M94 28H99M94 38H99M94 48H99"/><circle class="f" cx="100" cy="82" r="3.4"/>';
+      s += '<path class="water" d="M80 104H120L130 113H70Z"/><path class="s" d="M92 90V98L70 113H130L108 98V90"/>';
     } else if (g === "gas") {
       s += '<rect class="s" x="28" y="28" width="120" height="64" rx="3"/><rect class="f" x="148" y="22" width="9" height="76" rx="2"/><line class="s" x1="157" y1="60" x2="188" y2="60"/>';
       [[44, 44], [70, 70], [96, 40], [118, 76], [60, 82], [130, 48], [88, 62], [108, 52]].forEach(function (p) { s += '<circle class="f" cx="' + p[0] + '" cy="' + p[1] + '" r="3.8"/>'; });
