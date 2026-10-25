@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Équilibrer une réaction d'oxydoréduction</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#EBEFF2;--card:#F8FAFB;--tx:#14222C;--mut:#566673;--bd:#CBD4DA;--pri:#1B5E8C;--pri2:#E1ECF4;--ok:#12805c;--okbg:#e6f6ef;--bad:#c0392b;--badbg:#fdecea;--warn:#b45309;--warnbg:#fff4e0;--ox:#2563eb;--oxbg:#e8f0ff;--rd:#dc2626;--rdbg:#fdecec;--hint:#fff8d6;--onpri:#fff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1419;--card:#162027;--tx:#E4ECF0;--mut:#93A4AF;--bd:#2A3944;--pri:#6BB4E8;--pri2:#1B2B38;--ok:#4ade80;--okbg:#14301f;--bad:#f87171;--badbg:#3a1a1a;--warn:#fbbf24;--warnbg:#3a2d12;--ox:#60a5fa;--oxbg:#1a2742;--rd:#f87171;--rdbg:#3a1c1c;--hint:#3a3512;--onpri:#0D1419;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D1419;--card:#162027;--tx:#E4ECF0;--mut:#93A4AF;--bd:#2A3944;--pri:#6BB4E8;--pri2:#1B2B38;--ok:#4ade80;--okbg:#14301f;--bad:#f87171;--badbg:#3a1a1a;--warn:#fbbf24;--warnbg:#3a2d12;--ox:#60a5fa;--oxbg:#1a2742;--rd:#f87171;--rdbg:#3a1c1c;--hint:#3a3512;--onpri:#0D1419;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 16px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding-block:16px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;font-weight:600;font-size:1.7rem;margin:6px 0 2px}h1 span{color:var(--mut);font-weight:500}
+h3{margin:0 0 6px;font-size:1.05rem}
+.back{display:inline-block;color:var(--pri);font-size:.9rem;text-decoration:none;padding:4px 0}.back:hover{text-decoration:underline}
+.sub{margin:0 0 14px;color:var(--mut);font-size:.92rem}
+.mut{color:var(--mut);font-size:.92rem;margin:4px 0 10px}
+sub,sup{font-size:.7em;line-height:0}
+.st{font-size:.72em;color:var(--mut);margin-left:1px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{flex:1;padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;font:inherit;font-weight:600;cursor:pointer}
+.tab.on{background:var(--pri);border-color:var(--pri);color:var(--onpri)}
+.set{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:12px;font-size:.9rem}
+.set label{display:flex;align-items:center;gap:6px}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);max-width:100%}
+.score{margin-left:auto;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.card.ann{border-color:var(--pri);background:linear-gradient(180deg,var(--pri2),var(--card))}
+.kick{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);font-weight:700}
+.sentence{font-size:1.12rem;margin:4px 0 0;line-height:1.9}
+.tag{display:inline-block;font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:99px;vertical-align:middle}
+.tag.ox{background:var(--oxbg);color:var(--ox)}.tag.red{background:var(--rdbg);color:var(--rd)}
+.stepper{display:flex;gap:4px;margin:0 0 12px;overflow-x:auto}
+.pill{flex:1;min-width:max-content;text-align:center;font-size:.76rem;padding:5px 8px;border-radius:99px;background:var(--card);border:1px solid var(--bd);color:var(--mut)}
+.pill.done{background:var(--okbg);color:var(--ok);border-color:transparent}
+.pill.on{background:var(--pri);color:var(--onpri);border-color:var(--pri);font-weight:700}
+.log .ll{font-size:.93rem;padding:7px 10px;margin-bottom:6px;border-radius:10px;background:var(--okbg);overflow-x:auto}
+.log .ll b{color:var(--ok)}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:10px 6px;font-size:1.1rem;margin:10px 0}
+.term{display:inline-flex;align-items:center;gap:4px}
+.op{color:var(--mut);padding:0 2px}.op.sg{font-weight:700;padding:0 6px}
+.co{width:2.7rem;height:2.5rem;text-align:center;font:inherit;border:1.5px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx)}
+.co:focus{outline:2px solid var(--pri);border-color:var(--pri)}
+.co.hint{background:var(--hint)}.co:disabled{opacity:.85;background:var(--okbg);border-color:var(--ok)}
+.eqs{white-space:normal}
+.cons{margin-top:6px;padding:8px 10px;border-radius:12px;background:var(--bg);border:1px dashed var(--bd)}
+.cons .ct{font-size:.72rem;color:var(--mut);margin-bottom:4px}
+.cr{display:grid;grid-template-columns:3.6rem 1fr 1.6rem 1fr;align-items:center;gap:4px;font-size:.88rem;padding:2px 0}
+.cl{color:var(--mut)}
+.cb{display:flex;align-items:center;gap:6px;min-width:0}.cb.l{justify-content:flex-end}.cb.r{justify-content:flex-start}
+.cb i{display:block;height:11px;border-radius:6px;background:var(--mut);opacity:.5;flex:none}
+.cm{text-align:center;font-weight:700;color:var(--mut)}
+.cr.ok i{background:var(--ok);opacity:1}.cr.ok .cm{color:var(--ok)}
+.cr.ko i{background:var(--warn);opacity:1}.cr.ko .cm{color:var(--warn)}
+.fb{min-height:0;margin:8px 0 0;font-size:.95rem}
+.fb .m{padding:8px 10px;border-radius:10px}
+.fb .bad{background:var(--badbg);color:var(--bad)}.fb .good{background:var(--okbg);color:var(--ok)}.fb .info{background:var(--warnbg);color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{font:inherit;font-weight:600;padding:9px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:var(--onpri)}
+.btn:disabled{opacity:.45;cursor:default}
+details.meth{margin:6px 0;font-size:.9rem;color:var(--mut)}details.meth summary{cursor:pointer}
+details.meth ol{margin:6px 0 0;padding-left:20px}
+.stages{margin-top:8px}
+.stl{display:flex;gap:10px;padding:8px 10px;margin-top:6px;border-radius:10px;background:var(--pri2);font-size:.93rem;overflow-x:auto}
+.sn{flex:none;width:22px;height:22px;border-radius:50%;background:var(--pri);color:var(--onpri);font-size:.78rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+.group{margin:10px 0}.gl{font-size:.95rem;margin-bottom:6px}
+.opts{display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.opt{font:inherit;padding:9px 10px;border-radius:10px;border:1.5px solid var(--bd);background:var(--bg);color:var(--tx);cursor:pointer;text-align:left}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}.opt.good{border-color:var(--ok);background:var(--okbg)}
+.gfb{font-size:.9rem;color:var(--bad);margin-top:4px}
+.mrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:10px 0;font-size:1.05rem}
+.rl{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;min-width:5.2rem;text-align:center}
+.rl.ox{background:var(--oxbg);color:var(--ox)}.rl.red{background:var(--rdbg);color:var(--rd)}
+.sumline{padding:8px 10px;border-radius:10px;background:var(--bg);overflow-x:auto;margin:8px 0;font-size:1.02rem}
+.big{font-size:1.15rem;padding:10px 12px;border-radius:12px;background:var(--okbg);margin:8px 0;overflow-x:auto}
+/* transfert d'électrons */
+.xfer{display:grid;gap:6px;margin:12px 0;grid-template-columns:1fr}
+.xbox{border-radius:14px;padding:10px 12px;text-align:center}
+.xbox.ox{background:var(--oxbg)}.xbox.red{background:var(--rdbg)}
+.xt{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.xbox.ox .xt{color:var(--ox)}.xbox.red .xt{color:var(--rd)}
+.xs{font-size:1.15rem;margin:2px 0}.xe{font-size:.85rem;color:var(--mut)}
+.xlane{position:relative;height:72px}
+.xlane .cap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:.78rem;color:var(--mut);background:var(--bg);padding:1px 8px;border-radius:99px;z-index:2;white-space:nowrap}
+.e{position:absolute;left:50%;margin-left:-11px;top:0;width:22px;height:22px;border-radius:50%;background:#f5b400;color:#3a2a00;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;opacity:0;animation:fy 2.4s linear infinite}
+.e:nth-child(odd){margin-left:-30px}.e:nth-child(even){margin-left:8px}
+@keyframes fy{0%{top:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:calc(100% - 22px);opacity:0}}
+@keyframes fx{0%{left:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:calc(100% - 22px);opacity:0}}
+@media(min-width:640px){
+ .xfer{grid-template-columns:1fr 1.2fr 1fr;align-items:center}
+ .xlane{height:70px}
+ .e{top:50%;margin-top:-11px;left:0;animation-name:fx}
+ .e:nth-child(odd){margin-left:0;margin-top:-26px}.e:nth-child(even){margin-left:0;margin-top:4px}
+}
+@media(prefers-reduced-motion:reduce){.e{animation:none;opacity:1;position:static;display:inline-flex;margin:2px!important}.xlane{height:auto;text-align:center}.xlane .cap{position:static;transform:none;display:block}}
+.sel{width:100%;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <a class="back" href="../index.html">← Catalogue des simulations</a>
+ <h1>Oxydoréduction <span>: équilibrer pas à pas</span></h1>
+ <p class="sub">Demi-équations puis équation de la réaction. Les réactions sont annoncées : aucun potentiel d'oxydoréduction n'est nécessaire.</p>
+ <div class="tabs"><button class="tab on" data-t="ex">Exerciseur</button><button class="tab" data-t="exp">Explorateur</button></div>
+
+ <section id="p-ex">
+  <div class="set">
+   <label>Exercice
+    <select id="mode"><option value="full">Réaction complète</option><option value="half">Demi-équations seules</option></select></label>
+   <label>Niveau
+    <select id="level"><option value="all">Tous</option><option value="0">Facile (sans H⁺ ni H₂O)</option><option value="1">Intermédiaire</option><option value="2">Avancé</option></select></label>
+   <span class="score" id="sc"></span>
+  </div>
+  <div id="ann"></div>
+  <div class="stepper" id="stepper"></div>
+  <div class="log" id="log"></div>
+  <div id="stage"></div>
+ </section>
+
+ <section id="p-exp" hidden>
+  <select id="xsel" class="sel"></select>
+  <div id="xout"></div>
+ </section>
+</div>
+
+<script>
+/* ====================== NOYAU CHIMIE ====================== */
+const SP={
+ 'e-':{f:'',q:-1,s:'',n:'électron'},
+ 'H+':{f:'H',q:1,s:'aq',n:"l'ion hydrogène"},
+ 'H2':{f:'H2',q:0,s:'g',n:'le dihydrogène'},
+ 'H2O':{f:'H2O',q:0,s:'l',n:"l'eau"},
+ 'Mg2+':{f:'Mg',q:2,s:'aq',n:"l'ion magnésium"},'Mg':{f:'Mg',q:0,s:'s',n:'le magnésium'},
+ 'Al3+':{f:'Al',q:3,s:'aq',n:"l'ion aluminium"},'Al':{f:'Al',q:0,s:'s',n:"l'aluminium"},
+ 'Zn2+':{f:'Zn',q:2,s:'aq',n:"l'ion zinc"},'Zn':{f:'Zn',q:0,s:'s',n:'le zinc'},
+ 'Fe2+':{f:'Fe',q:2,s:'aq',n:"l'ion fer(II)"},'Fe3+':{f:'Fe',q:3,s:'aq',n:"l'ion fer(III)"},'Fe':{f:'Fe',q:0,s:'s',n:'le fer'},
+ 'Ni2+':{f:'Ni',q:2,s:'aq',n:"l'ion nickel(II)"},'Ni':{f:'Ni',q:0,s:'s',n:'le nickel'},
+ 'Pb2+':{f:'Pb',q:2,s:'aq',n:"l'ion plomb(II)"},'Pb':{f:'Pb',q:0,s:'s',n:'le plomb'},
+ 'Cu2+':{f:'Cu',q:2,s:'aq',n:"l'ion cuivre(II)"},'Cu':{f:'Cu',q:0,s:'s',n:'le cuivre'},
+ 'Ag+':{f:'Ag',q:1,s:'aq',n:"l'ion argent"},'Ag':{f:'Ag',q:0,s:'s',n:"l'argent"},
+ 'I2':{f:'I2',q:0,s:'aq',n:'le diiode'},'I-':{f:'I',q:-1,s:'aq',n:"l'ion iodure"},
+ 'Br2':{f:'Br2',q:0,s:'aq',n:'le dibrome'},'Br-':{f:'Br',q:-1,s:'aq',n:"l'ion bromure"},
+ 'Cl2':{f:'Cl2',q:0,s:'aq',n:'le dichlore'},'Cl-':{f:'Cl',q:-1,s:'aq',n:"l'ion chlorure"},
+ 'MnO4-':{f:'MnO4',q:-1,s:'aq',n:"l'ion permanganate"},'Mn2+':{f:'Mn',q:2,s:'aq',n:"l'ion manganèse(II)"},
+ 'Cr2O7':{f:'Cr2O7',q:-2,s:'aq',n:"l'ion dichromate"},'Cr3+':{f:'Cr',q:3,s:'aq',n:"l'ion chrome(III)"},
+ 'NO3-':{f:'NO3',q:-1,s:'aq',n:"l'ion nitrate"},'NO':{f:'NO',q:0,s:'g',n:"le monoxyde d'azote"},
+ 'H2O2':{f:'H2O2',q:0,s:'aq',n:"le peroxyde d'hydrogène"},'O2':{f:'O2',q:0,s:'g',n:'le dioxygène'},
+ 'S4O6':{f:'S4O6',q:-2,s:'aq',n:"l'ion tétrathionate"},'S2O3':{f:'S2O3',q:-2,s:'aq',n:"l'ion thiosulfate"},
+ 'DHA':{f:'C6H6O6',q:0,s:'aq',n:"l'acide déshydroascorbique"},'AA':{f:'C6H8O6',q:0,s:'aq',n:"l'acide ascorbique"},
+ 'AcOH':{f:'CH3COOH',q:0,s:'aq',n:"l'acide éthanoïque"},'EtOH':{f:'CH3CH2OH',q:0,s:'aq',n:"l'éthanol"}
+};
+/* couple : ox (a fois) / red (b fois) : a et b équilibrent l'élément commun */
+const C={
+ mg:{ox:'Mg2+',a:1,red:'Mg',b:1},al:{ox:'Al3+',a:1,red:'Al',b:1},zn:{ox:'Zn2+',a:1,red:'Zn',b:1},
+ fe:{ox:'Fe2+',a:1,red:'Fe',b:1},ni:{ox:'Ni2+',a:1,red:'Ni',b:1},pb:{ox:'Pb2+',a:1,red:'Pb',b:1},
+ cu:{ox:'Cu2+',a:1,red:'Cu',b:1},ag:{ox:'Ag+',a:1,red:'Ag',b:1},
+ h:{ox:'H+',a:2,red:'H2',b:1},fe3:{ox:'Fe3+',a:1,red:'Fe2+',b:1},
+ i2:{ox:'I2',a:1,red:'I-',b:2},br2:{ox:'Br2',a:1,red:'Br-',b:2},cl2:{ox:'Cl2',a:1,red:'Cl-',b:2},
+ mno4:{ox:'MnO4-',a:1,red:'Mn2+',b:1},cr2o7:{ox:'Cr2O7',a:1,red:'Cr3+',b:2},
+ no3:{ox:'NO3-',a:1,red:'NO',b:1},h2o2:{ox:'H2O2',a:1,red:'H2O',b:2},o2h2o2:{ox:'O2',a:1,red:'H2O2',b:1},
+ s4o6:{ox:'S4O6',a:1,red:'S2O3',b:2},asc:{ox:'DHA',a:1,red:'AA',b:1},eth:{ox:'AcOH',a:1,red:'EtOH',b:1}
+};
+Object.keys(C).forEach(k=>C[k].id=k);
+/* réactions annoncées : [couple de l'oxydant, couple du réducteur] */
+const PAIRS=[
+ ['cu','mg'],['cu','al'],['cu','zn'],['cu','fe'],['cu','ni'],['cu','pb'],
+ ['ag','mg'],['ag','al'],['ag','zn'],['ag','fe'],['ag','ni'],['ag','pb'],['ag','cu'],
+ ['pb','mg'],['pb','al'],['pb','zn'],['pb','fe'],
+ ['ni','mg'],['ni','al'],['ni','zn'],
+ ['fe','mg'],['fe','al'],['fe','zn'],
+ ['zn','mg'],['zn','al'],['al','mg'],
+ ['h','mg'],['h','al'],['h','zn'],['h','fe'],['h','ni'],
+ ['fe3','fe'],['fe3','cu'],['fe3','i2'],['fe3','asc'],
+ ['i2','s4o6'],['i2','asc'],['i2','zn'],['i2','fe'],
+ ['br2','i2'],['br2','fe3'],['br2','cu'],['br2','zn'],
+ ['cl2','br2'],['cl2','i2'],['cl2','fe3'],['cl2','cu'],['cl2','zn'],
+ ['no3','cu'],
+ ['h2o2','fe3'],['h2o2','i2'],
+ ['mno4','fe3'],['mno4','i2'],['mno4','br2'],['mno4','o2h2o2'],['mno4','eth'],['mno4','asc'],
+ ['cr2o7','fe3'],['cr2o7','i2'],['cr2o7','eth']
+];
+
+function atoms(f){const a={};f.replace(/([A-Z][a-z]?)(\d*)/g,(m,e,n)=>{a[e]=(a[e]||0)+(n?+n:1);return m;});return a;}
+function tally(M){const at={};let q=0;for(const k in M){const c=M[k]||0;if(!c)continue;const A=atoms(SP[k].f);for(const e in A)at[e]=(at[e]||0)+A[e]*c;q+=SP[k].q*c;}return {at,q};}
+function add(M,k,c){M[k]=(M[k]||0)+c;}
+function gcd(a,b){return b?gcd(b,a%b):Math.abs(a);}
+function lcm(a,b){return a/gcd(a,b)*b;}
+function uniq(a){return [...new Set(a)];}
+function fq(q){return q>0?'+'+q:q<0?'\u2212'+(-q):'0';}
+
+function mainEl(c){const els=Object.keys(atoms(SP[c.ox].f));const non=els.filter(e=>e!=='O'&&e!=='H');return non[0]||(els.includes('O')?'O':'H');}
+
+function solveHalf(c){
+ const L={},R={};add(L,c.ox,c.a);add(R,c.red,c.b);
+ const st=[{L:{...L},R:{...R}}];
+ let t1=tally(L),t2=tally(R);
+ const dO=(t1.at.O||0)-(t2.at.O||0);
+ if(dO>0)add(R,'H2O',dO);else if(dO<0)add(L,'H2O',-dO);
+ st.push({L:{...L},R:{...R}});
+ t1=tally(L);t2=tally(R);
+ const dH=(t1.at.H||0)-(t2.at.H||0);
+ if(dH<0)add(L,'H+',-dH);else if(dH>0)add(R,'H+',dH);
+ st.push({L:{...L},R:{...R}});
+ t1=tally(L);t2=tally(R);
+ const QL=t1.q,QR=t2.q,n=QL-QR;
+ if(n>0)add(L,'e-',n);else if(n<0)add(R,'e-',-n);
+ st.push({L:{...L},R:{...R}});
+ return {L,R,n:Math.abs(n),st,dO,dH,QL,QR};
+}
+function aux(id){const c=C[id],s=solveHalf(c);
+ const h=(s.L['H+']||0)-(c.ox==='H+'?c.a:0)>0,w=(s.R['H2O']||0)-(c.red==='H2O'?c.b:0)>0||(s.L['H2O']||0)>0;
+ return (h?1:0)+(w?1:0);}
+function solveBilan(A,B){
+ const hA=solveHalf(C[A]),hB=solveHalf(C[B]);
+ const L=lcm(hA.n,hB.n),kA=L/hA.n,kB=L/hB.n;
+ const SL={},SR={};
+ for(const k in hA.L)add(SL,k,kA*hA.L[k]);for(const k in hA.R)add(SR,k,kA*hA.R[k]);
+ for(const k in hB.R)add(SL,k,kB*hB.R[k]);for(const k in hB.L)add(SR,k,kB*hB.L[k]);
+ const net={};uniq([...Object.keys(SL),...Object.keys(SR)]).forEach(k=>{if(k==='e-')return;net[k]=(SL[k]||0)-(SR[k]||0);});
+ let g=0;for(const k in net)g=gcd(g,net[k]);
+ const FL={},FR={};for(const k in net){const v=net[k]/g;if(v>0)FL[k]=v;else if(v<0)FR[k]=-v;}
+ return {A,B,hA,hB,L,kA,kB,SL,SR,FL,FR,acid:(FL['H+']||0)>0};
+}
+const RX=PAIRS.map(([A,B])=>({A,B,lv:Math.max(aux(A),aux(B))}));
+/*UI*/
+/* ====================== AFFICHAGE ====================== */
+const SUB='₀₁₂₃₄₅₆₇₈₉',SUPD='⁰¹²³⁴⁵⁶⁷⁸⁹';
+function fmt(k,st=true){
+ if(k==='e-')return 'e<sup>\u2212</sup>';
+ const s=SP[k];let h=s.f.replace(/(\d+)/g,'<sub>$1</sub>');
+ if(s.q){const m=Math.abs(s.q);h+='<sup>'+(m>1?m:'')+(s.q>0?'+':'\u2212')+'</sup>';}
+ if(st&&s.s)h+='<span class="st">('+s.s+')</span>';
+ return h;
+}
+function plain(k){const s=SP[k];if(k==='e-')return 'e⁻';let t=s.f.replace(/\d/g,d=>SUB[d]);if(s.q){const m=Math.abs(s.q);t+=(m>1?SUPD[m]:'')+(s.q>0?'⁺':'⁻');}return t;}
+function coupleFmt(id){return fmt(C[id].ox)+' / '+fmt(C[id].red);}
+const LAST=['H+','H2O','e-'];
+function ordered(M){const ks=Object.keys(M).filter(k=>M[k]>0);return [...ks.filter(k=>!LAST.includes(k)),...LAST.filter(k=>ks.includes(k))];}
+function eqS(L,R,sep='='){const p=M=>ordered(M).map(k=>(M[k]>1?M[k]+'\u2009':'')+fmt(k)).join(' + ');return `<span class="eqs">${p(L)} <span class="op">${sep}</span> ${p(R)}</span>`;}
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+function el(h){const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;}
+const $=s=>document.querySelector(s);
+function sentName(k){return SP[k].n+' '+fmt(k);}
+
+/* panneau de conservation */
+function consHTML(L,R,keys){
+ const tl=tally(L),tr=tally(R);
+ const els=new Set();keys.forEach(k=>Object.keys(atoms(SP[k].f)).forEach(e=>els.add(e)));
+ const list=[...els].filter(e=>e!=='O'&&e!=='H').sort();if(els.has('O'))list.push('O');if(els.has('H'))list.push('H');
+ const any=Object.keys(L).length+Object.keys(R).length>0;
+ const mx=Math.max(1,...list.map(e=>Math.max(tl.at[e]||0,tr.at[e]||0)));
+ const bar=v=>`<i style="width:calc((100% - 2.4rem) * ${(v/mx).toFixed(3)})"></i>`;
+ let h='<div class="ct">Conservation (gauche | droite)</div>';
+ list.forEach(e=>{const l=tl.at[e]||0,r=tr.at[e]||0,cls=!any?'':l===r?'ok':'ko';
+  h+=`<div class="cr ${cls}"><span class="cl">${e}</span><div class="cb l"><span>${l}</span>${bar(l)}</div><span class="cm">${!any?'':l===r?'=':'≠'}</span><div class="cb r">${bar(r)}<span>${r}</span></div></div>`;});
+ const cls=!any?'':tl.q===tr.q?'ok':'ko';
+ h+=`<div class="cr ${cls}"><span class="cl">charge</span><div class="cb l"><span>${fq(tl.q)}</span></div><span class="cm">${!any?'':tl.q===tr.q?'=':'≠'}</span><div class="cb r"><span>${fq(tr.q)}</span></div></div>`;
+ return h;
+}
+
+/* éditeur d'équation à coefficients */
+function buildEditor(lk,rk,sep){
+ const root=el('<div class="editor"><div class="eq"></div><div class="cons"></div></div>');
+ const term=(k,s)=>`<span class="term"><input class="co" type="text" inputmode="numeric" maxlength="2" autocomplete="off" data-k="${k}" data-s="${s}" placeholder="·" aria-label="Coefficient devant ${plain(k)}"><span class="sp">${fmt(k)}</span></span>`;
+ root.querySelector('.eq').innerHTML=lk.map(k=>term(k,'L')).join('<span class="op">+</span>')+`<span class="op sg">${sep}</span>`+rk.map(k=>term(k,'R')).join('<span class="op">+</span>');
+ const cons=root.querySelector('.cons'),inputs=[...root.querySelectorAll('input')],keys=uniq([...lk,...rk]);
+ const read=()=>{const m={L:{},R:{}};inputs.forEach(i=>{const v=parseInt(i.value||'0',10)||0;if(v>0)m[i.dataset.s][i.dataset.k]=v;});return m;};
+ const refresh=()=>{const m=read();cons.innerHTML=consHTML(m.L,m.R,keys);};
+ inputs.forEach(i=>i.addEventListener('input',()=>{i.value=i.value.replace(/\D/g,'');i.classList.remove('hint');refresh();}));
+ const fill=(L,R)=>{inputs.forEach(i=>{const M=i.dataset.s==='L'?L:R,v=M[i.dataset.k];i.value=v?String(v):'';i.classList.toggle('hint',!!v);});refresh();};
+ const lock=()=>inputs.forEach(i=>i.disabled=true);
+ refresh();
+ return {root,read,fill,lock,inputs};
+}
+
+/* diagnostic */
+function diag(L,R,mode){
+ const tl=tally(L),tr=tally(R);
+ const els=uniq([...Object.keys(tl.at),...Object.keys(tr.at)]);
+ const bad=e=>(tl.at[e]||0)!==(tr.at[e]||0),nb=(e)=>`${tl.at[e]||0} à gauche, ${tr.at[e]||0} à droite`;
+ for(const e of els.filter(e=>e!=='O'&&e!=='H'))if(bad(e))return `L'élément <b>${e}</b> n'est pas conservé : ${nb(e)}.`;
+ if(bad('O'))return `L'oxygène n'est pas conservé : ${nb('O')}.`+(mode==='half'?` On l'équilibre avec ${fmt('H2O')}.`:'');
+ if(bad('H'))return `L'hydrogène n'est pas conservé : ${nb('H')}.`+(mode==='half'?` On l'équilibre avec ${fmt('H+')}.`:'');
+ if(tl.q!==tr.q)return `Les atomes sont conservés, mais pas la charge : ${fq(tl.q)} à gauche, ${fq(tr.q)} à droite.`+(mode==='half'?` On l'ajuste avec des électrons ${fmt('e-')}.`:` Revois les coefficients des ions.`);
+ return null;
+}
+function sameMap(a,b){return uniq([...Object.keys(a),...Object.keys(b)]).every(k=>(a[k]||0)===(b[k]||0));}
+function checkEq(m,exp,mode){
+ if(!Object.keys(m.L).length&&!Object.keys(m.R).length)return {ok:false,msg:'Complète l\'équation avec des coefficients.'};
+ const d=diag(m.L,m.R,mode);if(d)return {ok:false,msg:d};
+ if(mode==='bilan'){const both=Object.keys(m.L).filter(k=>m.R[k]);if(both.length)return {ok:false,msg:`Équilibrée, mais ${both.map(k=>fmt(k)).join(', ')} figure des deux côtés : simplifie.`};}
+ if(sameMap(m.L,exp.L)&&sameMap(m.R,exp.R))return {ok:true};
+ const ratios=[];for(const s of ['L','R'])for(const k of uniq([...Object.keys(m[s]),...Object.keys(exp[s])])){ratios.push((exp[s][k]?(m[s][k]||0)/exp[s][k]:Infinity));}
+ const r=ratios[0];if(r>1&&Number.isInteger(r)&&ratios.every(x=>x===r))return {ok:false,msg:`Équilibrée, mais pas avec les plus petits coefficients entiers : divise tout par ${r}.`};
+ return {ok:false,msg:'Équilibrée, mais ce n\'est pas l\'équation attendue.'};
+}
+const fbHTML=(cls,t)=>`<div class="m ${cls}">${t}</div>`;
+
+/* construction par étapes d'une demi-équation */
+function stageLines(c,sol,upto){
+ const T=[];
+ T.push(`On équilibre l'élément <b>${mainEl(c)}</b>.`);
+ T.push(sol.dO===0?`Oxygène : déjà équilibré.`:`Oxygène : il manque ${Math.abs(sol.dO)} O à ${sol.dO>0?'droite':'gauche'} → on ajoute ${Math.abs(sol.dO)} ${fmt('H2O')} à ${sol.dO>0?'droite':'gauche'}.`);
+ T.push(sol.dH===0?`Hydrogène : déjà équilibré.`:`Hydrogène : il manque ${Math.abs(sol.dH)} H à ${sol.dH<0?'gauche':'droite'} → on ajoute ${Math.abs(sol.dH)} ${fmt('H+')} à ${sol.dH<0?'gauche':'droite'}.`);
+ T.push(`Charges : ${fq(sol.QL)} à gauche, ${fq(sol.QR)} à droite → on ajoute ${sol.n} ${fmt('e-')} à gauche.`);
+ return T.slice(0,upto).map((t,i)=>`<div class="stl"><span class="sn">${i+1}</span><div>${t}<br>${eqS(sol.st[i].L,sol.st[i].R)}</div></div>`).join('');
+}
+
+/* visualisation du transfert d'électrons */
+function transferViz(b){
+ const nd=Math.min(b.L,8);
+ let dots='';for(let i=0;i<nd;i++)dots+=`<span class="e" style="animation-delay:${(i*2.4/nd).toFixed(2)}s">e<sup>−</sup></span>`;
+ const redK=C[b.B].red,oxK=C[b.A].ox;
+ return `<div class="xfer">
+  <div class="xbox red"><div class="xt">Réducteur · oxydation</div><div class="xs">${b.kB>1?b.kB+'\u2009':''}${fmt(redK)}</div><div class="xe">cède ${b.L} e<sup>−</sup></div></div>
+  <div class="xlane">${dots}<span class="cap">${b.L} e<sup>−</sup> transférés</span></div>
+  <div class="xbox ox"><div class="xt">Oxydant · réduction</div><div class="xs">${b.kA>1?b.kA+'\u2009':''}${fmt(oxK)}</div><div class="xe">capte ${b.L} e<sup>−</sup></div></div>
+ </div>`;
+}
+/* (le DOM mobile affiche l'ordre vertical : réducteur → oxydant) */
+
+/* ====================== EXERCISEUR ====================== */
+const S={mode:'full',level:'all',done:0,clean:0,ex:null,si:0,steps:[],log:[],helped:false,last:''};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+function options(entity,good){
+ const els=Object.keys(atoms(SP[entity].f));
+ const cand=Object.keys(C).filter(id=>id!==good).map(id=>{const c=C[id];
+  const has=c.ox===entity||c.red===entity;
+  const share=[c.ox,c.red].some(k=>Object.keys(atoms(SP[k].f)).some(e=>els.includes(e)&&e!=='O'&&e!=='H'));
+  return {id,p:(has?2:share?1:0)+Math.random()*0.9};}).sort((x,y)=>y.p-x.p);
+ return shuffle([good,...cand.slice(0,3).map(x=>x.id)]);
+}
+function makeFull(A,B){const bil=solveBilan(A,B);const oxk=C[A].ox,rdk=C[B].red;
+ return {type:'full',A,B,bil,oxk,rdk,optA:options(oxk,A),optB:options(rdk,B)};}
+function newEx(forced){
+ let ex;
+ if(forced)ex=forced;
+ else if(S.mode==='full'){
+  const lv=S.level==='all'?pick([0,1,2]):+S.level;
+  let pool=RX.filter(r=>r.lv===lv);const p2=pool.filter(r=>r.A+'|'+r.B!==S.last);if(p2.length)pool=p2;
+  const r=pick(pool);ex=makeFull(r.A,r.B);S.last=r.A+'|'+r.B;
+ }else{
+  const lv=S.level==='all'?pick([0,1,2]):+S.level;
+  let pool=Object.keys(C).filter(id=>aux(id)===lv);const p2=pool.filter(id=>id!==S.last);if(p2.length)pool=p2;
+  const id=pick(pool);ex={type:'half',A:id};S.last=id;
+ }
+ S.ex=ex;S.si=0;S.log=[];S.helped=false;
+ S.steps=ex.type==='full'?['couples','halfA','halfB','mult','bilan','done']:['halfA','done'];
+ render();
+}
+function stepNames(){return S.ex.type==='full'?['Couples','Demi-éq. 1','Demi-éq. 2','Électrons','Bilan']:['Demi-équation'];}
+function render(){
+ const ex=S.ex;
+ if(ex.type==='full'){
+  $('#ann').innerHTML=`<div class="card ann"><div class="kick">Réaction annoncée</div><p class="sentence">${cap(sentName(ex.oxk))} <span class="tag ox">oxydant</span> réagit avec ${sentName(ex.rdk)} <span class="tag red">réducteur</span>${ex.bil.acid?' en milieu acide':''}.</p></div>`;
+ }else{
+  const c=C[ex.A];
+  $('#ann').innerHTML=`<div class="card ann"><div class="kick">Couple proposé</div><p class="sentence">${coupleFmt(c.id)}<br><span class="tag ox">oxydant</span> ${fmt(c.ox)} · <span class="tag red">réducteur</span> ${fmt(c.red)}</p></div>`;
+ }
+ const names=stepNames();
+ $('#stepper').innerHTML=names.map((n,i)=>`<span class="pill ${i<S.si?'done':i===S.si?'on':''}">${i+1}. ${n}</span>`).join('');
+ $('#log').innerHTML=S.log.map(l=>`<div class="ll">${l}</div>`).join('');
+ const st=S.steps[S.si],host=$('#stage');host.innerHTML='';
+ const node={couples:stepCouples,halfA:()=>stepHalf(C[ex.A],ex.type==='full'?2:1,'A'),halfB:()=>stepHalf(C[ex.B],3,'B'),mult:stepMult,bilan:stepBilan,done:stepDone}[st]();
+ host.appendChild(node);
+ const f=node.querySelector('input:not(:disabled)');if(f&&st!=='done')f.focus({preventScroll:true});
+ $('#sc').textContent=`Exercices : ${S.done} · sans aide : ${S.clean}`;
+}
+function next(logLine){if(logLine)S.log.push(logLine);S.si++;render();window.scrollTo({top:$('#ann').offsetTop-8,behavior:'smooth'});}
+function toContinue(root,label,fn){const a=root.querySelector('.actions');a.innerHTML=`<button class="btn pri go">${label}</button>`;const b=a.querySelector('.go');b.addEventListener('click',fn);b.focus({preventScroll:true});}
+
+/* étape 1 : couples */
+function stepCouples(){
+ const ex=S.ex;
+ const root=el(`<div class="card"><h3>1 · Identifier les couples</h3><p class="mut">Pour chaque réactif, choisis le couple oxydant / réducteur auquel il appartient, en respectant le rôle annoncé.</p><div class="cg"></div><div class="actions"></div></div>`);
+ let ok=0;
+ [[ex.oxk,'ox',ex.optA,ex.A],[ex.rdk,'red',ex.optB,ex.B]].forEach(([k,role,opts,good])=>{
+  const g=el(`<div class="group"><div class="gl">${fmt(k)} <span class="tag ${role}">${role==='ox'?'oxydant':'réducteur'}</span> appartient au couple :</div><div class="opts"></div><div class="gfb"></div></div>`);
+  const box=g.querySelector('.opts'),fb=g.querySelector('.gfb');
+  opts.forEach(id=>{const b=el(`<button class="opt">${coupleFmt(id)}</button>`);
+   b.addEventListener('click',()=>{
+    if(id===good){b.classList.add('good');fb.textContent='';box.querySelectorAll('button').forEach(x=>x.disabled=true);ok++;
+     if(ok===2)toContinue(root,'Continuer →',()=>next(`<b>Couples</b> : ${coupleFmt(ex.A)} et ${coupleFmt(ex.B)}`));}
+    else{b.classList.add('bad');b.disabled=true;S.helped=true;
+     const c=C[id];
+     fb.innerHTML=(c.ox===k||c.red===k)?`Dans ce couple, ${fmt(k)} est le ${c.ox===k?'oxydant':'réducteur'}, alors qu'il est annoncé comme ${role==='ox'?'oxydant':'réducteur'}.`:`${fmt(k)} ne figure pas dans ce couple.`;}
+   });box.appendChild(b);});
+  root.querySelector('.cg').appendChild(g);
+ });
+ return root;
+}
+
+/* étapes 2 et 3 : demi-équations */
+function stepHalf(c,num,tag){
+ const sol=solveHalf(c);
+ const ed=buildEditor(uniq([c.ox,'H+','e-']),uniq([c.red,'H2O']),'=');
+ const root=el(`<div class="card"><h3>${num} · Demi-équation du couple ${coupleFmt(c.id)}</h3><p class="mut">Écris-la sous la forme <b>Ox + n e<sup>−</sup> = Red</b>. Une case vide vaut 0.</p>
+  <details class="meth"><summary>Rappel de la méthode</summary><ol><li>On équilibre l'élément commun (autre que O et H).</li><li>On équilibre O avec H<sub>2</sub>O.</li><li>On équilibre H avec H<sup>+</sup>.</li><li>On équilibre les charges avec e<sup>−</sup>.</li></ol></details>
+  <div class="ed"></div><div class="fb"></div><div class="stages"></div>
+  <div class="actions"><button class="btn pri chk">Vérifier</button><button class="btn hnt">Indice</button><button class="btn sol">Solution</button></div></div>`);
+ root.querySelector('.ed').appendChild(ed.root);
+ const fb=root.querySelector('.fb'),stg=root.querySelector('.stages'),hnt=root.querySelector('.hnt');
+ let hs=0;
+ const done=()=>{ed.lock();fb.innerHTML=fbHTML('good','✓ Demi-équation correcte.');stg.innerHTML=stageLines(c,sol,4);
+  toContinue(root,'Continuer →',()=>next(`<b>Demi-équation</b> ${coupleFmt(c.id)} : ${eqS(sol.L,sol.R)}`));};
+ const chk=()=>{const r=checkEq(ed.read(),{L:sol.L,R:sol.R},'half');if(r.ok)done();else fb.innerHTML=fbHTML('bad',r.msg);};
+ root.querySelector('.chk').addEventListener('click',chk);
+ hnt.addEventListener('click',()=>{S.helped=true;hs=Math.min(4,hs+1);ed.fill(sol.st[hs-1].L,sol.st[hs-1].R);stg.innerHTML=stageLines(c,sol,hs);fb.innerHTML=fbHTML('info',`Indice : étape ${hs} sur 4 remplie.`);if(hs===4)hnt.disabled=true;});
+ root.querySelector('.sol').addEventListener('click',()=>{S.helped=true;ed.fill(sol.L,sol.R);chk();});
+ root.addEventListener('keydown',e=>{if(e.key==='Enter'&&!root.querySelector('.go'))chk();});
+ return root;
+}
+
+/* étape 4 : facteurs */
+function stepMult(){
+ const b=S.ex.bil,hA=b.hA,hB=b.hB;
+ const root=el(`<div class="card"><h3>4 · Égaliser les électrons échangés</h3><p class="mut">L'oxydant capte des électrons, le réducteur en cède. Les deux nombres doivent être égaux : multiplie chaque demi-équation par un entier (le plus petit possible).</p>
+  <div class="mrow"><span class="rl ox">Réduction</span><input class="co" id="kA" type="text" inputmode="numeric" maxlength="2" placeholder="·" aria-label="facteur de la réduction"> × ( ${eqS(hA.L,hA.R)} )</div>
+  <div class="mrow"><span class="rl red">Oxydation</span><input class="co" id="kB" type="text" inputmode="numeric" maxlength="2" placeholder="·" aria-label="facteur de l'oxydation"> × ( ${eqS(hB.R,hB.L)} )</div>
+  <div class="fb"></div><div class="actions"><button class="btn pri chk">Vérifier</button><button class="btn hnt">Indice</button></div></div>`);
+ const kA=root.querySelector('#kA'),kB=root.querySelector('#kB'),fb=root.querySelector('.fb');
+ [kA,kB].forEach(i=>i.addEventListener('input',()=>i.value=i.value.replace(/\D/g,'')));
+ const chk=()=>{const a=parseInt(kA.value||'0',10),c=parseInt(kB.value||'0',10);
+  if(!a||!c){fb.innerHTML=fbHTML('bad','Renseigne les deux facteurs.');return;}
+  if(a*hA.n!==c*hB.n){fb.innerHTML=fbHTML('bad',`Électrons captés : ${a} × ${hA.n} = ${a*hA.n} ; électrons cédés : ${c} × ${hB.n} = ${c*hB.n}. Ils doivent être égaux.`);return;}
+  if(a!==b.kA){fb.innerHTML=fbHTML('bad','Les électrons sont bien égaux, mais on cherche les plus petits entiers.');return;}
+  kA.disabled=kB.disabled=true;fb.innerHTML=fbHTML('good',`✓ ${b.L} électrons échangés.`);
+  toContinue(root,'Continuer →',()=>next(`<b>Électrons</b> : ${b.kA} × réduction, ${b.kB} × oxydation → ${b.L} e<sup>−</sup> échangés`));};
+ root.querySelector('.chk').addEventListener('click',chk);
+ root.querySelector('.hnt').addEventListener('click',e=>{S.helped=true;fb.innerHTML=fbHTML('info',`La réduction capte ${hA.n} e<sup>−</sup> et l'oxydation en cède ${hB.n}. Le plus petit multiple commun de ${hA.n} et ${hB.n} est ${b.L}.`);e.target.disabled=true;});
+ root.addEventListener('keydown',e=>{if(e.key==='Enter'&&!root.querySelector('.go'))chk();});
+ return root;
+}
+
+/* étape 5 : bilan */
+function stepBilan(){
+ const ex=S.ex,b=ex.bil,A=C[b.A],B=C[b.B];
+ const lk=uniq([A.ox,B.red,'H+','H2O']),rk=uniq([A.red,B.ox,'H+','H2O']);
+ const ed=buildEditor(lk,rk,'→');
+ const root=el(`<div class="card"><h3>5 · Équation de la réaction</h3><p class="mut">On additionne les deux demi-équations multipliées :</p>
+  <div class="sumline">${eqS(b.SL,b.SR,'→')}</div>
+  <p class="mut">Les électrons se simplifient, ainsi que les espèces présentes des deux côtés (H<sup>+</sup>, H<sub>2</sub>O…). Écris l'équation finale :</p>
+  <div class="ed"></div><div class="fb"></div>
+  <div class="actions"><button class="btn pri chk">Vérifier</button><button class="btn hnt">Indice</button><button class="btn sol">Solution</button></div></div>`);
+ root.querySelector('.ed').appendChild(ed.root);
+ const fb=root.querySelector('.fb'),hnt=root.querySelector('.hnt');let hs=0;
+ const done=()=>{ed.lock();fb.innerHTML=fbHTML('good','✓ Équation correcte.');
+  toContinue(root,'Terminer →',()=>next(`<b>Bilan</b> : ${eqS(b.FL,b.FR,'→')}`));};
+ const chk=()=>{const r=checkEq(ed.read(),{L:b.FL,R:b.FR},'bilan');if(r.ok)done();else fb.innerHTML=fbHTML('bad',r.msg);};
+ root.querySelector('.chk').addEventListener('click',chk);
+ hnt.addEventListener('click',()=>{S.helped=true;hs++;
+  if(hs===1)fb.innerHTML=fbHTML('info',`On retire les ${b.L} e<sup>−</sup> de chaque côté, puis on soustrait ce qui est en commun : si ${fmt('H+')} ou ${fmt('H2O')} apparaît des deux côtés, on garde la différence du côté où il y en a le plus.`);
+  else{const nets=['H+','H2O'].map(k=>{const l=b.SL[k]||0,r=b.SR[k]||0;return `${fmt(k)} : ${l} à gauche, ${r} à droite`;}).join(' ; ');fb.innerHTML=fbHTML('info',`Dans la somme, ${nets}.`);hnt.disabled=true;}});
+ root.querySelector('.sol').addEventListener('click',()=>{S.helped=true;ed.fill(b.FL,b.FR);chk();});
+ root.addEventListener('keydown',e=>{if(e.key==='Enter'&&!root.querySelector('.go'))chk();});
+ return root;
+}
+
+/* fin */
+function stepDone(){
+ const ex=S.ex;S.done++;if(!S.helped)S.clean++;$('#sc').textContent=`Exercices : ${S.done} · sans aide : ${S.clean}`;
+ let inner;
+ if(ex.type==='full'){const b=ex.bil;
+  inner=`<h3>✓ Réaction équilibrée</h3><div class="big">${eqS(b.FL,b.FR,'→')}</div>${transferViz(b)}`;}
+ else inner=`<h3>✓ Demi-équation validée</h3><div class="big">${eqS(solveHalf(C[ex.A]).L,solveHalf(C[ex.A]).R)}</div>`;
+ const root=el(`<div class="card">${inner}<p class="mut">${S.helped?'Tu as utilisé de l\'aide sur cet exercice : refais-en un pour consolider.':'Réussi sans aide !'}</p><div class="actions"><button class="btn pri nx">Exercice suivant →</button>${ex.type==='full'?'<button class="btn xp">Voir dans l\'explorateur</button>':''}</div></div>`);
+ root.querySelector('.nx').addEventListener('click',()=>{newEx();window.scrollTo({top:0,behavior:'smooth'});});
+ const xp=root.querySelector('.xp');if(xp)xp.addEventListener('click',()=>{const i=RX.findIndex(r=>r.A===ex.A&&r.B===ex.B);$('#xsel').value=i;showTab('exp');renderExp();});
+ return root;
+}
+
+/* ====================== EXPLORATEUR ====================== */
+function renderExp(){
+ const r=RX[+$('#xsel').value],b=solveBilan(r.A,r.B),A=C[r.A],B=C[r.B];
+ const card=(c,sol,t)=>`<div class="card"><h3>${t} · ${coupleFmt(c.id)}</h3>${stageLines(c,sol,4)}<div class="big">${eqS(sol.L,sol.R)}</div></div>`;
+ $('#xout').innerHTML=`
+ <div class="card ann"><div class="kick">Réaction annoncée</div><p class="sentence">${cap(sentName(A.ox))} <span class="tag ox">oxydant</span> réagit avec ${sentName(B.red)} <span class="tag red">réducteur</span>${b.acid?' en milieu acide':''}.</p></div>
+ <div class="card"><h3>Les couples</h3><p class="mut" style="margin:0"><span class="tag ox">oxydant</span> ${coupleFmt(r.A)}<br><span class="tag red">réducteur</span> ${coupleFmt(r.B)}</p></div>
+ ${card(A,b.hA,'Demi-équation de l\'oxydant')}${card(B,b.hB,'Demi-équation du réducteur')}
+ <div class="card"><h3>Transfert d'électrons</h3>${transferViz(b)}
+  <div class="mrow"><span class="rl ox">Réduction</span>${b.kA} × ( ${eqS(b.hA.L,b.hA.R)} )</div>
+  <div class="mrow"><span class="rl red">Oxydation</span>${b.kB} × ( ${eqS(b.hB.R,b.hB.L)} )</div>
+  <p class="mut">Somme :</p><div class="sumline">${eqS(b.SL,b.SR,'→')}</div>
+  <p class="mut">Après simplification :</p><div class="big">${eqS(b.FL,b.FR,'→')}</div>
+  <div class="actions"><button class="btn pri tr">S'entraîner sur cette réaction</button><button class="btn rnd">Réaction au hasard</button></div></div>`;
+ $('#xout .tr').addEventListener('click',()=>{S.mode='full';$('#mode').value='full';showTab('ex');newEx(makeFull(r.A,r.B));});
+ $('#xout .rnd').addEventListener('click',()=>{$('#xsel').value=Math.floor(Math.random()*RX.length);renderExp();});
+}
+
+/* ====================== INIT ====================== */
+function showTab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#p-ex').hidden=t!=='ex';$('#p-exp').hidden=t!=='exp';}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{showTab(b.dataset.t);if(b.dataset.t==='exp')renderExp();}));
+$('#mode').addEventListener('change',e=>{S.mode=e.target.value;newEx();});
+$('#level').addEventListener('change',e=>{S.level=e.target.value;newEx();});
+$('#xsel').innerHTML=RX.map((r,i)=>`<option value="${i}">${plain(C[r.A].ox)} + ${plain(C[r.B].red)}</option>`).join('');
+$('#xsel').addEventListener('change',renderExp);
+newEx();
+</script>
+</body>
+</html>
