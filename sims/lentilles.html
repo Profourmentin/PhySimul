@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lentilles minces : foyers et construction d'images</title>
+<style>
+  :root {
+    --bg:#f8fafc; --ink:#1e293b; --muted:#64748b; --faint:#94a3b8; --line:#e2e8f0;
+    --card:#fff; --soft:#f1f5f9; --blue:#2563eb; --blue-dark:#1e40af; --blue-bg:#eff6ff; --blue-line:#dbeafe;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--ink);
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; touch-action:manipulation; }
+  header { background:var(--blue); color:#fff; padding:16px; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+  header .in { max-width:1280px; margin:0 auto; }
+  header h1 { margin:0; font-size:1.5rem; font-weight:700; }
+  header p { margin:4px 0 0; font-size:.875rem; color:#dbeafe; }
+  main { flex:1; display:flex; flex-direction:column; gap:24px; width:100%; max-width:1280px; margin:0 auto; padding:16px; }
+  aside { display:flex; flex-direction:column; gap:20px; width:100%; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .card h2 { margin:0 0 14px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.1rem; font-weight:600; color:#334155; }
+  .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:8px; }
+  .tabs button { padding:8px 4px; border:0; border-radius:12px; font:inherit; font-size:.875rem; font-weight:500; cursor:pointer; background:var(--soft); color:#334155; }
+  .tabs button:hover { background:var(--line); }
+  .tabs button.tab-active, .tabs button.tab-active:hover { background:var(--blue); color:#fff; }
+  .row { display:flex; justify-content:space-between; font-size:.875rem; font-weight:500; margin-bottom:4px; }
+  .row b { color:var(--blue); }
+  .ctl { margin-bottom:16px; }
+  input[type=range] { width:100%; accent-color:#3b82f6; }
+  .note { margin:4px 0 0; font-size:.75rem; color:var(--faint); }
+  .radios { display:flex; gap:16px; margin-bottom:16px; font-size:.875rem; }
+  .radios label, .checks label { display:flex; align-items:center; gap:8px; }
+  .checks { display:flex; flex-direction:column; gap:8px; margin-top:16px; font-size:.875rem; }
+  .small-btn { margin-top:8px; font-size:.75rem; background:var(--soft); border:1px solid var(--line); border-radius:4px; padding:4px 8px; cursor:pointer; }
+  .small-btn:hover { background:var(--line); }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .stat { background:#f8fafc; border:1px solid var(--soft); border-radius:8px; padding:12px; }
+  .stat .k { font-size:.75rem; color:var(--muted); text-transform:uppercase; }
+  .stat .v { font-size:1.1rem; font-weight:700; }
+  .obs { background:var(--blue-bg); border:1px solid var(--blue-line); border-radius:8px; padding:16px; }
+  .obs h3 { margin:0 0 4px; font-size:.875rem; font-weight:600; color:var(--blue-dark); }
+  .obs ul { margin:0; padding-left:18px; font-size:.875rem; color:#1d4ed8; }
+  .formula { margin-top:12px; font-size:.75rem; color:var(--muted); text-align:center; background:#f8fafc; padding:8px; border-radius:4px; }
+  .stage { position:relative; overflow:hidden; width:100%; height:520px; min-height:420px; background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  #canvas-container { width:100%; height:100%; position:relative; user-select:none; -webkit-user-select:none; }
+  canvas { display:block; width:100%; height:100%; cursor:crosshair; }
+  #legend { position:absolute; top:12px; left:12px; z-index:10; pointer-events:none; background:rgba(255,255,255,.85); padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:.75rem; color:#475569; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  #hint { position:absolute; bottom:12px; right:12px; pointer-events:none; background:rgba(255,255,255,.7); padding:4px 8px; border-radius:4px; font-size:.75rem; color:var(--faint); }
+  .c-blue { color:#3b82f6; } .c-red { color:#ef4444; } .c-slate { color:var(--faint); } .b { font-weight:700; }
+  @media (min-width:768px) {
+    main { flex-direction:row; }
+    aside { width:33.333%; }
+    .stage { width:66.666%; height:auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="in">
+    <h1>Lentilles minces : foyers et construction d'images</h1>
+    <p>Optique géométrique – Niveau Seconde</p>
+  </div>
+</header>
+
+<main>
+  <aside>
+
+    <div class="card tabs">
+      <button id="tab1">Foyer image F'</button>
+      <button id="tab2">Foyer objet F</button>
+      <button id="tab3">Image d'un objet</button>
+    </div>
+
+    <div class="card">
+      <h2>Lentille</h2>
+      <div class="radios">
+        <label><input type="radio" name="type" value="1" checked> Convergente</label>
+        <label><input type="radio" name="type" value="-1"> Divergente</label>
+      </div>
+      <div class="row"><span>Distance focale |f'|</span><b id="f_val"></b></div>
+      <input type="range" id="f_slider" min="2" max="25" step="0.5" value="10">
+    </div>
+
+    <div class="card">
+      <h2>Paramètres</h2>
+
+      <div id="ctl_theta" class="ctl">
+        <div class="row"><span>Inclinaison du faisceau</span><b id="theta_val"></b></div>
+        <input type="range" id="theta_slider" min="-15" max="15" step="1" value="0">
+        <p class="note">0° : faisceau parallèle à l'axe optique.</p>
+      </div>
+
+      <div id="ctl_n" class="ctl">
+        <div class="row"><span>Nombre de rayons</span><b id="n_val"></b></div>
+        <input type="range" id="n_slider" min="3" max="15" step="2" value="7">
+      </div>
+
+      <div id="ctl_oa" class="ctl">
+        <div class="row"><span id="oa_label">Position de l'objet (OA)</span><b id="oa_val"></b></div>
+        <input type="range" id="oa_slider" min="-40" max="-1" step="0.5" value="-25">
+        <button id="btn_atF" class="small-btn" hidden>Placer la source en F</button>
+      </div>
+
+      <div id="ctl_ab" class="ctl">
+        <div class="row"><span>Taille de l'objet (AB)</span><b id="ab_val"></b></div>
+        <input type="range" id="ab_slider" min="-15" max="15" step="0.5" value="5">
+      </div>
+
+      <div class="checks">
+        <label><input type="checkbox" id="chk_plane" checked> Afficher le plan focal</label>
+        <label id="lbl_rays3"><input type="checkbox" id="chk_rays3" checked> Rayons de construction</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Observations</h2>
+      <div id="res_numbers" class="grid2">
+        <div class="stat"><div class="k">Position (OA')</div><div id="oap_val" class="v">...</div></div>
+        <div class="stat"><div class="k">Grandissement (γ)</div><div id="gamma_val" class="v">...</div></div>
+      </div>
+      <div class="obs">
+        <h3 id="obs_title"></h3>
+        <ul id="obs_list"></ul>
+      </div>
+      <div class="formula">1/OA' − 1/OA = 1/f' &nbsp;;&nbsp; γ = OA'/OA = A'B'/AB</div>
+    </div>
+  </aside>
+
+  <div class="stage">
+    <div id="legend"></div>
+    <div id="canvas-container"><canvas id="bench"></canvas></div>
+    <div id="hint"></div>
+  </div>
+</main>
+
+<script>
+/* Unités : cm (mathématique) / px (dessin). Lentille en x = 0, axe optique en y = 0.
+   f > 0 : convergente ; f < 0 : divergente (f désigne f' algébrique).
+   Propriété utilisée : un rayon qui arrive en (0, y) avec la pente p repart avec la pente p − y/f'. */
+
+const canvas = document.getElementById('bench');
+const ctx = canvas.getContext('2d');
+const container = document.getElementById('canvas-container');
+const $ = id => document.getElementById(id);
+
+let mode = 1;
+let f = 10;             // f' algébrique
+let OA = -25, AB = 5;
+let theta = 0, nRays = 7;
+let SCALE = 12, originX = 0, originY = 0;
+let dragging = false;
+
+const COL = { r1:'#f97316', r2:'#22c55e', r3:'#a855f7', beam:'#f59e0b' };
+
+function resizeCanvas() {
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+  SCALE = Math.max(6, Math.min(12, canvas.width / 70));
+  originX = canvas.width * 0.45;
+  originY = canvas.height / 2;
+  draw();
+}
+window.addEventListener('resize', resizeCanvas);
+
+const X = x => originX + x * SCALE;
+const Y = y => originY - y * SCALE;
+const toMath = (px, py) => ({ x:(px - originX)/SCALE, y:(originY - py)/SCALE });
+
+/* ---------- Mise à jour ---------- */
+function readInputs() {
+  const sign = parseInt(document.querySelector('input[name=type]:checked').value);
+  f = sign * parseFloat($('f_slider').value);
+  OA = parseFloat($('oa_slider').value);
+  AB = parseFloat($('ab_slider').value);
+  theta = parseFloat($('theta_slider').value);
+  nRays = parseInt($('n_slider').value);
+}
+
+function setMode(m) {
+  mode = m;
+  [1,2,3].forEach(i => $('tab'+i).className = (i===m ? 'tab-active' : ''));
+  $('ctl_theta').style.display = m===1 ? '' : 'none';
+  $('ctl_n').style.display = m!==3 ? '' : 'none';
+  $('ctl_oa').style.display = m!==1 ? '' : 'none';
+  $('ctl_ab').style.display = m===3 ? '' : 'none';
+  $('lbl_rays3').style.display = m===3 ? '' : 'none';
+  $('res_numbers').style.display = m===1 ? 'none' : '';
+  $('btn_atF').hidden = (m!==2);
+  $('oa_label').textContent = m===2 ? 'Position de la source (OS)' : "Position de l'objet (OA)";
+  $('hint').textContent = m===3 ? "Astuce : glissez le sommet B de l'objet à la souris." : (m===2 ? "Astuce : changez la position de la source." : "Astuce : inclinez le faisceau.");
+  if (m===2 && Math.abs(OA) > 40) OA = -40;
+  update();
+}
+
+function update() {
+  readInputs();
+  $('f_val').textContent = (f>0?'+':'−') + Math.abs(f).toFixed(1) + " cm";
+  $('theta_val').textContent = theta + "°";
+  $('n_val').textContent = nRays;
+  $('oa_val').textContent = OA.toFixed(1) + " cm";
+  $('ab_val').textContent = AB.toFixed(1) + " cm";
+  updateLegend();
+  updateObs();
+  draw();
+}
+
+/* Position de l'image pour un objet en OA (null = à l'infini) */
+function imagePos() {
+  if (Math.abs(OA + f) < 1e-6) return null;
+  return OA * f / (OA + f);
+}
+
+function updateLegend() {
+  const li = (c, t) => `<span style="color:${c}" class="b">▬</span> ${t}<br>`;
+  let h = '<strong>Légende :</strong><br>';
+  if (mode === 3) {
+    h += `<span class="c-blue b">■</span> Objet (AB)<br><span class="c-red b">■</span> Image (A'B')<br>`;
+    h += li(COL.r1, "Rayon // à l'axe") + li(COL.r2, 'Rayon passant par O') + li(COL.r3, 'Rayon passant par F');
+  } else {
+    h += li(COL.beam, 'Rayons lumineux');
+    h += `<span class="b">F, F'</span> : foyers objet et image<br>`;
+  }
+  h += `<span class="c-slate b">┅</span> Prolongements (non réels)`;
+  $('legend').innerHTML = h;
+}
+
+function updateObs() {
+  const ul = $('obs_list');
+  const conv = f > 0;
+  if (mode === 1) {
+    $('obs_title').textContent = "Foyer image F'";
+    let s = "";
+    if (theta === 0) {
+      s += conv
+        ? "<li>Les rayons parallèles à l'axe <b>convergent</b> en F' (foyer image, réel).</li>"
+        : "<li>Les rayons parallèles à l'axe <b>divergent</b> : ils semblent provenir de F' (foyer image, virtuel).</li>";
+      s += "<li>F' est le point image d'un objet situé à l'infini sur l'axe.</li>";
+    } else {
+      s += conv
+        ? "<li>Le faisceau incliné converge en un <b>foyer secondaire</b> F'<sub>s</sub> du plan focal image.</li>"
+        : "<li>Le faisceau incliné semble provenir d'un <b>foyer secondaire</b> F'<sub>s</sub> du plan focal image.</li>";
+      s += "<li>Le rayon passant par O n'est pas dévié et passe par F'<sub>s</sub>.</li>";
+    }
+    s += "<li>Distance OF' = " + f.toFixed(1) + " cm (distance focale f').</li>";
+    ul.innerHTML = s;
+  } else if (mode === 2) {
+    $('obs_title').textContent = "Foyer objet F";
+    const p = imagePos();
+    const oap = $('oap_val'), g = $('gamma_val');
+    let s = "";
+    if (p === null) {
+      oap.textContent = "± ∞"; g.textContent = "—";
+      s = "<li>La source est en <b>F</b> : les rayons émergents sont <b>parallèles</b> à l'axe.</li><li>F est le point dont l'image est à l'infini.</li>";
+    } else {
+      oap.textContent = (p>0?'+':'') + p.toFixed(1) + " cm";
+      g.textContent = (p/OA > 0 ? '+' : '') + (p/OA).toFixed(2);
+      if (p > 0) s = "<li>Le faisceau émergent <b>converge</b> en un point image <b>réel</b>.</li>";
+      else s = "<li>Le faisceau émergent <b>diverge</b> : il semble provenir d'un point <b>virtuel</b>.</li>";
+      s += "<li>Source en F : le faisceau sortirait parallèle.</li>";
+    }
+    ul.innerHTML = s;
+  } else {
+    $('obs_title').textContent = "Nature de l'image :";
+    const p = imagePos();
+    if (p === null) {
+      $('oap_val').textContent = "± ∞"; $('gamma_val').textContent = "± ∞";
+      ul.innerHTML = "<li>Objet en F : l'image se forme à l'infini.</li><li>Les rayons émergents sont parallèles.</li>";
+      return;
+    }
+    const gm = p / OA;
+    $('oap_val').textContent = (p>0?'+':'') + p.toFixed(1) + " cm";
+    $('gamma_val').textContent = (gm>0?'+':'') + gm.toFixed(2);
+    let s = p > 0 ? "<li><b>Réelle</b> (observable sur un écran)</li>" : "<li><b>Virtuelle</b> (visible à travers la lentille)</li>";
+    s += gm > 0 ? "<li><b>Droite</b> (même sens que l'objet)</li>" : "<li><b>Renversée</b> (sens opposé à l'objet)</li>";
+    const ag = Math.abs(gm);
+    s += ag > 1.0001 ? "<li><b>Agrandie</b> (|γ| &gt; 1)</li>" : (ag < 0.9999 ? "<li><b>Réduite</b> (|γ| &lt; 1)</li>" : "<li><b>Même taille</b> (|γ| = 1)</li>");
+    ul.innerHTML = s;
+  }
+}
+
+/* ---------- Dessin ---------- */
+function line(x1, y1, x2, y2, color, w, dash) {
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.setLineDash(dash || []);
+  ctx.beginPath(); ctx.moveTo(X(x1), Y(y1)); ctx.lineTo(X(x2), Y(y2)); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function arrow(xa, ya, xb, yb, color, dashed, lt, lb) {
+  const sx = X(xa), sy = Y(ya), ex = X(xb), ey = Y(yb);
+  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.setLineDash(dashed ? [4,4] : []);
+  ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+  const ang = Math.atan2(ey - sy, ex - sx), h = 10;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(ex, ey); ctx.lineTo(ex - h*Math.cos(ang - Math.PI/6), ey - h*Math.sin(ang - Math.PI/6));
+  ctx.moveTo(ex, ey); ctx.lineTo(ex - h*Math.cos(ang + Math.PI/6), ey - h*Math.sin(ang + Math.PI/6));
+  ctx.stroke();
+  ctx.fillStyle = color; ctx.font = "bold 14px Arial"; ctx.textAlign = "center";
+  const up = ey < sy;
+  ctx.fillText(lt, ex, up ? ey - 10 : ey + 18);
+  ctx.fillText(lb, sx, up ? sy + 18 : sy - 8);
+}
+
+/* Trace un rayon : part de (xs, ys) avec la pente p, touche la lentille en (0, y),
+   repart avec la pente p − y/f. xv : abscisse du point (virtuel) jusqu'où tracer le prolongement arrière. */
+function rayThrough(y, p, color, xs, xv) {
+  const ys = y + p * xs;                // ordonnée au départ (xs < 0)
+  const p2 = p - y / f;
+  const xEnd = (canvas.width - originX) / SCALE + 5;
+  line(xs, ys, 0, y, color, 1.5);
+  line(0, y, xEnd, y + p2 * xEnd, color, 1.5);
+  if (xv !== undefined && xv !== null && xv < 0) line(0, y, xv, y + p2 * xv, color, 1.2, [5,5]);
+}
+
+function drawLens() {
+  const half = Math.max(60, canvas.height/2 - 18);
+  const top = originY - half, bot = originY + half;
+  ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(originX, top); ctx.lineTo(originX, bot); ctx.stroke();
+  const w = 7, h = 11;
+  ctx.beginPath();
+  if (f > 0) { // pointes vers l'extérieur
+    ctx.moveTo(originX - w, top + h); ctx.lineTo(originX, top); ctx.lineTo(originX + w, top + h);
+    ctx.moveTo(originX - w, bot - h); ctx.lineTo(originX, bot); ctx.lineTo(originX + w, bot - h);
+  } else {     // pointes vers l'intérieur
+    ctx.moveTo(originX - w, top - 0); ctx.lineTo(originX, top + h); ctx.lineTo(originX + w, top);
+    ctx.moveTo(originX - w, bot - 0); ctx.lineTo(originX, bot - h); ctx.lineTo(originX + w, bot);
+  }
+  ctx.stroke();
+  ctx.fillStyle = "#0f172a"; ctx.font = "italic 14px Arial"; ctx.textAlign = "center";
+  ctx.fillText("O", originX - 12, originY + 20);
+}
+
+function drawFoci() {
+  ctx.fillStyle = "#0f172a"; ctx.font = "italic 14px Arial"; ctx.textAlign = "center";
+  [[-f, "F"], [f, "F'"]].forEach(([x, t]) => {
+    ctx.beginPath(); ctx.arc(X(x), Y(0), 4, 0, 2*Math.PI); ctx.fill();
+    ctx.fillText(t, X(x), Y(0) + 20);
+  });
+  // graduation en cm
+  ctx.fillStyle = "#94a3b8"; ctx.font = "10px Arial";
+  for (let c = -50; c <= 50; c += 5) {
+    if (c === 0) continue;
+    const px = X(c);
+    if (px < 0 || px > canvas.width) continue;
+    ctx.fillRect(px - 0.5, originY - 3, 1, 6);
+    ctx.fillText(c, px, originY - 7);
+  }
+}
+
+function drawPlanes() {
+  if (!$('chk_plane').checked) return;
+  ctx.setLineDash([2,5]); ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1.5;
+  [[f, "plan focal image"], [-f, "plan focal objet"]].forEach(([x, t]) => {
+    ctx.beginPath(); ctx.moveTo(X(x), 0); ctx.lineTo(X(x), canvas.height); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#94a3b8"; ctx.font = "11px Arial"; ctx.textAlign = "center";
+  ctx.fillText("plan focal image", X(f), canvas.height - 8);
+  ctx.fillText("plan focal objet", X(-f), canvas.height - 8);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // grille
+  ctx.strokeStyle = "#eef2f7"; ctx.lineWidth = 1;
+  const g = SCALE * 5;
+  for (let x = originX % g; x < canvas.width; x += g) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+  for (let y = originY % g; y < canvas.height; y += g) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+
+  drawPlanes();
+  line(-1000, 0, 1000, 0, "#94a3b8", 2);  // axe optique
+  drawLens();
+
+  if (mode === 1) drawMode1();
+  else if (mode === 2) drawMode2();
+  else drawMode3();
+
+  drawFoci();
+}
+
+/* Mode 1 : faisceau parallèle -> foyer image (ou foyer secondaire) */
+function drawMode1() {
+  const t = Math.tan(theta * Math.PI / 180);
+  const half = Math.min(10, (canvas.height/2 - 40) / SCALE);
+  const xs = -originX / SCALE + 1;
+  for (let i = 0; i < nRays; i++) {
+    const y = nRays === 1 ? 0 : -half + 2*half*i/(nRays-1);
+    const p2 = t - y / f;
+    // prolongement arrière jusqu'au foyer secondaire (divergente)
+    const xv = f < 0 ? f : null;
+    rayThrough(y, t, COL.beam, xs, xv);
+  }
+  // foyer secondaire
+  const fx = f, fy = f * t;
+  ctx.fillStyle = "#dc2626";
+  ctx.beginPath(); ctx.arc(X(fx), Y(fy), 5, 0, 2*Math.PI); ctx.fill();
+  ctx.font = "italic 14px Arial"; ctx.textAlign = "center";
+  ctx.fillText(theta === 0 ? "" : "F's", X(fx) + 14, Y(fy) - 8);
+  if (theta !== 0) line(0, 0, fx, fy, COL.r2, 1.5, [4,4]);
+}
+
+/* Mode 2 : source ponctuelle sur l'axe */
+function drawMode2() {
+  const half = Math.min(10, (canvas.height/2 - 40) / SCALE);
+  const p = imagePos();
+  for (let i = 0; i < nRays; i++) {
+    const y = nRays === 1 ? 0 : -half + 2*half*i/(nRays-1);
+    const slope = (0 - y) / (0 - OA);   // pente du rayon source -> lentille
+    rayThrough(y, slope, COL.beam, OA, (p !== null && p < 0) ? p : (f < 0 ? null : null));
+  }
+  // source
+  ctx.fillStyle = "#3b82f6";
+  ctx.beginPath(); ctx.arc(X(OA), Y(0), 6, 0, 2*Math.PI); ctx.fill();
+  ctx.font = "bold 14px Arial"; ctx.textAlign = "center";
+  ctx.fillText("S", X(OA), Y(0) - 12);
+  // point image
+  if (p !== null) {
+    ctx.fillStyle = "#dc2626";
+    ctx.beginPath(); ctx.arc(X(p), Y(0), 5, 0, 2*Math.PI); ctx.fill();
+    ctx.fillText("S'", X(p), Y(0) - 12);
+  }
+}
+
+/* Mode 3 : construction de l'image */
+function drawMode3() {
+  const p = imagePos();
+  const xs = OA;
+  const show = $('chk_rays3').checked;
+
+  if (show) {
+    // Rayon 1 : parallèle à l'axe -> passe par F'
+    rayThrough(AB, 0, COL.r1, xs, (p !== null && p < 0) ? p : null);
+    // Rayon 2 : passe par O
+    rayThrough(0, AB / OA, COL.r2, xs, (p !== null && p < 0) ? p : null);
+    // Rayon 3 : dirigé vers F
+    const yL = AB * f / (OA + f);
+    if (Math.abs(OA + f) > 1e-6) {
+      const slope3 = (yL - AB) / (0 - OA);
+      rayThrough(yL, slope3, COL.r3, xs, (p !== null && p < 0) ? p : null);
+      // prolongement du rayon incident jusqu'à F (non réel)
+      if (OA > -f && f > 0) line(OA, AB, -f, 0, COL.r3, 1.2, [3,4]);
+      if (f < 0) line(0, yL, -f, 0, COL.r3, 1.2, [3,4]);
+    } else {
+      // objet en F : rayon 3 horizontal le long de l'axe
+      line(xs, AB, 0, AB, COL.r3, 1.5);
+    }
+    // Rayons 1 pour image réelle déjà prolongés. Pour F' : repère par prolongement arrière (divergente)
+    if (f < 0) line(0, AB, f, 0, COL.r1, 1.2, [5,5]);
+  }
+
+  // objet
+  arrow(OA, 0, OA, AB, '#3b82f6', false, 'B', 'A');
+  // image
+  if (p !== null) {
+    const gm = p / OA;
+    arrow(p, 0, p, gm * AB, '#ef4444', p < 0, "B'", "A'");
+  }
+}
+
+/* ---------- Interaction ---------- */
+function pointer(e) {
+  const r = canvas.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX - r.left, y: t.clientY - r.top };
+}
+function onDown(e) {
+  if (mode !== 3) return;
+  const m = toMath(...Object.values(pointer(e)));
+  if (Math.abs(m.x - OA) < 3 && Math.abs(m.y - AB) < 3) { dragging = true; e.preventDefault(); }
+}
+function onMove(e) {
+  if (!dragging) return;
+  const p = pointer(e), m = toMath(p.x, p.y);
+  $('oa_slider').value = Math.max(-40, Math.min(-1, m.x));
+  $('ab_slider').value = Math.max(-15, Math.min(15, m.y));
+  update();
+}
+canvas.addEventListener('mousedown', onDown);
+window.addEventListener('mousemove', onMove);
+window.addEventListener('mouseup', () => dragging = false);
+canvas.addEventListener('touchstart', onDown, { passive:false });
+window.addEventListener('touchmove', onMove, { passive:false });
+window.addEventListener('touchend', () => dragging = false);
+
+['f_slider','oa_slider','ab_slider','theta_slider','n_slider','chk_plane','chk_rays3'].forEach(id => $(id).addEventListener('input', update));
+document.querySelectorAll('input[name=type]').forEach(r => r.addEventListener('change', update));
+$('tab1').onclick = () => setMode(1);
+$('tab2').onclick = () => setMode(2);
+$('tab3').onclick = () => setMode(3);
+$('btn_atF').onclick = () => {
+  readInputs();
+  if (f > 0) { $('oa_slider').value = -f; update(); }
+  else alert("Pour une lentille divergente, le foyer objet F est situé après la lentille : une source réelle ne peut pas y être placée.");
+};
+
+setMode(1);
+resizeCanvas();
+</script>
+</body>
+</html>
