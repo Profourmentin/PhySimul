@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dissolution et dilution : préparer une solution</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#EBEFF2;--card:#F8FAFB;--tx:#14222C;--mut:#566673;--bd:#CBD4DA;--pri:#1B5E8C;--pri2:#E1ECF4;--ok:#12805c;--okbg:#e6f6ef;--bad:#c0392b;--badbg:#fdecea;--warn:#b45309;--warnbg:#fff4e0;--hint:#fff8d6;--onpri:#fff;--glass:#35506f;--water:#9cc9e8}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1419;--card:#162027;--tx:#E4ECF0;--mut:#93A4AF;--bd:#2A3944;--pri:#6BB4E8;--pri2:#1B2B38;--ok:#4ade80;--okbg:#14301f;--bad:#f87171;--badbg:#3a1a1a;--warn:#fbbf24;--warnbg:#3a2d12;--hint:#3a3512;--onpri:#0D1419;--glass:#9fb3c4;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D1419;--card:#162027;--tx:#E4ECF0;--mut:#93A4AF;--bd:#2A3944;--pri:#6BB4E8;--pri2:#1B2B38;--ok:#4ade80;--okbg:#14301f;--bad:#f87171;--badbg:#3a1a1a;--warn:#fbbf24;--warnbg:#3a2d12;--hint:#3a3512;--onpri:#0D1419;--glass:#9fb3c4;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 16px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding-block:16px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;font-weight:600;font-size:1.7rem;margin:6px 0 2px}h1 span{color:var(--mut);font-weight:500}
+h3{margin:0 0 6px;font-size:1.05rem}
+.back{display:inline-block;color:var(--pri);font-size:.9rem;text-decoration:none;padding:4px 0}.back:hover{text-decoration:underline}
+.sub{margin:0 0 12px;color:var(--mut);font-size:.92rem}
+.mut{color:var(--mut);font-size:.92rem}
+sub,sup{font-size:.7em;line-height:0}
+button{font:inherit;cursor:pointer}
+/* objectifs */
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.goal{display:flex;gap:8px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 10px;font-size:.84rem;line-height:1.3}
+.goal i{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--bd);display:grid;place-items:center;font-style:normal;font-size:.7rem;font-weight:700;color:var(--onpri)}
+.goal.done{border-color:var(--ok);background:var(--okbg)}.goal.done i{background:var(--ok);border-color:var(--ok)}
+.goal small{display:block;color:var(--mut)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{flex:1;padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;font-weight:600}
+.tab.on{background:var(--pri);border-color:var(--pri);color:var(--onpri)}
+.seg{display:inline-flex;gap:0;border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px;max-width:100%}
+.seg button{border:0;background:var(--card);color:var(--tx);padding:8px 14px;font-size:.92rem}
+.seg button.on{background:var(--pri2);color:var(--pri);font-weight:700}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.grid2 .card{margin-bottom:0}
+.stick{position:sticky;top:8px}
+.kick{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);font-weight:700}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 14px;font-weight:600}
+.btn.pri,.primary{background:var(--pri);border:1px solid var(--pri);color:var(--onpri);border-radius:10px;padding:8px 14px;font-weight:600}
+.btn:disabled,.primary:disabled{opacity:.45;cursor:default}
+/* scène */
+.scene svg{width:100%;height:auto;display:block}
+.scene .tbl{fill:var(--pri2)}
+.scene .ln{stroke:var(--glass);fill:none}
+.scene text{fill:var(--mut);font-size:13px;font-family:inherit}
+.scene .liqg,.scene .g-pip,.scene .bliq-g{transition:transform .9s ease}
+.scene .g-pip{transition:transform 1.1s ease}
+.scene .liq,.scene .grad,.scene .stopper,.scene .g-funnel,.scene .pfill,.scene .cupsolid{transition:opacity .6s ease}
+.scene .solid{transition:opacity 2.2s ease}
+.scene svg[data-kind="diss"] .only-dil{display:none}
+.scene svg[data-kind="dil"] .only-diss{display:none}
+.g-flask{transform-box:fill-box;transform-origin:50% 100%}
+.g-flask.shake{animation:shake .9s}
+.g-flask.flip{animation:flip 1.7s}
+@keyframes shake{0%,100%{transform:translateX(0) rotate(0)}15%{transform:translateX(-9px) rotate(-4deg)}35%{transform:translateX(9px) rotate(4deg)}55%{transform:translateX(-7px) rotate(-3deg)}75%{transform:translateX(7px) rotate(3deg)}}
+@keyframes flip{0%{transform:rotate(0)}35%,65%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.g-flask.shake,.g-flask.flip{animation:none}.scene *{transition:none!important}}
+.cap{min-height:2.6em;font-size:.9rem;color:var(--mut);margin-top:6px}
+/* protocole */
+.bar{height:6px;background:var(--bd);border-radius:9px;overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--pri);transition:width .3s}
+.why{background:var(--pri2);border-radius:10px;padding:8px 10px;font-size:.92rem;margin:8px 0}
+.key{background:var(--hint);border-radius:10px;padding:8px 10px;font-size:.95rem;margin:8px 0}
+/* quiz / pool */
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.act{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 10px;font-size:.9rem;text-align:left;line-height:1.3}
+.act:hover:not(:disabled){border-color:var(--pri)}
+.act.done{background:var(--okbg);border-color:var(--ok);color:var(--ok);cursor:default}
+.act.bump{animation:shake .5s}
+.ord{margin:8px 0;padding-left:22px}.ord li{margin:3px 0}
+.msg{border-radius:10px;padding:8px 10px;font-size:.92rem;margin-top:8px;display:none}
+.msg.ok{display:block;background:var(--okbg);color:var(--tx);border-left:4px solid var(--ok)}
+.msg.ko{display:block;background:var(--badbg);color:var(--tx);border-left:4px solid var(--bad)}
+.msg.info{display:block;background:var(--warnbg);color:var(--tx);border-left:4px solid var(--warn)}
+.fb{border-radius:10px;padding:8px 10px;font-size:.92rem;margin-top:8px}
+.fb:empty{display:none}
+.fb.ok{background:var(--okbg);border-left:4px solid var(--ok)}.fb.ko{background:var(--badbg);border-left:4px solid var(--bad)}.fb.info{background:var(--warnbg);border-left:4px solid var(--warn)}
+/* champs */
+.field{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.inp{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bd);background:var(--bg);border-radius:10px;padding:4px 10px}
+.inp input{width:90px;border:0;background:transparent;color:var(--tx);font:inherit;font-size:1.05rem;padding:4px 0;outline:none}
+.inp:focus-within{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri2)}
+.q{font-size:1.02rem;margin:8px 0}
+.data{background:var(--hint);border-radius:10px;padding:8px 10px;font-size:.9rem;margin:8px 0}
+.mission{background:var(--pri2);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.mission b.t{color:var(--pri)}
+.phases{display:flex;gap:4px;margin:0 0 12px;padding:0;list-style:none;overflow-x:auto}
+.phases li{flex:1;min-width:max-content;text-align:center;font-size:.78rem;padding:5px 8px;border-radius:99px;background:var(--card);border:1px solid var(--bd);color:var(--mut)}
+.phases li.done{background:var(--okbg);color:var(--ok);border-color:transparent}
+.phases li.on{background:var(--pri);color:var(--onpri);border-color:var(--pri);font-weight:700}
+/* matériel */
+fieldset{border:0;padding:0;margin:0 0 10px}legend{font-weight:600;font-size:.95rem;padding:0;margin-bottom:6px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
+.opt{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--bd);border-radius:10px;padding:7px 9px;background:var(--card);font-size:.88rem;line-height:1.3;cursor:pointer}
+.opt:has(input:checked){border-color:var(--pri);background:var(--pri2)}
+.opt input{margin-top:2px}
+/* balance */
+.weigh{border:1px solid var(--pri);border-radius:12px;padding:10px;margin:10px 0;background:var(--card)}
+.disp{font:600 1.7rem/1 ui-monospace,Menlo,Consolas,monospace;background:#1d2b1f;color:#9dff9d;border-radius:8px;padding:10px 14px;text-align:right;margin-bottom:8px}
+.weigh .btnrow button{padding:6px 10px;font-size:.88rem}
+/* bilan */
+.stars{font-size:1.6rem;color:var(--warn);letter-spacing:3px}
+.sw{display:inline-flex;align-items:center;gap:8px;margin:6px 14px 6px 0;font-size:.88rem}
+.sw i{display:inline-block;width:46px;height:30px;border-radius:6px;border:1px solid var(--bd)}
+.tbl2{border-collapse:collapse;font-size:.88rem}.tbl2 td,.tbl2 th{border:1px solid var(--bd);padding:4px 10px;text-align:left}
+.foot{margin-top:18px;font-size:.8rem;color:var(--mut)}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}.stick{position:static}.goals{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <a class="back" href="../index.html">← Catalogue des simulations</a>
+ <h1>Dissolution et dilution <span>: préparer une solution</span></h1>
+ <p class="sub">Seconde · Constitution et transformations de la matière · Solutions aqueuses</p>
+
+ <div class="goals" id="goals"></div>
+
+ <div class="tabs">
+  <button class="tab on" data-t="proto">1 · Protocoles</button>
+  <button class="tab" data-t="calc">2 · Calculer</button>
+  <button class="tab" data-t="lab">3 · Laboratoire</button>
+ </div>
+
+ <!-- ===== PROTOCOLES ===== -->
+ <section id="p-proto">
+  <div class="seg" id="proto-seg"><button class="on" data-k="diss">Dissolution (soluté solide)</button><button data-k="dil">Dilution (solution mère)</button></div>
+  <div class="grid2">
+   <div class="card stick"><div class="scene" id="proto-scene"></div><div class="cap" id="proto-cap" aria-live="polite"></div></div>
+   <div class="card">
+    <div class="kick">Étape <span id="ps-i">0</span> / <span id="ps-n">6</span></div>
+    <div class="bar"><i id="ps-bar" style="width:0"></i></div>
+    <h3 id="ps-title"></h3><p id="ps-detail" style="margin:4px 0"></p>
+    <div class="why" id="ps-why"></div>
+    <div class="key" id="ps-key"></div>
+    <div class="btnrow"><button class="btn" id="ps-prev">◀ Précédente</button><button class="btn pri" id="ps-next">Étape suivante ▶</button><button class="btn" id="ps-reset">↺ Recommencer</button></div>
+   </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+   <div class="kick">À toi de jouer</div>
+   <h3>Remets le protocole dans l’ordre</h3>
+   <p class="mut" style="margin:0">Clique sur les étapes, l’une après l’autre, dans le bon ordre.</p>
+   <div id="quiz"></div>
+  </div>
+ </section>
+
+ <!-- ===== CALCULS ===== -->
+ <section id="p-calc" hidden>
+  <div class="grid2">
+   <div class="card" id="ex-card"></div>
+   <div class="card">
+    <div class="kick">Aide-mémoire</div>
+    <p style="margin:6px 0"><b>Concentration en masse</b> d’un soluté : <b>t = m / V</b><br><span class="mut">m en g, V (volume de la solution) en L, t en g·L⁻¹</span></p>
+    <p style="margin:6px 0">Dilution : <b>F = t<sub>mère</sub> / t<sub>fille</sub></b> et <b>V<sub>mère</sub> = V<sub>fille</sub> / F</b><br><span class="mut">La masse de soluté se conserve : t<sub>mère</sub> × V<sub>mère</sub> = t<sub>fille</sub> × V<sub>fille</sub></span></p>
+    <p style="margin:6px 0"><b>Conversions</b> : 1 L = 1000 mL · 1 g = 1000 mg</p>
+    <p style="margin:6px 0"><b>Concentration maximale</b> : au-delà de la solubilité, le solide ne se dissout plus (solution saturée).</p>
+    <table class="tbl2"><tr><th>Soluté (eau, 20 °C)</th><th>Solubilité</th></tr><tr><td>chlorure de sodium</td><td>≈ 360 g·L⁻¹</td></tr><tr><td>sulfate de cuivre(II) pentahydraté</td><td>≈ 320 g·L⁻¹</td></tr><tr><td>permanganate de potassium</td><td>≈ 64 g·L⁻¹</td></tr></table>
+    <p class="mut" style="margin:6px 0">Valeurs arrondies, données à titre indicatif pour la simulation.</p>
+    <p style="margin:10px 0 0"><b id="calc-n">0</b> bonne(s) réponse(s) · série en cours : <b id="calc-s">0</b></p>
+   </div>
+  </div>
+ </section>
+
+ <!-- ===== LABORATOIRE ===== -->
+ <section id="p-lab" hidden>
+  <div class="seg" id="lab-seg"><button class="on" data-k="diss">Préparer par dissolution</button><button data-k="dil">Préparer par dilution</button></div>
+  <ol class="phases" id="lab-phases"></ol>
+  <div class="grid2">
+   <div class="card stick"><div class="scene" id="lab-scene"></div><div class="cap" id="lab-cap" aria-live="polite"></div></div>
+   <div class="card" id="lab-panel"></div>
+  </div>
+ </section>
+
+ <p class="foot">Capacités exigibles visées (programme de physique-chimie de seconde, BO spécial n° 1 du 22 janvier 2019) : déterminer la valeur de la concentration en masse d’un soluté à partir du mode opératoire de préparation d’une solution par dissolution ou par dilution ; choisir et utiliser la verrerie adaptée pour préparer une solution par dissolution ou par dilution.</p>
+</div>
+
+<script>
+'use strict';
+/* ====================== OUTILS ====================== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const fmt=(x,d=3)=>String(Number(Number(x).toFixed(d))).replace('.',',');
+const parseNum=s=>{const v=String(s).trim().replace(/\s/g,'').replace(',','.');return v===''?NaN:Number(v);};
+const dec=(x,n)=>Math.abs(x*Math.pow(10,n)-Math.round(x*Math.pow(10,n)))<1e-9;
+const near=(x,y,tol=0.01)=>Math.abs(x-y)<=tol*Math.abs(y)+1e-9;
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const U='g·L⁻¹';
+const TM='t<sub>mère</sub>',TF='t<sub>fille</sub>',VM='V<sub>mère</sub>',VF='V<sub>fille</sub>';
+
+/* progression (facultative, locale au navigateur) */
+const KEY='physimul-dissolution-dilution';
+const prog=Object.assign({protoDiss:false,protoDil:false,calc:0,labDiss:false,labDil:false},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};}})());
+function saveProg(){try{localStorage.setItem(KEY,JSON.stringify(prog));}catch(e){}refreshGoals();}
+function refreshGoals(){
+ const g=[
+  {done:prog.protoDiss&&prog.protoDil,t:'Connaître les protocoles',s:`dissolution ${prog.protoDiss?'✓':'○'} · dilution ${prog.protoDil?'✓':'○'}`},
+  {done:prog.calc>=5,t:'Calculer une concentration en masse',s:`${Math.min(prog.calc,5)} / 5 bonnes réponses`},
+  {done:prog.labDil,t:'Réaliser une dilution : bon matériel, bonne concentration',s:`dilution ${prog.labDil?'✓':'○'} · dissolution ${prog.labDiss?'✓':'○'}`}
+ ];
+ $('#goals').innerHTML=g.map(x=>`<div class="goal${x.done?' done':''}"><i>${x.done?'✓':''}</i><div><b>${x.t}</b><small>${x.s}</small></div></div>`).join('');
+}
+
+/* ====================== DONNÉES ====================== */
+const SOLUTES={
+ NaCl:{name:'chlorure de sodium',sol:360,color:null,ref:null,grain:'#f4f4f4'},
+ CuSO4:{name:'sulfate de cuivre(II) pentahydraté',sol:320,color:'#2b7bd6',ref:40,grain:'#4b8fe0'},
+ KMnO4:{name:'permanganate de potassium',sol:64,color:'#8e1f8c',ref:2,grain:'#4a0f4a'}
+};
+const DYES=[
+ {name:'sulfate de cuivre(II)',color:'#2b7bd6',Cm:[40,20,10]},
+ {name:'permanganate de potassium',color:'#8e1f8c',Cm:[10,5,2]},
+ {name:'carmin d’indigo',color:'#1f3fa8',Cm:[2,1,0.5]},
+ {name:'tartrazine (colorant jaune)',color:'#f2b400',Cm:[10,5,2]}
+];
+const PIP=[1,2,5,10,20,25],FIOLES=[50,100,200,250,500];
+
+/* ====================== SCÈNE SVG ====================== */
+function createScene(host,uid,kind){
+ const FL='M285 60 L285 150 C232 165 215 210 215 262 C215 318 250 345 300 345 C350 345 385 318 385 262 C385 210 368 165 315 150 L315 60 Z';
+ const BK='M70 220 L70 338 Q70 342 74 342 L166 342 Q170 342 170 338 L170 220';
+ let grains='';for(let i=0;i<34;i++){grains+=`<circle cx="${262+(i*37%76)}" cy="${330+(i*13%14)}" r="${(2.6+(i%3)*0.6).toFixed(1)}"/>`;}
+ host.innerHTML=`<svg viewBox="0 0 560 400" data-kind="${kind}" role="img" aria-label="Schéma de la manipulation : fiole jaugée, béchers et pipette">
+ <defs>
+  <clipPath id="fc-${uid}"><path d="${FL}"/></clipPath>
+  <clipPath id="bc-${uid}"><path d="${BK} Z"/></clipPath>
+  <linearGradient id="gr-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
+ </defs>
+ <rect class="tbl" x="0" y="345" width="560" height="55"/>
+ <g class="only-dil"><g clip-path="url(#bc-${uid})"><g class="bliq-g" style="transform:translateY(124px)"><rect class="bliq" x="70" y="220" width="100" height="124" fill="#2b7bd6" opacity=".9"/></g></g>
+  <path class="ln" d="${BK}" stroke-width="3"/><line class="ln" x1="64" y1="220" x2="176" y2="220" stroke-width="3"/><text x="120" y="368" text-anchor="middle">solution mère</text></g>
+ <g class="only-diss"><path class="ln" d="M110 326 Q150 352 190 326 Z" stroke-width="3"/><ellipse class="cupsolid" cx="150" cy="324" rx="26" ry="8" fill="#4b8fe0" opacity="0"/><text x="150" y="368" text-anchor="middle">coupelle</text></g>
+ <g class="g-flask">
+  <g clip-path="url(#fc-${uid})"><g class="liqg" style="transform:translateY(250px)"><rect class="liq" x="200" y="95" width="200" height="262" fill="#9cc9e8" opacity=".35"/><rect class="grad" x="200" y="95" width="200" height="262" fill="url(#gr-${uid})" opacity="0"/></g>
+   <g class="solid" opacity="0" fill="#fff" stroke="#8aa" stroke-width=".5">${grains}</g></g>
+  <path class="ln" d="${FL}" stroke-width="3"/>
+  <line x1="280" x2="320" y1="95" y2="95" stroke="#c0392b" stroke-width="2.5"/>
+  <text x="326" y="99" style="font-size:12px">trait de jauge</text>
+  <path class="stopper" d="M281 44 L319 44 L315 72 L285 72 Z" fill="#7b8a9c" opacity="0"/>
+ </g>
+ <text x="300" y="368" text-anchor="middle">fiole jaugée</text>
+ <g class="g-funnel only-diss" opacity="0"><path d="M252 24 L348 24 L314 62 L314 92 L286 92 L286 62 Z" fill="rgba(160,190,220,.35)" stroke="var(--glass)" stroke-width="2"/></g>
+ <g class="g-pip only-dil" style="transform:translate(500px,345px)">
+  <g class="pfill" opacity="0"><rect x="-2.4" y="-62" width="4.8" height="62"/><ellipse cx="0" cy="-74" rx="8" ry="13"/><rect x="-2.4" y="-135" width="4.8" height="62"/></g>
+  <path class="ln" d="M-2 0 L2 0 L3.2 -16 L-3.2 -16 Z" stroke-width="1.6"/><rect class="ln" x="-3.2" y="-62" width="6.4" height="46" stroke-width="1.6"/>
+  <ellipse class="ln" cx="0" cy="-74" rx="10" ry="14" stroke-width="1.6"/><rect class="ln" x="-3.2" y="-150" width="6.4" height="62" stroke-width="1.6"/>
+  <line x1="-6" x2="6" y1="-135" y2="-135" stroke="#c0392b" stroke-width="2"/>
+ </g>
+</svg>`;
+ const q=s=>host.querySelector(s);
+ const E={liqg:q('.liqg'),liq:q('.liq'),grad:q('.grad'),solid:q('.solid'),funnel:q('.g-funnel'),stopper:q('.stopper'),pip:q('.g-pip'),pfill:q('.pfill'),bliqg:q('.bliq-g'),bliq:q('.bliq'),cup:q('.cupsolid'),flask:q('.g-flask')};
+ const POS={rest:[500,345],beaker:[120,330],flask:[300,170]};
+ return {render(s,anim){
+  E.liqg.style.transform=`translateY(${250*(1-s.level)}px)`;
+  E.liq.setAttribute('fill',s.color);E.liq.setAttribute('opacity',s.op);
+  E.grad.setAttribute('opacity',s.grad?1:0);
+  E.solid.setAttribute('opacity',s.solid?1:0);E.solid.setAttribute('fill',s.solidColor||'#f4f4f4');
+  E.funnel.setAttribute('opacity',s.funnel?1:0);
+  E.stopper.setAttribute('opacity',s.stopper?1:0);
+  if(s.pip){const p=POS[s.pip];E.pip.style.transform=`translate(${p[0]}px,${p[1]}px)`;
+   E.pfill.setAttribute('opacity',s.pipFill?0.9:0);$$('rect,ellipse',E.pfill).forEach(e=>e.setAttribute('fill',s.pipColor||'#2b7bd6'));}
+  if(s.beakerColor){E.bliq.setAttribute('fill',s.beakerColor);}
+  E.bliqg.style.transform=`translateY(${124*(1-(s.beaker||0))}px)`;
+  E.cup.setAttribute('opacity',s.cup?0.95:0);if(s.cupColor)E.cup.setAttribute('fill',s.cupColor);
+  if(anim){E.flask.classList.remove('shake','flip');void E.flask.getBoundingClientRect();E.flask.classList.add(anim);setTimeout(()=>E.flask.classList.remove(anim),1800);}
+ }};
+}
+
+/* ====================== ÉTATS DE LA SCÈNE ====================== */
+function dissState(p,k){
+ const col=p.solute.color,dissolved=k>=4;
+ const level=k<=2?0:(k<=4?0.6:1);
+ const conc=dissolved&&level>0?p.m/(level*p.V/1000):0;
+ let color='#9cc9e8',op=0.35;
+ if(dissolved&&col){color=col;op=clamp(0.92*Math.pow(conc/p.solute.ref,0.6),0.08,0.95);}
+ return {level,color,op,solid:k>=2&&k<4,solidColor:p.solute.grain,funnel:k===2,stopper:k===4||k===6,grad:k===5,cup:k===1,cupColor:p.solute.grain};
+}
+function dilState(p,k){
+ const m=p.Cm*p.Vm/1000;
+ const level=k<4?0:(k===4?Math.max(0.06,p.Vm/p.Vf):(k<=6?0.6:1));
+ let conc=0;if(k===4)conc=p.Cm;else if(k>=5&&k<=6)conc=m/(0.6*p.Vf/1000);else if(k>=7)conc=p.Cf;
+ const op=level>0?clamp(0.92*Math.sqrt(conc/p.Cm),0.07,0.95):0;
+ const pip=k<=1?'rest':(k<=3?'beaker':(k===4?'flask':'rest'));
+ return {level,color:p.dye.color,op,solid:false,funnel:false,stopper:k===6||k===8,grad:k===7,
+  pip,pipFill:k===3,pipColor:p.dye.color,beaker:k===0?0:(k<=3?0.7:0.5),beakerColor:p.dye.color,cup:false};
+}
+
+/* ====================== PROTOCOLES ====================== */
+function protoDiss(p){
+ const V=p.V,m=p.m;
+ return {kind:'diss',p,weighAt:0,
+  intro:{title:'Situation de départ',detail:`On veut préparer <b>${fmt(V)} mL</b> de solution de ${p.solute.name} de concentration en masse <b>t = ${fmt(p.t)} ${U}</b>, par <b>dissolution</b> du solide dans l’eau.`,why:'Le soluté est un solide : on le pèse. Le solvant est l’eau distillée : on la verse jusqu’au volume voulu.',cap:'Matériel prêt sur la paillasse.'},
+  key:`<b>t = m / V</b> &nbsp;donc&nbsp; m = t × V = ${fmt(p.t)} × ${fmt(V/1000)} = <b>${fmt(m)} g</b>`,
+  state:k=>dissState(p,k),anims:{4:'shake',6:'flip'},
+  steps:[
+   {short:'Peser la masse m de soluté',detail:`Poser la coupelle sur la balance, tarer, puis ajouter le solide à la spatule jusqu’à lire <b>m = ${fmt(m)} g</b>.`,why:'La masse à peser se déduit de la concentration visée : m = t × V. La tare retire la masse de la coupelle.'},
+   {short:'Introduire le solide dans la fiole jaugée avec un entonnoir',detail:'Verser le solide dans la fiole à travers l’entonnoir, puis rincer la coupelle et l’entonnoir à l’eau distillée au-dessus de la fiole.',why:'Aucun grain ne doit être perdu : toute la masse m doit se retrouver dans la fiole.'},
+   {short:'Ajouter de l’eau distillée aux 2/3 de la fiole',detail:'Retirer l’entonnoir et verser de l’eau distillée jusqu’aux deux tiers environ de la fiole.',why:'On garde de la place pour agiter, et on ne risque pas de dépasser le trait de jauge.'},
+   {short:'Boucher et agiter jusqu’à dissolution totale',detail:'Boucher la fiole et l’agiter jusqu’à ce que le solide ait entièrement disparu.',why:'Le soluté doit être entièrement dissous avant d’ajuster le volume.'},
+   {short:'Compléter avec de l’eau distillée jusqu’au trait de jauge',detail:'Terminer goutte à goutte à la pipette Pasteur : le bas du ménisque doit être tangent au trait de jauge, œil à la hauteur du trait.',why:`Seul le trait de jauge garantit un volume de solution de ${fmt(V)} mL.`},
+   {short:'Boucher et homogénéiser',detail:'Boucher et retourner plusieurs fois la fiole.',why:'La concentration doit être la même en tout point de la solution.'}
+  ],
+  dist:[
+   {label:'Verser l’eau jusqu’au trait de jauge, puis ajouter le solide',why:'Le volume final doit être ajusté en dernier. Ajouter le solide après le trait changerait le volume et empêcherait de dissoudre correctement.'},
+   {label:`Mesurer ${fmt(V)} mL d’eau à l’éprouvette et y dissoudre le solide`,why:`${fmt(V)} mL est le volume de la solution, pas celui de l’eau. Le solide occupe lui aussi un volume : seule la fiole jaugée garantit ${fmt(V)} mL de solution.`},
+   {label:'Chauffer la fiole jaugée pour aller plus vite',why:'La verrerie jaugée ne se chauffe pas : la dilatation fausserait le volume. On agite plutôt.'},
+   {label:'Poser le solide directement sur le plateau de la balance',why:'On ne dépose jamais un produit directement sur le plateau : il l’abîmerait. On utilise une coupelle et on tare.'}
+  ]};
+}
+function protoDil(p){
+ const m=p.Cm*p.Vm/1000;
+ return {kind:'dil',p,weighAt:-1,
+  intro:{title:'Situation de départ',detail:`On veut préparer <b>${fmt(p.Vf)} mL</b> de solution fille de ${p.dye.name} de concentration en masse <b>${TF} = ${fmt(p.Cf)} ${U}</b>, par <b>dilution</b> d’une solution mère à <b>${TM} = ${fmt(p.Cm)} ${U}</b>.`,why:'On ajoute du solvant à la solution mère : la quantité de soluté ne change pas, mais elle est répartie dans un plus grand volume.',cap:'Matériel prêt sur la paillasse.'},
+  key:`<b>F = ${TM} / ${TF}</b> = ${fmt(p.Cm)} / ${fmt(p.Cf)} = <b>${fmt(p.F)}</b> &nbsp;donc&nbsp; ${VM} = ${VF} / F = ${fmt(p.Vf)} / ${fmt(p.F)} = <b>${fmt(p.Vm)} mL</b>`,
+  state:k=>dilState(p,k),anims:{6:'shake',8:'flip'},
+  steps:[
+   {short:'Verser de la solution mère dans un bécher',detail:`Verser dans un bécher propre un volume de solution mère un peu supérieur à ${fmt(p.Vm)} mL.`,why:'On ne plonge jamais la pipette dans le flacon de stockage : on risquerait de contaminer toute la solution mère.'},
+   {short:'Rincer la pipette jaugée avec la solution mère',detail:'Aspirer un peu de solution mère à la propipette, rincer les parois, puis jeter ce liquide dans un bécher de récupération.',why:'Des gouttes d’eau restées dans la pipette dilueraient la solution prélevée.'},
+   {short:`Prélever ${fmt(p.Vm)} mL avec la pipette jaugée`,detail:`Aspirer à la propipette au-dessus du trait de jauge, puis ajuster : le bas du ménisque affleure le trait. Volume prélevé : <b>${fmt(p.Vm)} mL</b>.`,why:'La pipette jaugée délivre un volume précis. La propipette évite d’aspirer à la bouche.'},
+   {short:'Verser la solution prélevée dans la fiole jaugée',detail:'Pointe de la pipette contre la paroi de la fiole, laisser s’écouler sans souffler.',why:`Toute la masse de soluté prélevée est transférée : m = ${TM} × ${VM} = ${fmt(p.Cm)} × ${fmt(p.Vm/1000)} = ${fmt(m)} g. Elle se conserve lors de la dilution.`},
+   {short:'Ajouter de l’eau distillée aux 2/3 de la fiole',detail:'Verser de l’eau distillée jusqu’aux deux tiers environ de la fiole.',why:'On garde de la place pour agiter et on ne dépasse pas le trait de jauge.'},
+   {short:'Boucher et agiter',detail:'Boucher la fiole et l’agiter pour mélanger la solution mère et l’eau.',why:'Le mélange est ainsi homogène avant l’ajustement final du volume.'},
+   {short:'Compléter avec de l’eau distillée jusqu’au trait de jauge',detail:'Terminer goutte à goutte à la pipette Pasteur : le bas du ménisque tangent au trait de jauge.',why:`Le trait de jauge garantit le volume ${VF} = ${fmt(p.Vf)} mL.`},
+   {short:'Boucher et homogénéiser',detail:'Boucher et retourner plusieurs fois la fiole.',why:`La concentration est la même partout : ${TF} = ${fmt(p.Cf)} ${U}.`}
+  ],
+  dist:[
+   {label:'Plonger la pipette directement dans le flacon de solution mère',why:'Cela contaminerait toute la solution mère. On en verse d’abord un peu dans un bécher.'},
+   {label:'Aspirer la solution à la bouche',why:'Jamais : risque d’ingestion de produit chimique. On utilise une propipette.'},
+   {label:'Souffler pour faire sortir la dernière goutte de la pipette',why:'Une pipette jaugée est calibrée pour s’écouler librement : la goutte restée dans la pointe fait partie du volume prévu.'},
+   {label:`Mesurer ${fmt(p.Vf-p.Vm)} mL d’eau à l’éprouvette et les verser sur la solution`,why:`On ne dose pas le solvant : c’est le volume final de solution qui doit valoir ${fmt(p.Vf)} mL. Seul le trait de jauge assure ce volume.`}
+  ]};
+}
+const DEMO={
+ diss:protoDiss({solute:SOLUTES.CuSO4,V:100,t:20,m:2}),
+ dil:protoDil({dye:DYES[0],Cm:20,Cf:2,Vf:100,Vm:10,F:10})
+};
+
+/* --- onglet protocoles --- */
+const PT={kind:'diss',k:0,scene:null};
+function protoRender(anim){
+ const P=DEMO[PT.kind],N=P.steps.length,k=PT.k;
+ const cur=k===0?P.intro:P.steps[k-1];
+ $('#ps-i').textContent=k;$('#ps-n').textContent=N;$('#ps-bar').style.width=(100*k/N)+'%';
+ $('#ps-title').textContent=k===0?cur.title:cur.short;
+ $('#ps-detail').innerHTML=cur.detail;$('#ps-why').innerHTML=(k===0?'':'<b>Pourquoi ? </b>')+cur.why;
+ $('#ps-key').innerHTML=P.key;
+ $('#proto-cap').innerHTML=k===0?cur.cap:cur.detail;
+ $('#ps-prev').disabled=k===0;$('#ps-next').disabled=k===N;
+ PT.scene.render(P.state(k),anim?P.anims[k]:null);
+}
+function protoSwitch(kind){
+ PT.kind=kind;PT.k=0;
+ $$('#proto-seg button').forEach(b=>b.classList.toggle('on',b.dataset.k===kind));
+ PT.scene=createScene($('#proto-scene'),'p',kind);
+ protoRender(false);quizInit();
+}
+$('#proto-seg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)protoSwitch(b.dataset.k);});
+$('#ps-next').onclick=()=>{const N=DEMO[PT.kind].steps.length;if(PT.k<N){PT.k++;protoRender(true);}};
+$('#ps-prev').onclick=()=>{if(PT.k>0){PT.k--;protoRender(false);}};
+$('#ps-reset').onclick=()=>{PT.k=0;protoRender(false);};
+
+/* --- quiz de remise en ordre --- */
+function quizInit(){
+ const P=DEMO[PT.kind],host=$('#quiz');let k=0;
+ const items=shuffle(P.steps.map((s,i)=>({i,t:s.short})));
+ host.innerHTML=`<div class="pool">${items.map((it,n)=>`<button class="act" data-n="${n}">${it.t}</button>`).join('')}</div><ol class="ord"></ol><div class="msg" aria-live="polite"></div><div class="btnrow"><button class="btn" id="quiz-new">↺ Mélanger à nouveau</button></div>`;
+ const msg=$('.msg',host),ord=$('.ord',host);
+ $$('.act',host).forEach(b=>b.onclick=()=>{
+  const it=items[+b.dataset.n];
+  if(it.i===k){
+   k++;b.classList.add('done');b.disabled=true;
+   ord.insertAdjacentHTML('beforeend',`<li>${it.t}</li>`);
+   msg.className='msg ok';msg.innerHTML='<b>✓</b> '+P.steps[it.i].why;
+   if(k===P.steps.length){
+    msg.innerHTML=`<b>Bravo !</b> Le protocole de ${P.kind==='diss'?'dissolution':'dilution'} est dans le bon ordre.`;
+    if(P.kind==='diss')prog.protoDiss=true;else prog.protoDil=true;saveProg();
+   }
+  }else{
+   b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump');
+   msg.className='msg ko';
+   msg.innerHTML=k===0?'Ce n’est pas la première étape. Par quoi commence-t-on ?':`Pas encore : qu’est-ce qui vient juste après « ${P.steps[k-1].short} » ?`;
+  }
+ });
+ $('#quiz-new').onclick=quizInit;
+}
+
+/* ====================== CALCULS (exerciseur) ====================== */
+function genDilParams(){
+ const combos=[];
+ for(const dye of DYES)for(const Cm of dye.Cm)for(const Vf of FIOLES)for(const F of [2,4,5,8,10,20,25,40,50,100]){
+  const Vm=Vf/F;if(!PIP.includes(Vm))continue;const Cf=Cm/F;if(!dec(Cf,2))continue;combos.push({dye,Cm,Cf,Vf,Vm,F});
+ }
+ return rnd(combos);
+}
+function diag(x,ans){
+ if(!isFinite(x)||ans===0)return '';const r=x/ans;
+ if(near(r,1000,.03)||near(r,.001,.03))return 'Ton résultat est juste… à un facteur 1000 près. Vérifie les conversions (1 L = 1000 mL ; 1 g = 1000 mg).';
+ if(near(x,1/ans,.03))return 'Tu as peut-être inversé le rapport. Vérifie ce qui se trouve au numérateur et au dénominateur.';
+ return '';
+}
+const nm=k=>SOLUTES[k].name;
+function exT(){for(;;){
+ const V=rnd([50,100,200,250,500,1000]),t=rnd([2,4,5,8,10,12,15,20,25,40,50]),m=t*V/1000;if(!dec(m,2))continue;
+ const key=rnd(Object.keys(SOLUTES)),v=rnd(['mL','mg','L']);let mTxt=`${fmt(m)} g`,VTxt=`${fmt(V)} mL`,conv='';
+ if(v==='mg'){mTxt=`${fmt(m*1000)} mg`;conv+=`m = ${fmt(m*1000)} mg = ${fmt(m)} g<br>`;}
+ if(v==='L')VTxt=`${fmt(V/1000)} L`;else conv+=`V = ${fmt(V)} mL = ${fmt(V/1000)} L<br>`;
+ return {kind:'num',unit:U,ans:t,
+  q:`<b>Mode opératoire.</b> On pèse ${mTxt} de ${nm(key)}. On l’introduit dans une fiole jaugée de ${VTxt}, on ajoute de l’eau distillée, on agite jusqu’à dissolution totale, puis on complète jusqu’au trait de jauge.<br>Calcule la concentration en masse <i>t</i> de la solution obtenue.`,
+  hint:'Convertis m en grammes et V en litres, puis applique t = m / V.',
+  sol:`${conv}t = m / V = ${fmt(m)} g / ${fmt(V/1000)} L = <b>${fmt(t)} ${U}</b>`};}}
+function exM(){for(;;){
+ const V=rnd([50,100,200,250,500]),t=rnd([2,4,5,8,10,12,15,20,25,40,50]),m=t*V/1000;if(!dec(m,2))continue;const key=rnd(Object.keys(SOLUTES));
+ return {kind:'num',unit:'g',ans:m,
+  q:`On veut préparer <b>${fmt(V)} mL</b> de solution de ${nm(key)} de concentration en masse <b>t = ${fmt(t)} ${U}</b>. Quelle masse de soluté faut-il peser ?`,
+  hint:'Isole m dans t = m / V : m = t × V (V en litres).',
+  sol:`m = t × V = ${fmt(t)} ${U} × ${fmt(V/1000)} L = <b>${fmt(m)} g</b>`};}}
+function exV(){for(;;){
+ const V=rnd([50,100,200,250,500]),t=rnd([2,4,5,8,10,20,25,40]),m=t*V/1000;if(!dec(m,2)||m<0.1)continue;const key=rnd(Object.keys(SOLUTES));
+ return {kind:'num',unit:'mL',ans:V,
+  q:`Avec <b>${fmt(m)} g</b> de ${nm(key)}, quel volume de solution (en mL) peut-on préparer à la concentration en masse <b>t = ${fmt(t)} ${U}</b> ?`,
+  hint:'Isole V dans t = m / V : V = m / t. Le résultat est en litres : convertis-le en mL.',
+  sol:`V = m / t = ${fmt(m)} g / ${fmt(t)} ${U} = ${fmt(V/1000)} L = <b>${fmt(V)} mL</b>`};}}
+function exF(){const d=genDilParams();
+ return {kind:'num',unit:'(sans unité)',ans:d.F,
+  q:`On dilue une solution de ${d.dye.name} de concentration en masse <b>${fmt(d.Cm)} ${U}</b> pour obtenir une solution de concentration <b>${fmt(d.Cf)} ${U}</b>. Quel est le facteur de dilution F ?`,
+  hint:'F = t<sub>mère</sub> / t<sub>fille</sub> : la solution mère est plus concentrée, donc F est supérieur à 1.',
+  sol:`F = ${TM} / ${TF} = ${fmt(d.Cm)} / ${fmt(d.Cf)} = <b>${fmt(d.F)}</b>`};}
+function exVm(){const d=genDilParams();
+ return {kind:'num',unit:'mL',ans:d.Vm,
+  q:`On veut préparer <b>${fmt(d.Vf)} mL</b> de solution de ${d.dye.name} à <b>${fmt(d.Cf)} ${U}</b> à partir d’une solution mère à <b>${fmt(d.Cm)} ${U}</b>. Quel volume de solution mère faut-il prélever (en mL) ?`,
+  hint:'Calcule d’abord F = t<sub>mère</sub> / t<sub>fille</sub>, puis V<sub>mère</sub> = V<sub>fille</sub> / F.',
+  sol:`F = ${fmt(d.Cm)} / ${fmt(d.Cf)} = ${fmt(d.F)}<br>${VM} = ${VF} / F = ${fmt(d.Vf)} mL / ${fmt(d.F)} = <b>${fmt(d.Vm)} mL</b>`};}
+function exTf(){const d=genDilParams();
+ return {kind:'num',unit:U,ans:d.Cf,
+  q:`<b>Mode opératoire.</b> On prélève <b>${fmt(d.Vm)} mL</b> d’une solution de ${d.dye.name} à <b>${fmt(d.Cm)} ${U}</b> avec une pipette jaugée. On les introduit dans une fiole jaugée de <b>${fmt(d.Vf)} mL</b>, puis on complète avec de l’eau distillée jusqu’au trait de jauge. Quelle est la concentration en masse de la solution obtenue ?`,
+  hint:'La masse de soluté prélevée se conserve : t<sub>fille</sub> = t<sub>mère</sub> × V<sub>mère</sub> / V<sub>fille</sub>.',
+  sol:`m = ${TM} × ${VM} = ${fmt(d.Cm)} × ${fmt(d.Vm/1000)} = ${fmt(d.Cm*d.Vm/1000)} g<br>${TF} = m / ${VF} = ${fmt(d.Cm*d.Vm/1000)} g / ${fmt(d.Vf/1000)} L = <b>${fmt(d.Cf)} ${U}</b>`};}
+function exSol(){const key=rnd(Object.keys(SOLUTES)),s=SOLUTES[key],V=rnd([50,100,200,250]),mmax=s.sol*V/1000,f=rnd([0.6,1.5]);
+ const m=Math.round(mmax*f*10)/10,t=m/(V/1000),ok=t<=s.sol;
+ return {kind:'choice',ans:ok,
+  q:`La solubilité du ${s.name} dans l’eau à 20 °C est d’environ <b>${fmt(s.sol)} ${U}</b>. Peut-on dissoudre <b>${fmt(m)} g</b> de ce solide pour préparer <b>${fmt(V)} mL</b> de solution ?`,
+  hint:'Calcule la concentration en masse que donnerait cette préparation et compare-la à la solubilité.',
+  sol:`t = m / V = ${fmt(m)} g / ${fmt(V/1000)} L = ${fmt(t)} ${U}<br>${fmt(t)} ${ok?'≤':'>'} ${fmt(s.sol)} ${U} : la concentration maximale ${ok?'n’est pas dépassée, <b>c’est possible</b>':'est dépassée, <b>c’est impossible</b> : le solide ne se dissoudra pas en totalité'}.`};}
+const EXS=[exT,exM,exV,exF,exVm,exTf,exSol,exT,exM,exF];
+const CX={cur:null,streak:0,done:false};
+function exNew(){
+ CX.cur=rnd(EXS)();CX.done=false;const e=CX.cur;
+ const inputHtml=e.kind==='num'
+  ?`<div class="field"><span class="inp"><input id="ex-in" inputmode="decimal" autocomplete="off" placeholder="?" aria-label="Ta réponse"><span>${e.unit}</span></span><button class="primary" id="ex-ok">Valider</button></div>`
+  :`<div class="opts" role="radiogroup" aria-label="Ta réponse"><label class="opt"><input type="radio" name="ex-c" value="1">Oui, c’est possible</label><label class="opt"><input type="radio" name="ex-c" value="0">Non, c’est impossible</label></div><div class="btnrow"><button class="primary" id="ex-ok">Valider</button></div>`;
+ $('#ex-card').innerHTML=`<div class="kick">Exercice</div><p class="q">${e.q}</p>${inputHtml}<div class="btnrow"><button class="btn" id="ex-hint">💡 Indice</button><button class="btn" id="ex-sol">Voir la solution</button><button class="btn pri" id="ex-next">Exercice suivant ▶</button></div><div class="fb" id="ex-fb" aria-live="polite"></div>`;
+ const fb=(c,h)=>{const f=$('#ex-fb');f.className='fb '+c;f.innerHTML=h;};
+ const finish=ok=>{
+  if(ok&&!CX.done){CX.done=true;CX.streak++;prog.calc++;saveProg();}
+  $('#calc-n').textContent=prog.calc;$('#calc-s').textContent=CX.streak;
+ };
+ const check=()=>{
+  if(CX.done)return;
+  if(e.kind==='num'){
+   const x=parseNum($('#ex-in').value);if(isNaN(x)){fb('info','Entre un nombre (la virgule est acceptée).');return;}
+   if(near(x,e.ans,0.01)){fb('ok',`<b>Exact !</b><br>${e.sol}`);finish(true);}
+   else{CX.streak=0;finish(false);fb('ko',(diag(x,e.ans)||'Ce n’est pas la bonne valeur. Relis l’énoncé et essaie encore (l’indice peut t’aider).'));}
+  }else{
+   const c=document.querySelector('input[name="ex-c"]:checked');if(!c){fb('info','Choisis une réponse.');return;}
+   if((c.value==='1')===e.ans){fb('ok',`<b>Exact !</b><br>${e.sol}`);finish(true);}
+   else{CX.streak=0;finish(false);fb('ko','Compare la concentration obtenue à la solubilité : la concentration maximale est-elle dépassée ?');}
+  }
+ };
+ $('#ex-ok').onclick=check;
+ if(e.kind==='num')$('#ex-in').addEventListener('keydown',ev=>{if(ev.key==='Enter')check();});
+ $('#ex-hint').onclick=()=>fb('info','<b>Indice.</b> '+e.hint);
+ $('#ex-sol').onclick=()=>{CX.streak=0;$('#calc-s').textContent=0;fb('info','<b>Solution.</b><br>'+e.sol);};
+ $('#ex-next').onclick=exNew;
+ $('#calc-n').textContent=prog.calc;$('#calc-s').textContent=CX.streak;
+}
+
+/* ====================== LABORATOIRE ====================== */
+function genDiss(){for(;;){
+ const key=rnd(['NaCl','CuSO4','KMnO4']),solute=SOLUTES[key],V=rnd([50,100,200,250]),bad=Math.random()<0.2;
+ const list=bad?{NaCl:[400,450],CuSO4:[350,400],KMnO4:[80,100]}[key]:{NaCl:[5,9,10,15,20,25,40],CuSO4:[10,20,25,40,50],KMnO4:[0.2,0.5,1,2,5]}[key];
+ const t=rnd(list),m=t*V/1000;if(!dec(m,2)||m<0.05)continue;
+ return {kind:'diss',solute,key,V,t,m:Math.round(m*100)/100,feasible:t<=solute.sol};
+}}
+function genDil(){return genDilParams();}
+
+const L={kind:'diss',task:null,proto:null,phase:1,stage:0,errs:{calc:0,mat:0,man:0},scene:null};
+const labHost=$('#lab-panel');
+const fbx=(id,c,h)=>{const f=$(id);if(f){f.className='fb '+c;f.innerHTML=h;}};
+function mission(){
+ const t=L.task;
+ if(L.kind==='diss')return `<div class="mission"><div class="kick">Mission</div>Prépare <b class="t">${fmt(t.V)} mL</b> de solution de ${t.solute.name} de concentration en masse <b class="t">t = ${fmt(t.t)} ${U}</b>, par dissolution.</div>`;
+ return `<div class="mission"><div class="kick">Mission</div>Prépare <b class="t">${fmt(t.Vf)} mL</b> de solution fille de ${t.dye.name} à <b class="t">${TF} = ${fmt(t.Cf)} ${U}</b>, à partir d’une solution mère à <b class="t">${TM} = ${fmt(t.Cm)} ${U}</b>.</div>`;
+}
+function labNew(){
+ L.task=L.kind==='diss'?genDiss():genDil();
+ L.proto=L.kind==='diss'?protoDiss(L.task):protoDil(L.task);
+ L.phase=1;L.stage=0;L.errs={calc:0,mat:0,man:0};
+ L.scene=createScene($('#lab-scene'),'l',L.kind);L.scene.render(L.proto.state(0));
+ $('#lab-cap').textContent='';
+ labRender();
+}
+function labRender(){
+ $('#lab-phases').innerHTML=['Calculer','Choisir le matériel','Manipuler','Bilan'].map((n,i)=>`<li class="${L.phase===i+1?'on':L.phase>i+1?'done':''}">${i+1}. ${n}</li>`).join('');
+ [labCalc,labMat,labMan,labBilan][L.phase-1]();
+}
+function labGo(ph){L.phase=ph;labRender();}
+$('#lab-seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;L.kind=b.dataset.k;$$('#lab-seg button').forEach(x=>x.classList.toggle('on',x===b));labNew();});
+
+/* --- phase 1 : calculs --- */
+function labCalc(){
+ const t=L.task;
+ if(L.kind==='diss'){
+  labHost.innerHTML=`${mission()}<div class="data">Solubilité à 20 °C (valeurs arrondies) : chlorure de sodium ≈ 360 ${U} · sulfate de cuivre(II) pentahydraté ≈ 320 ${U} · permanganate de potassium ≈ 64 ${U}</div>
+  <p style="margin:6px 0"><b>Étape 1.</b> Quelle masse de soluté faut-il peser ?</p>
+  <div class="field"><label for="in-m">m =</label><span class="inp"><input id="in-m" inputmode="decimal" autocomplete="off" placeholder="?"><span>g</span></span><button class="primary" id="ok-m">Valider</button></div>
+  <div class="fb" id="fb-m" aria-live="polite"></div><div id="feas"></div>`;
+  const check=()=>{const x=parseNum($('#in-m').value);if(isNaN(x)){fbx('#fb-m','info','Entre un nombre.');return;}
+   if(near(x,t.m,0.01)){fbx('#fb-m','ok',`<b>Exact.</b> m = t × V = ${fmt(t.t)} ${U} × ${fmt(t.V/1000)} L = <b>${fmt(t.m)} g</b>`);$('#in-m').disabled=true;$('#ok-m').disabled=true;feasStage();}
+   else{L.errs.calc++;fbx('#fb-m','ko',diag(x,t.m)||'Ce n’est pas la bonne masse. Rappel : t = m / V, donc m = t × V (V en litres).');}};
+  $('#ok-m').onclick=check;$('#in-m').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+ }else{
+  labHost.innerHTML=`${mission()}
+  <p style="margin:6px 0"><b>Étape 1.</b> Quel est le facteur de dilution ?</p>
+  <div class="field"><label for="in-f">F =</label><span class="inp"><input id="in-f" inputmode="decimal" autocomplete="off" placeholder="?"></span><button class="primary" id="ok-f">Valider</button></div>
+  <div class="fb" id="fb-f" aria-live="polite"></div><div id="stage2"></div>`;
+  const check=()=>{const x=parseNum($('#in-f').value);if(isNaN(x)){fbx('#fb-f','info','Entre un nombre.');return;}
+   if(near(x,t.F,0.01)){fbx('#fb-f','ok',`<b>Exact.</b> F = ${TM} / ${TF} = ${fmt(t.Cm)} / ${fmt(t.Cf)} = <b>${fmt(t.F)}</b>`);$('#in-f').disabled=true;$('#ok-f').disabled=true;volStage();}
+   else{L.errs.calc++;fbx('#fb-f','ko',diag(x,t.F)||`Ce n’est pas la bonne valeur. Rappel : F = ${TM} / ${TF}.`);}};
+  $('#ok-f').onclick=check;$('#in-f').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+ }
+}
+function volStage(){
+ const t=L.task;
+ $('#stage2').innerHTML=`<p style="margin:10px 0 6px"><b>Étape 2.</b> Quel volume de solution mère faut-il prélever ?</p>
+ <div class="field"><label for="in-v">${VM} =</label><span class="inp"><input id="in-v" inputmode="decimal" autocomplete="off" placeholder="?"><span>mL</span></span><button class="primary" id="ok-v">Valider</button></div><div class="fb" id="fb-v" aria-live="polite"></div>`;
+ const check=()=>{const x=parseNum($('#in-v').value);if(isNaN(x)){fbx('#fb-v','info','Entre un nombre.');return;}
+  if(near(x,t.Vm,0.01)){fbx('#fb-v','ok',`<b>Exact.</b> ${VM} = ${VF} / F = ${fmt(t.Vf)} / ${fmt(t.F)} = <b>${fmt(t.Vm)} mL</b>`);$('#in-v').disabled=true;$('#ok-v').disabled=true;
+   $('#stage2').insertAdjacentHTML('beforeend','<div class="btnrow"><button class="btn pri" id="go-mat">Choisir le matériel ▶</button></div>');$('#go-mat').onclick=()=>labGo(2);}
+  else{L.errs.calc++;fbx('#fb-v','ko',diag(x,t.Vm)||`Ce n’est pas la bonne valeur. Rappel : ${VM} = ${VF} / F.`);}};
+ $('#ok-v').onclick=check;$('#in-v').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+ $('#in-v').focus();
+}
+function feasStage(){
+ const t=L.task;
+ $('#feas').innerHTML=`<p style="margin:10px 0 6px"><b>Étape 2.</b> Cette solution est-elle réalisable ? Compare la concentration visée à la solubilité.</p>
+ <div class="opts"><label class="opt"><input type="radio" name="fe" value="1">Oui, réalisable</label><label class="opt"><input type="radio" name="fe" value="0">Non, impossible</label></div>
+ <div class="btnrow"><button class="primary" id="ok-fe">Valider</button></div><div class="fb" id="fb-fe" aria-live="polite"></div>`;
+ $('#ok-fe').onclick=()=>{
+  const c=document.querySelector('input[name="fe"]:checked');if(!c){fbx('#fb-fe','info','Choisis une réponse.');return;}
+  const say=c.value==='1',s=t.solute.sol;
+  if(say===t.feasible){
+   $('#ok-fe').disabled=true;
+   if(t.feasible){fbx('#fb-fe','ok',`<b>Oui.</b> t = ${fmt(t.t)} ${U} ≤ ${fmt(s)} ${U} : la concentration maximale n’est pas dépassée.`);
+    $('#feas').insertAdjacentHTML('beforeend','<div class="btnrow"><button class="btn pri" id="go-mat">Choisir le matériel ▶</button></div>');$('#go-mat').onclick=()=>labGo(2);}
+   else{fbx('#fb-fe','ok',`<b>Bien vu !</b> t = ${fmt(t.t)} ${U} dépasse la solubilité (≈ ${fmt(s)} ${U}) : une telle solution ne peut pas exister. Dans ${fmt(t.V)} mL, on ne peut dissoudre au maximum que ${fmt(s*t.V/1000)} g.`);
+    $('#feas').insertAdjacentHTML('beforeend','<div class="btnrow"><button class="btn pri" id="go-new">Nouvelle situation ▶</button></div>');$('#go-new').onclick=labNew;}
+  }else{L.errs.calc++;fbx('#fb-fe','ko',`Compare t = ${fmt(t.t)} ${U} à la solubilité du ${t.solute.name} (≈ ${fmt(s)} ${U}).`);}
+ };
+}
+
+/* --- phase 2 : matériel --- */
+function matGroups(){
+ const t=L.task;
+ if(L.kind==='diss'){
+  const V=t.V,o=shuffle(FIOLES.filter(x=>x!==V)).slice(0,2),ep=[50,100,250,500].find(x=>x>=V);
+  return [
+   {id:'cont',type:'radio',title:`Récipient pour obtenir exactement ${fmt(V)} mL de solution`,opts:shuffle([
+    {label:`Fiole jaugée de ${V} mL`,ok:true},
+    {label:`Fiole jaugée de ${o[0]} mL`,ok:false,why:`Le volume de la fiole doit être égal au volume de solution voulu (${V} mL), sinon la concentration ne serait pas celle visée.`},
+    {label:`Fiole jaugée de ${o[1]} mL`,ok:false,why:`Le volume de la fiole doit être égal au volume de solution voulu (${V} mL), sinon la concentration ne serait pas celle visée.`},
+    {label:`Éprouvette graduée de ${ep} mL`,ok:false,why:'L’éprouvette graduée est trop peu précise pour préparer une solution de concentration donnée.'},
+    {label:'Bécher de 250 mL',ok:false,why:'Les graduations d’un bécher sont approximatives : il sert à transvaser, pas à mesurer un volume précis.'}])},
+   {id:'acc',type:'check',title:'Accessoires nécessaires (plusieurs réponses)',opts:shuffle([
+    {label:'Balance (précision 0,01 g)',ok:true,why:'pour peser la masse m'},
+    {label:'Coupelle de pesée',ok:true,why:'pour déposer le solide sur la balance (on tare avec elle)'},
+    {label:'Spatule',ok:true,why:'pour prélever le solide sans le toucher'},
+    {label:'Entonnoir à solide',ok:true,why:'pour introduire le solide dans le col étroit de la fiole sans perte'},
+    {label:'Pissette d’eau distillée',ok:true,why:'pour rincer et verser l’eau distillée'},
+    {label:'Pipette Pasteur',ok:true,why:'pour ajuster goutte à goutte le niveau au trait de jauge'},
+    {label:'Propipette',ok:false,why:'elle sert à aspirer avec une pipette : aucune pipette n’est nécessaire ici'},
+    {label:'Thermomètre',ok:false,why:'aucune mesure de température n’est demandée'},
+    {label:'Agitateur magnétique chauffant',ok:false,why:'inutile, et la verrerie jaugée ne se chauffe pas'},
+    {label:'Burette graduée',ok:false,why:'on ne prélève aucun volume de liquide ici'}])}
+  ];
+ }
+ const Vm=t.Vm,Vf=t.Vf,po=shuffle(PIP.filter(x=>x!==Vm)).slice(0,2),fo=shuffle(FIOLES.filter(x=>x!==Vf)).slice(0,2);
+ return [
+  {id:'pip',type:'radio',title:`Pour prélever la solution mère (${VM} = ${fmt(Vm)} mL)`,opts:shuffle([
+   {label:`Pipette jaugée de ${Vm} mL`,ok:true},
+   {label:`Pipette jaugée de ${po[0]} mL`,ok:false,why:`Cette pipette ne délivre pas le volume voulu : il faut une pipette jaugée de ${Vm} mL, volume calculé à la phase 1.`},
+   {label:`Pipette jaugée de ${po[1]} mL`,ok:false,why:`Cette pipette ne délivre pas le volume voulu : il faut une pipette jaugée de ${Vm} mL, volume calculé à la phase 1.`},
+   {label:'Pipette graduée de 10 mL',ok:false,why:'Moins précise qu’une pipette jaugée pour un volume unique : on choisit la pipette jaugée.'},
+   {label:'Éprouvette graduée de 25 mL',ok:false,why:'Précision insuffisante pour une dilution : on choisit la pipette jaugée.'},
+   {label:'Bécher de 50 mL',ok:false,why:'Les graduations d’un bécher sont approximatives : on ne s’en sert pas pour mesurer.'}])},
+  {id:'fiole',type:'radio',title:`Pour la solution fille (${VF} = ${fmt(Vf)} mL)`,opts:shuffle([
+   {label:`Fiole jaugée de ${Vf} mL`,ok:true},
+   {label:`Fiole jaugée de ${fo[0]} mL`,ok:false,why:`La fiole doit avoir le volume de la solution fille voulue (${Vf} mL).`},
+   {label:`Fiole jaugée de ${fo[1]} mL`,ok:false,why:`La fiole doit avoir le volume de la solution fille voulue (${Vf} mL).`},
+   {label:'Erlenmeyer de 250 mL',ok:false,why:'Pas de trait de jauge : le volume final ne serait pas précis.'}])},
+  {id:'acc',type:'check',title:'Accessoires nécessaires (plusieurs réponses)',opts:shuffle([
+   {label:'Propipette',ok:true,why:'pour aspirer la solution sans risque dans la pipette jaugée'},
+   {label:'Bécher (pour la solution mère)',ok:true,why:'pour y verser un peu de solution mère et éviter de contaminer le flacon'},
+   {label:'Pissette d’eau distillée',ok:true,why:'pour verser le solvant'},
+   {label:'Pipette Pasteur',ok:true,why:'pour ajuster goutte à goutte au trait de jauge'},
+   {label:'Balance',ok:false,why:'on mesure ici un volume, pas une masse'},
+   {label:'Entonnoir à solide',ok:false,why:'réservé aux solides : inutile pour cette dilution'},
+   {label:'Thermomètre',ok:false,why:'aucune mesure de température n’est demandée'},
+   {label:'Burette graduée',ok:false,why:'le volume est prélevé avec la pipette jaugée'}])}
+ ];
+}
+function labMat(){
+ const groups=matGroups();
+ labHost.innerHTML=`${mission()}`+groups.map((g,gi)=>`<fieldset><legend>${g.title}</legend><div class="opts">${g.opts.map((o,oi)=>`<label class="opt"><input type="${g.type==='radio'?'radio':'checkbox'}" name="g${gi}" data-g="${gi}" data-o="${oi}">${o.label}</label>`).join('')}</div></fieldset>`).join('')+
+  `<div class="btnrow"><button class="primary" id="ok-mat">Valider mon choix</button></div><div class="fb" id="fb-mat" aria-live="polite"></div>`;
+ $('#ok-mat').onclick=()=>{
+  const problems=[];
+  groups.forEach((g,gi)=>{
+   const checked=$$(`input[data-g="${gi}"]:checked`,labHost).map(i=>g.opts[+i.dataset.o]);
+   if(g.type==='radio'){
+    if(!checked.length)problems.push(`<b>${g.title}</b> : fais un choix.`);
+    else if(!checked[0].ok)problems.push(`<b>${checked[0].label}</b> : ${checked[0].why}`);
+   }else{
+    g.opts.forEach((o,oi)=>{const on=$(`input[data-g="${gi}"][data-o="${oi}"]`,labHost).checked;
+     if(o.ok&&!on)problems.push(`Il manque « ${o.label} » : ${o.why}.`);
+     if(!o.ok&&on)problems.push(`« ${o.label} » est inutile : ${o.why}.`);});
+   }
+  });
+  if(problems.length){L.errs.mat++;fbx('#fb-mat','ko','<b>À revoir :</b><ul style="margin:4px 0 0;padding-left:20px">'+problems.map(p=>`<li>${p}</li>`).join('')+'</ul>');}
+  else{fbx('#fb-mat','ok','<b>Matériel complet et adapté.</b> Tu peux passer à la manipulation.');$('#ok-mat').disabled=true;
+   $('#fb-mat').insertAdjacentHTML('afterend','<div class="btnrow"><button class="btn pri" id="go-man">Manipuler ▶</button></div>');$('#go-man').onclick=()=>labGo(3);}
+ };
+}
+
+/* --- phase 3 : manipulation --- */
+function labMan(){
+ labHost.innerHTML=`${mission()}<div id="eng"></div>`;
+ engine($('#eng'),{steps:L.proto.steps,dist:L.proto.dist,state:L.proto.state,anims:L.proto.anims,weighAt:L.proto.weighAt,target:L.kind==='diss'?L.task.m:0,scene:L.scene,
+  onError:()=>{L.errs.man++;},cap:h=>{$('#lab-cap').innerHTML=h;},onDone:()=>labGo(4)});
+}
+function engine(host,cfg){
+ let k=0,consec=0;const N=cfg.steps.length;
+ const items=shuffle([...cfg.steps.map((s,i)=>({i,label:s.short})),...cfg.dist.map((d,j)=>({i:-1-j,label:d.label,why:d.why}))]);
+ host.innerHTML=`<p class="mut" style="margin:0">Clique sur les actions <b>dans le bon ordre</b>. Attention : certaines sont des erreurs classiques !</p><div class="pool">${items.map((it,n)=>`<button class="act" data-n="${n}">${it.label}</button>`).join('')}</div><div class="weigh" hidden></div><div class="msg" aria-live="polite"></div><div class="btnrow" id="endrow"></div>`;
+ const msg=$('.msg',host);
+ const show=(c,h)=>{msg.className='msg '+c;msg.innerHTML=h;};
+ function advance(btn){
+  const s=cfg.steps[k];k++;consec=0;btn.classList.add('done');btn.disabled=true;btn.textContent=`${k}. ${btn.textContent}`;
+  cfg.scene.render(cfg.state(k),cfg.anims[k]);cfg.cap(s.detail);
+  show('ok',`<b>✓ ${s.short}.</b> ${s.detail}<br><i>${s.why}</i>`);
+  if(k===N){show('ok',`<b>Manipulation terminée !</b> ${s.detail}`);$('#endrow').innerHTML='<button class="btn pri" id="go-bil">Voir le bilan ▶</button>';$('#go-bil').onclick=cfg.onDone;}
+ }
+ function wrong(btn,it){
+  cfg.onError();consec++;btn.classList.remove('bump');void btn.offsetWidth;btn.classList.add('bump');
+  let h=it.i<0?`<b>✗ Erreur.</b> ${it.why}`:'<b>✗ Pas dans cet ordre.</b> Relis le protocole : quelle est la prochaine étape ?';
+  if(consec>=3)h+=`<br><i>Indice : la prochaine action commence par « ${cfg.steps[k].short.split(' ').slice(0,3).join(' ')}… »</i>`;
+  show('ko',h);
+ }
+ function weigh(btn){
+  const w=$('.weigh',host);w.hidden=false;
+  const cup=Math.round((2+Math.random()*2)*100)/100;let onPan=false,tare=0,solid=0;
+  const rd=()=>onPan?Math.round((cup+solid-tare)*100)/100:0;
+  w.innerHTML=`<div class="kick">Balance</div><div class="disp" id="disp">0,00 g</div>
+  <div class="btnrow"><button class="btn" data-a="pose">Poser / retirer la coupelle</button><button class="btn" data-a="tare">Tarer</button></div>
+  <div class="btnrow">${[10,1,0.1,0.01].map(d=>`<button class="btn" data-d="${d}">+ ${fmt(d)} g</button>`).join('')}</div>
+  <div class="btnrow">${[1,0.1,0.01].map(d=>`<button class="btn" data-d="${-d}">− ${fmt(d)} g</button>`).join('')}</div>
+  <div class="btnrow"><button class="primary" data-a="ok">Valider la pesée</button></div><div class="fb" id="wfb" aria-live="polite"></div>
+  <p class="mut" style="margin:6px 0 0">Masse à peser : <b>${fmt(cfg.target)} g</b></p>`;
+  const up=()=>{$('#disp',w).textContent=rd().toFixed(2).replace('.',',')+' g';};
+  w.onclick=e=>{const b=e.target.closest('button');if(!b)return;const f=$('#wfb',w);
+   if(b.dataset.a==='pose'){onPan=!onPan;if(!onPan){solid=0;tare=0;}up();f.className='fb';f.innerHTML='';return;}
+   if(b.dataset.a==='tare'){if(!onPan){f.className='fb info';f.innerHTML='Pose d’abord la coupelle sur le plateau.';return;}tare=Math.round((cup+solid)*100)/100;up();return;}
+   if(b.dataset.d){if(!onPan){f.className='fb info';f.innerHTML='Pose d’abord la coupelle sur le plateau.';return;}solid=Math.max(0,Math.round((solid+parseFloat(b.dataset.d))*100)/100);up();return;}
+   if(b.dataset.a==='ok'){
+    if(!onPan){f.className='fb info';f.innerHTML='Pose la coupelle et pèse le solide.';return;}
+    if(Math.abs(tare-cup)>0.001){cfg.onError();f.className='fb ko';f.innerHTML='La tare doit être faite avec la <b>coupelle vide</b>, avant d’ajouter le solide.';return;}
+    const r=rd();
+    if(Math.round(r*100)!==Math.round(cfg.target*100)){cfg.onError();f.className='fb ko';f.innerHTML=r<cfg.target?'Il manque du solide : continue d’ajouter.':'Trop de solide : retire un peu de solide.';return;}
+    w.hidden=true;advance(btn);
+   }
+  };
+ }
+ $$('.act',host).forEach(b=>b.onclick=()=>{
+  const it=items[+b.dataset.n];
+  if(it.i===k){if(k===cfg.weighAt)weigh(b);else advance(b);}
+  else wrong(b,it);
+ });
+}
+
+/* --- phase 4 : bilan --- */
+function labBilan(){
+ const t=L.task,e=L.errs,tot=e.calc+e.mat+e.man,st=tot<=1?'★★★':tot<=4?'★★☆':'★☆☆';
+ let res='',sw='';
+ if(L.kind==='diss'){
+  res=`<p style="margin:6px 0">Tu as pesé <b>${fmt(t.m)} g</b> de ${t.solute.name} pour obtenir <b>${fmt(t.V)} mL</b> de solution :<br>t = m / V = ${fmt(t.m)} g / ${fmt(t.V/1000)} L = <b>${fmt(t.t)} ${U}</b> ✓</p>`;
+  prog.labDiss=true;
+ }else{
+  const op=c=>clamp(0.92*Math.sqrt(c/t.Cm),0.07,0.95);
+  sw=`<span class="sw"><i style="background:${t.dye.color};opacity:.92"></i>mère<br>${fmt(t.Cm)} ${U}</span><span class="sw">→</span><span class="sw"><i style="background:${t.dye.color};opacity:${op(t.Cf)}"></i>fille<br>${fmt(t.Cf)} ${U}</span>`;
+  res=`<p style="margin:6px 0">Tu as prélevé <b>${fmt(t.Vm)} mL</b> de solution mère et complété à <b>${fmt(t.Vf)} mL</b> :<br>${TF} = ${TM} × ${VM} / ${VF} = ${fmt(t.Cm)} × ${fmt(t.Vm)} / ${fmt(t.Vf)} = <b>${fmt(t.Cf)} ${U}</b> ✓<br>La solution a été diluée <b>${fmt(t.F)} fois</b> : elle est ${fmt(t.F)} fois moins concentrée.</p>${sw}`;
+  prog.labDil=true;
+ }
+ saveProg();
+ labHost.innerHTML=`${mission()}<div class="kick">Bilan</div><div class="stars" aria-label="${st.split('★').length-1} étoiles sur 3">${st}</div>${res}
+ <table class="tbl2" style="margin:8px 0"><tr><th>Phase</th><th>Erreurs</th></tr><tr><td>Calculs</td><td>${e.calc}</td></tr><tr><td>Matériel</td><td>${e.mat}</td></tr><tr><td>Manipulation</td><td>${e.man}</td></tr></table>
+ <div class="btnrow"><button class="btn pri" id="again">Nouvelle situation ▶</button></div>`;
+ $('#again').onclick=labNew;
+}
+
+/* ====================== INIT ====================== */
+function showTab(t){
+ $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ $('#p-proto').hidden=t!=='proto';$('#p-calc').hidden=t!=='calc';$('#p-lab').hidden=t!=='lab';
+}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.t)));
+refreshGoals();protoSwitch('diss');exNew();labNew();
+window.__sdd={L,prog,CX,PT};
+</script>
+</body>
+</html>
