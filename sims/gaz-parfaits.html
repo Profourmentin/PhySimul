@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Loi des gaz parfaits : P·V = constante</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Seringue (dispositif) et graphique côte à côte sur grand écran, empilés sur mobile.
+   Les canvas gardent un repère interne fixe et s'adaptent à la largeur disponible. */
+:root {
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --accent: #1B5E8C;
+  --ok: #17734A;
+  --warn: #B45309;
+  --err: #B42318;
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --accent: #6BB4E8; --ok: #67D39B; --warn: #F2B94B; --err: #F2877F;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font-body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 16px 16px 48px; display: flex; flex-direction: column; gap: 18px; }
+.back { display: inline-block; margin-bottom: 10px; color: var(--accent); font-weight: 600; font-size: 14px; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.kicker { margin: 0 0 4px; font: 500 12px var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0 0 6px; font: 600 clamp(28px, 5vw, 40px)/1.1 var(--font-head); }
+.sub { margin: 0; color: var(--muted); max-width: 74ch; }
+
+.grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 920px) { .grid { grid-template-columns: 1.35fr 1fr; gap: 22px; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; }
+.panel h2 { margin: 0 0 10px; font: 600 18px var(--font-head); text-align: center; }
+/* les canvas restent blancs : leur contenu est dessiné pour un fond clair */
+canvas { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; touch-action: pan-y; }
+#syringe { cursor: default; }
+
+.ctrl { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-top: 12px; }
+.ctrl label { font-weight: 600; }
+.ctrl output { font: 600 16px var(--font-data); min-width: 5.5em; text-align: right; }
+input[type=range] { width: 100%; height: 32px; margin: 0; cursor: pointer; accent-color: var(--accent); }
+.note { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.note.warn { color: var(--warn); font-weight: 500; }
+.obs { margin: 12px 0 0; font: 500 16px/1.45 var(--font-body); color: var(--accent); min-height: 2.9em; }
+
+.btn { font: 600 14px var(--font-body); padding: 8px 14px; min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0D1419; } }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, canvas:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
+.tab[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab[aria-pressed="true"] { color: #0D1419; } }
+.check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 12px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--bg); }
+.card .k { font: 500 12px var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.card .v { font: 600 28px/1.2 var(--font-head); }
+.card .s { font: 400 13px/1.4 var(--font-data); color: var(--muted); }
+.calc { margin-top: 12px; padding: 10px 12px; border-left: 4px solid var(--accent); background: var(--bg); border-radius: 0 10px 10px 0; font: 500 15px/1.8 var(--font-data); overflow-wrap: anywhere; }
+.calc sup { font-size: .75em; }
+.calc small { color: var(--muted); font-family: var(--font-body); }
+
+.tablewrap { overflow-x: auto; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; font: 500 15px var(--font-data); }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th { font: 600 12px var(--font-data); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+td.warnrow { color: var(--warn); }
+.empty { padding: 14px; text-align: center; color: var(--muted); font-style: italic; white-space: normal; }
+@media (max-width: 520px) { table { font-size: 13px; } th, td { padding: 6px 5px; } th { font-size: 10px; letter-spacing: 0; } }
+.bilan { margin: 12px 0 0; font-weight: 500; min-height: 1.5em; }
+.bilan.ok { color: var(--ok); }
+.bilan.warn { color: var(--warn); }
+
+.q { font-size: 17px; line-height: 1.55; margin: 0 0 12px; }
+.answer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.answer input[type=text] { font: 600 18px var(--font-data); width: 9em; padding: 8px 10px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.answer .unit { font: 600 18px var(--font-data); }
+.fb { margin: 12px 0 0; font-weight: 500; min-height: 1.5em; }
+.fb.ok { color: var(--ok); } .fb.warn { color: var(--warn); } .fb.err { color: var(--err); }
+.solution { margin: 10px 0 0; padding: 10px 12px; border-left: 4px solid var(--ok); background: var(--bg); border-radius: 0 10px 10px 0; font: 500 15px/1.7 var(--font-data); }
+.solution[hidden] { display: none; }
+.score { color: var(--muted); font-size: 14px; }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px; }
+summary { cursor: pointer; font: 600 17px var(--font-head); padding: 10px 0; }
+details[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+details p, details li { max-width: 78ch; }
+details ul { padding-left: 20px; }
+.ext-grid { display: grid; grid-template-columns: 1fr; gap: 4px 24px; }
+@media (min-width: 760px) { .ext-grid { grid-template-columns: 1fr 1fr; } }
+.fraction { display: inline-block; vertical-align: middle; text-align: center; }
+.fraction > span { display: block; padding: 0 4px; }
+.fraction > span:first-child { border-bottom: 1px solid currentColor; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../index.html">← Catalogue des simulations</a>
+    <p class="kicker">Mouvement et interactions · Première spécialité</p>
+    <h1>Loi des gaz parfaits : P·V = constante</h1>
+    <p class="sub">Un gaz est enfermé dans une seringue, à température constante. Comprime-le, lis sa pression sur le capteur, relève des mesures et teste la loi de Mariotte.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="Seringue et capteur de pression">
+      <h2>1. Le dispositif</h2>
+      <canvas id="syringe" width="640" height="250" tabindex="0" role="img" aria-label="Seringue contenant un gaz, reliée à un capteur de pression. Le piston se déplace avec le curseur ou en le faisant glisser. Les particules du gaz rebondissent sur les parois."></canvas>
+      <div class="ctrl">
+        <label for="vSlider">Volume</label>
+        <input type="range" id="vSlider" min="10" max="60" step="1" value="50" aria-controls="obs cP cV cPV cF">
+        <output id="vOut" for="vSlider">50 mL</output>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn" id="playBtn" aria-pressed="false">⏸ Pause</button>
+        <button type="button" class="btn" id="resetBtn">↺ Volume de départ</button>
+        <span class="note" style="margin:0">Tu peux aussi faire glisser le piston.</span>
+      </div>
+      <p class="obs" id="obs" aria-live="polite"></p>
+      <p class="note" id="cond"></p>
+      <p class="note">Chaque point représente une particule de gaz. L'échelle est illustrative : cette seringue contient environ <span id="nbMol">10<sup>21</sup></span> molécules. Plus le volume est petit, plus les chocs sur le piston sont fréquents.</p>
+    </section>
+
+    <section class="panel" aria-label="Graphique">
+      <h2>2. Le graphique</h2>
+      <div class="tabs" role="group" aria-label="Choix du graphique">
+        <button type="button" class="btn tab" data-tab="P" aria-pressed="true">P = f(V)</button>
+        <button type="button" class="btn tab" data-tab="inv" aria-pressed="false">P = f(1/V)</button>
+        <button type="button" class="btn tab" data-tab="PV" aria-pressed="false">P×V = f(V)</button>
+      </div>
+      <canvas id="graph" width="440" height="330" role="img" aria-label="Graphique des mesures relevées : pression, ou produit pression par volume, en fonction du volume ou de son inverse."></canvas>
+      <div class="toolbar">
+        <label class="check"><input type="checkbox" id="modelChk"> Afficher la courbe du modèle</label>
+      </div>
+      <p class="note" id="graphNote"></p>
+    </section>
+  </div>
+
+  <section class="panel" aria-label="Valeurs lues et calculs">
+    <h2>Ce que lit le capteur</h2>
+    <div class="cards">
+      <div class="card"><div class="k">Pression P</div><div class="v" id="cP">—</div><div class="s" id="cPs"></div></div>
+      <div class="card"><div class="k">Volume V</div><div class="v" id="cV">—</div><div class="s" id="cVs"></div></div>
+      <div class="card"><div class="k">Produit P × V</div><div class="v" id="cPV">—</div><div class="s">constant si T et la quantité de gaz ne changent pas</div></div>
+      <div class="card"><div class="k">Force pressante F</div><div class="v" id="cF">—</div><div class="s" id="cFs"></div></div>
+    </div>
+    <div class="calc" id="calc" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" aria-label="Tableau de mesures">
+    <h2>3. Teste la loi : tableau de mesures</h2>
+    <p class="note" style="margin-top:0">Déplace le piston, relève plusieurs mesures (au moins 5, bien réparties entre 10 mL et 60 mL), puis observe le produit P × V.</p>
+    <div class="toolbar">
+      <button type="button" class="btn primary" id="addBtn">＋ Relever la mesure</button>
+      <button type="button" class="btn" id="delBtn">Supprimer la dernière</button>
+      <button type="button" class="btn" id="clearBtn">Tout effacer</button>
+      <label class="check"><input type="checkbox" id="realChk"> Capteur réaliste (petites variations de mesure)</label>
+    </div>
+    <div class="tablewrap">
+      <table id="tbl">
+        <thead><tr><th scope="col">n°</th><th scope="col">V (mL)</th><th scope="col">P (hPa)</th><th scope="col">P × V (hPa·mL)</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="bilan" id="bilan" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" aria-label="Défi de calcul">
+    <h2>4. Défi : à toi de calculer</h2>
+    <p class="q" id="chQ"></p>
+    <div class="answer">
+      <label for="chIn" class="note" style="margin:0">Ta réponse :</label>
+      <input type="text" id="chIn" inputmode="decimal" autocomplete="off" placeholder="ex. 2 535">
+      <span class="unit" id="chUnit"></span>
+      <button type="button" class="btn primary" id="chCheck">Vérifier</button>
+      <button type="button" class="btn" id="chSol">Voir la correction</button>
+      <button type="button" class="btn" id="chNew">Autre défi</button>
+    </div>
+    <p class="fb" id="chFb" aria-live="polite"></p>
+    <div class="solution" id="chSolBox" hidden></div>
+    <p class="score" id="chScore"></p>
+  </section>
+
+  <details>
+    <summary>Rappels : unités et relations</summary>
+    <ul>
+      <li><b>Loi de Mariotte</b> : pour une quantité de gaz donnée, à température constante, le produit <i>P</i> × <i>V</i> est constant : <i>P</i><sub>1</sub> × <i>V</i><sub>1</sub> = <i>P</i><sub>2</sub> × <i>V</i><sub>2</sub>.</li>
+      <li><b>Pression</b> : l'unité du Système International est le pascal (Pa). 1 hPa = 100 Pa ; 1 bar = 10<sup>5</sup> Pa = 1000 hPa.</li>
+      <li><b>Volume</b> : 1 mL = 1 cm<sup>3</sup> = 10<sup>−6</sup> m<sup>3</sup> ; 1 L = 10<sup>−3</sup> m<sup>3</sup>.</li>
+      <li><b>Force pressante</b> : <i>F</i> = <i>P</i> × <i>S</i>, avec <i>F</i> en newton (N), <i>P</i> en pascal (Pa) et <i>S</i> en m<sup>2</sup>. 1 cm<sup>2</sup> = 10<sup>−4</sup> m<sup>2</sup>.</li>
+    </ul>
+  </details>
+
+  <details id="ext">
+    <summary>Pour aller plus loin (Terminale) : et si la température ou la quantité de gaz change ?</summary>
+    <p>Dans le modèle du gaz parfait, les particules sont ponctuelles et n'interagissent pas entre elles. L'équation d'état s'écrit <i>P</i> × <i>V</i> = <i>n</i> × <i>R</i> × <i>T</i>, avec <i>R</i> = 8,314 J·mol<sup>−1</sup>·K<sup>−1</sup> et <i>T</i> en kelvin (<i>T</i> = θ + 273,15). À <i>T</i> et <i>n</i> constants, le produit <i>n</i>·<i>R</i>·<i>T</i> est constant : on retrouve la loi de Mariotte. Cette équation relève du programme de Terminale.</p>
+    <div class="ext-grid">
+      <div class="ctrl"><label for="thSlider">Température θ</label><input type="range" id="thSlider" min="-20" max="150" step="1" value="20"><output id="thOut" for="thSlider">20 °C</output></div>
+      <div class="ctrl"><label for="nSlider">Quantité de gaz <i>n</i></label><input type="range" id="nSlider" min="1" max="4" step="0.01" value="2.08"><output id="nOut" for="nSlider">2,08 mmol</output></div>
+    </div>
+    <div class="toolbar"><button type="button" class="btn" id="extReset">↺ Revenir à 20 °C et 2,08 mmol</button></div>
+    <div class="calc" id="extCalc" aria-live="polite"></div>
+    <p class="note">Essaie : relève des mesures à 20 °C, puis chauffe le gaz et relève-en d'autres. Le produit <i>P</i> × <i>V</i> change : la loi de Mariotte ne vaut qu'à température et quantité de gaz constantes.</p>
+  </details>
+
+  <details>
+    <summary>Repères pour l'enseignant</summary>
+    <ul>
+      <li><b>Programme de Première spécialité</b>, thème « Mouvement et interactions », partie « Description d'un fluide au repos » : grandeurs macroscopiques (pression, température), modèle de comportement d'un gaz (loi de Mariotte), relation <i>F</i> = <i>P</i>·<i>S</i>.</li>
+      <li><b>Capacités travaillées</b> : expliquer qualitativement le lien entre grandeurs macroscopiques et agitation des particules ; tester la loi de Mariotte à partir de mesures (le capteur réaliste ajoute une incertitude de lecture d'environ 0,4 %) ; utiliser la loi de Mariotte dans un calcul ; exploiter <i>F</i> = <i>P</i>·<i>S</i> avec les conversions d'unités.</li>
+      <li><b>Au-delà du programme de Première</b> : l'équation d'état <i>PV</i> = <i>nRT</i> (Terminale) n'est proposée que dans le volet « Pour aller plus loin ».</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- constantes et réglages ---------- */
+  var R = 8.314;                      // J·mol⁻¹·K⁻¹ (volet Terminale)
+  var S_CM2 = 6.0;                    // section du piston, cm²
+  var S_M2 = S_CM2 * 1e-4;            // m²
+  var V_MIN = 10, V_MAX = 60, V_REF = 50;   // mL
+  var TH_REF = 20, N_REF = 2.08;      // °C ; mmol
+  var K_REF = (N_REF / 1000) * R * (TH_REF + 273.15);   // J (= Pa·m³)
+  var P_REF = K_REF * 1e4 / V_REF;    // hPa à V_REF (≈ 1014 hPa, pression atmosphérique)
+  var MAX_ROWS = 12;
+  var N_AVOGADRO = 6.022e23;
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { V: V_REF, th: TH_REF, n: N_REF, paused: !!reduceMotion, realistic: false, tab: 'P', model: false, rows: [], P: P_REF };
+
+  function Tk() { return st.th + 273.15; }
+  function kJ() { return (st.n / 1000) * R * Tk(); }           // P·V en Pa·m³ (= J)
+  function pTrueHpa(V) { return kJ() * 1e4 / V; }              // P en hPa pour V en mL
+
+  /* ---------- mise en forme (virgule décimale) ---------- */
+  function $(id) { return document.getElementById(id); }
+  function fr(x, dec) { return x.toLocaleString('fr-FR', { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
+  function sg(x, s) {                       // s chiffres significatifs
+    if (!isFinite(x) || x === 0) return '0';
+    var r = Number(x.toPrecision(s));
+    var e = Math.floor(Math.log10(Math.abs(r)));
+    return fr(r, Math.max(0, s - 1 - e));
+  }
+  function sci(x, s) {                      // notation scientifique avec exposant en HTML
+    if (!isFinite(x) || x === 0) return '0';
+    var e = Math.floor(Math.log10(Math.abs(x)));
+    var m = Number((x / Math.pow(10, e)).toPrecision(s));
+    if (m >= 10) { m /= 10; e += 1; }
+    return fr(m, s - 1) + ' × 10<sup>' + String(e).replace('-', '−') + '</sup>';
+  }
+
+  /* ---------- canvas ---------- */
+  var cvS = $('syringe'), cxS = cvS.getContext('2d');
+  var cvG = $('graph'), cxG = cvG.getContext('2d');
+  var WS = 640, HS = 250, WG = 440, HG = 330;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cvS.width = WS * dpr; cvS.height = HS * dpr; cxS.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cvG.width = WG * dpr; cvG.height = HG * dpr; cxG.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  /* ---------- géométrie de la seringue ---------- */
+  var SX = 116;               // x de la paroi gauche (intérieur)
+  var PXMM = 7;               // pixels par mL
+  var BY0 = 112, BY1 = 192;   // intérieur du corps de seringue (y)
+  var BARREL_END = 560;
+  function pistonX(V) { return SX + PXMM * V; }
+
+  /* ---------- particules ---------- */
+  var parts = [];
+  var N0 = 24;
+  var lastT = Tk();
+  var hitsWindow = 0, hitRate = 0, windowT = 0, flash = 0;
+
+  function vbase() { return 230 * Math.sqrt(Tk() / 293.15); }
+  function spawn() {
+    var a = Math.random() * 2 * Math.PI, f = 0.55 + Math.random() * 0.9;
+    var xp = pistonX(st.V);
+    return { x: SX + 6 + Math.random() * (xp - SX - 12), y: BY0 + 6 + Math.random() * (BY1 - BY0 - 12),
+             vx: Math.cos(a) * f * vbase(), vy: Math.sin(a) * f * vbase() };
+  }
+  function syncParticles() {
+    var target = Math.max(4, Math.round(N0 * st.n / N_REF));
+    while (parts.length < target) parts.push(spawn());
+    while (parts.length > target) parts.pop();
+  }
+  function step(dt) {
+    var T = Tk();
+    if (Math.abs(T - lastT) > 1e-9) {
+      var k = Math.sqrt(T / lastT);
+      for (var j = 0; j < parts.length; j++) { parts[j].vx *= k; parts[j].vy *= k; }
+      lastT = T;
+    }
+    var xp = pistonX(st.V), r = 4;
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.x < SX + r) { p.x = SX + r; p.vx = Math.abs(p.vx); }
+      if (p.x > xp - r) { p.x = xp - r; p.vx = -Math.abs(p.vx); hitsWindow++; flash = 1; }
+      if (p.y < BY0 + r) { p.y = BY0 + r; p.vy = Math.abs(p.vy); }
+      if (p.y > BY1 - r) { p.y = BY1 - r; p.vy = -Math.abs(p.vy); }
+    }
+    flash = Math.max(0, flash - dt * 6);
+    windowT += dt;
+    if (windowT >= 1) { hitRate = hitRate ? 0.5 * hitRate + 0.5 * (hitsWindow / windowT) : hitsWindow / windowT; hitsWindow = 0; windowT = 0; }
+  }
+
+  /* ---------- capteur ---------- */
+  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function readSensor() {
+    var p = pTrueHpa(st.V);
+    if (st.realistic) p *= 1 + 0.004 * gauss();
+    st.P = Number(p.toPrecision(4));
+  }
+
+  /* ---------- dessin : seringue ---------- */
+  function rr(c, x, y, w, h, rad) {
+    c.beginPath(); c.moveTo(x + rad, y); c.lineTo(x + w - rad, y); c.arcTo(x + w, y, x + w, y + rad, rad);
+    c.lineTo(x + w, y + h - rad); c.arcTo(x + w, y + h, x + w - rad, y + h, rad);
+    c.lineTo(x + rad, y + h); c.arcTo(x, y + h, x, y + h - rad, rad);
+    c.lineTo(x, y + rad); c.arcTo(x, y, x + rad, y, rad); c.closePath();
+  }
+  function tempColor() {
+    var t = Math.min(1, Math.max(0, (Tk() - 253.15) / 220));
+    return 'hsl(' + Math.round(215 - 215 * t) + ',62%,52%)';
+  }
+  function drawSyringe() {
+    var c = cxS, V = st.V, xp = pistonX(V), cy = (BY0 + BY1) / 2;
+    c.clearRect(0, 0, WS, HS);
+    c.textBaseline = 'alphabetic';
+
+    // force pressante du gaz sur le piston (flèche)
+    var Fn = st.P * 100 * S_M2;
+    var len = Math.max(4, Math.min(330, Fn * 0.9, WS - 12 - (xp + 7 + 12)));
+    c.fillStyle = '#B42318'; c.strokeStyle = '#B42318'; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(xp + 7, 72); c.lineTo(xp + 7 + len, 72); c.stroke();
+    c.beginPath(); c.moveTo(xp + 7 + len + 12, 72); c.lineTo(xp + 7 + len, 64); c.lineTo(xp + 7 + len, 80); c.closePath(); c.fill();
+    c.font = '600 13px "IBM Plex Sans", system-ui, sans-serif'; c.textAlign = 'left';
+    var fTxt = 'Force pressante du gaz sur le piston : F = ' + sg(Fn, 3) + ' N';
+    c.fillText(fTxt, Math.min(Math.max(8, xp - 40), WS - c.measureText(fTxt).width - 8), 52);
+
+    // gaz (zone colorée) et corps de seringue
+    c.fillStyle = '#EAF2FB'; c.fillRect(SX, BY0, xp - SX, BY1 - BY0);
+    c.strokeStyle = tempColor(); c.lineWidth = 6;
+    c.beginPath(); c.moveTo(SX - 6, BY0 - 3); c.lineTo(BARREL_END, BY0 - 3); c.moveTo(SX - 6, BY1 + 3); c.lineTo(BARREL_END, BY1 + 3); c.stroke();
+    c.strokeStyle = '#6B7280'; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(SX - 3, BY0 - 6); c.lineTo(SX - 3, BY1 + 6); c.stroke();
+
+    // graduations (mL)
+    c.strokeStyle = '#374151'; c.fillStyle = '#374151'; c.lineWidth = 1;
+    c.font = '500 11px "IBM Plex Mono", ui-monospace, monospace'; c.textAlign = 'center';
+    for (var g = 0; g <= V_MAX; g += 2) {
+      var gx = SX + PXMM * g, major = g % 10 === 0;
+      c.beginPath(); c.moveTo(gx, BY0 - 6); c.lineTo(gx, BY0 - (major ? 15 : 10)); c.stroke();
+      if (major && g > 0) c.fillText(String(g), gx, BY0 - 19);
+    }
+    c.textAlign = 'left'; c.fillText('mL', SX + PXMM * V_MAX + 6, BY0 - 12);
+
+    // particules
+    c.fillStyle = '#1B5E8C';
+    for (var i = 0; i < parts.length; i++) { c.beginPath(); c.arc(parts[i].x, parts[i].y, 4, 0, 2 * Math.PI); c.fill(); }
+
+    // piston, tige, poignée
+    c.fillStyle = flash > 0 ? '#F59E0B' : '#4B5563';
+    c.fillRect(xp, BY0, 5, BY1 - BY0);
+    c.fillStyle = '#1F2937'; c.fillRect(xp + 5, BY0, 9, BY1 - BY0);
+    c.fillStyle = '#9CA3AF'; c.fillRect(xp + 14, cy - 5, 600 - (xp + 14), 10);
+    rr(c, 600, cy - 30, 10, 60, 3); c.fillStyle = '#4B5563'; c.fill();
+
+    // tuyau et capteur de pression
+    c.fillStyle = '#9CA3AF'; c.fillRect(86, cy - 3, SX - 86 - 3, 6);
+    rr(c, 8, cy - 36, 78, 72, 8); c.fillStyle = '#E5E7EB'; c.fill(); c.strokeStyle = '#6B7280'; c.lineWidth = 2; c.stroke();
+    c.fillStyle = '#374151'; c.textAlign = 'center'; c.font = '600 10px "IBM Plex Sans", system-ui, sans-serif';
+    c.fillText('CAPTEUR DE', 47, cy - 22); c.fillText('PRESSION', 47, cy - 11);
+    rr(c, 14, cy - 5, 66, 30, 4); c.fillStyle = '#10261B'; c.fill();
+    c.fillStyle = '#7CF0A6'; c.font = '600 17px "IBM Plex Mono", ui-monospace, monospace';
+    c.fillText(String(Math.round(st.P)), 47, cy + 12);
+    c.font = '500 9px "IBM Plex Mono", ui-monospace, monospace'; c.fillText('hPa', 47, cy + 22);
+
+    // fréquence des chocs sur le piston
+    c.fillStyle = '#374151'; c.textAlign = 'left'; c.font = '500 13px "IBM Plex Sans", system-ui, sans-serif';
+    c.fillText('Chocs sur le piston : environ ' + Math.round(hitRate) + ' par seconde', 116, 232);
+    c.textAlign = 'right'; c.fillText('Paroi : θ = ' + st.th + ' °C', WS - 14, 232);
+  }
+
+  /* ---------- graphique ---------- */
+  function niceScale(maxVal) {
+    var raw = Math.max(maxVal, 1e-9) / 6, mag = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / mag;
+    var step = (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * mag;
+    return { step: step, top: Math.ceil(maxVal / step - 1e-9) * step };
+  }
+  function tickLabel(v, step) {
+    if (v === 0) return '0';
+    var dec = step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log10(step) - 1e-9));
+    return fr(v, dec);
+  }
+  var TABS = {
+    P:   { xl: 'V (mL)',     yl: 'P (hPa)',          fx: function (r) { return r.V; },     fy: function (r) { return r.P; },        xmax: 60,  xstep: 10 },
+    inv: { xl: '1/V (mL⁻¹)', yl: 'P (hPa)',          fx: function (r) { return 1 / r.V; }, fy: function (r) { return r.P; },        xmax: 0.1, xstep: 0.02 },
+    PV:  { xl: 'V (mL)',     yl: 'P × V (hPa·mL)',   fx: function (r) { return r.V; },     fy: function (r) { return r.P * r.V; }, xmax: 60,  xstep: 10 }
+  };
+  function drawGraph() {
+    var c = cxG, tab = TABS[st.tab];
+    var L = 66, Rm = 14, Tm = 26, B = 46, w = WG - L - Rm, h = HG - Tm - B;
+    var live = { V: st.V, P: st.P };
+    var ymaxRaw = st.tab === 'PV' ? kJ() * 1e4 * 1.3 : pTrueHpa(V_MIN) * 1.08;
+    [live].concat(st.rows).forEach(function (r) { ymaxRaw = Math.max(ymaxRaw, tab.fy(r) * 1.05); });
+    var ys = niceScale(ymaxRaw), ymax = ys.top;
+    function X(v) { return L + (v / tab.xmax) * w; }
+    function Y(v) { return Tm + h - (v / ymax) * h; }
+
+    c.clearRect(0, 0, WG, HG);
+    c.font = '500 11px "IBM Plex Mono", ui-monospace, monospace'; c.fillStyle = '#374151'; c.strokeStyle = '#E5E7EB'; c.lineWidth = 1;
+    c.textAlign = 'right'; c.textBaseline = 'middle';
+    for (var yv = 0; yv <= ymax + ys.step / 2; yv += ys.step) {
+      c.beginPath(); c.moveTo(L, Y(yv)); c.lineTo(L + w, Y(yv)); c.stroke();
+      c.fillText(tickLabel(yv, ys.step), L - 6, Y(yv));
+    }
+    c.textAlign = 'center'; c.textBaseline = 'top';
+    for (var xv = 0; xv <= tab.xmax + tab.xstep / 2; xv += tab.xstep) {
+      c.beginPath(); c.moveTo(X(xv), Tm); c.lineTo(X(xv), Tm + h); c.stroke();
+      c.fillText(tickLabel(xv, tab.xstep), X(xv), Tm + h + 6);
+    }
+    c.strokeStyle = '#374151'; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(L, Tm); c.lineTo(L, Tm + h); c.lineTo(L + w, Tm + h); c.stroke();
+    c.fillStyle = '#111827'; c.font = '600 12px "IBM Plex Sans", system-ui, sans-serif';
+    c.textAlign = 'right'; c.textBaseline = 'alphabetic'; c.fillText(tab.xl, L + w, HG - 6);
+    c.textAlign = 'left'; c.fillText(tab.yl, 6, 16);
+
+    c.save(); c.beginPath(); c.rect(L, Tm, w, h); c.clip();
+    if (st.model) {
+      c.strokeStyle = '#1B5E8C'; c.lineWidth = 2; c.setLineDash([6, 4]); c.beginPath();
+      var first = true;
+      for (var s = 0; s <= 100; s++) {
+        var V = V_MIN + (V_MAX - V_MIN) * s / 100, o = { V: V, P: pTrueHpa(V) }, px = X(tab.fx(o)), py = Y(tab.fy(o));
+        if (first) { c.moveTo(px, py); first = false; } else c.lineTo(px, py);
+      }
+      c.stroke(); c.setLineDash([]);
+    }
+    st.rows.forEach(function (r) {
+      var same = r.th === st.th && r.n === st.n, px = X(tab.fx(r)), py = Y(tab.fy(r));
+      c.beginPath(); c.arc(px, py, 5, 0, 2 * Math.PI);
+      if (same) { c.fillStyle = '#1B5E8C'; c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.stroke(); }
+      else { c.strokeStyle = '#9CA3AF'; c.lineWidth = 2; c.stroke(); }
+    });
+    c.beginPath(); c.arc(X(tab.fx(live)), Y(tab.fy(live)), 7, 0, 2 * Math.PI);
+    c.strokeStyle = '#D97706'; c.lineWidth = 3; c.stroke();
+    c.restore();
+  }
+
+  /* ---------- affichage des valeurs ---------- */
+  var OBS_REF_TXT = 'Position de départ : V = ' + V_REF + ' mL et P ≈ ' + Math.round(P_REF) + ' hPa, c’est la pression atmosphérique.';
+  function refresh() {
+    var V = st.V, P = st.P, PPa = P * 100, PV = P * V, F = PPa * S_M2;
+    $('vOut').textContent = V + ' mL';
+    $('vSlider').setAttribute('aria-valuetext', V + ' millilitres');
+    $('cP').innerHTML = sg(P, 4) + ' hPa';
+    $('cPs').innerHTML = '= ' + sci(PPa, 4) + ' Pa';
+    $('cV').innerHTML = V + ' mL';
+    $('cVs').innerHTML = '= ' + V + ' cm<sup>3</sup> = ' + sci(V * 1e-6, 2) + ' m<sup>3</sup>';
+    $('cPV').innerHTML = fr(PV, 0) + ' hPa·mL';
+    $('cF').innerHTML = sg(F, 3) + ' N';
+    $('cFs').innerHTML = 'F = P × S, avec S = ' + fr(S_CM2, 1) + ' cm<sup>2</sup>';
+    $('calc').innerHTML =
+      'P × V = ' + sg(P, 4) + ' hPa × ' + V + ' mL = <b>' + fr(PV, 0) + ' hPa·mL</b><br>' +
+      'F = P × S = ' + sci(PPa, 4) + ' Pa × ' + sci(S_M2, 2) + ' m<sup>2</sup> = <b>' + sg(F, 3) + ' N</b> ' +
+      '<small>(P en pascal, S en m<sup>2</sup>)</small>';
+
+    var unchanged = st.th === TH_REF && st.n === N_REF;
+    if (!unchanged) {
+      $('obs').textContent = 'La température ou la quantité de gaz n’est plus celle du départ : le produit P × V n’est plus le même qu’au départ.';
+    } else if (V === V_REF) {
+      $('obs').textContent = OBS_REF_TXT;
+    } else {
+      var rv = V / V_REF, rp = P / P_REF;
+      $('obs').textContent = 'Par rapport au départ, le volume est multiplié par ' + fr(rv, 2) + ' (' + V_REF + ' → ' + V + ' mL) et la pression par ' + fr(rp, 2) + ' (' + Math.round(P_REF) + ' → ' + Math.round(P) + ' hPa). Ces deux facteurs sont inverses l’un de l’autre.';
+    }
+    var cond = $('cond');
+    if (unchanged) { cond.className = 'note'; cond.textContent = 'Température constante (θ = ' + TH_REF + ' °C) et quantité de gaz constante : ce sont les conditions de la loi de Mariotte.'; }
+    else { cond.className = 'note warn'; cond.textContent = 'Attention : θ = ' + st.th + ' °C et n = ' + fr(st.n, 2) + ' mmol. La loi de Mariotte ne s’applique qu’à température et quantité de gaz constantes.'; }
+
+    var nMol = (st.n / 1000) * N_AVOGADRO;
+    $('nbMol').innerHTML = sci(nMol, 2);
+
+    var gn = $('graphNote');
+    gn.textContent = st.tab === 'P' ? 'Rond orange : état actuel. Points bleus : mesures relevées. Les points en rond gris ont été relevés à une autre température ou quantité de gaz.'
+      : st.tab === 'inv' ? 'Si P est proportionnelle à 1/V, les points sont alignés sur une droite passant par l’origine.'
+      : 'Si P × V est constant, les points sont alignés sur une droite horizontale.';
+
+    // volet Terminale
+    var Tn = Tk(), nmol = st.n / 1000, Vm3 = V * 1e-6;
+    $('thOut').textContent = st.th + ' °C';
+    $('nOut').textContent = fr(st.n, 2) + ' mmol';
+    $('extCalc').innerHTML =
+      'T = θ + 273,15 = ' + st.th + ' + 273,15 = ' + fr(Tn, 2) + ' K<br>' +
+      'P × V = n × R × T = ' + sci(nmol, 3) + ' mol × ' + fr(R, 3) + ' J·mol<sup>−1</sup>·K<sup>−1</sup> × ' + fr(Tn, 2) + ' K = <b>' + sg(kJ(), 4) + ' J</b><br>' +
+      'P = n·R·T / V = ' + sg(kJ(), 4) + ' J / ' + sci(Vm3, 2) + ' m<sup>3</sup> = <b>' + sci(kJ() / Vm3, 4) + ' Pa</b> = ' + sg(kJ() / Vm3 / 100, 4) + ' hPa';
+
+    renderTable();
+    dirty = true;
+  }
+
+  /* ---------- tableau de mesures ---------- */
+  function renderTable() {
+    var tb = $('tbody');
+    if (!st.rows.length) {
+      tb.innerHTML = '<tr><td colspan="4" class="empty">Aucune mesure pour l’instant : clique sur « Relever la mesure ».</td></tr>';
+    } else {
+      tb.innerHTML = st.rows.map(function (r, i) {
+        var same = r.th === TH_REF && r.n === N_REF;
+        return '<tr><td>' + (i + 1) + '</td><td>' + r.V + '</td><td>' + sg(r.P, 4) + '</td><td' + (same ? '' : ' class="warnrow"') + '>' + fr(r.P * r.V, 0) + '</td></tr>';
+      }).join('');
+    }
+    $('addBtn').disabled = st.rows.length >= MAX_ROWS;
+    $('delBtn').disabled = !st.rows.length;
+    $('clearBtn').disabled = !st.rows.length;
+    var b = $('bilan');
+    if (st.rows.length < 3) { b.className = 'bilan'; b.textContent = st.rows.length ? 'Relève encore quelques mesures pour pouvoir conclure.' : ''; return; }
+    var prods = st.rows.map(function (r) { return r.P * r.V; });
+    var mean = prods.reduce(function (a, x) { return a + x; }, 0) / prods.length;
+    var dev = Math.max.apply(null, prods.map(function (x) { return Math.abs(x - mean) / mean * 100; }));
+    var varied = st.rows.some(function (r) { return r.th !== st.rows[0].th || r.n !== st.rows[0].n; });
+    if (varied) { b.className = 'bilan warn'; b.textContent = 'Les mesures n’ont pas toutes été faites à la même température et avec la même quantité de gaz : le produit P × V ne peut pas être comparé.'; }
+    else if (dev < 2) { b.className = 'bilan ok'; b.innerHTML = 'Le produit P × V reste égal à ' + fr(Math.round(mean / 10) * 10, 0) + ' hPa·mL environ (écart maximal à la moyenne : ' + fr(dev, 1) + ' %). Il est constant, aux incertitudes de mesure près : la loi de Mariotte est vérifiée.'; }
+    else { b.className = 'bilan warn'; b.textContent = 'Le produit P × V varie de ' + fr(dev, 1) + ' % autour de sa moyenne : vérifie les mesures relevées.'; }
+  }
+  function addRow() {
+    if (st.rows.length >= MAX_ROWS) return;
+    st.rows.push({ V: st.V, P: st.P, th: st.th, n: st.n });
+    renderTable(); dirty = true;
+  }
+
+  /* ---------- état : volume ---------- */
+  var dirty = true;
+  function setV(v) {
+    v = Math.max(V_MIN, Math.min(V_MAX, Math.round(v)));
+    st.V = v; $('vSlider').value = v;
+    var xp = pistonX(v);
+    for (var i = 0; i < parts.length; i++) if (parts[i].x > xp - 4) { parts[i].x = xp - 4; parts[i].vx = -Math.abs(parts[i].vx); }
+    readSensor(); refresh();
+  }
+
+  /* ---------- événements ---------- */
+  $('vSlider').addEventListener('input', function (e) { setV(Number(e.target.value)); });
+  $('resetBtn').addEventListener('click', function () { setV(V_REF); });
+  $('playBtn').addEventListener('click', function () {
+    st.paused = !st.paused; this.setAttribute('aria-pressed', String(st.paused));
+    this.textContent = st.paused ? '▶ Animer' : '⏸ Pause'; dirty = true;
+  });
+  $('addBtn').addEventListener('click', addRow);
+  $('delBtn').addEventListener('click', function () { st.rows.pop(); renderTable(); dirty = true; });
+  $('clearBtn').addEventListener('click', function () { st.rows = []; renderTable(); dirty = true; });
+  $('modelChk').addEventListener('change', function (e) { st.model = e.target.checked; dirty = true; });
+  $('realChk').addEventListener('change', function (e) { st.realistic = e.target.checked; readSensor(); refresh(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+    b.addEventListener('click', function () {
+      st.tab = b.getAttribute('data-tab');
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      refresh();
+    });
+  });
+  $('thSlider').addEventListener('input', function (e) { st.th = Number(e.target.value); readSensor(); refresh(); });
+  $('nSlider').addEventListener('input', function (e) { st.n = Number(e.target.value); syncParticles(); readSensor(); refresh(); });
+  $('extReset').addEventListener('click', function () {
+    st.th = TH_REF; st.n = N_REF; $('thSlider').value = TH_REF; $('nSlider').value = N_REF;
+    syncParticles(); readSensor(); refresh();
+  });
+  setInterval(function () { if (st.realistic) { readSensor(); refresh(); } }, 900);
+
+  // faire glisser le piston
+  var dragging = false;
+  function canvasX(e) { var r = cvS.getBoundingClientRect(); return (e.clientX - r.left) * (WS / r.width); }
+  function canvasY(e) { var r = cvS.getBoundingClientRect(); return (e.clientY - r.top) * (HS / r.height); }
+  function nearPiston(e) {
+    var x = canvasX(e), y = canvasY(e), xp = pistonX(st.V);
+    return (x > xp - 6 && x < xp + 22 && y > BY0 - 8 && y < BY1 + 8) || (x > 596 && y > 120 && y < 184);
+  }
+  cvS.addEventListener('pointerdown', function (e) {
+    if (!nearPiston(e)) return;
+    dragging = true; cvS.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  cvS.addEventListener('pointermove', function (e) {
+    if (dragging) { setV((canvasX(e) - 7 - SX) / PXMM); return; }
+    cvS.style.cursor = nearPiston(e) ? 'ew-resize' : 'default';
+  });
+  function endDrag() { dragging = false; }
+  cvS.addEventListener('pointerup', endDrag);
+  cvS.addEventListener('pointercancel', endDrag);
+  cvS.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setV(st.V - 1); e.preventDefault(); }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setV(st.V + 1); e.preventDefault(); }
+  });
+
+  /* ---------- défi de calcul ---------- */
+  var ch = null, tries = 0, okCount = 0, doneCount = 0;
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function parseNum(s) {
+    s = String(s).trim().replace(/[\s  ]/g, '').replace(',', '.');
+    s = s.replace(/[×x*·]10\^?\(?(-?\d+)\)?/i, 'e$1');
+    var v = Number(s); return isFinite(v) && s !== '' ? v : NaN;
+  }
+  function rel(a, b) { return Math.abs(a - b) / Math.abs(b); }
+  var P_UNITS = { hPa: 100, bar: 1e5, Pa: 1 };
+  function newChallenge() {
+    tries = 0; $('chFb').textContent = ''; $('chFb').className = 'fb'; $('chSolBox').hidden = true; $('chIn').value = '';
+    var type = pick(['A', 'B', 'C']), i;
+    if (type === 'C') {
+      var pu = pick(['hPa', 'hPa', 'bar', 'bar', 'Pa']);
+      var pv = pu === 'hPa' ? pick([1013, 1200, 1500, 2000, 2500, 3000]) : pu === 'bar' ? pick([1.2, 1.5, 2.0, 2.5, 3.0, 4.0]) : pick([1.2e5, 1.5e5, 2.0e5, 2.5e5]);
+      var S = pick([4, 5, 8, 10, 12, 15, 20]);
+      var pPa = pv * P_UNITS[pu], F = pPa * S * 1e-4;
+      var pTxt = pu === 'Pa' ? sci(pv, 2) : fr(pv, pu === 'bar' ? 1 : 0);
+      ch = {
+        q: 'Le piston d’une seringue a une section S = ' + S + ' cm<sup>2</sup>. Le gaz enfermé exerce sur lui une pression P = ' + pTxt + ' ' + pu + '. Calcule la valeur de la force pressante F exercée par le gaz sur le piston.',
+        unit: 'N', ans: F,
+        wrongs: [
+          { v: pPa * S, hint: 'Pense à convertir la section en m² : 1 cm² = 10⁻⁴ m².' },
+          { v: pv * S * 1e-4, hint: 'Pense à convertir la pression en pascal : 1 hPa = 100 Pa et 1 bar = 10⁵ Pa.' },
+          { v: pv * S, hint: 'Les deux grandeurs doivent être converties : P en pascal (Pa) et S en m².' }
+        ].filter(function (w) { return rel(w.v, F) > 0.03; }),
+        sol: 'F = P × S<br>P = ' + pTxt.replace(/ /g, ' ') + ' ' + pu + ' = ' + sci(pPa, 3) + ' Pa ; S = ' + S + ' cm<sup>2</sup> = ' + sci(S * 1e-4, 2) + ' m<sup>2</sup><br>F = ' + sci(pPa, 3) + ' × ' + sci(S * 1e-4, 2) + ' = <b>' + sg(F, 3) + ' N</b>'
+      };
+    } else {
+      var V1 = pick([20, 30, 40, 50, 60, 80, 100, 120]), V2 = V1, tryN = 0;
+      var ratios = [0.25, 0.4, 0.5, 0.6, 0.8, 1.25, 1.5, 2, 2.5];
+      while ((V2 === V1 || Math.abs(V2 - Math.round(V2)) > 1e-9) && tryN++ < 80) V2 = V1 * pick(ratios);
+      if (Math.abs(V2 - Math.round(V2)) > 1e-9 || V2 === V1) { V1 = 50; V2 = 20; }
+      V2 = Math.round(V2);
+      var unit = pick(['hPa', 'hPa', 'bar']);
+      var P1 = unit === 'hPa' ? pick([800, 1000, 1013, 1200, 1500, 2000]) : pick([0.8, 1.0, 1.2, 1.5, 2.0, 2.5]);
+      var P2 = P1 * V1 / V2, dec = unit === 'hPa' ? 0 : 1;
+      var base = 'Une seringue contient de l’air à la température constante de 20 °C. Quand son volume est V<sub>1</sub> = ' + V1 + ' mL, la pression de l’air est P<sub>1</sub> = ' + fr(P1, dec) + ' ' + unit + '. ';
+      if (type === 'A') {
+        ch = {
+          q: base + 'On déplace le piston lentement jusqu’à V<sub>2</sub> = ' + V2 + ' mL. Calcule la pression P<sub>2</sub> de l’air.',
+          unit: unit, ans: P2,
+          wrongs: [{ v: P1 * V2 / V1, hint: 'Attention : P et V sont inversement proportionnels. Si le volume diminue, la pression augmente.' }].filter(function (w) { return rel(w.v, P2) > 0.03; }),
+          sol: 'Loi de Mariotte : P<sub>1</sub> × V<sub>1</sub> = P<sub>2</sub> × V<sub>2</sub><br>P<sub>2</sub> = P<sub>1</sub> × V<sub>1</sub> / V<sub>2</sub> = ' + fr(P1, dec) + ' × ' + V1 + ' / ' + V2 + ' = <b>' + sg(P2, 3) + ' ' + unit + '</b>'
+        };
+      } else {
+        // la pression P2 affichée est arrondie à 3 chiffres significatifs : la réponse attendue part de cette valeur
+        var P2s = Number(P2.toPrecision(3)), V2b = P1 * V1 / P2s;
+        ch = {
+          q: base + 'On déplace le piston lentement jusqu’à ce que la pression atteigne P<sub>2</sub> = ' + sg(P2s, 3) + ' ' + unit + '. Calcule le volume V<sub>2</sub> de l’air.',
+          unit: 'mL', ans: V2b,
+          wrongs: [{ v: V1 * P2s / P1, hint: 'Attention : P et V sont inversement proportionnels. Si la pression augmente, le volume diminue.' }].filter(function (w) { return rel(w.v, V2b) > 0.03; }),
+          sol: 'Loi de Mariotte : P<sub>1</sub> × V<sub>1</sub> = P<sub>2</sub> × V<sub>2</sub><br>V<sub>2</sub> = P<sub>1</sub> × V<sub>1</sub> / P<sub>2</sub> = ' + fr(P1, dec) + ' × ' + V1 + ' / ' + sg(P2s, 3) + ' = <b>' + sg(V2b, 3) + ' mL</b>'
+        };
+      }
+    }
+    $('chQ').innerHTML = ch.q;
+    $('chUnit').textContent = ch.unit;
+    $('chSolBox').innerHTML = ch.sol;
+    $('chScore').textContent = doneCount ? 'Défis réussis : ' + okCount + ' sur ' + doneCount + ' essayés.' : '';
+  }
+  function checkChallenge() {
+    var v = parseNum($('chIn').value), fb = $('chFb');
+    if (isNaN(v)) { fb.className = 'fb warn'; fb.textContent = 'Écris un nombre, par exemple 2535 ou 2,5.'; return; }
+    tries++;
+    if (rel(v, ch.ans) <= 0.02) {
+      fb.className = 'fb ok'; fb.innerHTML = 'Bravo, c’est correct : ' + sg(ch.ans, 3) + ' ' + ch.unit + '.';
+      $('chSolBox').hidden = false;
+      if (!ch.done) { ch.done = true; okCount++; doneCount++; $('chScore').textContent = 'Défis réussis : ' + okCount + ' sur ' + doneCount + ' essayés.'; }
+      return;
+    }
+    var hint = '';
+    for (var i = 0; i < ch.wrongs.length; i++) if (rel(v, ch.wrongs[i].v) <= 0.03) { hint = ch.wrongs[i].hint; break; }
+    fb.className = 'fb err';
+    fb.textContent = 'Ce n’est pas encore ça. ' + (hint || 'Relis l’énoncé et vérifie ton calcul et les unités.') + (tries >= 2 ? ' Tu peux aussi regarder la correction.' : '');
+  }
+  $('chCheck').addEventListener('click', checkChallenge);
+  $('chIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') checkChallenge(); });
+  $('chSol').addEventListener('click', function () {
+    $('chSolBox').hidden = false;
+    if (!ch.done) { ch.done = true; doneCount++; $('chScore').textContent = 'Défis réussis : ' + okCount + ' sur ' + doneCount + ' essayés.'; }
+  });
+  $('chNew').addEventListener('click', newChallenge);
+
+  /* ---------- boucle d'animation ---------- */
+  var lastTs = null;
+  function frame(ts) {
+    if (lastTs === null) lastTs = ts;
+    var dt = Math.min(0.05, (ts - lastTs) / 1000); lastTs = ts;
+    if (!st.paused || dirty) {
+      if (!st.paused) step(dt);
+      drawSyringe(); drawGraph(); dirty = false;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- démarrage ---------- */
+  if (reduceMotion) { $('playBtn').setAttribute('aria-pressed', 'true'); $('playBtn').textContent = '▶ Animer'; }
+  syncParticles();
+  readSensor();
+  refresh();
+  newChallenge();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
