@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loi d'Ohm : caractéristique d'un dipôle</title>
+<style>
+  :root {
+    --bg:#f8fafc; --ink:#1e293b; --muted:#64748b; --faint:#94a3b8; --line:#e2e8f0;
+    --card:#fff; --soft:#f1f5f9; --blue:#2563eb; --blue-dark:#1e40af; --blue-bg:#eff6ff; --blue-line:#dbeafe;
+    --orange:#ea580c;
+  }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--ink);
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; touch-action:manipulation; }
+  header { background:var(--blue); color:#fff; padding:16px; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+  header .in { max-width:1280px; margin:0 auto; }
+  header h1 { margin:0; font-size:1.5rem; font-weight:700; }
+  header p { margin:4px 0 0; font-size:.875rem; color:#dbeafe; }
+  main { flex:1; display:flex; flex-direction:column; gap:24px; width:100%; max-width:1280px; margin:0 auto; padding:16px; }
+  aside { display:flex; flex-direction:column; gap:20px; width:100%; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .card h2 { margin:0 0 14px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.1rem; font-weight:600; color:#334155; }
+  .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:8px; }
+  .tabs button { padding:8px 4px; border:0; border-radius:12px; font:inherit; font-size:.8125rem; font-weight:500; cursor:pointer; background:var(--soft); color:#334155; }
+  .tabs button:hover { background:var(--line); }
+  .tabs button.tab-active, .tabs button.tab-active:hover { background:var(--blue); color:#fff; }
+  .row { display:flex; justify-content:space-between; font-size:.875rem; font-weight:500; margin-bottom:4px; }
+  .row b { color:var(--blue); }
+  .ctl { margin-bottom:16px; }
+  input[type=range] { width:100%; accent-color:#3b82f6; }
+  .note { margin:4px 0 0; font-size:.75rem; color:var(--muted); }
+  .intro { margin:0 0 12px; font-size:.875rem; color:#334155; }
+  .radios { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; font-size:.875rem; }
+  .radios label, .checks label { display:flex; align-items:center; gap:8px; }
+  .checks { display:flex; flex-direction:column; gap:8px; margin-top:14px; font-size:.875rem; }
+  .btn { width:100%; padding:10px 12px; border:0; border-radius:12px; background:var(--blue); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  .btn:hover { background:var(--blue-dark); }
+  .btnrow { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .small-btn { font:inherit; font-size:.75rem; background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:6px 8px; cursor:pointer; color:#334155; }
+  .small-btn:hover { background:var(--line); }
+  button:focus-visible, input:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
+  .tablewrap { max-height:240px; overflow:auto; border:1px solid var(--line); border-radius:8px; }
+  table { width:100%; border-collapse:collapse; font-size:.8125rem; font-variant-numeric:tabular-nums; }
+  th, td { padding:5px 8px; text-align:right; border-bottom:1px solid var(--soft); white-space:nowrap; }
+  th { position:sticky; top:0; background:var(--soft); font-weight:600; color:#334155; }
+  td:first-child, th:first-child { text-align:center; }
+  td.ser, th.ser { text-align:left; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+  .empty { padding:14px; text-align:center; font-size:.8125rem; color:var(--faint); }
+  .ansrow { display:flex; gap:8px; margin-top:6px; }
+  .ansrow input { flex:1; min-width:0; padding:9px 10px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
+  .ansrow .btn { width:auto; padding:9px 16px; }
+  .feedback { display:none; margin:10px 0 0; font-size:.875rem; padding:10px 12px; border-radius:8px; }
+  .feedback.ok { display:block; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+  .feedback.ko { display:block; background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; }
+  .feedback.info { display:block; background:var(--blue-bg); border:1px solid var(--blue-line); color:var(--blue-dark); }
+  .obs { background:var(--blue-bg); border:1px solid var(--blue-line); border-radius:8px; padding:16px; }
+  .obs h3 { margin:0 0 6px; font-size:.875rem; font-weight:600; color:var(--blue-dark); }
+  .obs ul { margin:0; padding-left:18px; font-size:.875rem; color:#1d4ed8; }
+  .obs li + li { margin-top:4px; }
+  .formula { margin-top:12px; font-size:.75rem; line-height:1.55; color:var(--muted); text-align:center; background:#f8fafc; padding:8px; border-radius:4px; }
+  .formula strong { color:var(--ink); font-size:.9rem; }
+
+  .stage { display:flex; flex-direction:column; gap:16px; width:100%; order:-1; }
+  .panel { position:relative; overflow:hidden; background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  #pc { height:210px; }
+  #pg { height:380px; }
+  canvas { display:block; width:100%; height:100%; }
+  #gcanvas { cursor:crosshair; touch-action:pan-y; }
+  #warn { position:absolute; left:10px; right:10px; bottom:8px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; border-radius:8px; padding:5px 10px; font-size:.78rem; pointer-events:none; }
+  #hintc { position:absolute; left:12px; bottom:8px; font-size:.7rem; color:var(--faint); pointer-events:none; }
+  #legend { position:absolute; right:16px; bottom:54px; background:rgba(255,255,255,.92); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:.75rem; color:#475569; pointer-events:none; }
+  #legend div { white-space:nowrap; }
+  #hintg { position:absolute; right:12px; top:8px; font-size:.7rem; color:var(--faint); pointer-events:none; }
+  @media (min-width:768px) {
+    main { flex-direction:row; align-items:flex-start; }
+    aside { width:36%; }
+    .stage { order:0; width:64%; position:sticky; top:16px; height:calc(100vh - 32px); min-height:560px; }
+    #pc { flex:0 0 38%; height:auto; }
+    #pg { flex:1 1 auto; height:auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="in">
+    <h1>Loi d'Ohm : caractéristique d'un dipôle</h1>
+    <p>Signaux électriques – Niveau Seconde</p>
+  </div>
+</header>
+
+<main>
+  <aside>
+
+    <div class="card tabs" role="group" aria-label="Choix de l'activité">
+      <button id="tab1" type="button">Conducteur ohmique</button>
+      <button id="tab2" type="button">Autres dipôles</button>
+      <button id="tab3" type="button">Défi : R inconnue</button>
+    </div>
+
+    <div class="card">
+      <h2 id="dip_title">Dipôle</h2>
+
+      <div data-m="1">
+        <div class="row"><span>Résistance R</span><b id="r_val"></b></div>
+        <input type="range" id="r_slider" min="0" max="10" step="1" value="4" aria-label="Résistance du conducteur ohmique">
+        <p class="note">Valeur inscrite sur le conducteur (tolérance 5 %). Change de conducteur sans effacer tes mesures : chaque conducteur donne sa propre série de points.</p>
+      </div>
+
+      <div data-m="2">
+        <div class="radios" role="radiogroup" aria-label="Choix du dipôle">
+          <label><input type="radio" name="dip" value="ohm" checked> Conducteur ohmique (220 Ω)</label>
+          <label><input type="radio" name="dip" value="lamp"> Lampe à filament (6 V ; 0,1 A)</label>
+          <label><input type="radio" name="dip" value="ctn"> Thermistance CTN (capteur de température)</label>
+          <label><input type="radio" name="dip" value="ldr"> Photorésistance (capteur de lumière)</label>
+        </div>
+        <div id="ctl_T" class="ctl" hidden>
+          <div class="row"><span>Température θ</span><b id="t_val"></b></div>
+          <input type="range" id="t_slider" min="0" max="100" step="5" value="20" aria-label="Température de la thermistance">
+          <p class="note">Change θ puis refais des mesures : chaque température donne une nouvelle série.</p>
+        </div>
+        <div id="ctl_E" class="ctl" hidden>
+          <div class="row"><span>Éclairement E</span><b id="e_val"></b></div>
+          <input type="range" id="e_slider" min="0" max="3" step="0.25" value="2" aria-label="Éclairement de la photorésistance">
+          <p class="note">Échelle logarithmique : de 1 lx (pénombre) à 1 000 lx (éclairage intense).</p>
+        </div>
+      </div>
+
+      <div data-m="3">
+        <p class="intro">Un conducteur ohmique dont la résistance est <b>inconnue</b> est branché dans le circuit. Détermine sa valeur à partir de tes mesures.</p>
+        <button id="btn_new" type="button" class="small-btn">Nouveau conducteur</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Mesures</h2>
+      <div class="ctl">
+        <div class="row"><span>Tension du générateur U</span><b id="u_val"></b></div>
+        <input type="range" id="u_slider" min="0" max="12" step="0.1" value="6" aria-label="Tension réglée sur le générateur">
+      </div>
+      <button id="btn_add" type="button" class="btn">Ajouter la mesure au tableau</button>
+      <div class="btnrow">
+        <button id="btn_sweep" type="button" class="small-btn" title="Ajoute 8 mesures réparties de 0 V à la tension maximale permise">Balayage auto</button>
+        <button id="btn_undo" type="button" class="small-btn">Annuler la dernière</button>
+        <button id="btn_clear" type="button" class="small-btn">Tout effacer</button>
+      </div>
+      <p id="status" class="note" aria-live="polite"></p>
+      <div class="checks">
+        <label><input type="checkbox" id="chk_noise" checked> Simuler les incertitudes de mesure (≈ 1 %)</label>
+        <label><input type="checkbox" id="chk_live" checked> Montrer le point de fonctionnement sur le graphique</label>
+        <label data-m="13"><input type="checkbox" id="chk_fit" checked> Tracer la droite modèle (U = k × I)</label>
+        <label data-m="2"><input type="checkbox" id="chk_link" checked> Relier les points</label>
+        <label><input type="checkbox" id="chk_anim" checked> Animer le courant</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tableau de mesures</h2>
+      <div class="tablewrap" id="tablewrap"><table id="tbl" aria-label="Tableau de mesures"></table></div>
+    </div>
+
+    <div class="card" data-m="3">
+      <h2>Ma réponse</h2>
+      <label for="ans" style="font-size:.875rem">Résistance du conducteur, en ohms (Ω)</label>
+      <div class="ansrow">
+        <input type="text" id="ans" inputmode="decimal" autocomplete="off" placeholder="ex. 470">
+        <button id="btn_check" type="button" class="btn">Vérifier</button>
+      </div>
+      <p id="feedback" class="feedback" aria-live="polite"></p>
+      <button id="btn_reveal" type="button" class="small-btn" style="margin-top:10px">Voir la correction</button>
+    </div>
+
+    <div class="card">
+      <h2>Observations</h2>
+      <div class="obs">
+        <h3 id="obs_title">Ce que tu peux constater</h3>
+        <ul id="obs_list"></ul>
+      </div>
+      <div class="formula">
+        <strong>U = R × I</strong><br>
+        U en volts (V) · I en ampères (A) · R en ohms (Ω)<br>
+        1 mA = 0,001 A · 1 kΩ = 1 000 Ω<br>
+        Convention récepteur : les flèches de U et de I sont de sens opposés.
+      </div>
+    </div>
+  </aside>
+
+  <div class="stage">
+    <div class="panel" id="pc">
+      <canvas id="ccanvas" role="img" aria-label="Schéma du circuit"></canvas>
+      <div id="hintc">Les points orange indiquent le sens conventionnel du courant.</div>
+      <div id="warn" hidden></div>
+    </div>
+    <div class="panel" id="pg">
+      <canvas id="gcanvas" role="img" aria-label="Graphique de la tension U en fonction de l'intensité I"></canvas>
+      <div id="legend" hidden></div>
+      <div id="hintg">Survole le graphique pour lire des valeurs.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+"use strict";
+/* Unités : U en V, I en mA (affichage de l'ampèremètre), R en Ω.
+   Dipôles idéalisés : générateur parfait, ampèremètre et voltmètre idéaux.
+   - conducteur ohmique : I = U / R (valeur réelle = valeur nominale ± 3 %)
+   - lampe à filament   : I = 0,1 A × (U / 6 V)^0,58   (modèle empirique)
+   - CTN                : R = 1 kΩ × exp[3500 K × (1/T − 1/298,15 K)]
+   - photorésistance    : R = 10 kΩ × (E / 10 lx)^(−0,7) */
+
+const $ = id => document.getElementById(id);
+const NBSP = ' ';
+const INK = '#1e293b', AXIS = '#475569', GRID = '#e2e8f0';
+const BLUE = '#2563eb', ORANGE = '#ea580c';
+const SERIES_COL = ['#2563eb', '#ef4444', '#16a34a', '#a855f7', '#f59e0b', '#0891b2', '#db2777', '#64748b'];
+const R_LIST = [47, 68, 100, 150, 220, 330, 470, 680, 1000, 1500, 2200];
+const CHALLENGE_R = [68, 100, 150, 220, 330, 470, 680, 1000, 1500, 2200];
+
+const fr = (n, d) => (Math.abs(n) < Math.pow(10, -d) / 2 ? 0 : n).toFixed(d).replace('.', ',');
+const frR = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const frE = e => String(e).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const decI = v => (v < 1 ? 3 : (v < 10 ? 2 : 1));
+const fmtI = v => fr(v, decI(v));
+const fmtK = k => fr(k, k < 0.1 ? 3 : 2);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+const st = {
+  mode: 1, dip: 'ohm', Ridx: 4, T: 20, E: 100, U: 6,
+  hid: null, seed: Math.floor(Math.random() * 1000),
+  points: [], cur: { U: 0, I: 0 },
+  noise: true, live: true, anim: true, fit: true, link: true,
+  revealed: false, cursor: null
+};
+if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) st.anim = false;
+
+/* ---------- Modèle physique ---------- */
+function rnd(a, b) {                       // pseudo-aléatoire déterministe dans [-1 ; 1]
+  const s = Math.sin(a * 12.9898 + b * 78.233 + st.seed * 37.719) * 43758.5453;
+  return (s - Math.floor(s)) * 2 - 1;
+}
+
+function dipoleInfo() {
+  if (st.mode === 3) {
+    const R = st.hid.nom * st.hid.fac;
+    return { id:'ohm', R, par:st.hid.nom, Umax:12, key:'', label: st.revealed ? 'R = ' + frR(st.hid.nom) + NBSP + 'Ω' : 'R = ?', sub:'' };
+  }
+  if (st.mode === 1 || st.dip === 'ohm') {
+    const nom = st.mode === 1 ? R_LIST[st.Ridx] : 220;
+    const t = frR(nom) + NBSP + 'Ω';
+    return { id:'ohm', R: nom * (1 + 0.03 * rnd(nom, 99)), par:nom, Umax:12, key:t, label:'R = ' + t, sub:'' };
+  }
+  if (st.dip === 'lamp') return { id:'lamp', par:6, Umax:9, key:'', label:'Lampe', sub:'6 V ; 0,1 A' };
+  if (st.dip === 'ctn') {
+    const R = 1000 * Math.exp(3500 * (1 / (st.T + 273.15) - 1 / 298.15));
+    return { id:'ctn', R, par:st.T, Umax:6, key:'θ = ' + st.T + NBSP + '°C', label:'CTN', sub:'θ = ' + st.T + NBSP + '°C' };
+  }
+  const R = 10000 * Math.pow(st.E / 10, -0.7);
+  return { id:'ldr', R, par:st.E, Umax:12, key:'E = ' + frE(st.E) + NBSP + 'lx', label:'Photorésistance', sub:'E = ' + frE(st.E) + NBSP + 'lx' };
+}
+
+function trueCurrent(d, U) {               // en ampères
+  return d.id === 'lamp' ? 0.1 * Math.pow(U / 6, 0.58) : U / d.R;
+}
+
+function ulim(d) {                         // tension maximale « raisonnable » pour le balayage automatique
+  if (d.id === 'ohm') return Math.min(12, Math.floor(Math.sqrt(0.25 * d.R) * 10) / 10);
+  if (d.id === 'lamp') return 7.2;
+  return d.Umax;
+}
+
+function measure(Uset) {                   // valeurs lues sur les afficheurs
+  const d = dipoleInfo();
+  let u = Uset, i = trueCurrent(d, Uset) * 1000;
+  if (st.noise && Uset > 0) {
+    const k = Math.round(Uset * 100);
+    u *= 1 + 0.01 * rnd(k, d.par + 1);
+    i *= 1 + 0.01 * rnd(k, d.par + 2);
+  }
+  return { U: +u.toFixed(2), I: +i.toFixed(decI(i)) };
+}
+
+function warnText(d, m) {
+  if (d.id === 'ohm' && m.U * m.I / 1000 > 0.25)
+    return '⚠ Puissance reçue : ' + fr(m.U * m.I / 1000, 2) + ' W. Au-delà de 0,25 W, un conducteur ohmique courant chauffe trop : diminue U.';
+  if (d.id === 'lamp' && st.U > 6.6)
+    return '⚠ La tension dépasse la tension nominale de la lampe (6 V) : elle risquerait de griller.';
+  return '';
+}
+
+/* ---------- Séries de mesures ---------- */
+function seriesList() {
+  const map = new Map();
+  st.points.forEach(p => {
+    if (!map.has(p.key)) map.set(p.key, { key:p.key, par:p.par, pts:[], col:SERIES_COL[map.size % SERIES_COL.length] });
+    map.get(p.key).pts.push(p);
+  });
+  return [...map.values()];
+}
+function colorFor(key) {
+  const S = seriesList(), s = S.find(x => x.key === key);
+  return s ? s.col : SERIES_COL[S.length % SERIES_COL.length];
+}
+function stats(pts) {                      // modèle U = k·I (droite passant par l'origine)
+  const q = pts.filter(p => p.I > 0 && p.U > 0);
+  if (!q.length) return { n:0 };
+  let sui = 0, sii = 0;
+  q.forEach(p => { sui += p.U * p.I; sii += p.I * p.I; });
+  const k = sui / sii, R = k * 1000;
+  const ratios = q.map(p => p.U / p.I * 1000);
+  const dev = Math.max(...ratios.map(r => Math.abs(r - R) / R));
+  return { n:q.length, k, R, dev, rmin:Math.min(...ratios), rmax:Math.max(...ratios), aligned: dev <= 0.06 };
+}
+
+function addPoint(Uset, silent) {
+  const d = dipoleInfo();
+  if (st.points.some(p => p.key === d.key && p.Uset === Uset)) { if (!silent) say('Cette mesure est déjà dans le tableau.'); return false; }
+  if (st.points.length >= 60) { say('Le tableau est plein : efface des mesures.'); return false; }
+  const m = measure(Uset);
+  st.points.push({ U:m.U, I:m.I, key:d.key, par:d.par, Uset });
+  return true;
+}
+let sayTimer = null;
+function say(msg) {
+  $('status').textContent = msg;
+  clearTimeout(sayTimer);
+  if (msg) sayTimer = setTimeout(() => { $('status').textContent = ''; }, 4000);
+}
+
+/* ---------- Mise en page des canevas ---------- */
+const cv = { w:0, h:0, dpr:1 }, gv = { w:0, h:0, dpr:1 };
+const cc = $('ccanvas').getContext('2d'), gc = $('gcanvas').getContext('2d');
+function fitCanvas(canvas, v) {
+  const r = canvas.parentElement.getBoundingClientRect();
+  v.dpr = window.devicePixelRatio || 1;
+  v.w = Math.max(1, r.width); v.h = Math.max(1, r.height);
+  canvas.width = Math.round(v.w * v.dpr); canvas.height = Math.round(v.h * v.dpr);
+}
+function resize() { fitCanvas($('ccanvas'), cv); fitCanvas($('gcanvas'), gv); drawCircuit(); drawGraph(); }
+if (window.ResizeObserver) { const ro = new ResizeObserver(resize); ro.observe($('pc')); ro.observe($('pg')); }
+window.addEventListener('resize', resize);
+
+/* ---------- Circuit ---------- */
+function arrowHead(c, x1, y1, x2, y2, s) {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  c.beginPath();
+  c.moveTo(x2, y2); c.lineTo(x2 - s * Math.cos(a - 0.45), y2 - s * Math.sin(a - 0.45));
+  c.moveTo(x2, y2); c.lineTo(x2 - s * Math.cos(a + 0.45), y2 - s * Math.sin(a + 0.45));
+  c.stroke();
+}
+function lcd(c, x, y, w, h, text) {
+  c.fillStyle = '#0f172a'; c.beginPath();
+  if (c.roundRect) c.roundRect(x, y, w, h, 6); else c.rect(x, y, w, h);
+  c.fill();
+  c.fillStyle = '#4ade80'; c.font = 'bold 21px ui-monospace, Menlo, Consolas, monospace';
+  c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, x + w / 2, y + h / 2 + 1);
+}
+
+let phase = 0, dirtyC = true;
+function drawCircuit() {
+  const c = cc, W = cv.w, H = cv.h;
+  c.setTransform(cv.dpr, 0, 0, cv.dpr, 0, 0);
+  c.clearRect(0, 0, W, H);
+  const s = Math.min(W / 640, H / 300);
+  c.translate((W - 640 * s) / 2, (H - 300 * s) / 2); c.scale(s, s);
+
+  const d = dipoleInfo(), cur = st.cur;
+  const xG = 60, xA = 215, xN = 370, xV = 470, yT = 80, yB = 260, yM = 170;
+  c.lineWidth = 3; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = INK;
+
+  // fils
+  c.beginPath(); c.moveTo(xG, yT); c.lineTo(xN, yT); c.lineTo(xN, yB); c.lineTo(xG, yB); c.lineTo(xG, yT); c.stroke();
+  c.beginPath(); c.moveTo(xN, yT); c.lineTo(xV, yT); c.lineTo(xV, yB); c.lineTo(xN, yB); c.stroke();
+  c.fillStyle = INK;
+  [[xN, yT], [xN, yB]].forEach(p => { c.beginPath(); c.arc(p[0], p[1], 5, 0, 7); c.fill(); });
+
+  // charges en mouvement (sens conventionnel, du + vers le −)
+  if (cur.I > 0) {
+    const L1 = xN - xG, L2 = yB - yT, L = 2 * (L1 + L2), gap = 35;
+    for (let i = 0; i < Math.floor(L / gap); i++) {
+      let p = (i * gap + phase) % L, x, y;
+      if (p < L1) { x = xG + p; y = yT; }
+      else if (p < L1 + L2) { x = xN; y = yT + (p - L1); }
+      else if (p < 2 * L1 + L2) { x = xN - (p - L1 - L2); y = yB; }
+      else { x = xG; y = yB - (p - 2 * L1 - L2); }
+      if (y === yT && Math.abs(x - xA) < 30) continue;
+      if (x === xN && Math.abs(y - yM) < 48) continue;
+      if (x === xG && Math.abs(y - yM) < 28) continue;
+      c.fillStyle = '#fb923c'; c.strokeStyle = '#fff'; c.lineWidth = 1.5;
+      c.beginPath(); c.arc(x, y, 5, 0, 7); c.fill(); c.stroke();
+    }
+    c.strokeStyle = INK; c.lineWidth = 3;
+  }
+
+  // générateur
+  c.fillStyle = '#fff'; c.fillRect(xG - 26, yM - 24, 52, 48);
+  c.beginPath(); c.moveTo(xG, yM - 24); c.lineTo(xG, yM - 9); c.moveTo(xG, yM + 9); c.lineTo(xG, yM + 24);
+  c.moveTo(xG - 22, yM - 9); c.lineTo(xG + 22, yM - 9); c.stroke();
+  c.lineWidth = 7; c.beginPath(); c.moveTo(xG - 12, yM + 9); c.lineTo(xG + 12, yM + 9); c.stroke(); c.lineWidth = 3;
+  c.fillStyle = INK; c.font = 'bold 20px system-ui, sans-serif'; c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.fillText('+', xG + 28, yM - 10); c.fillText('−', xG + 28, yM + 12);
+  c.font = 'italic 600 22px system-ui, sans-serif'; c.textAlign = 'right'; c.fillText('G', xG - 30, yM);
+
+  // ampèremètre (en série)
+  c.fillStyle = '#fff'; c.strokeStyle = ORANGE; c.lineWidth = 3;
+  c.beginPath(); c.arc(xA, yT, 24, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = ORANGE; c.font = 'bold 24px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('A', xA, yT + 1);
+  lcd(c, xA - 68, 12, 136, 36, fmtI(cur.I) + ' mA');
+
+  // voltmètre (en dérivation)
+  c.fillStyle = '#fff'; c.strokeStyle = BLUE;
+  c.beginPath(); c.arc(xV, yM, 24, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = BLUE; c.font = 'bold 24px system-ui, sans-serif'; c.fillText('V', xV, yM + 1);
+  lcd(c, xV + 34, yM - 18, 130, 36, fr(cur.U, 2) + ' V');
+
+  // dipôle
+  c.strokeStyle = INK; c.lineWidth = 3; c.fillStyle = '#fff';
+  if (d.id === 'lamp') {
+    const P = cur.U * cur.I / 1000, glow = Math.min(1, P / 0.6 * 0.95);
+    c.beginPath(); c.arc(xN, yM, 28, 0, 7); c.fill();
+    if (glow > 0) { c.fillStyle = 'rgba(250,204,21,' + glow.toFixed(2) + ')'; c.beginPath(); c.arc(xN, yM, 28, 0, 7); c.fill(); }
+    c.beginPath(); c.arc(xN, yM, 28, 0, 7); c.moveTo(xN - 20, yM - 20); c.lineTo(xN + 20, yM + 20); c.moveTo(xN + 20, yM - 20); c.lineTo(xN - 20, yM + 20); c.stroke();
+  } else {
+    c.fillRect(xN - 16, yM - 42, 32, 84); c.strokeRect(xN - 16, yM - 42, 32, 84);
+    if (d.id === 'ctn') {
+      c.beginPath(); c.moveTo(xN - 26, yM + 36); c.lineTo(xN + 10, yM + 36); c.lineTo(xN + 26, yM - 36); c.stroke();
+    } else if (d.id === 'ldr') {
+      c.strokeStyle = '#ca8a04';
+      [[-50, -58], [-34, -66]].forEach(a => {
+        c.beginPath(); c.moveTo(xN + a[0] - 4, yM + a[1] - 4); c.lineTo(xN + a[0] + 22, yM + a[1] + 22); c.stroke();
+        arrowHead(c, xN + a[0] - 4, yM + a[1] - 4, xN + a[0] + 22, yM + a[1] + 22, 9);
+      });
+      c.strokeStyle = INK;
+    }
+  }
+  c.fillStyle = INK; c.textAlign = 'right'; c.textBaseline = 'middle';
+  c.font = 'italic 600 22px system-ui, sans-serif'; c.fillText(d.label, xN - 36, yM - (d.sub ? 10 : 0));
+  if (d.sub) { c.font = '17px system-ui, sans-serif'; c.fillStyle = AXIS; c.fillText(d.sub, xN - 36, yM + 15); }
+
+  // flèches I (orange) et U (bleue)
+  c.lineWidth = 3; c.strokeStyle = ORANGE; c.fillStyle = ORANGE;
+  c.beginPath(); c.moveTo(285, yT); c.lineTo(335, yT); c.stroke(); arrowHead(c, 285, yT, 335, yT, 11);
+  c.font = 'italic bold 22px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('I', 310, yT - 18);
+  c.strokeStyle = BLUE; c.fillStyle = BLUE;
+  c.beginPath(); c.moveTo(418, yB - 24); c.lineTo(418, yT + 26); c.stroke(); arrowHead(c, 418, yB - 24, 418, yT + 26, 11);
+  c.textAlign = 'left'; c.fillText('U', 428, yM);
+}
+
+/* ---------- Graphique U = f(I) ---------- */
+function niceCeil(x) {
+  const e = Math.pow(10, Math.floor(Math.log10(x))), f = x / e;
+  return [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(v => f <= v + 1e-9) * e;
+}
+function niceStep(x) {
+  const e = Math.pow(10, Math.floor(Math.log10(x))), f = x / e;
+  return [1, 2, 2.5, 5, 10].find(v => f <= v + 1e-9) * e;
+}
+function tickFmt(step) { return step % 1 === 0 ? 0 : ((step * 10) % 1 === 0 ? 1 : 2); }
+
+let gview = null;
+function drawGraph() {
+  const c = gc, W = gv.w, H = gv.h;
+  c.setTransform(gv.dpr, 0, 0, gv.dpr, 0, 0);
+  c.clearRect(0, 0, W, H);
+  const d = dipoleInfo();
+  const m = { l:58, r:20, t:34, b:46 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  let imax = trueCurrent(d, d.Umax) * 1000 * 1.02;
+  st.points.forEach(p => { imax = Math.max(imax, p.I * 1.05); });
+  const xMax = niceCeil(imax), yMax = d.Umax;
+  const X = i => m.l + i / xMax * pw, Y = u => m.t + ph - u / yMax * ph;
+  gview = { m, pw, ph, xMax, yMax, X, Y };
+
+  // grille et graduations
+  c.font = '12px system-ui, sans-serif'; c.lineWidth = 1;
+  const sx = niceStep(xMax / 6), sy = niceStep(yMax / 6);
+  c.textAlign = 'center'; c.textBaseline = 'top';
+  for (let v = 0; v <= xMax + 1e-9; v += sx) {
+    const x = X(v);
+    c.strokeStyle = GRID; c.beginPath(); c.moveTo(x, m.t); c.lineTo(x, m.t + ph); c.stroke();
+    c.fillStyle = AXIS; c.fillText(fr(v, tickFmt(sx)), x, m.t + ph + 6);
+  }
+  c.textAlign = 'right'; c.textBaseline = 'middle';
+  for (let v = 0; v <= yMax + 1e-9; v += sy) {
+    const y = Y(v);
+    c.strokeStyle = GRID; c.beginPath(); c.moveTo(m.l, y); c.lineTo(m.l + pw, y); c.stroke();
+    c.fillStyle = AXIS; c.fillText(fr(v, tickFmt(sy)), m.l - 8, y);
+  }
+  c.strokeStyle = AXIS; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(m.l, m.t); c.lineTo(m.l, m.t + ph); c.lineTo(m.l + pw, m.t + ph); c.stroke();
+  c.fillStyle = INK; c.font = '600 13px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  c.fillText('Intensité I (mA)', m.l + pw / 2, H - 8);
+  c.save(); c.translate(15, m.t + ph / 2); c.rotate(-Math.PI / 2); c.fillText('Tension U (V)', 0, 0); c.restore();
+  c.textAlign = 'left'; c.fillText('Caractéristique U = f(I)', m.l, 20);
+
+  const S = seriesList();
+  // droites modèle (modes 1 et 3) ou points reliés (mode 2)
+  S.forEach(s => {
+    c.strokeStyle = s.col; c.lineWidth = 2;
+    if (st.mode === 2) {
+      if (!st.link) return;
+      const pts = s.pts.slice().sort((a, b) => a.I - b.I);
+      c.beginPath(); c.moveTo(X(0), Y(0));
+      pts.forEach(p => c.lineTo(X(p.I), Y(p.U)));
+      c.stroke();
+    } else if (st.fit) {
+      const f = stats(s.pts);
+      if (f.n < 2) return;
+      const xe = Math.min(xMax, yMax / f.k), ye = f.k * xe;
+      c.setLineDash([8, 5]); c.beginPath(); c.moveTo(X(0), Y(0)); c.lineTo(X(xe), Y(ye)); c.stroke(); c.setLineDash([]);
+      if (st.mode === 1 || st.revealed) {
+        c.fillStyle = s.col; c.font = '600 12px system-ui, sans-serif'; c.textAlign = 'right'; c.textBaseline = 'alphabetic';
+        const lab = 'k = ' + fmtK(f.k) + ' V/mA', lx = X(xe) - 8, ly = Math.max(m.t + 14, Y(ye) + 18);
+        c.lineWidth = 4; c.strokeStyle = '#fff'; c.strokeText(lab, lx, ly); c.fillText(lab, lx, ly);
+      }
+    }
+  });
+  // points de mesure
+  S.forEach(s => s.pts.forEach(p => {
+    c.fillStyle = s.col; c.strokeStyle = '#fff'; c.lineWidth = 1.5;
+    c.beginPath(); c.arc(X(p.I), Y(p.U), 5.5, 0, 7); c.fill(); c.stroke();
+  }));
+  // point de fonctionnement courant
+  if (st.live) {
+    const col = colorFor(d.key), x = X(st.cur.I), y = Y(st.cur.U);
+    c.strokeStyle = col; c.lineWidth = 1.2; c.setLineDash([3, 4]);
+    c.beginPath(); c.moveTo(m.l, y); c.lineTo(x, y); c.lineTo(x, m.t + ph); c.stroke(); c.setLineDash([]);
+    c.lineWidth = 2.5; c.fillStyle = 'rgba(255,255,255,.7)';
+    c.beginPath(); c.arc(x, y, 8, 0, 7); c.fill(); c.stroke();
+  }
+  // lecture au curseur
+  const cu = st.cursor;
+  if (cu && cu.x >= m.l && cu.x <= m.l + pw && cu.y >= m.t && cu.y <= m.t + ph) {
+    const iv = (cu.x - m.l) / pw * xMax, uv = (m.t + ph - cu.y) / ph * yMax;
+    c.strokeStyle = '#94a3b8'; c.lineWidth = 1; c.setLineDash([4, 4]);
+    c.beginPath(); c.moveTo(cu.x, m.t); c.lineTo(cu.x, m.t + ph); c.moveTo(m.l, cu.y); c.lineTo(m.l + pw, cu.y); c.stroke(); c.setLineDash([]);
+    c.fillStyle = INK; c.font = '600 12px system-ui, sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.fillText('Lecture : I = ' + fr(iv, xMax < 10 ? 2 : 1) + ' mA ; U = ' + fr(uv, 2) + ' V', m.l + 10, m.t + 18);
+  }
+}
+(function () {
+  const g = $('gcanvas');
+  const set = e => { const r = g.getBoundingClientRect(); st.cursor = { x:e.clientX - r.left, y:e.clientY - r.top }; drawGraph(); };
+  g.addEventListener('pointermove', set);
+  g.addEventListener('pointerdown', set);
+  g.addEventListener('pointerleave', () => { st.cursor = null; drawGraph(); });
+})();
+
+/* ---------- Interface ---------- */
+function renderLegend() {
+  const S = seriesList(), box = $('legend');
+  if (!S.length || (S.length === 1 && !S[0].key)) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = S.map(s => '<div><span class="dot" style="background:' + s.col + '"></span>' + esc(s.key) + '</div>').join('');
+}
+
+function renderTable() {
+  const showSer = st.points.some(p => p.key);
+  const head = '<thead><tr><th>N°</th>' + (showSer ? '<th class="ser">Série</th>' : '') + '<th>U (V)</th><th>I (mA)</th><th>U/I (Ω)</th></tr></thead>';
+  if (!st.points.length) { $('tbl').innerHTML = head + '<tbody><tr><td colspan="' + (showSer ? 5 : 4) + '" class="empty">Aucune mesure pour l\'instant.</td></tr></tbody>'; return; }
+  const rows = st.points.map((p, i) =>
+    '<tr><td>' + (i + 1) + '</td>' +
+    (showSer ? '<td class="ser"><span class="dot" style="background:' + colorFor(p.key) + '"></span>' + esc(p.key) + '</td>' : '') +
+    '<td>' + fr(p.U, 2) + '</td><td>' + fmtI(p.I) + '</td><td>' + (p.I > 0 ? frR(p.U / p.I * 1000) : '—') + '</td></tr>').join('');
+  $('tbl').innerHTML = head + '<tbody>' + rows + '</tbody>';
+}
+
+function ohmicBullets(s, showK) {
+  if (s.n < 3) return ['Place au moins 3 points (avec des tensions différentes) pour savoir si la caractéristique est une droite passant par l\'origine.'];
+  if (!s.aligned) return ['Les points ne sont <b>pas alignés</b> avec l\'origine : le rapport U/I varie de ' + frR(s.rmin) + ' Ω à ' + frR(s.rmax) + ' Ω.'];
+  const b = ['Les points sont <b>alignés avec l\'origine</b> : la tension U est <b>proportionnelle</b> à l\'intensité I.',
+             'Le rapport U/I reste voisin de <b>' + frR(s.R) + ' Ω</b> : c\'est la résistance R du dipôle (loi d\'Ohm : U = R × I).'];
+  if (showK) b.push('Droite modèle : k = ' + fmtK(s.k) + ' V/mA = ' + frR(s.R) + ' Ω. Le coefficient directeur est égal à <b>R</b> (1 V/mA = 1 000 Ω).');
+  return b;
+}
+
+function updateObs() {
+  const d = dipoleInfo(), S = seriesList(), cs = S.find(s => s.key === d.key);
+  const sc = cs ? stats(cs.pts) : { n:0 };
+  let li = [], title = 'Ce que tu peux constater';
+  if (!st.points.length) {
+    li = [st.mode === 3 ? 'Fais varier U, relève U et I, puis ajoute chaque mesure au tableau (ou lance le balayage automatique).'
+        : st.mode === 2 && (st.dip === 'ctn' || st.dip === 'ldr') ? 'Relève quelques mesures, puis change ' + (st.dip === 'ctn' ? 'la température' : 'l\'éclairement') + ' et recommence : chaque valeur donne une nouvelle série.'
+        : 'Fais varier U, lis les deux instruments, puis ajoute la mesure au tableau (ou lance le balayage automatique).'];
+  } else if (st.mode === 1) {
+    li = ohmicBullets(sc, true);
+    const multi = S.filter(s => stats(s.pts).n >= 2);
+    if (multi.length >= 2) li.push('Une droite plus <b>inclinée</b> correspond à une résistance plus <b>grande</b> : pour une même tension, l\'intensité est plus petite.');
+  } else if (st.mode === 3) {
+    if (st.revealed) li = ohmicBullets(sc, true);
+    else if (sc.n < 3) li = ['Ajoute au moins 4 mesures de tensions différentes, puis exploite le tableau ou le graphique.'];
+    else if (!sc.aligned) li = ohmicBullets(sc, false);
+    else li = ['Les points sont <b>alignés avec l\'origine</b> : le conducteur est ohmique, U = R × I.',
+               'Pour trouver R : calcule U/I pour un point (<b>I en ampères</b>) ou exploite la pente de la droite ; vérifie avec plusieurs points.'];
+  } else if (d.id === 'ohm') {
+    li = ohmicBullets(sc, true);
+  } else if (d.id === 'lamp') {
+    if (sc.n < 3) li = ['Relève plusieurs points, bien répartis entre 0 V et 9 V.'];
+    else if (!sc.aligned) li = ['La caractéristique est une <b>courbe</b> : U n\'est pas proportionnelle à I.',
+      'Le rapport U/I n\'est pas constant (de ' + frR(sc.rmin) + ' Ω à ' + frR(sc.rmax) + ' Ω) : la lampe n\'est <b>pas</b> un conducteur ohmique.',
+      'Sa résistance augmente avec la tension : le filament s\'échauffe.'];
+    else li = ohmicBullets(sc, false);
+  } else {
+    const unit = d.id === 'ctn' ? 'la température' : 'l\'éclairement';
+    if (sc.n >= 3 && sc.aligned) li.push('Pour <b>' + esc(d.key) + '</b> fixé, les points sont alignés avec l\'origine : le capteur se comporte comme un conducteur ohmique de résistance <b>' + frR(sc.R) + ' Ω</b>.');
+    else if (sc.n < 3) li.push('Place au moins 3 points pour cette valeur de ' + unit + '.');
+    const ok = S.filter(s => stats(s.pts).n >= 2).sort((a, b) => a.par - b.par);
+    if (ok.length >= 2) {
+      const a = ok[0], z = ok[ok.length - 1], ra = stats(a.pts).R, rz = stats(z.pts).R;
+      li.push('Quand ' + unit + ' passe de <b>' + esc(a.key.replace(/^[^=]*= /, '')) + '</b> à <b>' + esc(z.key.replace(/^[^=]*= /, '')) + '</b>, la résistance passe de ' + frR(ra) + ' Ω à ' + frR(rz) + ' Ω.');
+      li.push('La résistance dépend de la grandeur à mesurer : c\'est un <b>capteur résistif</b> (' + (d.id === 'ctn' ? 'elle diminue quand la température augmente' : 'elle diminue quand l\'éclairement augmente') + ').');
+    }
+  }
+  $('obs_title').textContent = title;
+  $('obs_list').innerHTML = li.map(x => '<li>' + x + '</li>').join('');
+}
+
+function update() {
+  const d = dipoleInfo();
+  const us = $('u_slider');
+  us.max = d.Umax;
+  if (parseFloat(us.value) > d.Umax) us.value = d.Umax;
+  st.U = parseFloat(us.value);
+  st.cur = measure(st.U);
+  st.noise = $('chk_noise').checked; st.live = $('chk_live').checked;
+  st.anim = $('chk_anim').checked; st.fit = $('chk_fit').checked; st.link = $('chk_link').checked;
+
+  $('u_val').textContent = fr(st.U, 1) + NBSP + 'V';
+  $('r_val').textContent = frR(R_LIST[st.Ridx]) + NBSP + 'Ω';
+  $('t_val').textContent = st.T + NBSP + '°C';
+  $('e_val').textContent = frE(st.E) + NBSP + 'lx';
+  $('ctl_T').hidden = !(st.mode === 2 && st.dip === 'ctn');
+  $('ctl_E').hidden = !(st.mode === 2 && st.dip === 'ldr');
+
+  const w = warnText(d, st.cur);
+  $('warn').hidden = !w; $('warn').textContent = w;
+  $('ccanvas').setAttribute('aria-label', 'Schéma du circuit : générateur, ampèremètre en série (' + fmtI(st.cur.I) + ' mA), dipôle, voltmètre en dérivation (' + fr(st.cur.U, 2) + ' V)');
+
+  renderLegend(); renderTable(); updateObs();
+  dirtyC = true; drawCircuit(); drawGraph();
+}
+
+function applyMode() {
+  document.querySelectorAll('[data-m]').forEach(el => { el.hidden = !el.dataset.m.includes(String(st.mode)); });
+  [1, 2, 3].forEach(i => { $('tab' + i).className = i === st.mode ? 'tab-active' : ''; $('tab' + i).setAttribute('aria-pressed', i === st.mode); });
+  $('dip_title').textContent = st.mode === 1 ? 'Conducteur ohmique' : (st.mode === 2 ? 'Choix du dipôle' : 'Conducteur inconnu');
+}
+
+function clearPoints() { st.points = []; say(''); }
+
+function newChallenge() {
+  let nom;
+  do { nom = CHALLENGE_R[Math.floor(Math.random() * CHALLENGE_R.length)]; } while (st.hid && nom === st.hid.nom);
+  st.hid = { nom, fac: 1 + (Math.random() * 2 - 1) * 0.03 };
+  st.seed = Math.floor(Math.random() * 1000);
+  st.revealed = false;
+  clearPoints();
+  $('ans').value = ''; $('feedback').className = 'feedback'; $('feedback').textContent = '';
+}
+
+function setMode(m) {
+  st.mode = m;
+  if (m === 3 && !st.hid) newChallenge();
+  else if (m === 3) { st.revealed = false; $('feedback').className = 'feedback'; $('ans').value = ''; }
+  clearPoints();
+  applyMode(); update();
+}
+
+/* ---------- Défi : vérification de la réponse ---------- */
+function parseAns(s) {
+  s = s.trim().replace(/[\s  ]/g, '').replace(',', '.');
+  const m = s.match(/^(\d*\.?\d+)(k?)(?:[ΩωΩ]|ohms?)?$/i);
+  return m ? parseFloat(m[1]) * (m[2] ? 1000 : 1) : NaN;
+}
+function feedback(kind, html) { const f = $('feedback'); f.className = 'feedback ' + kind; f.innerHTML = html; }
+function checkAnswer() {
+  const v = parseAns($('ans').value), R = st.hid.nom * st.hid.fac;
+  if (isNaN(v) || v <= 0) { feedback('info', 'Écris un nombre positif, en ohms. Exemple : 470.'); return; }
+  const rel = Math.abs(v - R) / R, ratio = v / R;
+  if (rel <= 0.05) {
+    feedback('ok', '<b>Bravo !</b> Ta valeur est compatible avec la résistance du conducteur (≈ ' + frR(R) + ' Ω).' + (st.points.length < 3 ? ' Appuie-toi tout de même sur au moins 3 mesures pour justifier ta réponse.' : '') + ' Clique sur « Nouveau conducteur » pour recommencer.');
+  } else if (ratio > 0.0009 && ratio < 0.0011) {
+    feedback('ko', 'Ta valeur est <b>1 000 fois trop petite</b> : l\'intensité est lue en <b>mA</b>, or 1 mA = 0,001 A. Convertis I en ampères avant de calculer R = U/I.');
+  } else if (ratio > 900 && ratio < 1100) {
+    feedback('ko', 'Ta valeur est <b>1 000 fois trop grande</b> : vérifie la conversion des unités (1 mA = 0,001 A) et l\'unité de ta réponse.');
+  } else if (rel <= 0.15) {
+    feedback('ko', 'Tu es proche, mais l\'écart reste trop grand. Calcule U/I sur plusieurs points, ou lis la pente de la droite modèle, pour affiner.');
+  } else {
+    feedback('ko', 'Pas encore. Pour un point, R = U/I (I en ampères). Vérifie avec d\'autres points : le rapport doit rester à peu près constant.');
+  }
+}
+function reveal() {
+  st.revealed = true;
+  feedback('info', '<b>Correction :</b> le conducteur est un « ' + frR(st.hid.nom) + ' Ω » (valeur nominale, tolérance 5 %). Sa valeur réelle est voisine de ' + frR(st.hid.nom * st.hid.fac) + ' Ω.');
+  update();
+}
+
+/* ---------- Événements ---------- */
+$('tab1').onclick = () => setMode(1);
+$('tab2').onclick = () => setMode(2);
+$('tab3').onclick = () => setMode(3);
+$('btn_new').onclick = () => { newChallenge(); update(); };
+$('btn_check').onclick = checkAnswer;
+$('ans').addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+$('btn_reveal').onclick = reveal;
+
+$('btn_add').onclick = () => {
+  const n = st.points.length;
+  if (addPoint(st.U, false)) say('Mesure ajoutée (' + (n + 1) + ').');
+  update(); const tw = $('tablewrap'); tw.scrollTop = tw.scrollHeight;
+};
+$('btn_sweep').onclick = () => {
+  const d = dipoleInfo(), top = ulim(d);
+  let n = 0;
+  for (let k = 1; k <= 8; k++) if (addPoint(Math.round(top * k / 8 * 10) / 10, true)) n++;
+  say(n ? n + ' mesures ajoutées, de 0 à ' + fr(top, 1) + ' V.' : 'Ces mesures sont déjà dans le tableau.');
+  update(); const tw = $('tablewrap'); tw.scrollTop = tw.scrollHeight;
+};
+$('btn_undo').onclick = () => { st.points.pop(); say(''); update(); };
+$('btn_clear').onclick = () => { clearPoints(); update(); };
+
+$('u_slider').addEventListener('input', update);
+$('r_slider').addEventListener('input', () => { st.Ridx = parseInt($('r_slider').value); update(); });
+$('t_slider').addEventListener('input', () => { st.T = parseInt($('t_slider').value); update(); });
+$('e_slider').addEventListener('input', () => { st.E = Number(Math.pow(10, parseFloat($('e_slider').value)).toPrecision(2)); update(); });
+['chk_noise', 'chk_live', 'chk_fit', 'chk_link', 'chk_anim'].forEach(id => $(id).addEventListener('change', update));
+document.querySelectorAll('input[name=dip]').forEach(r => r.addEventListener('change', () => {
+  st.dip = document.querySelector('input[name=dip]:checked').value;
+  clearPoints(); update();
+}));
+
+/* ---------- Animation du courant ---------- */
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (st.anim && st.cur.I > 0) { phase += (18 + 38 * Math.log10(1 + st.cur.I)) * dt; drawCircuit(); }
+  requestAnimationFrame(tick);
+}
+
+$('chk_anim').checked = st.anim;
+applyMode();
+resize();
+update();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
