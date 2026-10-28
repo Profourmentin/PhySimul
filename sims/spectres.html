@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spectres lumineux — Simulateur</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1a2233; --muted:#5a6579; --line:#dde2ee;
+  --accent:#3454d1; --accent-ink:#ffffff; --good:#1b7f47; --bad:#c22f2f; --warn:#a85a00;
+  --chip:#eceff8; --chip-on:#dbe3ff; --dark:#080b14; --shadow:0 1px 2px rgba(20,30,60,.06),0 4px 14px rgba(20,30,60,.05);
+  --b-s:#d7f0e0; --b-s-ink:#14663a; --b-p:#f3e6ff; --b-p-ink:#6a2aa8;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0d121d; --card:#161c2b; --ink:#e7ebf5; --muted:#9aa7bf; --line:#27304a;
+    --accent:#86a2ff; --accent-ink:#0b1020; --good:#52cc86; --bad:#ff8484; --warn:#f2b866;
+    --chip:#202a42; --chip-on:#2c3c6e; --dark:#05070d; --shadow:none;
+    --b-s:#17382a; --b-s-ink:#7fe0a8; --b-p:#2e1f45; --b-p-ink:#cfa9ff;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 40px}
+header{padding:22px 0 8px}
+.back{display:inline-block;margin-bottom:10px;color:var(--accent);text-decoration:none;font-weight:600;font-size:.92rem}
+.back:hover{text-decoration:underline}
+h1{margin:0;font-size:1.65rem;letter-spacing:-.01em}
+.sub{margin:.25rem 0 0;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+.tabs button .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--chip);font-size:.8rem}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tabs button[aria-selected="true"] .n{background:rgba(255,255,255,.25);color:inherit}
+.panel{display:none}
+.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{margin:0 0 6px;font-size:1.12rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3{margin:14px 0 6px;font-size:1rem}
+.lead{margin:0 0 10px;color:var(--muted)}
+.badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.badge.s{background:var(--b-s);color:var(--b-s-ink)}
+.badge.p{background:var(--b-p);color:var(--b-p-ink)}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.grid-main{grid-template-columns:1fr}}
+canvas{display:block;width:100%}
+.plot{border-radius:10px;background:var(--card)}
+.vis{border-radius:8px;border:1px solid var(--line);background:#000}
+label.f{display:block;font-weight:600;font-size:.92rem;margin:10px 0 4px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.num{width:100px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.btn{border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:7px 12px;border-radius:9px;font:inherit;font-size:.92rem;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.sm{padding:4px 9px;font-size:.85rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:5px 10px;border-radius:999px;font:inherit;font-size:.88rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--chip-on);border-color:var(--accent);font-weight:700}
+.chip .x{opacity:.6;margin-left:4px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--card);color:var(--ink);padding:7px 12px;font:inherit;font-size:.92rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.law{background:var(--chip);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin:8px 0}
+.law b{font-size:1.05rem}
+.readout .disc{width:74px;height:74px;border-radius:50%;flex:none;border:1px solid var(--line)}
+.readout p{margin:.3rem 0}
+.kv{font-variant-numeric:tabular-nums}
+.big{font-size:1.15rem;font-weight:700}
+.note{font-size:.88rem;color:var(--muted)}
+.fb{margin-top:8px;padding:8px 10px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:rgba(40,160,90,.14);color:var(--good)}
+.fb.ko{background:rgba(200,50,50,.12);color:var(--bad)}
+.fb.info{background:var(--chip);color:var(--ink)}
+.strip{border-radius:4px;background:#000;display:block}
+.specgrid{position:relative}
+.sr{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;align-items:center;margin-bottom:5px}
+.sr .lb{font-size:.86rem;line-height:1.15}
+.sr .lb label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.sr .lb small{color:var(--muted)}
+.ov{position:absolute;left:104px;right:0;top:0;bottom:0;pointer-events:none}
+.ov.full{left:0}
+.cross{position:absolute;top:0;bottom:0;width:0;border-left:1px solid rgba(255,255,255,.85);mix-blend-mode:difference;display:none}
+.xlab{position:absolute;top:-22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:.78rem;padding:1px 6px;border-radius:5px;display:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mk{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed #ffd43b}
+.mk.al{border-left:0}
+.mk.al::before{content:"";position:absolute;top:0;bottom:0;left:0;border-left:1px dashed rgba(255,255,255,.6);mix-blend-mode:difference}
+.mk span{position:absolute;bottom:100%;top:auto;left:-8px;font-size:.72rem;writing-mode:vertical-rl;transform:rotate(180deg);color:var(--ink);padding:0 1px;white-space:nowrap}
+.mk.al span{display:none}
+.mk.lab span{display:block}
+.rulerwrap{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px}
+.legend-row{display:flex;gap:10px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+table.t{border-collapse:collapse;font-size:.9rem;width:100%;font-variant-numeric:tabular-nums}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left}
+details.d{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--card);margin-top:8px}
+details.d summary{cursor:pointer;font-weight:600}
+.labs{position:relative;height:74px}
+.lw{position:absolute;width:0}
+.lw::after{content:"";position:absolute;left:0;top:19px;bottom:0;border-left:1px dotted var(--muted)}
+.lw button{position:absolute;left:0;top:0;transform:translateX(-50%);border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;font:inherit;font-size:.76rem;line-height:1;padding:3px 5px;cursor:pointer;white-space:nowrap}
+.lw button.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lw button.hl{border-color:#e8590c;background:#ffe8cc;color:#7a2e00;font-weight:700}
+.lw button.tel{border-style:dashed}
+.lw button.found{background:rgba(40,160,90,.2);border-color:var(--good)}
+.sunsvg{width:100%;height:auto;display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+footer{color:var(--muted);font-size:.82rem;margin-top:10px}
+.sr-only{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="back" href="../index.html">← Catalogue des simulations</a>
+  <h1>Spectres lumineux</h1>
+  <p class="sub">Spectre d'un corps chaud et loi de Wien · spectres d'émission et d'absorption · identifier un élément · raies de Fraunhofer</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Modules de la simulation">
+  <button role="tab" id="tab1" aria-selected="true" aria-controls="p1"><span class="n">1</span>Corps chaud &amp; loi de Wien</button>
+  <button role="tab" id="tab2" aria-selected="false" aria-controls="p2"><span class="n">2</span>Émission &amp; absorption</button>
+  <button role="tab" id="tab3" aria-selected="false" aria-controls="p3"><span class="n">3</span>Identifier un élément</button>
+  <button role="tab" id="tab4" aria-selected="false" aria-controls="p4"><span class="n">4</span>Raies de Fraunhofer</button>
+</nav>
+
+<!-- ============ MODULE 1 ============ -->
+<section id="p1" class="panel on" role="tabpanel" aria-labelledby="tab1">
+  <div class="grid-main">
+    <div>
+      <div class="card">
+        <h2>Spectre d'émission d'un corps chaud <span class="badge s">Seconde</span></h2>
+        <p class="lead">Tout corps chaud émet de la lumière sur un <b>spectre continu</b> d'origine thermique. Modifie la température <b>T</b> de sa surface : la courbe change de forme et de position.</p>
+        <canvas id="cvPlanck" class="plot" role="img" aria-label="Courbe d'intensité lumineuse en fonction de la longueur d'onde pour un corps chaud"></canvas>
+        <div class="legend-row"><span><span class="sw" style="background:linear-gradient(90deg,#7a00ff,#00a0ff,#00d060,#ffe000,#ff3000)"></span>zone du visible (380–780 nm)</span><span>La hauteur est exprimée en unités arbitraires (u. a.).</span></div>
+        <h3>Ce que verrait un spectroscope (partie visible)</h3>
+        <canvas id="cvVis" class="vis" role="img" aria-label="Spectre visible du corps chaud"></canvas>
+      </div>
+    </div>
+
+    <div>
+      <div class="card ctl">
+        <h2>Température du corps</h2>
+        <div class="row" style="justify-content:space-between">
+          <div class="row"><input id="tNum" class="num" type="number" min="250" max="12500" step="10" aria-label="Température en kelvin"><b>K</b></div>
+          <span class="note kv" id="tC"></span>
+        </div>
+        <input id="tRange" type="range" min="0" max="1000" step="1" aria-label="Curseur de température">
+        <label class="f">Exemples</label>
+        <div class="chips" id="presets"></div>
+        <label class="f">Échelle verticale</label>
+        <div class="seg" id="modeSeg" role="group" aria-label="Échelle verticale">
+          <button data-m="common" aria-pressed="true">Intensité réelle</button>
+          <button data-m="own" aria-pressed="false">Chaque courbe à sa hauteur</button>
+        </div>
+        <p class="note" style="margin:.4rem 0 0">« Intensité réelle » : plus T est grand, plus le corps rayonne. L'autre échelle met en évidence le déplacement du maximum.</p>
+        <label class="f">Comparer plusieurs températures</label>
+        <div class="row"><button class="btn" id="keep">＋ Garder cette courbe</button><button class="btn" id="cmp3">Bételgeuse · Soleil · Sirius</button></div>
+        <div class="chips" id="snaps" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card readout">
+        <h2>Loi de Wien <span class="badge p">Prolongement</span></h2>
+        <div class="law"><b>λ<sub>max</sub> × T = 2,898 × 10⁻³ m·K</b><br><span class="note">λ<sub>max</sub> : longueur d'onde du maximum d'émission (en m) · T : température de surface (en K)</span></div>
+        <div class="row" style="align-items:flex-start;flex-wrap:nowrap">
+          <div class="disc" id="disc" aria-hidden="true"></div>
+          <div>
+            <p class="kv" id="rdW"></p>
+            <p class="big kv" id="rdL"></p>
+            <p id="rdDom"></p>
+          </div>
+        </div>
+        <p id="rdEye" class="note"></p>
+      </div>
+
+      <div class="card">
+        <h2>À toi de jouer : trouver T <span class="badge p">Prolongement</span></h2>
+        <div id="chOff"><p class="lead" style="margin:0 0 8px">Une étoile est observée : tu connais la longueur d'onde de son maximum d'émission. Calcule sa température.</p><button class="btn pri" id="chStart">Lancer un défi</button></div>
+        <div id="chOn" style="display:none">
+          <p style="margin:0 0 8px">Cette étoile a son maximum d'émission à <b class="big kv" id="chL"></b> (trait orange pointillé sur le graphique).</p>
+          <div class="row"><label for="chIn" class="note">T =</label><input id="chIn" class="num" type="number" inputmode="decimal" placeholder="en K"><b>K</b><button class="btn pri" id="chCheck">Vérifier</button><button class="btn" id="chTry">Tester sur le graphique</button></div>
+          <div class="fb" id="chFb"></div>
+          <div class="row" style="margin-top:8px"><button class="btn" id="chNew">Nouvelle étoile</button><button class="btn" id="chStop">Arrêter</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 2 ============ -->
+<section id="p2" class="panel" role="tabpanel" aria-labelledby="tab2">
+  <div class="card">
+    <h2>Banc d'optique : analyser la lumière d'un gaz <span class="badge s">Seconde</span> <span class="badge p">Prolongement : absorption</span></h2>
+    <p class="lead">Choisis un gaz et un mode d'observation. Un prisme disperse la lumière : chaque radiation arrive à un endroit différent de l'écran.</p>
+    <div class="row" style="margin-bottom:10px;gap:14px">
+      <div class="seg" id="modeSeg2" role="group" aria-label="Mode d'observation">
+        <button data-m="emission" aria-pressed="true">Émission</button>
+        <button data-m="absorption" aria-pressed="false">Absorption</button>
+      </div>
+      <div class="chips" id="elChips2" role="group" aria-label="Choix du gaz"></div>
+    </div>
+    <canvas id="cvBench" style="border-radius:10px" role="img" aria-label="Schéma du banc d'optique : source, gaz, prisme, écran"></canvas>
+    <div class="fb info show" id="benchTxt" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Les spectres obtenus</h2>
+    <div class="row" style="margin-bottom:8px;gap:16px">
+      <label class="row note" style="gap:6px"><input type="checkbox" id="optAlign" checked> Repères alignés sur les raies</label>
+      <label class="row note" style="gap:6px"><input type="checkbox" id="optLab"> Afficher les longueurs d'onde</label>
+    </div>
+    <div style="height:50px"></div>
+    <div class="specgrid" id="grid2">
+      <div class="sr"><div class="lb"><b>Lumière blanche</b><br><small>spectre continu</small></div><canvas class="strip" id="st2c"></canvas></div>
+      <div class="sr"><div class="lb"><b>Émission</b><br><small id="lbE2"></small></div><canvas class="strip" id="st2e"></canvas></div>
+      <div class="sr"><div class="lb"><b>Absorption</b><br><small id="lbA2"></small></div><canvas class="strip" id="st2a"></canvas></div>
+      <div class="rulerwrap"><div></div><canvas id="ru2" style="height:30px"></canvas></div>
+      <div class="ov"><div class="cross"></div><div class="xlab"></div><div class="marks"></div></div>
+    </div>
+    <p class="note" style="margin:8px 0 0">Survole les spectres pour lire la longueur d'onde. <b>Observation :</b> les raies sombres du spectre d'absorption sont aux mêmes longueurs d'onde que les raies brillantes du spectre d'émission du même élément.</p>
+    <h3>Raies visibles de l'élément choisi</h3>
+    <div id="lineTab"></div>
+  </div>
+
+  <div class="card">
+    <h2>Pourquoi des raies ? <span class="badge p">Prolongement</span></h2>
+    <p class="lead">Dans un atome, l'énergie ne peut prendre que certaines valeurs : on parle de <b>niveaux d'énergie</b>. Un atome émet un photon en passant d'un niveau à un niveau plus bas, et absorbe un photon pour passer à un niveau plus haut. Exemple de l'atome d'hydrogène (raies visibles : série de Balmer).</p>
+    <div class="two">
+      <canvas id="cvLev" style="border-radius:10px;background:var(--dark)" role="img" aria-label="Diagramme des niveaux d'énergie de l'atome d'hydrogène"></canvas>
+      <div>
+        <div class="law"><b>E<sub>photon</sub> = h·c / λ = |ΔE|</b><br><span class="note">Avec λ en nm : E (eV) ≈ 1 239,8 / λ</span></div>
+        <table class="t" id="levTab"></table>
+        <p class="note">Chaque élément a ses propres niveaux d'énergie, donc ses propres raies : c'est comme un « code-barres » qui permet de l'identifier.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 3 ============ -->
+<section id="p3" class="panel" role="tabpanel" aria-labelledby="tab3">
+  <div class="card">
+    <h2>Quel(s) élément(s) dans ce gaz ? <span class="badge s">Seconde</span></h2>
+    <p class="lead">Compare le spectre inconnu aux spectres de référence. <b>Clique sur le spectre</b> pour poser des repères (traits jaunes) : ils se prolongent sur tous les spectres de référence. Coche ensuite les éléments présents.</p>
+    <div class="row" style="margin-bottom:10px;gap:12px">
+      <label class="note" for="lvl">Niveau</label>
+      <select id="lvl"><option value="easy">Facile — 1 élément, émission</option><option value="mid">Moyen — 2 éléments, émission</option><option value="hard">Difficile — absorption, 2 ou 3 éléments</option></select>
+      <button class="btn pri" id="newM">Nouveau spectre</button>
+      <span class="note" id="score"></span>
+    </div>
+    <div style="height:50px"></div>
+    <div class="specgrid" id="grid3">
+      <div class="sr"><div class="lb"><b>Spectre à analyser</b><br><small id="mType"></small></div><canvas class="strip" id="st3m"></canvas></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
+      <div id="refRows"></div>
+      <div class="rulerwrap"><div></div><canvas id="ru3" style="height:30px"></canvas></div>
+      <div class="ov"><div class="cross"></div><div class="xlab"></div><div class="marks"></div></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn pri" id="valid">Valider ma réponse</button>
+      <button class="btn" id="hint">Indice</button>
+      <button class="btn" id="clrMk">Effacer les repères</button>
+      <button class="btn" id="sol">Voir la solution</button>
+    </div>
+    <div class="fb" id="fb3"></div>
+    <p class="note" style="margin-bottom:0">Les spectres de référence sont des spectres d'<b>émission</b>. Dans un spectre d'absorption, les raies sombres se trouvent aux mêmes longueurs d'onde.</p>
+  </div>
+</section>
+
+<!-- ============ MODULE 4 ============ -->
+<section id="p4" class="panel" role="tabpanel" aria-labelledby="tab4">
+  <div class="card">
+    <h2>Le spectre de la lumière du Soleil <span class="badge p">Prolongement</span></h2>
+    <p class="lead">En 1814, Joseph von Fraunhofer observe dans le spectre solaire plus de 570 raies sombres et désigne les principales par des lettres. Ces raies renseignent sur la composition de l'atmosphère du Soleil.</p>
+    <svg class="sunsvg" viewBox="0 0 900 150" role="img" aria-label="Schéma : lumière du Soleil traversant l'atmosphère solaire puis l'atmosphère terrestre jusqu'au spectroscope">
+      <rect x="0" y="0" width="900" height="150" rx="10" fill="#0b0f1a"/>
+      <circle cx="90" cy="75" r="42" fill="#ffd34d"/><circle cx="90" cy="75" r="42" fill="none" stroke="#ff9f1a" stroke-width="2"/>
+      <text x="90" y="141" fill="#cfd6e6" font-size="13" text-anchor="middle">Photosphère ≈ 5 800 K</text>
+      <text x="90" y="22" fill="#cfd6e6" font-size="12" text-anchor="middle">spectre continu</text>
+      <path d="M134 75H760" stroke="#fff" stroke-width="3" stroke-opacity=".55"/>
+      <rect x="150" y="30" width="170" height="90" rx="14" fill="#ff8a3d" fill-opacity=".16" stroke="#ff8a3d" stroke-dasharray="4 4"/>
+      <text x="235" y="52" fill="#ffb27a" font-size="13" text-anchor="middle">Atmosphère solaire</text>
+      <text x="235" y="70" fill="#ffb27a" font-size="12" text-anchor="middle">gaz plus froid : H, He, Na,</text>
+      <text x="235" y="86" fill="#ffb27a" font-size="12" text-anchor="middle">Mg, Ca, Fe… absorbent</text>
+      <text x="235" y="110" fill="#ffb27a" font-size="11" text-anchor="middle">→ raies de Fraunhofer</text>
+      <rect x="470" y="30" width="190" height="90" rx="14" fill="#4aa3ff" fill-opacity=".14" stroke="#4aa3ff" stroke-dasharray="4 4"/>
+      <text x="565" y="52" fill="#8ec5ff" font-size="13" text-anchor="middle">Atmosphère terrestre</text>
+      <text x="565" y="72" fill="#8ec5ff" font-size="12" text-anchor="middle">O₂ absorbe aussi</text>
+      <text x="565" y="90" fill="#8ec5ff" font-size="11" text-anchor="middle">→ raies « telluriques » A, B, a</text>
+      <rect x="770" y="45" width="100" height="60" rx="8" fill="#1d2640" stroke="#8aa0d6"/>
+      <text x="820" y="72" fill="#dbe4ff" font-size="13" text-anchor="middle">Spectroscope</text>
+      <text x="820" y="90" fill="#9fb0d8" font-size="11" text-anchor="middle">(prisme)</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <h2 style="margin:0">Spectre solaire</h2>
+      <label class="row note" style="gap:6px"><input type="checkbox" id="defi"> Mode défi : cacher les noms des raies</label>
+    </div>
+    <div class="specgrid" id="grid4" style="margin-top:6px">
+      <div class="labs" id="labs4"></div>
+      <canvas class="strip" id="st4s"></canvas>
+      <div id="cmpBox" style="display:none;margin-top:6px"><canvas class="strip" id="st4c"></canvas><div class="note" id="cmpLb" style="margin-top:2px"></div></div>
+      <canvas id="ru4" style="height:30px"></canvas>
+      <div class="ov full" style="top:74px"><div class="cross"></div><div class="xlab"></div><div class="marks"></div></div>
+    </div>
+    <label class="f">Comparer avec le spectre d'émission d'un élément</label>
+    <div class="chips" id="cmpChips" role="group" aria-label="Élément à comparer"></div>
+    <div class="fb info show" id="fInfo" style="margin-top:12px"></div>
+    <div class="row" style="margin-top:10px"><span class="note" id="fScore"></span><button class="btn sm" id="toWien">Le fond continu : voir le corps noir à 5 800 K</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Ce qu'il faut retenir</h2>
+    <ul style="margin:6px 0 0;padding-left:20px">
+      <li>La surface du Soleil émet un spectre <b>continu</b> (corps chaud, ≈ 5 800 K, λ<sub>max</sub> ≈ 500 nm).</li>
+      <li>Les gaz plus froids de l'atmosphère solaire <b>absorbent</b> certaines radiations : des raies sombres apparaissent.</li>
+      <li>Chaque raie sombre correspond à une raie d'émission d'un élément : on en déduit la <b>composition</b> de l'atmosphère solaire.</li>
+      <li>L'atmosphère terrestre ajoute ses propres raies d'absorption (O₂).</li>
+      <li>En 1868, une raie jaune (D<sub>3</sub>) du spectre solaire ne correspondait à aucun élément connu : l'<b>hélium</b> (de <i>hêlios</i>, Soleil) a été découvert dans le Soleil avant d'être isolé sur Terre (1895).</li>
+    </ul>
+  </div>
+</section>
+
+<footer>Longueurs d'onde de référence arrondies (≈ dans l'air) ; intensités relatives schématiques. Visible : 380 nm (violet) à 780 nm (rouge). Constante de Wien : 2,898 × 10⁻³ m·K.</footer>
+</div>
+
+<script>
+'use strict';
+/* ============================ Utilitaires ============================ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fr=(x,d=0)=>Number(x).toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sci(x,d=2){
+  if(!x) return '0';
+  let e=Math.floor(Math.log10(Math.abs(x))), m=x/Math.pow(10,e);
+  if(Number(m.toFixed(d))>=10){m/=10;e++}
+  return fr(m,d)+' × 10'+String(e).split('').map(c=>SUP[c]).join('');
+}
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const VMIN=380, VMAX=780, VSPAN=VMAX-VMIN;
+
+function setupCanvas(cv,h){
+  const dpr=window.devicePixelRatio||1, w=cv.clientWidth;
+  if(!w) return null;
+  const hc=typeof h==='function'?h(w):h;
+  cv.style.height=hc+'px';
+  cv.width=Math.round(w*dpr); cv.height=Math.round(hc*dpr);
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h:hc};
+}
+
+/* longueur d'onde (nm) -> RGB */
+function wl2rgb(w){
+  let r=0,g=0,b=0;
+  if(w>=380&&w<440){r=-(w-440)/60;b=1}
+  else if(w>=440&&w<490){g=(w-440)/50;b=1}
+  else if(w>=490&&w<510){g=1;b=-(w-510)/20}
+  else if(w>=510&&w<580){r=(w-510)/70;g=1}
+  else if(w>=580&&w<645){r=1;g=-(w-645)/65}
+  else if(w>=645&&w<=780){r=1}
+  let f=0;
+  if(w>=380&&w<=780){ f=1; if(w<420) f=0.3+0.7*(w-380)/40; else if(w>700) f=0.3+0.7*(780-w)/80; }
+  return [r,g,b].map(c=>Math.round(255*Math.pow(Math.max(0,c*f),0.8)));
+}
+const rgb=(c,k=1)=>`rgb(${Math.round(c[0]*k)},${Math.round(c[1]*k)},${Math.round(c[2]*k)})`;
+
+/* ============================ Physique ============================ */
+const C2=1.4388e7;        // hc/k_B en nm·K
+const WIEN=2.898e6;       // 2,898×10⁻³ m·K exprimée en nm·K
+const planck=(l,T)=>{const x=C2/(l*T); if(x>700) return 0; return 1/(Math.pow(l,5)*(Math.exp(x)-1));};
+const peak=T=>planck(WIEN/T,T);
+const PV=T=>{let s=0; for(let l=380;l<=780;l+=10) s+=planck(l,T); return s;};
+const L0=Math.log10(PV(800)), L1=Math.log10(PV(4500));
+const lumOf=T=>clamp((Math.log10(PV(T)+1e-300)-L0)/(L1-L0),0,1);
+function tempRGB(T){  // approximation usuelle couleur d'un corps noir
+  const t=clamp(T,1000,40000)/100; let r,g,b;
+  r=t<=66?255:329.698727446*Math.pow(t-60,-0.1332047592);
+  g=t<=66?99.4708025861*Math.log(t)-161.1195681661:288.1221695283*Math.pow(t-60,-0.0755148492);
+  b=t>=66?255:(t<=19?0:138.5177312231*Math.log(t-10)-305.0447927307);
+  return [r,g,b].map(c=>clamp(Math.round(c),0,255));
+}
+
+/* Éléments : raies [longueur d'onde nm, intensité relative] */
+const ELS={
+  H :{name:'Hydrogène',lines:[[410.2,.35],[434.0,.5],[486.1,.8],[656.3,1]]},
+  He:{name:'Hélium',lines:[[447.1,.5],[471.3,.3],[492.2,.3],[501.6,.6],[587.6,1],[667.8,.5],[706.5,.4]]},
+  Li:{name:'Lithium',lines:[[460.3,.3],[610.4,.5],[670.8,1]]},
+  Na:{name:'Sodium',lines:[[498.3,.2],[568.8,.35],[589.0,1],[589.6,.95],[615.4,.3]]},
+  Ne:{name:'Néon',lines:[[585.2,.8],[588.2,.5],[594.5,.5],[603.0,.4],[607.4,.5],[614.3,.7],[621.7,.4],[626.6,.5],[633.4,.6],[640.2,1],[650.6,.6],[692.9,.5]]},
+  Hg:{name:'Mercure',lines:[[404.7,.6],[435.8,1],[491.6,.2],[546.1,1],[577.0,.6],[579.1,.6]]},
+  Ca:{name:'Calcium',lines:[[393.4,.9],[396.8,.8],[422.7,1],[445.5,.3],[558.9,.3],[616.2,.4],[643.9,.5]]},
+  Mg:{name:'Magnésium',lines:[[383.8,.6],[470.3,.3],[516.7,.7],[517.3,.8],[518.4,.9],[552.8,.4]]},
+  Fe:{name:'Fer',lines:[[404.6,.6],[430.8,.5],[438.4,.8],[440.5,.4],[466.8,.4],[495.8,.4],[527.0,.6],[532.8,.5],[537.1,.4]]}
+};
+const EK=Object.keys(ELS);
+const lineI=(k,l,s)=>{let v=0; for(const [c,i] of ELS[k].lines){const d=(l-c)/s; if(Math.abs(d)<6) v+=i*Math.exp(-d*d/2);} return Math.min(1,v);};
+
+/* Fonctions de couleur pour les bandes spectrales */
+const colCont=l=>wl2rgb(l);
+const colEm=(keys,l)=>{let v=0; for(const k of keys) v+=lineI(k,l,1.0); v=Math.min(1,v); return wl2rgb(l).map(c=>c*Math.pow(v,.75));};
+const colAbs=(keys,l)=>{let t=1; for(const k of keys) t*=(1-.93*lineI(k,l,1.2)); return wl2rgb(l).map(c=>c*t);};
+
+function paintStrip(cv,h,fn){
+  const s=setupCanvas(cv,h); if(!s) return;
+  const {ctx,w}=s;
+  for(let x=0;x<w;x++){ const l=VMIN+(x+.5)/w*VSPAN; ctx.fillStyle=rgb(fn(l)); ctx.fillRect(x,0,1.3,s.h); }
+}
+function paintRuler(cv){
+  const s=setupCanvas(cv,30); if(!s) return;
+  const {ctx,w}=s, ink=css('--muted');
+  ctx.fillStyle=ink; ctx.strokeStyle=ink; ctx.font='12px system-ui,sans-serif'; ctx.textAlign='center';
+  for(let l=VMIN;l<=VMAX;l+=10){ const x=(l-VMIN)/VSPAN*w; const big=l%50===0; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,big?8:4); ctx.stroke(); if(big&&l>=400&&l<=750) ctx.fillText(l,x,21); }
+  ctx.textAlign='right'; ctx.fillText('λ (nm)',w,28);
+}
+
+/* Sonde : réticule + lecture de λ + repères */
+function makeProbe(grid,onClick){
+  const ov=$('.ov',grid), cross=$('.cross',ov), lab=$('.xlab',ov);
+  const lam=e=>{const r=ov.getBoundingClientRect(); const x=e.clientX-r.left; return {x,w:r.width,l:VMIN+x/r.width*VSPAN};};
+  grid.addEventListener('pointermove',e=>{const p=lam(e); if(p.x<0||p.x>p.w){cross.style.display=lab.style.display='none';return}
+    cross.style.display=lab.style.display='block'; cross.style.left=p.x+'px'; lab.style.left=p.x+'px'; lab.textContent=fr(p.l,1)+' nm';});
+  grid.addEventListener('pointerleave',()=>{cross.style.display=lab.style.display='none'});
+  if(onClick) grid.addEventListener('click',e=>{const p=lam(e); if(p.x>=0&&p.x<=p.w&&!e.target.closest('label,button,input')) onClick(p.l);});
+}
+function setMarks(grid,list,cls){
+  const box=$('.marks',grid); box.innerHTML='';
+  for(const m of list){ const d=document.createElement('div'); d.className='mk '+(cls||''); d.style.left=((m.l-VMIN)/VSPAN*100)+'%'; if(m.t){const s=document.createElement('span'); s.textContent=m.t; d.appendChild(s);} box.appendChild(d); }
+}
+
+/* ============================ Navigation ============================ */
+let cur=1;
+function show(n){
+  cur=n;
+  for(let i=1;i<=4;i++){ $('#p'+i).classList.toggle('on',i===n); $('#tab'+i).setAttribute('aria-selected',i===n); }
+  requestAnimationFrame(redraw);
+}
+for(let i=1;i<=4;i++) $('#tab'+i).addEventListener('click',()=>show(i));
+function redraw(){ ({1:draw1,2:draw2,3:draw3,4:draw4})[cur](); }
+let rz; window.addEventListener('resize',()=>{clearTimeout(rz); rz=setTimeout(redraw,80)});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>setTimeout(redraw,30));
+
+/* ============================ MODULE 1 ============================ */
+const TMIN=250, TMAX=12500;
+const S1={T:5800,mode:'common',snaps:[],target:null,ch:null};
+const SNAPCOL=['#e8590c','#2b9348','#a23bb8','#0b8aa3'];
+const PRESETS=[['Corps humain',310],['Fer chauffé au rouge',1100],['Filament d’ampoule',2800],['Bételgeuse',3500],['Soleil (surface)',5800],['Sirius A',9900],['Rigel',12000]];
+const tToS=T=>Math.round(1000*Math.log(T/TMIN)/Math.log(TMAX/TMIN));
+const sToT=s=>TMIN*Math.pow(TMAX/TMIN,s/1000);
+const niceStep=(range,max)=>{for(const s of [50,100,200,250,500,1000,2000,2500,5000,10000]) if(range/s<=max) return s; return 20000;};
+const colorName=l=>l<450?'violet':l<495?'bleu':l<570?'vert':l<590?'jaune':l<620?'orange':'rouge';
+function eyeColor(T){
+  if(T<1000) return 'aucune lumière visible : le corps est invisible dans le noir (rayonnement infrarouge)';
+  if(T<1500) return 'rouge sombre';
+  if(T<2500) return 'orange';
+  if(T<3500) return 'jaune-orangé';
+  if(T<4500) return 'jaune';
+  if(T<6500) return 'blanc légèrement jaune';
+  if(T<8500) return 'blanc';
+  return 'blanc bleuté';
+}
+
+function buildPresets(){
+  $('#presets').innerHTML='';
+  for(const [n,T] of PRESETS){ const b=document.createElement('button'); b.className='chip'; b.textContent=`${n} · ${fr(T)} K`; b.onclick=()=>{S1.T=T;update1()}; $('#presets').appendChild(b); }
+}
+function buildSnaps(){
+  const box=$('#snaps'); box.innerHTML='';
+  S1.snaps.forEach((T,i)=>{ const b=document.createElement('button'); b.className='chip'; b.innerHTML=`<span class="sw" style="background:${SNAPCOL[i%4]}"></span>${fr(T)} K<span class="x">✕</span>`; b.setAttribute('aria-label','Retirer la courbe '+T+' K'); b.onclick=()=>{S1.snaps.splice(i,1);update1()}; box.appendChild(b); });
+}
+function update1(){
+  S1.T=clamp(Math.round(S1.T),TMIN,TMAX);
+  const T=S1.T, l=WIEN/T;
+  $('#tNum').value=T; $('#tRange').value=tToS(T);
+  $('#tC').textContent='= '+fr(T-273.15,0)+' °C';
+  $('#rdW').innerHTML=`λ<sub>max</sub> = 2,898 × 10⁻³ ÷ ${fr(T)}`;
+  $('#rdL').innerHTML=`= ${sci(l*1e-9,2)} m = ${l<1000?fr(l,0)+' nm':fr(l/1000,2)+' µm'}`;
+  let dom;
+  if(l<380) dom=`Maximum dans l'<b>ultraviolet</b> (λ<sub>max</sub> &lt; 380 nm).`;
+  else if(l<=780) dom=`Maximum dans le <b>visible</b> (${colorName(l)}).`;
+  else dom=`Maximum dans l'<b>infrarouge</b> (λ<sub>max</sub> &gt; 780 nm).`;
+  $('#rdDom').innerHTML=dom;
+  let eye=`Couleur perçue : <b>${eyeColor(T)}</b>.`;
+  if(l>=380&&l<=780) eye+=` Le maximum est dans le ${colorName(l)}, mais le corps émet <i>toutes</i> les couleurs du visible : c'est leur mélange que l'œil perçoit.`;
+  $('#rdEye').innerHTML=eye;
+  const lum=lumOf(T), c=tempRGB(T), k=lum>0?(.06+.94*Math.pow(lum,.7)):0;
+  const col=rgb(c,k), dark='rgb(18,18,24)';
+  const d=$('#disc'); d.style.background=`radial-gradient(circle at 35% 30%, ${rgb(c,Math.min(1,k*1.25))}, ${col} 70%)`;
+  d.style.boxShadow=k>.2?`0 0 ${Math.round(8+30*k)}px ${rgb(c,k*.8)}`:'none';
+  if(k===0) d.style.background=dark;
+  buildSnaps(); draw1();
+}
+
+function draw1(){ drawPlanck(); drawVis(); }
+function drawPlanck(){
+  const cv=$('#cvPlanck'), s=setupCanvas(cv,w=>clamp(w*.56,300,400)); if(!s) return;
+  const {ctx,w,h}=s;
+  const ink=css('--ink'), muted=css('--muted'), line=css('--line'), accent=css('--accent');
+  const m={l:46,r:16,t:34,b:44}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+  const curves=[{T:S1.T,col:accent,cur:true},...S1.snaps.map((T,i)=>({T,col:SNAPCOL[i%4]}))];
+  const Tmin=Math.min(...curves.map(c=>c.T));
+  const xmax=Math.max(3000,Math.ceil(2.5*WIEN/Tmin/1000)*1000);
+  const X=l=>m.l+l/xmax*pw;
+  const common=Math.max(...curves.map(c=>peak(c.T)))*1.1;
+  const val=(c,l)=>planck(l,c.T)/(S1.mode==='common'?common:peak(c.T)*1.1);
+  const Y=v=>m.t+ph*(1-v);
+  // bande visible
+  for(let l=VMIN;l<=VMAX;l+=2){ const c=wl2rgb(l); ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},.35)`; ctx.fillRect(X(l),m.t,Math.max(1.2,2/xmax*pw+.4),ph); }
+  // grille / axes
+  ctx.strokeStyle=line; ctx.lineWidth=1; ctx.font='12px system-ui,sans-serif'; ctx.fillStyle=muted; ctx.textAlign='center';
+  const st=niceStep(xmax,9);
+  for(let l=0;l<=xmax;l+=st){ ctx.beginPath(); ctx.moveTo(X(l),m.t); ctx.lineTo(X(l),m.t+ph); ctx.stroke(); ctx.fillText(fr(l),X(l),m.t+ph+16); }
+  ctx.strokeStyle=ink; ctx.beginPath(); ctx.moveTo(m.l,m.t); ctx.lineTo(m.l,m.t+ph); ctx.lineTo(m.l+pw,m.t+ph); ctx.stroke();
+  ctx.fillStyle=ink; ctx.fillText('Longueur d’onde λ (nm)',m.l+pw/2,h-6);
+  ctx.save(); ctx.translate(13,m.t+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText('Intensité (u. a.)',0,0); ctx.restore();
+  // zones
+  ctx.fillStyle=muted; ctx.font='11px system-ui,sans-serif';
+  ctx.textAlign='right'; ctx.fillText('UV',X(VMIN)-3,m.t+ph-6);
+  ctx.textAlign='left'; ctx.fillText('IR',X(VMAX)+3,m.t+ph-6);
+  if(X(VMAX)-X(VMIN)>56){ctx.textAlign='center'; ctx.fillText('visible',(X(VMIN)+X(VMAX))/2,m.t+ph-6);}
+  // courbes
+  for(const c of [...curves].reverse()){
+    ctx.beginPath();
+    for(let px=0;px<=pw;px++){ const l=Math.max(8,px/pw*xmax); const y=Y(val(c,l)); px?ctx.lineTo(m.l+px,y):ctx.moveTo(m.l+px,y); }
+    ctx.lineWidth=c.cur?3:2; ctx.strokeStyle=c.col; ctx.stroke();
+    if(c.cur){ ctx.lineTo(m.l+pw,Y(0)); ctx.lineTo(m.l,Y(0)); ctx.globalAlpha=.1; ctx.fillStyle=c.col; ctx.fill(); ctx.globalAlpha=1; }
+    // maximum
+    const lm=WIEN/c.T, ym=Y(val(c,lm));
+    ctx.beginPath(); ctx.arc(X(lm),ym,c.cur?5:3.5,0,7); ctx.fillStyle=c.col; ctx.fill();
+  }
+  // ligne de Wien
+  const lm=WIEN/S1.T, xm=X(lm);
+  ctx.setLineDash([5,4]); ctx.lineWidth=1.5; ctx.strokeStyle=accent; ctx.beginPath(); ctx.moveTo(xm,m.t+16); ctx.lineTo(xm,m.t+ph); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=accent; ctx.font='bold 13px system-ui,sans-serif';
+  const txt='λmax = '+(lm<1000?fr(lm,0)+' nm':fr(lm/1000,2)+' µm');
+  ctx.textAlign=xm>w*.62?'right':'left'; ctx.fillText(txt,xm+(xm>w*.62?-6:6),m.t+26);
+  // cible
+  if(S1.target){ const xt=X(S1.target); ctx.setLineDash([2,4]); ctx.strokeStyle='#e8590c'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(xt,m.t); ctx.lineTo(xt,m.t+ph); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='#e8590c'; ctx.font='bold 12px system-ui,sans-serif'; ctx.textAlign=xt>w*.62?'right':'left'; ctx.fillText('cible',xt+(xt>w*.62?-5:5),m.t+44); }
+  // légende
+  ctx.font='12px system-ui,sans-serif'; ctx.textAlign='left'; let lx=m.l+6;
+  ctx.fillStyle=ink;
+  curves.forEach(c=>{ const t=`T = ${fr(c.T)} K`; ctx.fillStyle=c.col; ctx.fillRect(lx,m.t-24,12,12); ctx.fillStyle=ink; ctx.fillText(t,lx+16,m.t-14); lx+=ctx.measureText(t).width+34; });
+}
+function drawVis(){
+  const cv=$('#cvVis'), s=setupCanvas(cv,74); if(!s) return;
+  const {ctx,w}=s, T=S1.T, lum=lumOf(T);
+  let pk=0; for(let l=VMIN;l<=VMAX;l+=4) pk=Math.max(pk,planck(l,T));
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,w,74);
+  for(let x=0;x<w;x++){ const l=VMIN+(x+.5)/w*VSPAN, v=planck(l,T)/pk, c=wl2rgb(l); ctx.fillStyle=rgb(c,Math.pow(v,.6)*(lum>0?Math.pow(lum,.6):0)); ctx.fillRect(x,0,1.3,56); }
+  ctx.fillStyle='#bbb'; ctx.font='11px system-ui,sans-serif'; ctx.textAlign='center'; ctx.strokeStyle='#bbb';
+  for(let l=400;l<=750;l+=50){ const x=(l-VMIN)/VSPAN*w; ctx.beginPath(); ctx.moveTo(x,56); ctx.lineTo(x,61); ctx.stroke(); ctx.fillText(l,x,72); }
+  if(lum===0){ ctx.fillStyle='#999'; ctx.font='13px system-ui,sans-serif'; ctx.textAlign='center'; ctx.fillText('Aucune lumière visible émise',w/2,30); }
+}
+
+/* contrôles module 1 */
+$('#tRange').addEventListener('input',e=>{S1.T=sToT(+e.target.value);update1()});
+$('#tNum').addEventListener('change',e=>{S1.T=+e.target.value||5800;update1()});
+$$('#modeSeg button').forEach(b=>b.onclick=()=>{S1.mode=b.dataset.m; $$('#modeSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b)); draw1();});
+$('#keep').onclick=()=>{ if(S1.snaps.length<4&&!S1.snaps.includes(S1.T)&&true){S1.snaps.push(S1.T);update1();} };
+$('#cmp3').onclick=()=>{S1.T=3500;S1.snaps=[5800,9900];S1.mode='common';$$('#modeSeg button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m==='common'));update1();};
+/* défi */
+function newChallenge(){
+  const T=Math.round((2500+Math.random()*8500)/100)*100;
+  S1.ch={T,l:WIEN/T}; S1.target=S1.ch.l;
+  $('#chL').textContent=fr(S1.ch.l,0)+' nm'; $('#chIn').value=''; const f=$('#chFb'); f.className='fb'; f.textContent='';
+  if(Math.abs(S1.T-T)/T<.05){S1.T=5800}
+  update1();
+}
+$('#chStart').onclick=()=>{$('#chOff').style.display='none';$('#chOn').style.display='block';newChallenge()};
+$('#chNew').onclick=newChallenge;
+$('#chStop').onclick=()=>{S1.ch=null;S1.target=null;$('#chOff').style.display='block';$('#chOn').style.display='none';draw1()};
+$('#chTry').onclick=()=>{const v=parseFloat($('#chIn').value); if(v>0){S1.T=clamp(v,TMIN,TMAX);update1()}};
+$('#chCheck').onclick=()=>{
+  const v=parseFloat($('#chIn').value), f=$('#chFb'); if(!(v>0)){f.className='fb show info';f.textContent='Entre une valeur de température en kelvin.';return}
+  const T=S1.ch.T, ok=Math.abs(v-T)/T<=.03;
+  if(ok){ f.className='fb show ok'; f.innerHTML=`Bravo ! T = (2,898 × 10⁻³) ÷ (${sci(S1.ch.l*1e-9,2)}) ≈ <b>${fr(T)} K</b>.`; }
+  else { f.className='fb show ko'; let h='Pas tout à fait. Rappel : λ<sub>max</sub> × T = 2,898 × 10⁻³ m·K, donc T = 2,898 × 10⁻³ ÷ λ<sub>max</sub>.';
+    if(v/T>200||v/T<.005) h+=' <b>Attention aux unités :</b> convertis λ<sub>max</sub> en mètres (1 nm = 10⁻⁹ m).';
+    else h+=' Utilise « Tester sur le graphique » pour comparer ton maximum à la cible.'; f.innerHTML=h; }
+};
+
+/* ============================ MODULE 2 ============================ */
+const S2={el:'H',mode:'emission'};
+function buildChips2(){
+  const box=$('#elChips2'); box.innerHTML='';
+  for(const k of EK){ const b=document.createElement('button'); b.className='chip'; b.textContent=k; b.title=ELS[k].name; b.setAttribute('aria-pressed',k===S2.el); b.setAttribute('aria-label',ELS[k].name); b.onclick=()=>{S2.el=k;buildChips2();draw2()}; box.appendChild(b); }
+}
+$$('#modeSeg2 button').forEach(b=>b.onclick=()=>{S2.mode=b.dataset.m;$$('#modeSeg2 button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw2()});
+$('#optAlign').onchange=()=>draw2(); $('#optLab').onchange=()=>draw2();
+
+function draw2(){
+  const k=S2.el, e=ELS[k], em=S2.mode==='emission';
+  $('#lbE2').textContent=e.name; $('#lbA2').textContent=e.name;
+  $('#benchTxt').innerHTML = em
+    ? `<b>Émission.</b> Le gaz (${e.name.toLowerCase()}), excité par une décharge électrique, émet lui-même de la lumière. Cette lumière, dispersée par le prisme, donne un <b>spectre de raies brillantes</b> sur fond noir.`
+    : `<b>Absorption.</b> Une lumière blanche (spectre continu) traverse le gaz froid (${e.name.toLowerCase()}). Le gaz absorbe certaines radiations : le spectre est <b>continu avec des raies sombres</b>, aux mêmes longueurs d'onde que les raies d'émission.`;
+  drawBench();
+  paintStrip($('#st2c'),42,colCont);
+  paintStrip($('#st2e'),42,l=>colEm([k],l));
+  paintStrip($('#st2a'),42,l=>colAbs([k],l));
+  paintRuler($('#ru2'));
+  const al=$('#optAlign').checked, lb=$('#optLab').checked;
+  setMarks($('#grid2'),e.lines.map(([l])=>({l,t:fr(l,1)})),'al'+(lb?' lab':''));
+  if(!al&&!lb) setMarks($('#grid2'),[]);
+  else if(!al&&lb) setMarks($('#grid2'),e.lines.map(([l])=>({l,t:fr(l,1)})),'lab');
+  $('#lineTab').innerHTML='<div class="chips">'+e.lines.map(([l])=>{const c=wl2rgb(l);return `<span class="chip" style="cursor:default"><span class="sw" style="background:${rgb(c)}"></span>${fr(l,1)} nm</span>`}).join('')+'</div>';
+  drawLevels();
+}
+function drawBench(){
+  const cv=$('#cvBench'), s=setupCanvas(cv,w=>Math.round(w*240/900)); if(!s) return;
+  const {ctx,w}=s, sc=w/900, k=S2.el, e=ELS[k], em=S2.mode==='emission';
+  ctx.save(); ctx.scale(sc,sc);
+  ctx.fillStyle='#0a0e18'; ctx.fillRect(0,0,900,240);
+  // couleur moyenne du gaz excité
+  let r=0,g=0,b=0,sw=0; for(const [l,i] of e.lines){const c=wl2rgb(l); r+=c[0]*i;g+=c[1]*i;b+=c[2]*i;sw+=i;}
+  let tc=[r/sw,g/sw,b/sw]; const mx=Math.max(...tc); tc=tc.map(x=>Math.round(x/mx*255));
+  ctx.font='13px system-ui,sans-serif'; ctx.textAlign='center';
+  // source
+  if(em){
+    ctx.fillStyle='#232c44'; ctx.strokeStyle='#8aa0d6'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(24,92,86,56,8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#dbe4ff'; ctx.fillText('Générateur',67,115); ctx.fillText('haute tension',67,133);
+    ctx.strokeStyle='#8aa0d6'; ctx.beginPath(); ctx.moveTo(110,104); ctx.lineTo(160,104); ctx.lineTo(160,95); ctx.moveTo(110,136); ctx.lineTo(160,136); ctx.lineTo(160,145); ctx.stroke();
+  } else {
+    const gr=ctx.createRadialGradient(70,120,4,70,120,60); gr.addColorStop(0,'rgba(255,245,210,.95)'); gr.addColorStop(.35,'rgba(255,220,140,.35)'); gr.addColorStop(1,'rgba(255,220,140,0)');
+    ctx.fillStyle=gr; ctx.fillRect(0,50,150,140);
+    ctx.fillStyle='#fff4c8'; ctx.beginPath(); ctx.arc(70,120,20,0,7); ctx.fill();
+    ctx.fillStyle='#dbe4ff'; ctx.fillText('Lampe à lumière',70,172); ctx.fillText('blanche',70,189);
+    ctx.strokeStyle='#fff'; ctx.globalAlpha=.8; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(92,120); ctx.lineTo(195,120); ctx.stroke(); ctx.globalAlpha=1;
+  }
+  // tube
+  if(em){ const gr=ctx.createRadialGradient(240,120,5,240,120,95); gr.addColorStop(0,rgb(tc)); gr.addColorStop(.45,`rgba(${tc[0]},${tc[1]},${tc[2]},.35)`); gr.addColorStop(1,`rgba(${tc[0]},${tc[1]},${tc[2]},0)`); ctx.fillStyle=gr; ctx.fillRect(130,30,220,180); }
+  ctx.fillStyle=em?`rgba(${tc[0]},${tc[1]},${tc[2]},.55)`:'rgba(120,150,200,.16)'; ctx.strokeStyle='#8aa0d6'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(190,90,100,60,14); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#dbe4ff'; ctx.fillText(em?`Gaz excité (${k})`:`Gaz froid (${k})`,240,172);
+  // faisceau vers prisme
+  ctx.lineWidth=6; ctx.strokeStyle=em?rgb(tc):'#fff'; ctx.globalAlpha=em?.9:.8; ctx.beginPath(); ctx.moveTo(290,120); ctx.lineTo(453,125); ctx.stroke(); ctx.globalAlpha=1;
+  // prisme
+  ctx.fillStyle='rgba(150,200,255,.18)'; ctx.strokeStyle='#9fc7ff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(430,165); ctx.lineTo(530,165); ctx.lineTo(480,80); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#dbe4ff'; ctx.fillText('Prisme',480,190);
+  // rayons dispersés
+  const ex=506, ey=125, sx=790, Yof=l=>40+(780-l)/400*160;
+  ctx.lineCap='butt';
+  if(em){
+    for(const [l,i] of e.lines){ ctx.strokeStyle=rgb(wl2rgb(l)); ctx.globalAlpha=.4+.6*i; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(sx,Yof(l)); ctx.stroke(); }
+    ctx.globalAlpha=1;
+  } else {
+    ctx.globalCompositeOperation='lighter';
+    for(let l=VMIN;l<=VMAX;l+=1){ let t=1-.93*lineI(k,l,1.2); const c=wl2rgb(l); ctx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${.1*t})`; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(sx,Yof(l)); ctx.stroke(); }
+    ctx.globalCompositeOperation='source-over';
+  }
+  // écran
+  ctx.fillStyle='#000'; ctx.fillRect(786,34,40,172);
+  for(let y=40;y<=200;y+=1){ const l=780-(y-40)/160*400; const c=em?colEm([k],l):colAbs([k],l); ctx.fillStyle=rgb(c); ctx.fillRect(790,y,32,1.3); }
+  ctx.strokeStyle='#8aa0d6'; ctx.lineWidth=1.5; ctx.strokeRect(786,34,40,172);
+  ctx.fillStyle='#dbe4ff'; ctx.textAlign='center'; ctx.fillText('Écran',806,224);
+  ctx.fillStyle='#9fb0d8'; ctx.font='11px system-ui,sans-serif'; ctx.textAlign='left'; ctx.fillText('rouge',832,48); ctx.fillText('violet',832,204);
+  ctx.restore();
+}
+/* niveaux d'énergie de l'hydrogène */
+function drawLevels(){
+  const cv=$('#cvLev'), s=setupCanvas(cv,380); if(!s) return;
+  const {ctx,w,h}=s, em=S2.mode==='emission';
+  ctx.fillStyle='#0a0e18'; ctx.fillRect(0,0,w,h);
+  const top=26, bot=h-30, Y=E=>E<-3.5?bot:top+(-E/3.4)*(0.74*(bot-top));
+  const En=n=>-13.6/(n*n);
+  const x0=54, x1=w-74;
+  ctx.font='12px system-ui,sans-serif'; ctx.textAlign='left';
+  for(let n=1;n<=6;n++){ const y=Y(En(n)); ctx.strokeStyle='#8aa0d6'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke(); ctx.fillStyle='#dbe4ff'; ctx.font=(n>=4?'11px':'12px')+' system-ui,sans-serif'; ctx.fillText(`n = ${n}`,6,y+4); ctx.fillStyle='#9fb0d8'; if(n<=3) ctx.fillText(fr(En(n),2)+' eV',x1+6,y+4); }
+  ctx.font='12px system-ui,sans-serif'; ctx.fillStyle='#9fb0d8'; ctx.fillText('n → ∞',x1+6,Y(-.2)+4);
+  ctx.fillStyle='#6f7da0'; ctx.fillText('//  échelle non respectée pour n = 1',x0+4,bot-8);
+  ctx.setLineDash([3,4]); ctx.strokeStyle='#8aa0d6'; ctx.beginPath(); ctx.moveTo(x0,Y(0)); ctx.lineTo(x1,Y(0)); ctx.stroke(); ctx.setLineDash([]);
+  
+  const T=[[3,656.3],[4,486.1],[5,434.0],[6,410.2]], span=(x1-x0)/(T.length+1);
+  T.forEach(([n,l],i)=>{
+    const x=x0+span*(i+1), ya=Y(En(n)), yb=Y(En(2)), c=rgb(wl2rgb(l));
+    ctx.strokeStyle=c; ctx.fillStyle=c; ctx.lineWidth=3; ctx.beginPath();
+    const from=em?ya:yb, to=em?yb:ya, dir=to>from?1:-1;
+    ctx.moveTo(x,from); ctx.lineTo(x,to-dir*8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,to); ctx.lineTo(x-6,to-dir*11); ctx.lineTo(x+6,to-dir*11); ctx.closePath(); ctx.fill();
+    ctx.textAlign='center'; ctx.font='12px system-ui,sans-serif'; ctx.fillText(fr(l,1)+' nm',x,Y(En(2))+30+ (i%2)*16);
+  });
+  ctx.fillStyle='#cfd6e6'; ctx.textAlign='center'; ctx.font='12px system-ui,sans-serif';
+  ctx.fillText(em?'Émission : l’atome passe à un niveau plus bas (photon émis)':'Absorption : l’atome passe à un niveau plus haut (photon absorbé)',w/2,h-6);
+  let rows='<tr><th>Transition</th><th>λ (nm)</th><th>E<sub>photon</sub> (eV)</th></tr>';
+  T.forEach(([n,l])=>{ rows+=`<tr><td>${em?n+' → 2':'2 → '+n}</td><td>${fr(l,1)}</td><td>${fr(1239.84/l,2)}</td></tr>`; });
+  $('#levTab').innerHTML=rows;
+}
+
+/* ============================ MODULE 3 ============================ */
+const S3={truth:[],type:'emission',markers:[],sel:new Set(),score:0,played:0,done:false,hints:0};
+function buildRefRows(){
+  const box=$('#refRows'); box.innerHTML='';
+  for(const k of EK){
+    const row=document.createElement('div'); row.className='sr';
+    row.innerHTML=`<div class="lb"><label><input type="checkbox" data-k="${k}"><span><b>${k}</b> <small>${ELS[k].name}</small></span></label></div><canvas class="strip" data-k="${k}"></canvas>`;
+    box.appendChild(row);
+  }
+  $$('#refRows input').forEach(i=>i.onchange=()=>{ i.checked?S3.sel.add(i.dataset.k):S3.sel.delete(i.dataset.k); });
+}
+function newMystery(){
+  const lv=$('#lvl').value;
+  let n=1, type='emission';
+  if(lv==='mid') n=2; if(lv==='hard'){n=2+Math.floor(Math.random()*2);type='absorption'}
+  S3.truth=shuffle(EK).slice(0,n); S3.type=type; S3.markers=[]; S3.sel.clear(); S3.done=false; S3.hints=0;
+  $$('#refRows input').forEach(i=>i.checked=false);
+  const f=$('#fb3'); f.className='fb'; f.textContent='';
+  draw3();
+}
+function updateScore(){ $('#score').textContent=S3.played?`Réussis du premier coup : ${S3.score} / ${S3.played}`:''; }
+function draw3(){
+  if(!S3.truth.length) return newMystery();
+  $('#mType').textContent=S3.type==='emission'?'spectre d’émission':'spectre d’absorption';
+  const t=S3.truth;
+  paintStrip($('#st3m'),52,l=>S3.type==='emission'?colEm(t,l):colAbs(t,l));
+  $$('#refRows canvas').forEach(c=>paintStrip(c,26,l=>colEm([c.dataset.k],l)));
+  paintRuler($('#ru3'));
+  setMarks($('#grid3'),S3.markers.map(l=>({l,t:fr(l,1)})),'');
+  updateScore();
+}
+makeProbe($('#grid3'),l=>{ if(S3.markers.length<10){S3.markers.push(l); setMarks($('#grid3'),S3.markers.map(x=>({l:x,t:fr(x,1)})),'');} });
+$('#newM').onclick=newMystery; $('#lvl').onchange=newMystery;
+$('#clrMk').onclick=()=>{S3.markers=[];setMarks($('#grid3'),[])};
+$('#valid').onclick=()=>{
+  const f=$('#fb3'), sel=[...S3.sel], t=S3.truth;
+  if(!sel.length){f.className='fb show info';f.textContent='Coche au moins un élément avant de valider.';return}
+  const good=sel.filter(k=>t.includes(k)).length, wrong=sel.length-good, miss=t.length-good;
+  if(!wrong&&!miss){
+    if(!S3.done){ S3.played++; if(S3.hints===0&&!S3.tried) S3.score++; }
+    S3.done=true; S3.tried=false;
+    f.className='fb show ok';
+    f.innerHTML='Bravo ! '+t.map(k=>`<b>${ELS[k].name}</b> (raies à ${ELS[k].lines.slice().sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>fr(x[0],1)).join(' ; ')} nm…)`).join(' et ')+'.';
+    updateScore();
+  } else {
+    S3.tried=true;
+    let msg=`Pas encore. Sur les ${sel.length} élément(s) cochés, ${good} ${good>1?'sont présents':'est présent'}`;
+    if(wrong) msg+=` et ${wrong} ${wrong>1?'ne le sont pas':'ne l’est pas'}`;
+    msg+=miss?`. Il manque encore ${miss} élément(s).`:'.';
+    msg+=' Vérifie que <b>toutes</b> les raies du spectre sont expliquées, et qu’aucune raie de référence cochée ne manque.';
+    f.className='fb show ko'; f.innerHTML=msg;
+  }
+};
+$('#hint').onclick=()=>{
+  const f=$('#fb3'); S3.hints++;
+  if(S3.hints===1){ f.className='fb show info'; f.innerHTML=`Indice : il y a <b>${S3.truth.length}</b> élément(s) dans ce gaz.`; }
+  else { S3.markers=S3.truth.map(k=>ELS[k].lines.slice().sort((a,b)=>b[1]-a[1])[0][0]); setMarks($('#grid3'),S3.markers.map(x=>({l:x,t:fr(x,1)})),''); f.className='fb show info'; f.innerHTML=`Indice : des repères ont été placés sur les raies les plus intenses (${S3.truth.length} élément(s)).`; }
+};
+$('#sol').onclick=()=>{
+  const f=$('#fb3'); if(!S3.done){S3.played++;S3.done=true;} S3.tried=false;
+  S3.sel=new Set(S3.truth); $$('#refRows input').forEach(i=>i.checked=S3.sel.has(i.dataset.k));
+  f.className='fb show info'; f.innerHTML='Solution : '+S3.truth.map(k=>`<b>${ELS[k].name}</b>`).join(' + ')+'.'; updateScore();
+};
+
+/* ============================ MODULE 4 ============================ */
+/* el : clé d'élément ; w : largeur visuelle (σ, nm) ; d : profondeur */
+const FR=[
+ {id:'K',l:393.4,el:'Ca',sp:'calcium ionisé (Ca⁺)',d:.95,w:1.7},
+ {id:'H',l:396.8,el:'Ca',sp:'calcium ionisé (Ca⁺)',d:.92,w:1.7},
+ {id:'h',l:410.2,el:'H',sp:'hydrogène (Hδ, série de Balmer)',d:.5,w:1.0},
+ {id:'g',l:422.7,el:'Ca',sp:'calcium',d:.6,w:.9},
+ {id:'G',l:430.8,el:'Fe',sp:'fer (et calcium, molécule CH)',d:.65,w:1.2},
+ {id:'G′',l:434.0,el:'H',sp:'hydrogène (Hγ, série de Balmer)',d:.6,w:1.0},
+ {id:'e',l:438.4,el:'Fe',sp:'fer',d:.55,w:.8},
+ {id:'d',l:466.8,el:'Fe',sp:'fer',d:.35,w:.7},
+ {id:'F',l:486.1,el:'H',sp:'hydrogène (Hβ, série de Balmer)',d:.75,w:1.1},
+ {id:'c',l:495.8,el:'Fe',sp:'fer',d:.4,w:.7},
+ {id:'b4',l:516.7,el:'Mg',sp:'magnésium',d:.72,w:.8},
+ {id:'b2',l:517.3,el:'Mg',sp:'magnésium',d:.75,w:.8},
+ {id:'b1',l:518.4,el:'Mg',sp:'magnésium',d:.8,w:.8},
+ {id:'E',l:527.0,el:'Fe',sp:'fer',d:.55,w:.8},
+ {id:'D3',l:587.6,el:'He',sp:'hélium',d:.3,w:.6},
+ {id:'D2',l:589.0,el:'Na',sp:'sodium',d:.85,w:.9},
+ {id:'D1',l:589.6,el:'Na',sp:'sodium',d:.8,w:.9},
+ {id:'a',l:627.6,el:'O2',sp:'dioxygène O₂ de l’air',d:.45,w:1.4,tel:true},
+ {id:'C',l:656.3,el:'H',sp:'hydrogène (Hα, série de Balmer)',d:.85,w:1.2},
+ {id:'B',l:686.7,el:'O2',sp:'dioxygène O₂ de l’air',d:.7,w:1.6,tel:true},
+ {id:'A',l:759.4,el:'O2',sp:'dioxygène O₂ de l’air',d:.75,w:1.8,tel:true}
+];
+const QEL=[['H','Hydrogène'],['He','Hélium'],['Na','Sodium'],['Mg','Magnésium'],['Ca','Calcium'],['Fe','Fer'],['O2','Dioxygène (air)']];
+const S4={sel:null,cmp:null,defi:false,found:new Set(),wrong:{}};
+const pkSun=Math.max(...Array.from({length:81},(_,i)=>planck(380+i*5,5772)));
+function solarCol(l){
+  const base=wl2rgb(l), br=.55+.45*planck(l,5772)/pkSun; let t=1;
+  for(const f of FR){ const d=(l-f.l)/f.w; if(Math.abs(d)<6) t*=(1-f.d*Math.exp(-d*d/2)); }
+  return base.map(c=>c*br*t);
+}
+function draw4(){
+  paintStrip($('#st4s'),120,solarCol);
+  paintRuler($('#ru4'));
+  const cmp=S4.cmp;
+  $('#cmpBox').style.display=(cmp&&cmp!=='O2')?'block':'none';
+  if(cmp&&cmp!=='O2'){ paintStrip($('#st4c'),34,l=>colEm([cmp],l)); $('#cmpLb').textContent=`Spectre d’émission : ${ELS[cmp].name.toLowerCase()} (lampe à vapeur)`; }
+  layoutLabs(); renderInfo();
+  if(cmp&&cmp!=='O2') setMarks($('#grid4'),FR.filter(f=>f.el===cmp).map(f=>({l:f.l})),'al');
+  else setMarks($('#grid4'),[]);
+  $('#fScore').textContent=S4.defi?`Raies identifiées : ${S4.found.size} / ${FR.length}`:'';
+}
+function layoutLabs(){
+  const box=$('#labs4'); box.innerHTML='';
+  const w=box.clientWidth; if(!w) return;
+  const rows=[-99,-99,-99,-99]; const H=18;
+  for(const f of FR){
+    const x=(f.l-VMIN)/VSPAN*w, wid=10+7*f.id.length;
+    let r=rows.findIndex(e=>x-wid/2>e+3); if(r<0) r=rows.indexOf(Math.min(...rows));
+    rows[r]=x+wid/2;
+    const wrap=document.createElement('div'); wrap.className='lw'; wrap.style.left=x+'px'; wrap.style.top=(r*H)+'px'; wrap.style.height=(74-r*H)+'px';
+    const b=document.createElement('button'); const hidden=S4.defi&&!S4.found.has(f.id);
+    b.textContent=hidden?'?':f.id; b.title=hidden?'Raie à '+fr(f.l,1)+' nm':f.id+' — '+fr(f.l,1)+' nm';
+    if(S4.sel===f.id) b.classList.add('sel'); if(S4.cmp&&f.el===S4.cmp) b.classList.add('hl'); if(f.tel) b.classList.add('tel'); if(S4.defi&&S4.found.has(f.id)) b.classList.add('found');
+    b.onclick=()=>{S4.sel=f.id;draw4()};
+    wrap.appendChild(b); box.appendChild(wrap);
+  }
+}
+function renderInfo(){
+  const box=$('#fInfo'), f=FR.find(x=>x.id===S4.sel);
+  if(!f){ box.className='fb info show'; box.innerHTML='Clique sur une raie (ou une lettre) pour en savoir plus. Les raies à bord pointillé sont d’origine <b>terrestre</b>.'; return; }
+  if(S4.defi&&!S4.found.has(f.id)){
+    box.className='fb info show';
+    box.innerHTML=`Raie à <b>${fr(f.l,1)} nm</b>. À quelle espèce l’attribuer ? <span class="note">(astuce : compare avec le spectre d’émission d’un élément)</span><div class="chips" id="qChips" style="margin-top:8px"></div><div id="qFb" style="margin-top:6px"></div>`;
+    const q=$('#qChips',box);
+    for(const [k,n] of QEL){ const b=document.createElement('button'); b.className='chip'; b.textContent=n; b.onclick=()=>{
+      if(k===f.el){ S4.found.add(f.id); draw4(); }
+      else $('#qFb',box).innerHTML='<span style="color:var(--bad)">Non : '+n.toLowerCase()+' n’a pas de raie à cette longueur d’onde. Essaie encore.</span>'; };
+      q.appendChild(b); }
+    return;
+  }
+  let extra='';
+  if(f.id==='D3') extra=' En 1868, cette raie jaune ne correspondait à aucun élément connu sur Terre : on l’attribue à un nouvel élément, l’<b>hélium</b> (<i>hêlios</i> = Soleil), isolé sur Terre en 1895.';
+  if(f.tel) extra=' Cette raie est due à l’<b>atmosphère terrestre</b> : le dioxygène de l’air absorbe ces radiations avant le spectroscope (raie « tellurique »). Elle n’informe pas sur la composition du Soleil.';
+  if(f.el==='Na'&&!f.tel) extra=' Les raies D<sub>1</sub> et D<sub>2</sub> forment un doublet, très proche de 589 nm.';
+  box.className='fb info show';
+  box.innerHTML=`<b>Raie ${f.id}</b> · λ = <b>${fr(f.l,1)} nm</b> (${colorName(f.l)}) · espèce responsable : <b>${f.sp}</b>.<br>Origine : ${f.tel?'atmosphère terrestre':'atmosphère du Soleil'}.${extra}`;
+}
+function buildCmpChips(){
+  const box=$('#cmpChips'); box.innerHTML='';
+  for(const [k,n] of QEL){ const b=document.createElement('button'); b.className='chip'; b.textContent=k==='O2'?'O₂ (air)':k; b.title=n; b.setAttribute('aria-pressed',S4.cmp===k); b.onclick=()=>{S4.cmp=S4.cmp===k?null:k; buildCmpChips(); draw4();}; box.appendChild(b); }
+}
+$('#defi').onchange=e=>{S4.defi=e.target.checked; S4.found.clear(); S4.sel=null; draw4();};
+$('#toWien').onclick=()=>{S1.T=5800;S1.snaps=[];S1.target=null;show(1);update1();};
+makeProbe($('#grid4'),null);
+
+/* ============================ Démarrage ============================ */
+buildPresets(); buildChips2(); buildRefRows(); buildCmpChips();
+newMystery(); update1();
+</script>
+</body>
+</html>
