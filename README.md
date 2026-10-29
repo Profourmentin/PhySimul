@@ -7,8 +7,11 @@ Chaque simulation est un fichier HTML autonome. La page d'accueil (`index.html`)
 ## Structure
 
 ```
-index.html        page d'accueil et catalogue
-sims/             une simulation = un fichier HTML autonome
+index.html                    page d'accueil et catalogue
+sims/                         une simulation = un fichier HTML autonome
+enseignants/index.html        espace enseignant : liste des fiches d'activités
+enseignants/enseignants.css   styles communs de l'espace (aucune ressource externe)
+enseignants/fiches/           une fiche enseignant = un fichier HTML
 README.md
 ```
 
@@ -45,3 +48,16 @@ README.md
 ## Hébergement
 
 Le site est statique. Il peut être publié avec GitHub Pages : Settings, Pages, Source « Deploy from a branch », branche `main`, dossier `/ (root)`.
+
+## Espace enseignant
+
+L'espace `enseignants/` regroupe des fiches d'activités : programme visé, déroulé, réponses attendues (repliées), difficultés fréquentes, accessibilité, limites et prolongements, sources. Chaque fiche s'imprime ou s'enregistre en PDF.
+
+Les fiches sont publiques, corrections comprises : l'espace n'est pas protégé par un mot de passe.
+
+### Ajouter une fiche
+
+1. Copier `enseignants/fiches/modele-fiche.html` en `enseignants/fiches/<identifiant>.html` et le remplir (les consignes sont en commentaire en tête du fichier). Marquer « À vérifier » tout ce qui ne l'est pas.
+2. Dans `index.html`, ajouter le champ `"fiche": "enseignants/fiches/<identifiant>.html"` à l'entrée du catalogue : un lien « Fiche enseignant » apparaît sur la carte.
+3. Dans `enseignants/index.html`, renseigner `"fiche": "fiches/<identifiant>.html"` (avec `resume`, `programme` et `duree_txt`) pour la simulation dans la liste `fiches-data`.
+4. Ouvrir une pull request.

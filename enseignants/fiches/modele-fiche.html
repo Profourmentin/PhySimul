@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Modèle de fiche enseignant · Simulabo PhCh</title>
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<!--
+  MODÈLE DE FICHE. Pour créer une fiche :
+  1. Copier ce fichier en enseignants/fiches/<identifiant-de-la-simulation>.html
+  2. Remplacer chaque texte entre crochets [ ] et supprimer les commentaires.
+  3. Dans index.html, ajouter à l'entrée du catalogue : "fiche": "enseignants/fiches/<identifiant>.html"
+  4. Dans enseignants/index.html, mettre le même "fiche" dans la liste « fiches-data ».
+  Règles : citer le programme (BO) avec les notions et capacités exactes ; marquer « À vérifier » tout ce qui ne l'est pas ;
+  ne rien affirmer sur la page de la simulation qui n'ait été vérifié ; garder les réponses attendues dans le bloc <details>.
+-->
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/[fichier-de-la-simulation].html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · [Matière ou enseignement] · [Niveau]</p>
+    <h1>[Titre de l'activité]</h1>
+    <p class="lead">[Une ou deux phrases : ce que fait l'élève et ce qu'il doit comprendre à la fin.]</p>
+    <ul class="chips" aria-label="Repères">
+      <li>[Niveau, voie]</li>
+      <li>[Thème du programme]</li>
+      <li>[Durée] min (à confirmer en classe)</li>
+      <li>[Matériel : ordinateur, tablette, papier]</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/[fichier-de-la-simulation].html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>[Thème, partie et rubrique du programme, avec la référence du texte officiel.]</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>[Notion ou capacité, citée du BO]</td><td>[Étape de la simulation qui la travaille]</td></tr>
+            <tr><td>[Formulation non vérifiée] <span class="verify">À vérifier dans le BO</span></td><td>[Étape]</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>[Démarche d'ensemble (par exemple Prédire, Observer, Mesurer, Expliquer, Transférer) et durée estimée.]</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. [Nom]</td><td>[Hypothèse, expérience, modélisation, raisonnement ou transfert]</td><td>[Action de l'élève]</td><td>[Valeur, schéma, phrase]</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>[Étape]</td><td>[Réponse, avec unités et chiffres significatifs]</td><td>[Tolérance acceptée, erreur fréquente]</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>[Conception erronée ou erreur de méthode]</td><td>[Phrase ou réponse typique d'un élève]</td><td>[Indice, message ou étape de la simulation qui y répond]</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>[Ce qui est vérifié : clavier, contraste, lecteur d'écran, réduction des animations, consignes courtes.]</p>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> [audit, test lecteur d'écran, test avec des élèves…].</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>[En binôme, en classe entière, en autonomie, en différenciation]</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain"><li>[Hypothèse simplificatrice du modèle]</li></ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain"><li>[Expérience réelle, tableur, exercice, évaluation]</li></ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> [date de lecture des textes officiels, points non confirmés].</p>
+      <ul class="plain">
+        <li><a href="[adresse du texte officiel]">[Titre du document, éditeur]</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le [JJ/MM/AAAA]</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>

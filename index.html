@@ -227,6 +227,7 @@ button.link[hidden] { display: none; }
 .card .desc { color: var(--muted); font-size: 14.5px; }
 .tags { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .tags li { font: 400 12px var(--font-data); padding: 3px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+.fiche-link { position: relative; z-index: 2; align-self: flex-start; font: 600 13px var(--font-body); color: var(--accent); text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; min-height: 32px; }
 .foot { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font: 500 13px var(--font-data); color: var(--muted); }
 .foot .go { color: var(--accent); font-weight: 600; font-family: var(--font-body); font-size: 14px; }
 .card.live:hover .go { text-decoration: underline; text-underline-offset: 3px; }
@@ -265,6 +266,7 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
       <a href="#catalogue">Catalogue</a>
       <a href="#themes">Thèmes</a>
       <a href="#contribuer">Contribuer</a>
+      <a href="enseignants/index.html">Enseignants</a>
     </nav>
   </header>
 
@@ -491,7 +493,7 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     "resume": "Lance des dés pour simuler la désintégration de noyaux, mesure une demi-vie sur la courbe, puis date une statuette en bois : cinq missions pour comprendre pourquoi le hasard d'un noyau donne une loi pour un grand nombre.",
     "theme": "matiere", "niveau": "Première", "type": "Simulation", "duree": 40,
     "notions": ["enseignement scientifique", "radioactivité", "décroissance radioactive", "demi-vie", "datation", "carbone 14", "modèle discret", "lecture graphique"],
-    "statut": "dispo", "url": "sims/datation-radioactive.html", "date": "2026-10-29", "glyph": "reaction"
+    "statut": "dispo", "url": "sims/datation-radioactive.html", "fiche": "enseignants/fiches/datation-radioactive.html", "date": "2026-10-29", "glyph": "reaction"
   }
 ]
 </script>
@@ -676,6 +678,7 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
       '<div class="thumb">' + glyph(it.glyph) + badge + '</div>' +
       '<div class="card-body"><p class="meta"><span>' + esc(t.court) + '</span><span>' + esc(it.type) + '</span></p>' +
       '<h3>' + title + '</h3><p class="desc">' + hl(it.resume) + '</p><ul class="tags">' + tags + '</ul>' +
+      (it.fiche ? '<a class="fiche-link" href="' + esc(it.fiche) + '">Fiche enseignant</a>' : '') +
       '<div class="foot"><span>' + esc(info) + '</span>' + (live ? '<span class="go">Ouvrir →</span>' : '<span>Bientôt</span>') + '</div></div></article>';
   }
   function update() {
