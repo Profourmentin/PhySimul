@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace enseignant · Simulabo PhCh</title>
+<meta name="description" content="Fiches d'activités pour les enseignants : programme visé, déroulé, réponses attendues, difficultés fréquentes, accessibilité et prolongements.">
+<link rel="stylesheet" href="enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap wide">
+  <div class="topbar">
+    <a class="brand" href="../index.html">Simulabo<small>PhCh</small></a>
+    <nav aria-label="Navigation principale">
+      <a href="../index.html#catalogue">Catalogue</a>
+      <a href="index.html" aria-current="page">Espace enseignant</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Espace enseignant</p>
+    <h1>Des fiches pour préparer et mener l'activité</h1>
+    <p class="lead">Chaque fiche relie une simulation au programme officiel : notions visées, déroulé, réponses attendues, difficultés fréquentes des élèves, accessibilité et prolongements. Elle s'imprime ou s'enregistre en PDF.</p>
+    <p class="info"><b>Accès libre.</b> Les fiches sont publiques, corrections comprises. Les réponses attendues sont repliées par défaut pour permettre la projection en classe, mais elles ne sont pas protégées.</p>
+  </header>
+
+  <main id="contenu">
+    <noscript><p class="info">Cette page a besoin de JavaScript pour afficher la liste. Fiche disponible : <a href="fiches/datation-radioactive.html">Datation au carbone 14</a>.</p></noscript>
+
+    <section aria-labelledby="h-fiches" style="padding-top:24px">
+      <h2 id="h-fiches">Fiches disponibles</h2>
+      <div class="tools" role="search">
+        <input id="q" type="search" placeholder="Chercher une notion, un titre…" autocomplete="off" aria-label="Rechercher une fiche">
+        <select id="niveau" aria-label="Niveau"></select>
+      </div>
+      <p class="progress" id="progress" role="status" aria-live="polite"></p>
+      <div class="fiches" id="fiches"></div>
+      <p class="empty" id="empty" hidden>Aucune fiche ne correspond. Essaie un mot plus court ou retire le filtre de niveau.</p>
+    </section>
+
+    <section aria-labelledby="h-todo" style="padding-top:34px">
+      <h2 id="h-todo">Simulations sans fiche pour l'instant</h2>
+      <p class="lead" style="font-size:16px;margin-top:8px">Ces simulations sont en ligne. Leur fiche reste à rédiger.</p>
+      <div class="todo"><ul id="todo"></ul></div>
+    </section>
+
+    <section aria-labelledby="h-contenu" style="padding-top:34px">
+      <h2 id="h-contenu">Ce que contient une fiche</h2>
+      <ol class="steps">
+        <li><b>Programme visé</b> : notions et capacités du texte officiel, avec l'étape de la simulation qui les travaille.</li>
+        <li><b>Déroulé</b> : la démarche, ce que fait l'élève, la trace attendue.</li>
+        <li><b>Réponses attendues</b> : repliées, avec les tolérances acceptées par la page.</li>
+        <li><b>Difficultés fréquentes</b> : conceptions erronées et réponse de la simulation.</li>
+        <li><b>Accessibilité et mise en œuvre</b> : ce qui est vérifié, ce qui ne l'est pas, idées d'organisation.</li>
+        <li><b>Limites et prolongements</b> : ce qu'il faut dire aux élèves, pour aller plus loin.</li>
+        <li><b>Sources</b> : textes officiels consultés, avec les points restant à vérifier.</li>
+      </ol>
+      <p style="margin-top:14px">Tout ce qui n'a pas pu être vérifié est signalé <span class="verify">À vérifier</span>. Pour rédiger une nouvelle fiche, copier <a href="fiches/modele-fiche.html">le modèle de fiche</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant</span>
+    <span>Aucun compte · aucune donnée collectée</span>
+  </footer>
+</div>
+
+<script type="application/json" id="fiches-data">
+[
+  {
+    "id": "banc-optique-photovoltaique",
+    "titre": "Banc d'optique photovoltaïque",
+    "niveau": "Seconde",
+    "theme": "energie",
+    "sim": "sims/banc-optique.html",
+    "duree": 20,
+    "fiche": null
+  },
+  {
+    "id": "lentilles-foyers-images",
+    "titre": "Lentilles : foyers et construction d'images",
+    "niveau": "Seconde",
+    "theme": "ondes",
+    "sim": "sims/lentilles.html",
+    "duree": 20,
+    "fiche": null
+  },
+  {
+    "id": "titrage-colorimetrique",
+    "titre": "Titrage colorimétrique",
+    "niveau": "Première spé",
+    "theme": "matiere",
+    "sim": "sims/titrage.html",
+    "duree": 45,
+    "fiche": null
+  },
+  {
+    "id": "combustion-energie-liaison",
+    "titre": "Combustion et énergie de liaison",
+    "niveau": "Première spé",
+    "theme": "energie",
+    "sim": "sims/combustion.html",
+    "duree": 10,
+    "fiche": null
+  },
+  {
+    "id": "equilibrer-oxydoreduction",
+    "titre": "Équilibrer une réaction d'oxydoréduction",
+    "niveau": "Première spé",
+    "theme": "matiere",
+    "sim": "sims/oxydoreduction.html",
+    "duree": 20,
+    "fiche": null
+  },
+  {
+    "id": "dissolution-dilution",
+    "titre": "Dissolution et dilution",
+    "niveau": "Seconde",
+    "theme": "matiere",
+    "sim": "sims/dissolution-dilution.html",
+    "duree": 30,
+    "fiche": null
+  },
+  {
+    "id": "principe-inertie",
+    "titre": "Principe d'inertie",
+    "niveau": "Seconde",
+    "theme": "mouvement",
+    "sim": "sims/principe-inertie.html",
+    "duree": 25,
+    "fiche": null
+  },
+  {
+    "id": "spectres-lumineux",
+    "titre": "Spectres lumineux",
+    "niveau": "Seconde",
+    "theme": "ondes",
+    "sim": "sims/spectres.html",
+    "duree": 35,
+    "fiche": null
+  },
+  {
+    "id": "loi-ohm",
+    "titre": "Loi d'Ohm",
+    "niveau": "Seconde",
+    "theme": "ondes",
+    "sim": "sims/loi-ohm.html",
+    "duree": 20,
+    "fiche": null
+  },
+  {
+    "id": "gaz-parfaits-mariotte",
+    "titre": "Loi des gaz parfaits : P·V = constante",
+    "niveau": "Première spé",
+    "theme": "mouvement",
+    "sim": "sims/gaz-parfaits.html",
+    "duree": 25,
+    "fiche": null
+  },
+  {
+    "id": "decroissance-radioactive-carbone-14",
+    "titre": "Décroissance radioactive et datation au carbone 14",
+    "niveau": "Première",
+    "theme": "matiere",
+    "sim": "sims/datation-radioactive.html",
+    "duree": 40,
+    "fiche": "fiches/datation-radioactive.html",
+    "resume": "Jeu de dés en 5 missions : mesurer une demi-vie, puis dater une statuette au carbone 14.",
+    "programme": "Enseignement scientifique de Première : décroissance radioactive, demi-vie, datation.",
+    "duree_txt": "30 à 45 min"
+  }
+]
+</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("fiches-data").textContent);
+  var THEMES = { matiere: "Matière", mouvement: "Mouvement", energie: "Énergie", ondes: "Ondes et signaux" };
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function norm(s) { return String(s).replace(/[\u2019\u2018]/g, "'").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+  DATA.forEach(function (d) { d.hay = norm([d.titre, d.niveau, THEMES[d.theme] || "", d.resume || "", d.programme || ""].join(" ")); });
+
+  var levels = [];
+  DATA.forEach(function (d) { if (levels.indexOf(d.niveau) < 0) levels.push(d.niveau); });
+  $("niveau").innerHTML = '<option value="">Tous les niveaux</option>' + levels.map(function (l) { return '<option value="' + esc(l) + '">' + esc(l) + "</option>"; }).join("");
+  $("niveau").hidden = levels.length < 2;
+
+  function match(d) {
+    var lv = $("niveau").value;
+    if (lv && d.niveau !== lv) return false;
+    var t = norm($("q").value).split(/\s+/).filter(Boolean);
+    for (var i = 0; i < t.length; i++) if (d.hay.indexOf(t[i]) < 0) return false;
+    return true;
+  }
+  function render() {
+    var withF = DATA.filter(function (d) { return d.fiche; });
+    var shown = withF.filter(match), todo = DATA.filter(function (d) { return !d.fiche && match(d); });
+    $("fiches").innerHTML = shown.map(function (d) {
+      return '<article class="fcard"><p class="kicker">' + esc(d.niveau) + " · " + esc(THEMES[d.theme] || "") + (d.duree_txt ? " · " + esc(d.duree_txt) : "") + "</p>" +
+        '<h3><a href="' + esc(d.fiche) + '">' + esc(d.titre) + "</a></h3>" +
+        "<p>" + esc(d.resume || "") + "</p><p>" + esc(d.programme || "") + '</p><span class="go">Ouvrir la fiche →</span></article>';
+    }).join("");
+    $("empty").hidden = shown.length > 0;
+    $("todo").innerHTML = todo.map(function (d) {
+      return '<li><a href="../' + esc(d.sim) + '">' + esc(d.titre) + "</a><span>" + esc(d.niveau) + "</span></li>";
+    }).join("");
+    var pct = Math.round(100 * withF.length / DATA.length);
+    $("progress").innerHTML = "<span>" + withF.length + " fiche" + (withF.length > 1 ? "s" : "") + " sur " + DATA.length + " simulations</span>" +
+      '<span class="bar" aria-hidden="true"><span style="width:' + pct + '%"></span></span>';
+  }
+  $("q").addEventListener("input", render);
+  $("niveau").addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>

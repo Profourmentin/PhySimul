@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche enseignant · Datation au carbone 14 · Simulabo PhCh</title>
+<meta name="description" content="Fiche d'activité pour l'enseignant : jeu de dés sur la décroissance radioactive, la demi-vie et la datation au carbone 14 (enseignement scientifique, Première).">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/datation-radioactive.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Enseignement scientifique · Première</p>
+    <h1>Datation au carbone 14 : le jeu de dés</h1>
+    <p class="lead">Activité gamifiée en 5 missions : des dés modélisent la désintégration aléatoire de noyaux, puis l'élève mesure une demi-vie et date une statuette au carbone 14.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale</li>
+      <li>Enseignement scientifique</li>
+      <li>30 à 45 min (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/datation-radioactive.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>L'activité relève du thème « Une longue histoire de la matière » de l'enseignement scientifique en Première (voie générale), rubrique « Décroissance radioactive ; demi-vie ; datation ». Le programme suggère d'ailleurs le modèle discret de décroissance exponentielle, avec « mise en œuvre de simulations, calculs de demi-vie, datation ».</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Certains noyaux sont instables et se désintègrent (radioactivité) ; la durée de vie d'un noyau est aléatoire</td><td>Missions 1 et 4 : un dé = un noyau, la désintégration tombe au hasard</td></tr>
+            <tr><td>La demi-vie est la durée au bout de laquelle la moitié des noyaux d'un échantillon s'est désintégrée ; elle est caractéristique du noyau</td><td>Missions 3 et 4 : mesure sur le graphique, trois types de noyaux (dés à 4, 6 et 10 faces)</td></tr>
+            <tr><td>Utiliser une représentation graphique pour déterminer une demi-vie</td><td>Mission 3 : lecture de t₁/₂ sur la courbe N = f(t)</td></tr>
+            <tr><td>Estimer la durée nécessaire pour obtenir une proportion donnée de noyaux restants au bout de n demi-vies <span class="verify">À vérifier dans le BO</span></td><td>Missions 1, 3 et 5 : un quart après 2 demi-vies, 12,5 % après 3</td></tr>
+            <tr><td>Utiliser une décroissance radioactive pour une datation (exemple du carbone 14)</td><td>Mission 5 : choix du noyau, puis datation de la statuette et du charbon de bois</td></tr>
+            <tr><td>Notation scientifique</td><td>Mission 5 : demi-vies données en notation scientifique (5,73 × 10³ ans)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé des 5 missions</h2>
+      <p>Les missions se débloquent dans l'ordre et suivent une démarche Prédire, Observer, Mesurer, Expliquer, Transférer. Durée estimée de l'ensemble : 30 à 45 minutes, à confirmer en classe.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Mission</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Points</th></tr></thead>
+          <tbody>
+            <tr><td>1. Prédire</td><td>Hypothèse</td><td>Choisit ce qui restera après deux demi-vies (rien, un quart, ou « on ne peut pas savoir »). Valider débloque les dés.</td><td>1</td></tr>
+            <tr><td>2. Observer</td><td>Expérience</td><td>Lance les dés jusqu'à ce qu'il reste moins de 10 % des noyaux de départ, et regarde la courbe se construire.</td><td>2</td></tr>
+            <tr><td>3. Mesurer la demi-vie</td><td>Modélisation</td><td>Lit sur le graphique le nombre de lancers pour passer de N₀ à N₀/2. Un retour sur sa prédiction s'affiche ensuite.</td><td>3 à 1</td></tr>
+            <tr><td>4. Expliquer</td><td>Raisonnement</td><td>Teste 4 affirmations (vrai ou faux) en explorant le nombre de noyaux (20, 100, 1 000) et le type de noyau.</td><td>3 à 1</td></tr>
+            <tr><td>5. Dater la relique</td><td>Transfert</td><td>Choisit le noyau adapté parmi quatre, puis calcule l'âge de la statuette (25 % restants), puis du charbon de bois (12,5 %, mission bonus).</td><td>3 à 1 par étape</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Le score (3 points au premier essai, puis 2, puis 1) donne un grade : Stagiaire, Fouilleur, Archéologue, Chef de mission. Après 3 essais ratés, un bouton affiche la correction pour ne jamais bloquer l'élève (0 point).</p>
+      <p>En fin de parcours, l'élève obtient un « carnet de fouille » à copier : prédiction, expériences, demi-vie lue, noyau choisi, âges calculés. Il peut servir de trace écrite ou de rendu.</p>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Mission</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Environ un quart des noyaux de départ</td><td>Les deux autres réponses sont des conceptions fréquentes (voir plus bas)</td></tr>
+                <tr><td>3</td><td>t₁/₂ ≈ 3,8 lancers pour le dé à 6 faces, soit 3 à 5 sur une expérience de 100 noyaux</td><td>La page accepte toute valeur entre le lancer qui précède le franchissement de N₀/2 et celui du franchissement, décimale possible (3,5)</td></tr>
+                <tr><td>4</td><td>Faux, Vrai, Faux, Faux (dans l'ordre des quatre affirmations)</td><td>Demi-vies théoriques : 2,4 lancers (dé à 4 faces), 3,8 (6 faces), 6,6 (10 faces)</td></tr>
+                <tr><td>5, choix du noyau</td><td>Carbone 14 (5,73 × 10³ ans)</td><td>Iode 131 et strontium 90 : trop courts. Potassium 40 : trop long</td></tr>
+                <tr><td>5, statuette</td><td>25 % restants = 2 demi-vies, soit 2 × 5 730 = 11 460 ans</td><td>Environ 1,1 × 10⁴ ans</td></tr>
+                <tr><td>5, bonus charbon de bois</td><td>12,5 % restants = 3 demi-vies, soit 3 × 5 730 = 17 190 ans</td><td>Environ 1,7 × 10⁴ ans</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>La demi-vie théorique d'un dé à f faces vient de N = N₀ × (1 − 1/f)<sup>t</sup> : elle n'est vérifiée qu'en moyenne, jamais exactement sur une expérience. La page s'appuie donc sur un encadrement plutôt que sur une valeur unique.</p>
+          <p style="margin-top:12px">La page accepte les nombres écrits avec une virgule ou des espaces (11 460, 11460, 11 460 ans).</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <p>Chaque obstacle ci-dessous est prévu dans les messages de retour : une erreur donne un indice ciblé, pas seulement « faux ».</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Confondre demi-vie et moitié de la durée de vie</td><td>« Après deux demi-vies, il ne reste plus rien »</td><td>La mission 1 propose cette réponse en distracteur. La mission 3 compare N₀ → N₀/2 et N₀/2 → N₀/4 : deux durées voisines</td></tr>
+            <tr><td>Penser que le hasard interdit toute prévision</td><td>« On ne peut rien savoir, c'est le hasard »</td><td>Mission 4 : un noyau est imprévisible, un grand nombre de noyaux suit une loi. Comparer 20 et 1 000 noyaux montre la courbe se régulariser</td></tr>
+            <tr><td>Croire que la demi-vie dépend de la quantité</td><td>« Plus il y a de noyaux, plus c'est long »</td><td>Mission 4 : le journal des expériences met côte à côte 20, 100 et 1 000 noyaux</td></tr>
+            <tr><td>Lire le mauvais axe</td><td>Répondre 50 (valeur de N) au lieu d'un nombre de lancers</td><td>Message dédié, puis case « Afficher la ligne N₀/2 » et indice sur l'axe horizontal</td></tr>
+            <tr><td>Confondre proportion et nombre de demi-vies</td><td>25 % → 4 demi-vies ; 12,5 % → 8 demi-vies</td><td>Messages ciblés sur ces erreurs, puis tableau 100 % → 50 % → 25 % → 12,5 % après deux essais</td></tr>
+            <tr><td>Mélanger unité du jeu et unité réelle</td><td>Chercher des années dans le jeu de dés</td><td>Avertissement au début de la mission 5 : le lancer est l'unité du jeu, la nature fixe la demi-vie d'un vrai noyau</td></tr>
+            <tr><td>Choisir un noyau sans raisonner sur l'ordre de grandeur</td><td>« Le plus radioactif » ou « le plus lent »</td><td>Chaque noyau refusé est expliqué : 10 demi-vies pour l'iode 131 = 80 jours, rien à mesurer ; potassium 40 : quantité quasi inchangée</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>La page est un fichier HTML autonome : pas de compte, pas de réseau, aucune donnée envoyée. Elle fonctionne hors connexion.</p>
+      <p>Choix d'accessibilité déjà intégrés :</p>
+      <ul class="plain">
+        <li>Un noyau désintégré se reconnaît à ses hachures et à son contour pointillé, pas seulement à sa couleur.</li>
+        <li>Le graphique a une description textuelle et un tableau de mesures équivalent, sous le graphique.</li>
+        <li>Tout se fait au clavier ; les boutons et champs font au moins 44 px de haut.</li>
+        <li>Les résultats importants sont annoncés aux lecteurs d'écran (nombre de noyaux restants, mission terminée).</li>
+        <li>Si l'appareil demande de réduire les animations, la secousse des dés disparaît et les lancers sont instantanés. Le mode sombre est géré.</li>
+        <li>Pas de limite de temps. Phrases courtes, une consigne par mission, missions suivantes verrouillées tant que la précédente n'est pas terminée.</li>
+      </ul>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> la page n'a pas été auditée (RGAA) ni testée avec un lecteur d'écran réel. Le parcours complet et l'absence de débordement à 360 px ont été testés dans un navigateur.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme sur ordinateur ou tablette, un élève manipule, l'autre note le carnet.</li>
+        <li>En classe entière, mission 1 au vidéoprojecteur avec un vote à main levée avant de valider la prédiction.</li>
+        <li>Pour les élèves à besoins particuliers, cocher d'emblée « Afficher la ligne N₀/2 » et utiliser « Lancer ×5 » réduit la charge de lecture et de manipulation.</li>
+        <li>Le carnet de fouille copiable peut servir de trace écrite ou de rendu.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>Le dé est un modèle : à chaque lancer, un noyau a la même probabilité (1 sur f) de se désintégrer, quel que soit son âge. C'est ce qui rend la demi-vie constante. Le chiffre affiché sur un dé encore actif n'a aucun sens physique.</li>
+        <li>Un lancer est un pas de temps du modèle discret ; la durée réelle correspondante dépend du noyau. La constante radioactive n'est pas introduite dans la page.</li>
+        <li>La datation est simplifiée : elle suppose que la proportion initiale de carbone 14 était connue et constante. Les âges obtenus (11 460 et 17 190 ans) sont des âges calculés sans calibration, pas des dates calibrées.</li>
+        <li><span class="verify">À relire</span>La phrase de fin de parcours situe la statuette au début de la période chaude actuelle, après la dernière glaciation. À reformuler si l'on veut une version plus prudente.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Refaire l'expérience avec de vrais dés (ou des pièces) et comparer au résultat de la simulation.</li>
+        <li>Tracer la courbe dans un tableur et la comparer à N₀ × (1 − 1/f)<sup>t</sup> ; la case « Afficher le modèle » en donne un aperçu après la mission 3.</li>
+        <li>Réinvestir dans un sujet d'évaluation commune sur la datation au carbone 14 (par exemple l'ivoire et la biodiversité, voir Sources).</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> extraits de ces documents lus via une recherche le 29/10/2026 ; le texte complet du programme n'a pas pu être rouvert. La référence « BOEN spécial n° 1 du 22 janvier 2019 », indiquée dans la page, est à vérifier.</p>
+      <ul class="plain">
+        <li><a href="https://eduscol.education.fr/document/25345/download">Éduscol, ressource Première : décroissance radioactive, demi-vie, datation</a></li>
+        <li><a href="https://euler.ac-versailles.fr/IMG/pdf/math_enseignement-scientifique_doc-ressource_fusion.pdf">Académie de Versailles, ressources mathématiques pour l'enseignement scientifique</a></li>
+        <li><a href="https://ent2d.ac-bordeaux.fr/disciplines/enseignement-scientifique/wp-content/uploads/sites/67/2020/09/Analyse-du-programme-denseignement-scientifique-classe-de-premie%CC%80re.pdf">Académie de Bordeaux, analyse du programme de Première</a></li>
+        <li><a href="https://ent2d.ac-bordeaux.fr/disciplines/enseignement-scientifique/wp-content/uploads/sites/67/2019/06/Support-de-présentation-de-latelier-1.pdf">Académie de Bordeaux, atelier 1 : radioactivité, acquis de seconde</a></li>
+        <li><a href="https://www.vecteurbac.fr/wp-content/uploads/2022/06/La-datation-au-carbone-14-pour-preserver-la-biodiversite.pdf">Sujet d'évaluation : la datation au carbone 14 pour préserver la biodiversité</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 29/10/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
