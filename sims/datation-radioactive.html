@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datation au carbone 14 · Simulabo PhCh</title>
+<meta name="description" content="Jeu de dés pour comprendre la décroissance radioactive, la demi-vie et la datation au carbone 14 (enseignement scientifique, classe de première).">
+<style>
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --ink:#17203a; --muted:#4f5b73; --line:#d5dbe8;
+  --brand:#2b3a9e; --on-brand:#ffffff; --brand-soft:#e8ebfb;
+  --accent:#a85a00; --accent-bg:#fff4e0;
+  --alive:#0b7a6b; --alive-ink:#ffffff;
+  --gone:#dfe4ee; --gone2:#eef1f7; --gone-ink:#4b566d;
+  --ok:#0b6b4f; --ok-bg:#e4f6ee; --bad:#a61b1b; --bad-bg:#fdeaea;
+  --focus:#1a56db; --ghost:#9aa5bd;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-title:"Barlow","IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1424; --surface:#18203a; --ink:#e8ecf8; --muted:#a9b4cf; --line:#2c3658;
+    --brand:#9fb0ff; --on-brand:#0f1424; --brand-soft:#232d57;
+    --accent:#ffb454; --accent-bg:#3a2c10;
+    --alive:#2dd4bf; --alive-ink:#062b27;
+    --gone:#2a3352; --gone2:#222a45; --gone-ink:#b4bfd8;
+    --ok:#5eead4; --ok-bg:#12322e; --bad:#ff9a9a; --bad-bg:#3b1a1d;
+    --focus:#8ab4ff; --ghost:#5d6a8d;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:8px;background:var(--brand);color:var(--on-brand);padding:10px 14px;border-radius:8px;z-index:10}
+.skip:focus{left:8px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.topbar{padding:12px 0}
+.back{display:inline-flex;align-items:center;min-height:44px;color:var(--brand);font-weight:600;text-decoration:none}
+.back:hover{text-decoration:underline}
+.hero{background:var(--brand);color:var(--on-brand);border-radius:16px;padding:20px 22px;display:grid;gap:16px}
+@media(min-width:720px){.hero{grid-template-columns:1fr auto;align-items:center}}
+.kicker{margin:0 0 4px;font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+h1{margin:0 0 8px;font-family:var(--font-title);font-size:1.9rem;line-height:1.15}
+.hero p{margin:0;max-width:62ch}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.16);border-radius:12px;padding:8px 14px;min-width:92px;text-align:center}
+@media (prefers-color-scheme: dark){.stat{background:rgba(15,20,36,.18)}}
+.stat span{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.stat strong{font-size:1.5rem;font-family:var(--font-title)}
+.stat strong.grade{font-size:1.1rem}
+.layout{display:grid;gap:20px;margin:20px 0;grid-template-areas:"carnet" "lab" "graph"}
+@media(min-width:960px){.layout{grid-template-columns:5fr 7fr;grid-template-areas:"lab graph" "lab carnet";align-items:start}}
+.carnet{grid-area:carnet}.lab{grid-area:lab}.graph{grid-area:graph}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel h2{margin:0 0 8px;font-family:var(--font-title);font-size:1.35rem}
+.carnet{border-top:5px solid var(--accent)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{display:inline-block;background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:2px 12px;font-weight:700;font-size:.9rem}
+.badge.mid{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+.badge.low{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.help,.small{color:var(--muted)}
+.small{font-size:.9rem}
+.controls{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin:12px 0}
+@media(max-width:420px){.controls{grid-template-columns:1fr}}
+label.field{display:grid;gap:4px;font-weight:600;font-size:.9rem}
+select,input[type=text]{min-height:44px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+.btn{min-height:44px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--brand);background:transparent;color:var(--brand);font:inherit;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--brand);color:var(--on-brand)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.btns .primary{flex:1 1 160px}
+.lockmsg{background:var(--accent-bg);color:var(--accent);border-radius:10px;padding:8px 12px;font-weight:600;margin:0 0 10px}
+.tray{--cell:30px;--gap:6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--cell),1fr));gap:var(--gap);padding:8px;border:1px dashed var(--line);border-radius:12px}
+.tray.small{--cell:12px;--gap:2px}
+.die{aspect-ratio:1;border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--alive);color:var(--alive-ink)}
+.tray.small .die{border-radius:2px;font-size:0}
+.die.gone{background:repeating-linear-gradient(45deg,var(--gone) 0 4px,var(--gone2) 4px 8px);color:var(--gone-ink);outline:1.5px dashed var(--gone-ink);outline-offset:-1.5px}
+.tray.small .die.gone{outline-width:1px;outline-offset:-1px}
+@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-3px,1px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(2px,2px)}}
+@media (prefers-reduced-motion: no-preference){.tray.rolling{animation:shake .45s}}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 0;font-size:.85rem;color:var(--muted)}
+.legend .die{display:inline-grid;width:20px;height:20px;font-size:11px;vertical-align:middle;margin-right:6px}
+.opts{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 10px}
+.check{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.92rem}
+.check input{width:20px;height:20px}
+svg#chart{width:100%;display:block}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg .axis{stroke:var(--muted);stroke-width:1.5}
+svg .tick{fill:var(--muted);font:12px var(--font)}
+svg .axtitle{fill:var(--ink);font:600 13px var(--font)}
+svg .series{fill:none;stroke:var(--alive);stroke-width:2.5}
+svg .pt{fill:var(--alive)}
+svg .ghost{fill:none;stroke:var(--ghost);stroke-width:1.5}
+svg .half{stroke:var(--accent);stroke-width:2;stroke-dasharray:7 5}
+svg .halflbl{fill:var(--accent);font:700 12px var(--font)}
+svg .model{fill:none;stroke:var(--brand);stroke-width:2;stroke-dasharray:2 5;stroke-linecap:round}
+svg .modellbl{fill:var(--brand);font:700 12px var(--font)}
+details.plain{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:0 12px}
+details.plain summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:6px 0 12px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.tablewrap{max-height:260px;overflow:auto}
+.mission{border:1px solid var(--line);border-radius:12px;margin:10px 0;background:var(--surface)}
+.mission summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 12px;cursor:pointer;font-weight:700}
+.mission summary::-webkit-details-marker{display:none}
+.mission .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--brand);color:var(--on-brand);flex:none}
+.mission .ttl{flex:1}
+.mission .st{font-size:.85rem;font-weight:600;color:var(--muted)}
+.mission[data-status=locked]{opacity:.65}
+.mission[data-status=locked] summary{cursor:not-allowed}
+.mission[data-status=done] .num{background:var(--ok);color:var(--surface)}
+.mission[data-status=done] .st{color:var(--ok)}
+.mission .body{padding:4px 14px 14px;border-top:1px solid var(--line)}
+fieldset{border:0;margin:10px 0;padding:0}
+legend{font-weight:600;padding:0;margin-bottom:6px}
+.opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer}
+.opt input{width:20px;height:20px;flex:none}
+.opt:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.inline{display:inline-flex;margin-right:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:10px 0}
+.row .field{flex:1 1 180px}
+.fb{margin:8px 0 0;padding:0}
+.fb:not(:empty){padding:10px 12px;border-radius:10px;border-left:5px solid var(--muted);background:var(--brand-soft)}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok)}
+.fb.bad{background:var(--bad-bg);border-color:var(--bad)}
+.fb.hint,.fb.warn{background:var(--accent-bg);border-color:var(--accent)}
+.vf{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0}
+.vf legend{padding:0 4px}
+.retro{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--brand-soft)}
+progress{width:100%;height:16px;accent-color:var(--alive)}
+.victory{margin-top:14px;border:2px solid var(--ok);background:var(--ok-bg);border-radius:12px;padding:14px}
+.victory h3{margin:0 0 6px;font-family:var(--font-title);font-size:1.3rem}
+pre.summary{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:.9rem}
+.teacher{margin:0 0 20px}
+.teacher ul{margin:6px 0 10px;padding-left:20px}
+footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#carnet">Aller au carnet de fouille</a>
+<div class="wrap">
+  <div class="topbar"><a class="back" href="../index.html">← Catalogue des simulations</a></div>
+
+  <header class="hero">
+    <div>
+      <p class="kicker">Matière · Première (enseignement scientifique)</p>
+      <h1>Mission : le mystère de la relique</h1>
+      <p>Ton équipe d'archéologues a trouvé une statuette en bois. Pour la dater avec le carbone 14, il faut d'abord comprendre comment la nature « compte le temps » avec des atomes. Pour cela, on utilise des <strong>dés</strong>.</p>
+    </div>
+    <div class="stats" aria-label="Tableau de bord">
+      <div class="stat"><span>Lancers</span><strong id="roll-counter">0</strong></div>
+      <div class="stat"><span>Points</span><strong id="score">0</strong></div>
+      <div class="stat"><span>Grade</span><strong class="grade" id="grade">Stagiaire</strong></div>
+    </div>
+  </header>
+
+  <main>
+  <noscript><p class="panel">Cette simulation a besoin de JavaScript pour fonctionner.</p></noscript>
+  <div class="layout">
+
+    <!-- Carnet de fouille -->
+    <section class="panel carnet" id="carnet" aria-labelledby="carnet-title">
+      <h2 id="carnet-title">Carnet de fouille</h2>
+      <p class="help">5 missions, à faire dans l'ordre. Chaque mission réussie rapporte des points : 3 points si tu réussis du premier coup, moins ensuite.</p>
+
+      <details class="mission" id="m1" data-status="active" open>
+        <summary aria-disabled="false"><span class="num">1</span><span class="ttl">Prédire</span><span class="st">À faire</span></summary>
+        <div class="body">
+          <p>Un archéologue fait toujours une <strong>hypothèse</strong> avant de fouiller. Fais la tienne.</p>
+          <p>Tu vas lancer les dés jusqu'à ce que la <strong>moitié</strong> des noyaux de départ se soit désintégrée : c'est la <strong>demi-vie</strong>. Tu continues ensuite pendant la <strong>même durée</strong>.</p>
+          <fieldset>
+            <legend>Que restera-t-il alors, par rapport au départ ?</legend>
+            <label class="opt"><input type="radio" name="pred" value="A"><span>Plus rien : tout aura disparu.</span></label>
+            <label class="opt"><input type="radio" name="pred" value="B"><span>Environ un quart des noyaux de départ.</span></label>
+            <label class="opt"><input type="radio" name="pred" value="C"><span>On ne peut pas savoir : c'est le hasard.</span></label>
+          </fieldset>
+          <button class="btn primary" id="btn-pred" type="button">Valider ma prédiction</button>
+          <p class="fb" id="m1-fb" role="status"></p>
+          <button class="btn next" type="button" data-next="m2" hidden>Mission 2 →</button>
+        </div>
+      </details>
+
+      <details class="mission" id="m2" data-status="locked">
+        <summary aria-disabled="true"><span class="num">2</span><span class="ttl">Observer</span><span class="st">Verrouillée</span></summary>
+        <div class="body">
+          <p>Dans le laboratoire, lance les dés jusqu'à ce qu'il reste <strong>moins de 10 %</strong> des noyaux de départ. Regarde la forme de la courbe qui se dessine.</p>
+          <progress id="prog" max="100" value="0" aria-labelledby="prog-label"></progress>
+          <p class="small" id="prog-label">0 % de l'objectif atteint</p>
+          <p class="fb" id="m2-fb" role="status"></p>
+          <button class="btn next" type="button" data-next="m3" hidden>Mission 3 →</button>
+        </div>
+      </details>
+
+      <details class="mission" id="m3" data-status="locked">
+        <summary aria-disabled="true"><span class="num">3</span><span class="ttl">Mesurer la demi-vie</span><span class="st">Verrouillée</span></summary>
+        <div class="body">
+          <p>La <strong>demi-vie</strong> t<sub>1/2</sub> est la durée au bout de laquelle la moitié des noyaux de départ s'est désintégrée. Ici, on la compte en <strong>nombre de lancers</strong>.</p>
+          <p>Lis ton graphique : au bout de combien de lancers N est-il passé de N₀ à N₀/2 ? <span class="small">(Tu peux donner une valeur décimale, par exemple 3,5.)</span></p>
+          <form class="row" id="f-m3" novalidate>
+            <label class="field" for="in-half">t<sub>1/2</sub> (en lancers)
+              <input id="in-half" type="text" inputmode="decimal" autocomplete="off">
+            </label>
+            <button class="btn primary" type="submit">Vérifier</button>
+          </form>
+          <p class="fb" id="m3-fb" role="status"></p>
+          <button class="btn reveal" type="button" data-task="m3" hidden>Voir la correction</button>
+          <div class="retro" id="m3-retro" hidden></div>
+          <button class="btn next" type="button" data-next="m4" hidden>Mission 4 →</button>
+        </div>
+      </details>
+
+      <details class="mission" id="m4" data-status="locked">
+        <summary aria-disabled="true"><span class="num">4</span><span class="ttl">Expliquer : hasard et grand nombre</span><span class="st">Verrouillée</span></summary>
+        <div class="body">
+          <p>Pour répondre, tu peux explorer le laboratoire : change le <strong>nombre de noyaux</strong> et le <strong>type de noyau</strong>, puis regarde le <em>journal des expériences</em> sous le graphique.</p>
+          <div id="vf-list"></div>
+          <button class="btn primary" id="btn-m4" type="button">Vérifier mes réponses</button>
+          <p class="fb" id="m4-fb" role="status"></p>
+          <button class="btn reveal" type="button" data-task="m4" hidden>Voir la correction</button>
+          <button class="btn next" type="button" data-next="m5" hidden>Mission 5 →</button>
+        </div>
+      </details>
+
+      <details class="mission" id="m5" data-status="locked">
+        <summary aria-disabled="true"><span class="num">5</span><span class="ttl">Dater la relique</span><span class="st">Verrouillée</span></summary>
+        <div class="body">
+          <div id="m5a">
+            <p><strong>Attention :</strong> dans le jeu, l'unité de temps est le lancer, pas l'année. Pour un vrai noyau, c'est la nature qui fixe la demi-vie.</p>
+            <fieldset>
+              <legend>Tu dois dater une statuette en bois que l'on pense vieille de quelques milliers d'années. Quel noyau radioactif choisis-tu ?</legend>
+              <div id="nuc-list"></div>
+            </fieldset>
+            <button class="btn primary" id="btn-m5a" type="button">Valider mon choix</button>
+            <p class="fb" id="m5a-fb" role="status"></p>
+            <button class="btn reveal" type="button" data-task="m5a" hidden>Voir la correction</button>
+          </div>
+
+          <div id="m5b" hidden>
+            <hr>
+            <p>Le laboratoire mesure : la statuette ne contient plus que <strong>25 %</strong> du carbone 14 qu'elle contenait quand l'arbre est mort. La demi-vie du carbone 14 est de <strong>5 730 ans</strong>.</p>
+            <form class="row" id="f-m5b" novalidate>
+              <label class="field" for="in-age-b">Âge de la statuette (en années)
+                <input id="in-age-b" type="text" inputmode="decimal" autocomplete="off">
+              </label>
+              <button class="btn primary" type="submit">Dater</button>
+            </form>
+            <p class="fb" id="m5b-fb" role="status"></p>
+            <div id="m5b-table" hidden></div>
+            <button class="btn reveal" type="button" data-task="m5b" hidden>Voir la correction</button>
+          </div>
+
+          <div class="victory" id="victory" hidden>
+            <h3>Mission accomplie !</h3>
+            <p>Tu as daté la statuette : elle a environ <strong>11 500 ans</strong>, ce qui la place au tout début de la période chaude actuelle, juste après la dernière glaciation. Tu as aussi compris que le <strong>hasard</strong> au niveau d'un noyau donne une <strong>loi prévisible</strong> pour un grand nombre de noyaux.</p>
+          </div>
+
+          <div id="m5c" hidden>
+            <hr>
+            <p><strong>Mission bonus.</strong> Un morceau de charbon de bois trouvé dans le foyer ne contient plus que <strong>12,5 %</strong> de son carbone 14 de départ. Quel est son âge (en années) ?</p>
+            <form class="row" id="f-m5c" novalidate>
+              <label class="field" for="in-age-c">Âge du charbon (en années)
+                <input id="in-age-c" type="text" inputmode="decimal" autocomplete="off">
+              </label>
+              <button class="btn primary" type="submit">Dater</button>
+            </form>
+            <p class="fb" id="m5c-fb" role="status"></p>
+            <button class="btn reveal" type="button" data-task="m5c" hidden>Voir la correction</button>
+          </div>
+
+          <div id="m5-end" hidden>
+            <hr>
+            <p><strong>Mon carnet de fouille</strong> (à copier dans mon cahier ou à envoyer à mon professeur) :</p>
+            <pre class="summary" id="summary"></pre>
+            <button class="btn" id="btn-copy" type="button">Copier mon carnet</button>
+            <p class="fb" id="copy-fb" role="status"></p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Laboratoire -->
+    <section class="panel lab" aria-labelledby="lab-title">
+      <div class="panel-head">
+        <h2 id="lab-title">Laboratoire</h2>
+        <span class="badge" id="badge">100 restants</span>
+      </div>
+      <p class="help" id="lab-help"></p>
+      <div class="controls">
+        <label class="field" for="sel-n">Nombre de noyaux
+          <select id="sel-n">
+            <option value="20">20 noyaux</option>
+            <option value="100" selected>100 noyaux</option>
+            <option value="1000">1 000 noyaux</option>
+          </select>
+        </label>
+        <label class="field" for="sel-dice">Type de noyau
+          <select id="sel-dice">
+            <option value="4">Noyau A (dé à 4 faces)</option>
+            <option value="6" selected>Noyau B (dé à 6 faces)</option>
+            <option value="10">Noyau C (dé à 10 faces)</option>
+          </select>
+        </label>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="btn-roll" type="button">Lancer le temps</button>
+        <button class="btn" id="btn-roll5" type="button">Lancer ×5</button>
+        <button class="btn" id="btn-reset" type="button">Recommencer</button>
+      </div>
+      <p class="lockmsg" id="lock-msg">Commence par la mission 1 du carnet de fouille : fais ta prédiction pour débloquer les dés.</p>
+      <div id="tray" class="tray big" role="img" aria-label="Plateau de dés"></div>
+      <p class="legend" aria-hidden="true">
+        <span><span class="die">5</span>noyau actif (dernier chiffre obtenu)</span>
+        <span><span class="die gone">6</span>noyau désintégré (hachuré)</span>
+      </p>
+    </section>
+
+    <!-- Graphique -->
+    <section class="panel graph" aria-labelledby="graph-title">
+      <h2 id="graph-title">Loi de décroissance : N en fonction du temps</h2>
+      <div class="opts">
+        <label class="check"><input type="checkbox" id="chk-half"> Afficher la ligne N₀/2 (aide)</label>
+        <label class="check"><input type="checkbox" id="chk-model" disabled> Afficher le modèle (après la mission 3)</label>
+        <label class="check"><input type="checkbox" id="chk-ghost" checked> Garder mes expériences précédentes en gris</label>
+      </div>
+      <svg id="chart" role="img" aria-labelledby="chart-title chart-desc" viewBox="0 0 600 340" height="340">
+        <title id="chart-title">Nombre de noyaux restants en fonction du nombre de lancers</title>
+        <desc id="chart-desc"></desc>
+      </svg>
+      <details class="plain">
+        <summary>Voir les mesures sous forme de tableau</summary>
+        <div class="tablewrap">
+          <table>
+            <caption class="sr-only">Noyaux restants après chaque lancer</caption>
+            <thead><tr><th scope="col">Lancers (t)</th><th scope="col">Noyaux restants (N)</th><th scope="col">N / N₀</th></tr></thead>
+            <tbody id="tbl-data"></tbody>
+          </table>
+        </div>
+      </details>
+      <details class="plain">
+        <summary>Journal des expériences</summary>
+        <div class="tablewrap">
+          <table>
+            <caption class="sr-only">Expériences où la moitié des noyaux a disparu</caption>
+            <thead><tr><th scope="col">N°</th><th scope="col">Type de noyau</th><th scope="col">Nombre de noyaux</th><th scope="col">Lancers pour passer sous N₀/2</th></tr></thead>
+            <tbody id="tbl-journal"></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+  </div>
+
+  <details class="panel teacher">
+    <summary><strong>Repères pour l'enseignant</strong></summary>
+    <ul>
+      <li><strong>Programme :</strong> enseignement scientifique, classe de première (voie générale), thème « Une longue histoire de la matière » (BO spécial n° 1 du 22 janvier 2019).</li>
+      <li><strong>Notions :</strong> certains noyaux sont instables et se désintègrent (radioactivité) ; la durée de vie d'un noyau est aléatoire ; la demi-vie est caractéristique du noyau ; datation au carbone 14.</li>
+      <li><strong>Capacités :</strong> utiliser une représentation graphique pour déterminer une demi-vie ; estimer la durée nécessaire pour obtenir une proportion donnée de noyaux restants au bout de n demi-vies ; utiliser une décroissance radioactive pour une datation (carbone 14).</li>
+      <li><strong>Démarche :</strong> Prédire (mission 1), Observer (2), Mesurer (3), Expliquer (4), Transférer (5).</li>
+      <li><strong>Durée estimée :</strong> 30 à 45 minutes (à confirmer en classe). La fiche complète est fournie à part.</li>
+    </ul>
+  </details>
+  </main>
+
+  <footer>Simulabo PhCh · Aucun compte, aucun suivi. Les mesures restent sur votre appareil.</footer>
+</div>
+<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const last = a => a[a.length - 1];
+const fr = (x, d = 1) => (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toString().replace('.', ',');
+const nb = n => Number(n).toLocaleString('fr-FR');
+const ORDER = ['m1', 'm2', 'm3', 'm4', 'm5'];
+
+/* ---------- État ---------- */
+const S = {
+  n0: 100, face: 6,
+  states: [], dieEls: [], data: [100], rolls: 0,
+  past: [], journal: [], nObs: null,
+  busy: false, pred: null, predLabel: '', halfRead: null, nucLabel: '', ageB: null, ageC: null,
+  score: 0, mission: {}, pts: {m1: 0, m2: 0, m3: 0, m4: 0, m5: 0}, done: {},
+};
+const A = {m3: 0, m4: 0, m5a: 0, m5b: 0, m5c: 0};
+const attemptPts = id => Math.max(1, 4 - A[id]);
+
+/* ---------- Utilitaires d'interface ---------- */
+function live(msg) { $('#live').textContent = ''; setTimeout(() => { $('#live').textContent = msg; }, 30); }
+function fb(id, kind, html) { const el = $('#' + id); el.className = 'fb ' + kind; el.innerHTML = html; }
+function parseNum(s) {
+  s = String(s).replace(/[\s\u00a0\u202f]/g, '').replace(/ans?$/i, '').replace(',', '.');
+  if (s === '') return null;
+  const v = Number(s);
+  return Number.isFinite(v) ? v : null;
+}
+const unlocked = () => S.mission.m1 === 'done';
+
+/* ---------- Plateau de dés ---------- */
+function buildTray() {
+  const tray = $('#tray');
+  tray.innerHTML = '';
+  tray.className = 'tray ' + (S.n0 > 100 ? 'small' : 'big');
+  S.states = new Array(S.n0).fill(1);
+  S.dieEls = [];
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < S.n0; i++) {
+    const d = document.createElement('div');
+    d.className = 'die';
+    d.textContent = S.n0 > 100 ? '' : String(1 + Math.floor(Math.random() * (S.face - 1)));
+    frag.appendChild(d);
+    S.dieEls.push(d);
+  }
+  tray.appendChild(frag);
+  updateLabels();
+}
+function updateLabels() {
+  const alive = last(S.data);
+  $('#tray').setAttribute('aria-label', 'Plateau de ' + S.n0 + ' dés : ' + alive + ' noyaux actifs, ' + (S.n0 - alive) + ' désintégrés.');
+  const b = $('#badge');
+  b.textContent = alive + ' restant' + (alive > 1 ? 's' : '');
+  b.className = 'badge' + (alive < S.n0 * 0.1 ? ' low' : alive < S.n0 * 0.5 ? ' mid' : '');
+  $('#lab-help').textContent = 'Chaque dé est un noyau de carbone 14. Un lancer correspond à une durée Δt. Quand un dé montre ' + S.face + ' (1 chance sur ' + S.face + ' à chaque lancer), le noyau se désintègre : il devient hachuré.';
+}
+
+/* ---------- Lancers ---------- */
+function rollOnce() {
+  let alive = 0;
+  for (let i = 0; i < S.n0; i++) {
+    if (!S.states[i]) continue;
+    const r = 1 + Math.floor(Math.random() * S.face);
+    const el = S.dieEls[i];
+    if (S.n0 <= 100) el.textContent = String(r);
+    if (r === S.face) { S.states[i] = 0; el.classList.add('gone'); } else alive++;
+  }
+  S.rolls++;
+  S.data.push(alive);
+  return alive;
+}
+function logHalf() {
+  if (S.nObs != null) return;
+  const i = S.data.findIndex(v => v <= S.n0 / 2);
+  if (i > 0) {
+    S.nObs = i;
+    S.journal.push({face: S.face, n0: S.n0, nObs: i});
+    drawJournal();
+  }
+}
+function afterRoll(announce) {
+  const alive = last(S.data);
+  $('#roll-counter').textContent = S.rolls;
+  updateLabels();
+  logHalf();
+  drawChart();
+  drawTable();
+  updateM2();
+  if (announce) live('Lancer ' + S.rolls + ' : il reste ' + alive + ' noyaux sur ' + S.n0 + '.');
+}
+async function doRoll(k) {
+  if (S.busy || !unlocked() || last(S.data) === 0) return;
+  S.busy = true; setButtons();
+  for (let j = 0; j < k && last(S.data) > 0; j++) {
+    const tray = $('#tray');
+    if (!reduce) { tray.classList.add('rolling'); await sleep(k > 1 ? 220 : 450); tray.classList.remove('rolling'); }
+    rollOnce();
+    afterRoll(j === k - 1 || last(S.data) === 0);
+  }
+  S.busy = false; setButtons();
+}
+function resetRun() {
+  if (S.rolls > 0) { S.past.push({n0: S.n0, face: S.face, data: S.data.slice()}); S.past = S.past.slice(-6); }
+  S.data = [S.n0]; S.rolls = 0; S.nObs = null;
+  $('#roll-counter').textContent = 0;
+  buildTray(); drawChart(); drawTable();
+  live('Nouvelle expérience : ' + S.n0 + ' noyaux.');
+}
+function setButtons() {
+  const u = unlocked(), alive = last(S.data) > 0;
+  $('#btn-roll').disabled = S.busy || !u || !alive;
+  $('#btn-roll5').disabled = S.busy || !u || !alive;
+  $('#btn-reset').disabled = S.busy || !u;
+  $('#sel-n').disabled = S.busy || !u;
+  $('#sel-dice').disabled = S.busy || !u;
+  $('#lock-msg').hidden = u;
+}
+
+/* ---------- Graphique (SVG) ---------- */
+function niceStep(max) { const raw = max / 8; for (const s of [1, 2, 5, 10, 20, 50, 100]) if (s >= raw) return s; return 100; }
+let lastW = 0;
+function drawChart() {
+  const svg = $('#chart');
+  const W = Math.max(300, Math.floor(svg.getBoundingClientRect().width) || 600);
+  const H = Math.round(Math.min(380, Math.max(260, W * 0.6)));
+  lastW = W;
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('height', H);
+  const ml = 54, mr = 14, mt = 14, mb = 46;
+  const ghosts = $('#chk-ghost').checked ? S.past.filter(r => r.n0 === S.n0 && r.face === S.face) : [];
+  const maxT = Math.max(10, S.rolls, ...ghosts.map(r => r.data.length - 1));
+  const step = niceStep(maxT);
+  const xMax = Math.ceil(maxT / step) * step;
+  const X = t => ml + t / xMax * (W - ml - mr);
+  const Y = n => H - mb - n / S.n0 * (H - mt - mb);
+  let g = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = S.n0 * i / 4;
+    g += '<line class="grid" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/>';
+    g += '<text class="tick" x="' + (ml - 8) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + v + '</text>';
+  }
+  for (let t = 0; t <= xMax; t += step) {
+    g += '<line class="grid" x1="' + X(t) + '" x2="' + X(t) + '" y1="' + mt + '" y2="' + (H - mb) + '"/>';
+    g += '<text class="tick" x="' + X(t) + '" y="' + (H - mb + 18) + '" text-anchor="middle">' + t + '</text>';
+  }
+  g += '<line class="axis" x1="' + ml + '" x2="' + ml + '" y1="' + mt + '" y2="' + (H - mb) + '"/>';
+  g += '<line class="axis" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + (H - mb) + '" y2="' + (H - mb) + '"/>';
+  g += '<text class="axtitle" x="' + ((ml + W - mr) / 2) + '" y="' + (H - 8) + '" text-anchor="middle">Nombre de lancers (t)</text>';
+  g += '<text class="axtitle" transform="translate(14 ' + ((mt + H - mb) / 2) + ') rotate(-90)" text-anchor="middle">Noyaux restants (N)</text>';
+  ghosts.forEach(r => {
+    g += '<polyline class="ghost" points="' + r.data.map((v, t) => X(t).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ') + '"/>';
+  });
+  if ($('#chk-half').checked) {
+    g += '<line class="half" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(S.n0 / 2) + '" y2="' + Y(S.n0 / 2) + '"/>';
+    g += '<text class="halflbl" x="' + (W - mr - 4) + '" y="' + (Y(S.n0 / 2) - 6) + '" text-anchor="end">N₀/2 = ' + S.n0 / 2 + '</text>';
+  }
+  if ($('#chk-model').checked && !$('#chk-model').disabled) {
+    const q = 1 - 1 / S.face, pts = [];
+    for (let i = 0; i <= 80; i++) { const t = xMax * i / 80; pts.push(X(t).toFixed(1) + ',' + Y(S.n0 * Math.pow(q, t)).toFixed(1)); }
+    g += '<polyline class="model" points="' + pts.join(' ') + '"/>';
+    g += '<text class="modellbl" x="' + (W - mr - 4) + '" y="' + (mt + 14) + '" text-anchor="end">pointillés : modèle</text>';
+  }
+  g += '<polyline class="series" points="' + S.data.map((v, t) => X(t).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ') + '"/>';
+  const r = S.n0 > 100 ? 2.5 : 4;
+  S.data.forEach((v, t) => { g += '<circle class="pt" cx="' + X(t).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + r + '"/>'; });
+  svg.querySelectorAll(':scope > :not(title):not(desc)').forEach(n => n.remove());
+  svg.insertAdjacentHTML('beforeend', g);
+  $('#chart-desc').textContent = 'Courbe qui descend de ' + S.n0 + ' noyaux au départ. Après ' + S.rolls + ' lancers, il reste ' + last(S.data) + ' noyaux. Les valeurs détaillées sont dans le tableau sous le graphique.';
+}
+function drawTable() {
+  $('#tbl-data').innerHTML = S.data.map((v, t) => '<tr><td>' + t + '</td><td>' + v + '</td><td>' + Math.round(v / S.n0 * 100) + ' %</td></tr>').join('');
+}
+function drawJournal() {
+  $('#tbl-journal').innerHTML = S.journal.length
+    ? S.journal.map((j, i) => '<tr><td>' + (i + 1) + '</td><td>Dé à ' + j.face + ' faces</td><td>' + nb(j.n0) + '</td><td>' + j.nObs + '</td></tr>').join('')
+    : '<tr><td colspan="4">Aucune expérience pour l\'instant.</td></tr>';
+}
+
+/* ---------- Missions : moteur ---------- */
+function gradeFor(p) { return p >= 12 ? 'Chef de mission' : p >= 7 ? 'Archéologue' : p >= 3 ? 'Fouilleur' : 'Stagiaire'; }
+function refreshHeader() { $('#score').textContent = S.score; $('#grade').textContent = gradeFor(S.score); }
+function setStatus(id, status) {
+  S.mission[id] = status;
+  const d = $('#' + id);
+  d.dataset.status = status;
+  const st = d.querySelector('.st');
+  st.textContent = status === 'locked' ? 'Verrouillée' : status === 'active' ? 'À faire' : 'Terminée · ' + S.pts[id] + ' pt' + (S.pts[id] > 1 ? 's' : '');
+  d.querySelector('summary').setAttribute('aria-disabled', String(status === 'locked'));
+  if (status === 'locked') d.open = false;
+}
+function addPts(id, p) { S.pts[id] += p; S.score += p; refreshHeader(); }
+function finish(id) {
+  setStatus(id, 'done');
+  const i = ORDER.indexOf(id), next = ORDER[i + 1];
+  const btn = document.querySelector('#' + id + ' .next');
+  if (next && S.mission[next] === 'locked') setStatus(next, 'active');
+  if (btn) btn.hidden = false;
+  live('Mission ' + (i + 1) + ' terminée. ' + S.pts[id] + ' point' + (S.pts[id] > 1 ? 's' : '') + '.' + (next ? ' Mission ' + (i + 2) + ' débloquée.' : ''));
+  if (id === 'm1') setButtons();
+  if (id === 'm3') $('#chk-model').disabled = false;
+}
+function showReveal(id) {
+  const b = document.querySelector('.reveal[data-task="' + id + '"]');
+  if (b) b.hidden = !(A[id] >= 3 && !S.done[id]);
+}
+
+document.querySelectorAll('.mission summary').forEach(s => s.addEventListener('click', e => {
+  if (s.parentElement.dataset.status === 'locked') e.preventDefault();
+}));
+document.querySelectorAll('.next').forEach(b => b.addEventListener('click', () => {
+  const cur = b.closest('.mission'), nxt = $('#' + b.dataset.next);
+  cur.open = false; nxt.open = true;
+  const sum = nxt.querySelector('summary');
+  sum.scrollIntoView({block: 'start', behavior: reduce ? 'auto' : 'smooth'});
+  sum.focus({preventScroll: true});
+}));
+
+/* ---------- Mission 1 : prédire ---------- */
+$('#btn-pred').addEventListener('click', () => {
+  const v = document.querySelector('input[name=pred]:checked');
+  if (!v) { fb('m1-fb', 'warn', 'Choisis une réponse pour continuer.'); return; }
+  S.pred = v.value;
+  S.predLabel = v.nextElementSibling.textContent.trim();
+  document.querySelectorAll('input[name=pred]').forEach(r => { r.disabled = true; });
+  $('#btn-pred').disabled = true;
+  fb('m1-fb', 'ok', '<strong>Prédiction enregistrée.</strong> Les dés du laboratoire sont débloqués. Tu compareras ta prédiction à tes observations à la mission 3.');
+  addPts('m1', 1); finish('m1');
+});
+
+/* ---------- Mission 2 : observer ---------- */
+function updateM2() {
+  if (S.mission.m2 === 'locked') return;
+  const alive = last(S.data), thr = Math.ceil(S.n0 * 0.1);
+  const pct = Math.max(0, Math.min(100, Math.round((S.n0 - alive) / (S.n0 - thr) * 100)));
+  $('#prog').value = pct;
+  $('#prog-label').textContent = 'Il reste ' + alive + ' noyaux sur ' + S.n0 + '. Objectif : ' + thr + ' noyaux ou moins (' + pct + ' % atteint).';
+  if (S.mission.m2 === 'active' && alive <= thr) {
+    fb('m2-fb', 'ok', '<strong>Bien joué !</strong> Ta courbe descend vite au début, puis de plus en plus lentement.');
+    addPts('m2', 2); finish('m2');
+  }
+}
+
+/* ---------- Mission 3 : mesurer la demi-vie ---------- */
+function m3Detail() {
+  const k = S.nObs, d = S.data;
+  const t = (k - 1) + (d[k - 1] - S.n0 / 2) / (d[k - 1] - d[k]);
+  return 'Sur ton graphique, N passe de <strong>' + d[k - 1] + '</strong> (lancer ' + (k - 1) + ') à <strong>' + d[k] + '</strong> (lancer ' + k + '). La valeur ' + S.n0 / 2 + ' est franchie entre ces deux lancers : t<sub>1/2</sub> ≈ <strong>' + fr(t, 1) + ' lancers</strong>.';
+}
+function m3Retro() {
+  const k = S.nObs, d = S.data, k4 = d.findIndex(v => v <= S.n0 / 4);
+  let h = '<strong>Retour sur ta prédiction.</strong> ';
+  if (S.pred === 'B') h += 'Tu avais prévu environ un quart : c\'est bien ce qui se passe. ';
+  else if (S.pred === 'A') h += 'Tu avais prévu que tout disparaîtrait : ce n\'est pas ce que tu observes. ';
+  else h += 'Tu avais pensé que le hasard empêchait toute prévision : pour un seul noyau oui, mais pas pour un grand nombre de noyaux. ';
+  if (k4 > k) {
+    h += 'Il t\'a fallu ' + k + ' lancers pour passer de N₀ à N₀/2, puis ' + (k4 - k) + ' lancers pour passer de N₀/2 à N₀/4 (' + S.n0 / 4 + ' noyaux). Les deux durées sont voisines : <strong>la demi-vie est constante</strong>. Après deux demi-vies, il reste environ <strong>un quart</strong> des noyaux, pas zéro.';
+  } else {
+    h += 'Après deux demi-vies, il reste environ <strong>un quart</strong> des noyaux, pas zéro.';
+  }
+  return h;
+}
+function m3Done(p) {
+  S.done.m3 = true; showReveal('m3');
+  $('#m3-retro').hidden = false; $('#m3-retro').innerHTML = m3Retro();
+  addPts('m3', p); finish('m3');
+}
+$('#f-m3').addEventListener('submit', e => {
+  e.preventDefault();
+  if (S.done.m3) return;
+  if (S.nObs == null) { fb('m3-fb', 'warn', 'Ton graphique n\'est pas encore passé sous N₀/2. Retourne dans le laboratoire et lance les dés.'); return; }
+  const v = parseNum($('#in-half').value);
+  if (v == null) { fb('m3-fb', 'warn', 'Écris un nombre de lancers, par exemple 4 ou 3,5.'); return; }
+  A.m3++;
+  const lo = S.nObs - 1, hi = S.nObs;
+  if (v >= lo - 0.05 && v <= hi + 0.05) {
+    fb('m3-fb', 'ok', '<strong>Exact !</strong> ' + m3Detail());
+    S.halfRead = fr(v, 2);
+    m3Done(attemptPts('m3'));
+    return;
+  }
+  let msg;
+  if (Math.abs(v - S.n0 / 2) < 0.5) msg = 'Tu as donné la valeur de N (' + S.n0 / 2 + '). On te demande un <strong>nombre de lancers</strong> : lis l\'axe horizontal.';
+  else if (v > hi) msg = 'Trop grand : à ce lancer, N est déjà passé sous N₀/2. Regarde plus tôt sur la courbe.';
+  else msg = 'Trop petit : à ce lancer, il reste encore plus de la moitié des noyaux.';
+  if (A.m3 >= 2) msg += ' <br><em>Astuce :</em> coche « Afficher la ligne N₀/2 » sous le graphique. La demi-vie est la position, sur l\'axe horizontal, où la courbe croise cette ligne.';
+  fb('m3-fb', A.m3 >= 2 ? 'hint' : 'bad', msg);
+  showReveal('m3');
+});
+document.querySelector('.reveal[data-task="m3"]').addEventListener('click', () => {
+  if (S.nObs == null) return;
+  fb('m3-fb', 'hint', '<strong>Correction.</strong> ' + m3Detail());
+  S.halfRead = fr((S.nObs - 1) + (S.data[S.nObs - 1] - S.n0 / 2) / (S.data[S.nObs - 1] - S.data[S.nObs]), 2);
+  m3Done(0);
+});
+
+/* ---------- Mission 4 : expliquer ---------- */
+const STATEMENTS = [
+  {t: 'On peut prévoir à quel instant un noyau précis va se désintégrer.', v: false,
+   hint: 'Pense à un seul dé : peut-il tomber sur la face de désintégration dès le 1er lancer ? Et au 20ᵉ ?',
+   ex: 'Faux. Pour un noyau, la durée de vie est <strong>aléatoire</strong> : on ne peut pas prévoir quand il se désintègre.'},
+  {t: 'Pour un très grand nombre de noyaux, on peut prévoir à peu près combien il en reste après une demi-vie.', v: true,
+   hint: 'Compare la courbe avec 1 000 noyaux et celle avec 20 noyaux : laquelle est la plus régulière ?',
+   ex: 'Vrai. Chaque noyau est imprévisible, mais un grand nombre de noyaux suit une loi : il en reste environ la moitié après une demi-vie.'},
+  {t: 'Plus un échantillon contient de noyaux, plus sa demi-vie est longue.', v: false,
+   hint: 'Dans le journal, compare les expériences à 20, 100 et 1 000 noyaux (même type de noyau).',
+   ex: 'Faux. La demi-vie ne dépend pas du nombre de noyaux. Avec peu de noyaux, la mesure est seulement plus irrégulière.'},
+  {t: 'Deux types de noyaux différents (deux dés différents) ont la même demi-vie.', v: false,
+   hint: 'Change de type de noyau dans le laboratoire et compare les valeurs dans le journal.',
+   ex: 'Faux. La demi-vie est <strong>caractéristique du noyau</strong> : environ 2,4 lancers pour le dé à 4 faces, 3,8 pour le dé à 6 faces et 6,6 pour le dé à 10 faces.'},
+];
+function buildStatements() {
+  $('#vf-list').innerHTML = STATEMENTS.map((s, i) =>
+    '<fieldset class="vf" id="vf' + i + '"><legend>' + (i + 1) + '. ' + s.t + '</legend>' +
+    '<label class="opt inline"><input type="radio" name="s' + i + '" value="v"><span>Vrai</span></label>' +
+    '<label class="opt inline"><input type="radio" name="s' + i + '" value="f"><span>Faux</span></label>' +
+    '<p class="fb" id="s' + i + '-fb" role="status"></p></fieldset>').join('');
+}
+function m4Done(p) { S.done.m4 = true; showReveal('m4'); addPts('m4', p); finish('m4'); }
+$('#btn-m4').addEventListener('click', () => {
+  if (S.done.m4) return;
+  const ans = STATEMENTS.map((s, i) => { const c = document.querySelector('input[name=s' + i + ']:checked'); return c ? c.value === 'v' : null; });
+  if (ans.some(a => a === null)) { fb('m4-fb', 'warn', 'Réponds aux 4 affirmations avant de vérifier.'); return; }
+  A.m4++;
+  let wrong = 0;
+  STATEMENTS.forEach((s, i) => {
+    const ok = ans[i] === s.v;
+    if (!ok) wrong++;
+    if (ok) fb('s' + i + '-fb', 'ok', '<strong>Juste.</strong> ' + s.ex);
+    else if (A.m4 >= 2) fb('s' + i + '-fb', 'hint', s.ex);
+    else fb('s' + i + '-fb', 'bad', '<strong>Pas tout à fait.</strong> ' + s.hint);
+  });
+  if (wrong === 0) { fb('m4-fb', 'ok', '<strong>Bravo !</strong> Tu as bien distingué le hasard d\'un noyau et la loi d\'un grand nombre de noyaux.'); m4Done(attemptPts('m4')); }
+  else { fb('m4-fb', 'bad', wrong + ' réponse' + (wrong > 1 ? 's' : '') + ' à corriger. Modifie-la et revérifie.'); showReveal('m4'); }
+});
+document.querySelector('.reveal[data-task="m4"]').addEventListener('click', () => {
+  STATEMENTS.forEach((s, i) => fb('s' + i + '-fb', 'hint', s.ex));
+  fb('m4-fb', 'hint', 'Voici la correction. Relis chaque explication avant de passer à la suite.');
+  m4Done(0);
+});
+
+/* ---------- Mission 5 : dater la relique ---------- */
+const NUCS = [
+  {k: 'I', n: 'Iode 131', d: '8,0 jours', ok: false, ex: 'Demi-vie beaucoup trop courte : au bout de 10 demi-vies (80 jours), il reste moins de 0,1 % des noyaux. Après des milliers d\'années, il n\'en reste plus rien à mesurer.'},
+  {k: 'Sr', n: 'Strontium 90', d: '29 ans', ok: false, ex: 'Demi-vie trop courte : en quelques milliers d\'années, il s\'écoule des dizaines, voire des centaines de demi-vies. Il ne reste plus rien à mesurer.'},
+  {k: 'C', n: 'Carbone 14', d: '5,73 × 10³ ans (5 730 ans)', ok: true, ex: 'Oui. Sa demi-vie est du <strong>même ordre de grandeur</strong> que l\'âge à mesurer. Et tant que l\'arbre vit, il renouvelle son carbone 14 : à sa mort, la quantité diminue seulement par décroissance radioactive.'},
+  {k: 'K', n: 'Potassium 40', d: '1,25 × 10⁹ ans', ok: false, ex: 'Demi-vie beaucoup trop longue : en quelques milliers d\'années, la quantité ne change presque pas. On ne détecterait aucune différence.'},
+];
+$('#nuc-list').innerHTML = NUCS.map(n => '<label class="opt"><input type="radio" name="nuc" value="' + n.k + '"><span><strong>' + n.n + '</strong> : demi-vie ' + n.d + '</span></label>').join('');
+function m5aDone(p) {
+  S.done.m5a = true; showReveal('m5a');
+  addPts('m5', p);
+  $('#m5b').hidden = false;
+  live('Bien. Étape suivante : dater la statuette.');
+}
+$('#btn-m5a').addEventListener('click', () => {
+  if (S.done.m5a) return;
+  const c = document.querySelector('input[name=nuc]:checked');
+  if (!c) { fb('m5a-fb', 'warn', 'Choisis un noyau.'); return; }
+  A.m5a++;
+  const n = NUCS.find(x => x.k === c.value);
+  S.nucLabel = n.n + ' (demi-vie ' + n.d + ')';
+  if (n.ok) { fb('m5a-fb', 'ok', '<strong>Bon choix.</strong> ' + n.ex); m5aDone(attemptPts('m5a')); }
+  else { fb('m5a-fb', A.m5a >= 2 ? 'hint' : 'bad', '<strong>' + n.n + ' ne convient pas.</strong> ' + n.ex); showReveal('m5a'); }
+});
+document.querySelector('.reveal[data-task="m5a"]').addEventListener('click', () => {
+  const n = NUCS.find(x => x.ok);
+  S.nucLabel = n.n + ' (demi-vie ' + n.d + ')';
+  fb('m5a-fb', 'hint', '<strong>Correction : ' + n.n + '.</strong> ' + n.ex);
+  m5aDone(0);
+});
+
+const AGE = {
+  m5b: {target: 11460, nHalf: 2, pct: '25 %', mis: {
+    22920: 'Tu as multiplié par 4 : 25 % = 1/4 ne veut pas dire 4 demi-vies. Après 1 demi-vie il reste 1/2, après 2 demi-vies il reste 1/4.',
+    5730: '5 730 ans correspond à <strong>une</strong> demi-vie, donc à 50 % de noyaux restants, pas à 25 %.',
+    1432.5: 'Tu as divisé 5 730 par 4. Or l\'âge se calcule avec le <strong>nombre de demi-vies</strong> écoulées, multiplié par 5 730 ans.'}},
+  m5c: {target: 17190, nHalf: 3, pct: '12,5 %', mis: {
+    22920: '4 demi-vies laisseraient 6,25 %. Compte les divisions par 2 : 100 % → 50 % → 25 % → 12,5 %.',
+    11460: '11 460 ans = 2 demi-vies = 25 % restants. Il faut encore une demi-vie.',
+    45840: '12,5 % = 1/8 ne veut pas dire 8 demi-vies. Compte les divisions par 2 : 100 % → 50 % → 25 % → 12,5 %.'}},
+};
+function helpTable() {
+  return '<table><caption class="sr-only">Proportion de carbone 14 restant selon le nombre de demi-vies écoulées</caption><thead><tr><th scope="col">Demi-vies écoulées</th><th scope="col">Proportion restante</th><th scope="col">Âge</th></tr></thead><tbody>' +
+    ['100 %', '50 %', '25 %', '12,5 %', '6,25 %'].map((p, i) => '<tr><td>' + i + '</td><td>' + p + '</td><td>?</td></tr>').join('') + '</tbody></table>';
+}
+function ageExplain(id) { const c = AGE[id]; return 'De 100 % à ' + c.pct + ', on divise <strong>' + c.nHalf + ' fois par 2</strong> : ' + c.nHalf + ' demi-vies. Âge = ' + c.nHalf + ' × 5 730 = <strong>' + nb(c.target) + ' ans</strong>.'; }
+function ageDone(id, p) {
+  S.done[id] = true; showReveal(id);
+  addPts('m5', p);
+  if (id === 'm5b') { $('#victory').hidden = false; $('#m5c').hidden = false; finish('m5'); }
+  buildSummary();
+}
+function ageCheck(id, inputId) {
+  if (S.done[id]) return;
+  const v = parseNum($(inputId).value), c = AGE[id];
+  if (v == null) { fb(id + '-fb', 'warn', 'Écris un nombre d\'années, par exemple 10 000.'); return; }
+  A[id]++;
+  if (v === c.target) {
+    fb(id + '-fb', 'ok', '<strong>Exact !</strong> ' + ageExplain(id));
+    if (id === 'm5b') S.ageB = v; else S.ageC = v;
+    ageDone(id, attemptPts(id)); return;
+  }
+  let msg = c.mis[v] || ('Combien de fois faut-il diviser par 2 pour passer de 100 % à ' + c.pct + ' ? Cela donne le nombre de demi-vies écoulées. Multiplie-le par 5 730.');
+  fb(id + '-fb', A[id] >= 2 ? 'hint' : 'bad', msg);
+  if (A[id] >= 2 && id === 'm5b') { $('#m5b-table').hidden = false; $('#m5b-table').innerHTML = '<p class="small"><strong>Coup de pouce :</strong></p>' + helpTable(); }
+  showReveal(id);
+}
+$('#f-m5b').addEventListener('submit', e => { e.preventDefault(); ageCheck('m5b', '#in-age-b'); });
+$('#f-m5c').addEventListener('submit', e => { e.preventDefault(); ageCheck('m5c', '#in-age-c'); });
+['m5b', 'm5c'].forEach(id => document.querySelector('.reveal[data-task="' + id + '"]').addEventListener('click', () => {
+  fb(id + '-fb', 'hint', '<strong>Correction.</strong> ' + ageExplain(id));
+  if (id === 'm5b') S.ageB = AGE[id].target; else S.ageC = AGE[id].target;
+  ageDone(id, 0);
+}));
+
+/* ---------- Carnet à copier ---------- */
+function summaryText() {
+  const L = ['Carnet de fouille — Datation au carbone 14'];
+  if (S.predLabel) L.push('Ma prédiction : ' + S.predLabel);
+  if (S.journal.length) {
+    L.push('Mes expériences (type de noyau ; nombre de noyaux ; lancers pour passer sous N0/2) :');
+    S.journal.forEach((j, i) => L.push('  ' + (i + 1) + '. dé à ' + j.face + ' faces ; ' + j.n0 + ' noyaux ; ' + j.nObs + ' lancers'));
+  }
+  if (S.halfRead != null) L.push('Demi-vie lue sur mon graphique : ' + S.halfRead + ' lancers');
+  if (S.nucLabel) L.push('Noyau choisi pour la datation : ' + S.nucLabel);
+  if (S.ageB != null) L.push('Statuette (25 % de carbone 14 restant = 2 demi-vies) : ' + nb(S.ageB) + ' ans');
+  if (S.ageC != null) L.push('Charbon de bois (12,5 % restant = 3 demi-vies) : ' + nb(S.ageC) + ' ans');
+  L.push('Points : ' + S.score + ' (' + gradeFor(S.score) + ')');
+  return L.join('\n');
+}
+function buildSummary() { $('#m5-end').hidden = false; $('#summary').textContent = summaryText(); }
+$('#btn-copy').addEventListener('click', async () => {
+  const txt = summaryText();
+  try { await navigator.clipboard.writeText(txt); fb('copy-fb', 'ok', 'Carnet copié.'); }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents($('#summary'));
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    fb('copy-fb', 'hint', 'Copie automatique impossible : le texte est sélectionné, copie-le avec Ctrl+C (ou en appui long).');
+  }
+});
+
+/* ---------- Câblage du laboratoire ---------- */
+$('#btn-roll').addEventListener('click', () => doRoll(1));
+$('#btn-roll5').addEventListener('click', () => doRoll(5));
+$('#btn-reset').addEventListener('click', resetRun);
+$('#sel-n').addEventListener('change', e => { S.n0 = Number(e.target.value); resetRun(); });
+$('#sel-dice').addEventListener('change', e => { S.face = Number(e.target.value); resetRun(); });
+['#chk-half', '#chk-model', '#chk-ghost'].forEach(s => $(s).addEventListener('change', drawChart));
+if (window.ResizeObserver) {
+  new ResizeObserver(() => { const w = Math.floor($('#chart').getBoundingClientRect().width); if (w && w !== lastW) drawChart(); }).observe($('#chart').parentElement);
+}
+
+/* ---------- Initialisation ---------- */
+ORDER.forEach(id => { S.mission[id] = id === 'm1' ? 'active' : 'locked'; });
+buildStatements(); buildTray(); drawChart(); drawTable(); drawJournal(); setButtons(); refreshHeader();
+})();
+</script>
+</body>
+</html>
