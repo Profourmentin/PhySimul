@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche enseignant · Loi de Mariotte, P·V = constante · Simulabo PhCh</title>
+<meta name="description" content="Fiche d'activité pour l'enseignant : tester la loi de Mariotte avec une seringue virtuelle, exploiter F = P·S et résoudre un défi de calcul (Première spécialité physique-chimie).">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/gaz-parfaits.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Physique-chimie · Première spécialité</p>
+    <h1>Loi de Mariotte : P·V = constante</h1>
+    <p class="lead">Avec une seringue virtuelle reliée à un capteur de pression, l'élève comprime un gaz, relève des mesures, constate que le produit P × V reste constant, puis réinvestit la loi et la relation F = P·S dans des calculs.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale, spécialité</li>
+      <li>Mouvement et interactions</li>
+      <li>25 min (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette, papier</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/gaz-parfaits.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>L'activité relève du thème « Mouvement et interactions », partie « Description d'un fluide au repos », du programme de spécialité physique-chimie de Première (voie générale). Le programme y parle de « modèle de comportement d'un gaz : loi de Mariotte » : en Première, l'élève travaille donc sur P·V = constante, pas sur l'équation d'état du gaz parfait.</p>
+      <p class="note"><span class="verify">À vérifier dans le BO</span> Les formulations ci-dessous viennent d'extraits du programme lus le 27/10/2026 par extraction automatique ; le texte n'a pas pu être rouvert pour cette fiche. Les relire mot à mot avant diffusion.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Grandeurs macroscopiques de description d'un fluide au repos : masse volumique, pression, température</td><td>Capteur de pression, graduation du volume, température de la paroi (20 °C) affichée sous la seringue</td></tr>
+            <tr><td>Expliquer qualitativement le lien entre les grandeurs macroscopiques de description d'un fluide et la valeur de la pression <span class="verify">Fin de phrase à vérifier</span></td><td>Particules animées : moins de volume, plus de chocs sur le piston par seconde (indicateur sous la seringue), donc pression plus grande</td></tr>
+            <tr><td>Modèle de comportement d'un gaz : loi de Mariotte</td><td>Étapes 3 et 4 : tableau de mesures, produit P × V, graphiques P = f(V), P = f(1/V) et P × V = f(V)</td></tr>
+            <tr><td>Utiliser la loi de Mariotte</td><td>Défis de calcul de type A (trouver P₂) et B (trouver V₂)</td></tr>
+            <tr><td>Tester la loi de Mariotte (le programme cite l'exemple d'un microcontrôleur)</td><td>Étapes 3 et 4, avec un capteur virtuel ; l'option « capteur réaliste » ajoute une incertitude de lecture d'environ 0,4 %. Le dispositif réel avec microcontrôleur reste à faire (voir Prolongements)</td></tr>
+            <tr><td>Exploiter la relation F = P·S pour déterminer la force pressante exercée par un fluide</td><td>Carte « Force pressante F » avec le calcul détaillé en pascal et en m², flèche de force sur le piston, défi de type C</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Compétences mobilisées : s'approprier (lire les grandeurs et leurs unités), analyser et raisonner (relier volume et pression), réaliser (relever des mesures), valider (comparer P × V aux incertitudes près), communiquer (conclure par une phrase).</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Démarche proposée : Prédire, Explorer, Mesurer, Conclure, Transférer. Durée estimée : 25 minutes, à confirmer en classe. La page n'impose pas d'ordre : tout est accessible dès l'ouverture, c'est la consigne de l'enseignant qui structure le parcours.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. Prédire (3 min, hors page)</td><td>Hypothèse</td><td>Avant d'ouvrir la simulation : « Si on divise le volume du gaz par 2, que devient la pression ? » Réponse écrite ou vote à main levée.</td><td>Une phrase de prédiction, datée avant la manipulation</td></tr>
+            <tr><td>2. Explorer (5 min)</td><td>Observation</td><td>Fait glisser le piston (souris, curseur ou flèches du clavier), regarde les particules, le nombre de chocs par seconde, la flèche de force et la valeur du capteur.</td><td>Une phrase : ce qui change quand le volume diminue</td></tr>
+            <tr><td>3. Mesurer (8 min)</td><td>Expérience</td><td>Relève au moins 5 mesures réparties entre 10 mL et 60 mL avec « Relever la mesure ». Lit la colonne P × V.</td><td>Tableau de mesures (V, P, P × V)</td></tr>
+            <tr><td>4. Conclure (4 min)</td><td>Modélisation</td><td>Compare le bilan affiché sous le tableau, change d'onglet du graphique, observe que P = f(1/V) est une droite passant par l'origine, puis revient à sa prédiction.</td><td>Énoncé de la loi avec ses conditions (température et quantité de gaz constantes)</td></tr>
+            <tr><td>5. Transférer (5 min)</td><td>Raisonnement</td><td>Résout un ou deux défis (bouton « Autre défi » pour en tirer d'autres), avec conversion des unités pour la force pressante.</td><td>Calcul rédigé avec unités, puis vérifié sur la page</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>La page mémorise le nombre de défis réussis et essayés sur la session en cours (un rechargement remet le compteur à zéro). Les mesures du tableau ne sont pas exportables : l'élève les recopie ou fait une capture d'écran.</p>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>1, prédiction</td><td>La pression est multipliée par 2</td><td>Conception fréquente : « elle diminue de moitié » ou « elle augmente un peu » (voir plus bas)</td></tr>
+                <tr><td>2, état de départ</td><td>V = 50 mL et P ≈ 1 014 hPa (pression atmosphérique), F ≈ 60,8 N</td><td>Section du piston S = 6,0 cm² ; air à 20 °C</td></tr>
+                <tr><td>3, mesures (capteur idéal)</td><td>10 mL : 5 069 hPa · 20 mL : 2 535 hPa · 30 mL : 1 690 hPa · 40 mL : 1 267 hPa · 50 mL : 1 014 hPa · 60 mL : 844,9 hPa</td><td>Pour chaque mesure, P × V ≈ 50 700 hPa·mL (écarts de quelques unités dus à l'arrondi à 4 chiffres significatifs)</td></tr>
+                <tr><td>3, avec « capteur réaliste »</td><td>P × V varie de moins de 1 % autour de 50 700 hPa·mL</td><td>Le bilan reste « vérifié » tant que l'écart maximal à la moyenne est inférieur à 2 %. Montrer qu'un produit n'est jamais exactement identique en mesure réelle</td></tr>
+                <tr><td>4, graphiques</td><td>P = f(V) : hyperbole · P = f(1/V) : droite passant par l'origine · P × V = f(V) : droite horizontale</td><td>La droite P = f(1/V) est la signature d'une proportionnalité entre P et 1/V</td></tr>
+                <tr><td>4, énoncé</td><td>À température constante et pour une quantité de gaz donnée, le produit de la pression par le volume est constant : P₁ × V₁ = P₂ × V₂</td><td>Les conditions font partie de la réponse</td></tr>
+                <tr><td>5, défi A (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, V₂ = 40 mL : P₂ = 1 000 × 100 / 40 = 2 500 hPa</td><td>Réponse acceptée à 2 % près</td></tr>
+                <tr><td>5, défi B (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, P₂ = 2 500 hPa : V₂ = 1 000 × 100 / 2 500 = 40 mL</td><td>La valeur de P₂ affichée est arrondie à 3 chiffres significatifs ; la réponse attendue part de la valeur affichée</td></tr>
+                <tr><td>5, défi C (exemple)</td><td>P = 2,0 bar = 2,0 × 10⁵ Pa, S = 10 cm² = 1,0 × 10⁻³ m² : F = 2,0 × 10⁵ × 1,0 × 10⁻³ = 200 N</td><td>Il faut convertir les deux grandeurs (P en pascal, S en m²)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Les défis sont tirés au hasard : les valeurs ci-dessus sont des exemples, et le bouton « Voir la correction » affiche le détail du calcul pour chaque tirage. La page accepte les nombres écrits avec une virgule, avec des espaces ou en notation « × 10^n ».</p>
+          <p style="margin-top:12px">Contre-vérification faite à la création de la fiche : à 20 °C, avec n = 2,08 mmol, P × V = n·R·T = 5,07 J, soit 50 700 hPa·mL.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <p>La plupart de ces obstacles sont courants en classe ; la page n'en traite que certains directement, les autres sont à anticiper dans la consigne.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Confondre proportionnalité inverse et proportionnalité directe</td><td>« Si le volume est divisé par 2, la pression est divisée par 2 »</td><td>Sous la seringue, une phrase compare les deux facteurs (« volume multiplié par 0,50, pression multipliée par 2,00 : ces deux facteurs sont inverses »). Dans les défis, l'indice « P et V sont inversement proportionnels » s'affiche si l'élève a inversé le rapport</td></tr>
+            <tr><td>Croire que la relation est affine ou linéaire décroissante</td><td>Tracer une droite entre deux points de P = f(V)</td><td>Le graphique P = f(V) montre la courbe ; l'onglet P = f(1/V) donne la droite attendue ; la case « Afficher la courbe du modèle » aide à voir l'écart</td></tr>
+            <tr><td>Penser que P + V est constant, ou que seul « le produit » compte sans condition</td><td>Additionner les valeurs, oublier la température et la quantité de gaz</td><td>Colonne P × V dans le tableau et carte dédiée ; rappel permanent des conditions de la loi. Si la température ou la quantité de gaz est modifiée dans le volet repliable, un avertissement orange s'affiche et le bilan refuse de comparer des mesures faites dans des conditions différentes</td></tr>
+            <tr><td>Imaginer que les particules se compriment ou que leur nombre change</td><td>« Il y a plus de particules quand on comprime »</td><td>Le nombre de particules dessinées reste le même ; seul le volume varie. Le compteur de chocs par seconde (environ 4 par seconde à 60 mL, environ 25 par seconde à 10 mL) relie le modèle microscopique à la pression</td></tr>
+            <tr><td>Oublier les conversions d'unités dans F = P·S</td><td>Multiplier des hPa par des cm², ou des bar par des m²</td><td>La carte « Force pressante » détaille le calcul en pascal et en m². Le défi C donne un indice ciblé selon l'erreur : section non convertie, pression non convertie, ou aucune des deux</td></tr>
+            <tr><td>Exiger que P × V soit exactement identique</td><td>« Mes produits ne sont pas égaux, la loi est fausse »</td><td>Avec « capteur réaliste », les produits varient légèrement ; le bilan conclut à partir d'un écart inférieur à 2 %, aux incertitudes de mesure près</td></tr>
+            <tr><td>Conclure à partir d'une seule mesure ou de mesures trop proches</td><td>Trois mesures entre 48 et 52 mL</td><td>La consigne demande des mesures réparties entre 10 et 60 mL. Le bilan n'apparaît qu'à partir de 3 mesures, mais la page ne vérifie pas la répartition : à contrôler</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>La page est un fichier HTML autonome : pas de compte, aucune donnée envoyée, pas de script externe. Elle charge seulement des polices depuis les serveurs de Google ; en leur absence, elle s'affiche avec les polices du système.</p>
+      <p>Choix déjà intégrés :</p>
+      <ul class="plain">
+        <li>Le volume se règle au curseur, au glisser du piston ou avec les flèches du clavier sur la seringue (1 mL par appui).</li>
+        <li>Les valeurs essentielles (pression, volume, produit, force) sont écrites en texte dans quatre cartes, avec le calcul détaillé, et non uniquement dessinées. Les messages de retour (observation, bilan, correction des défis) sont annoncés aux lecteurs d'écran.</li>
+        <li>L'information « température » ne passe pas par la couleur seule : « Paroi : θ = 20 °C » est écrit sous la seringue, comme la valeur de la force à côté de la flèche.</li>
+        <li>Si l'appareil demande de réduire les animations, les particules démarrent à l'arrêt ; un bouton « Pause » ou « Animer » est toujours disponible.</li>
+        <li>Mode sombre géré. Aucun débordement horizontal à 390 px de large.</li>
+      </ul>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> la page n'a pas été auditée (RGAA) ni testée avec un lecteur d'écran réel, ni avec des élèves. Le graphique est un dessin dont la description est une étiquette fixe : ses points sont lisibles dans le tableau de mesures, mais il n'a pas d'équivalent textuel dynamique. Les boutons font 40 px de haut et le curseur 32 px, sous les 44 px souvent recommandés pour le tactile.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme : un élève manipule le piston, l'autre note les mesures puis inverse les rôles pour les défis.</li>
+        <li>En classe entière : étape 1 au tableau avec vote à main levée, puis une mesure projetée avant de laisser les élèves explorer.</li>
+        <li>Pour alléger la charge de lecture : laisser l'onglet P × V = f(V) ouvert, ne pas activer le capteur réaliste dans un premier temps et limiter le défi à un seul type (A ou B).</li>
+        <li>Pour différencier vers le haut : demander de prévoir la valeur de P à un volume donné avant de la lire, puis d'ouvrir le volet « Pour aller plus loin (Terminale) ».</li>
+        <li>Trace écrite : recopier le tableau et la phrase de conclusion, ou imprimer la page en PDF avec les mesures affichées.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>La compression est supposée lente, à température constante, sans fuite et sans « volume mort » (tuyau et capteur). Dans une vraie seringue, ce volume supplémentaire écarte légèrement les mesures de la loi.</li>
+        <li>Les particules dessinées sont illustratives : une vingtaine de points au lieu d'environ 10²¹ molécules, et leurs vitesses ne sont pas à l'échelle. Le compteur de chocs par seconde est un indicateur d'animation, pas une grandeur mesurable.</li>
+        <li>Le gaz est assimilé à de l'air à 20 °C, à la pression atmosphérique au départ (50 mL, environ 1 014 hPa). La section du piston est fixée à 6,0 cm².</li>
+        <li>Le titre de la page parle de « gaz parfaits » alors que le programme de Première parle de loi de Mariotte : à signaler aux élèves, ou à renommer. L'équation d'état du gaz parfait relève de la Terminale.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Refaire l'expérience avec une vraie seringue et un capteur de pression, éventuellement relié à un microcontrôleur, puis comparer à la simulation (capacité expérimentale : mesurer une pression dans un gaz).</li>
+        <li>Saisir les mesures dans un tableur ou en Python et tracer P = f(1/V) avec sa droite de régression.</li>
+        <li>Relier au volume molaire d'un gaz pour déterminer une quantité de matière (thème « Constitution et transformations de la matière »).</li>
+        <li>Ouvrir le volet « Pour aller plus loin (Terminale) » : la température et la quantité de gaz y deviennent variables et la page affiche P × V = n·R·T avec les calculs. À réserver aux élèves en avance ou à une séance de transition vers la Terminale.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> extraits du programme de Première lus via une recherche le 27/10/2026 ; l'annexe du BO n'a pas pu être rouverte le 30/10/2026 (adresse non accessible depuis l'outil). Les intitulés cités entre guillemets sont à relire mot à mot. L'absence de « gaz parfait » et de la constante R dans le programme de Première a été constatée sur ces mêmes extraits.</p>
+      <ul class="plain">
+        <li><a href="https://cache.media.education.gouv.fr/file/CSP/52/6/1e_Physique-chimie_Specialite_Voie_generale_1022526.pdf">Ministère de l'Éducation nationale, programme de spécialité de physique-chimie de la classe de première, voie générale</a></li>
+        <li><a href="https://cache.media.education.gouv.fr/file/SPE8_MENJ_25_7_2019/92/9/spe249_annexe_1158929.pdf">Ministère de l'Éducation nationale, programme de spécialité de physique-chimie de la classe terminale (équation d'état du gaz parfait, volet « Pour aller plus loin »)</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 30/10/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
