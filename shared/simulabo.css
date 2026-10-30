@@ -1,0 +1,234 @@
+/* ==========================================================================
+   Simulabo PhCh : socle CSS commun aux simulations
+   --------------------------------------------------------------------------
+   Rôle : garantir la même identité visuelle, la même ergonomie et les mêmes
+   règles d'accessibilité à toutes les simulations, sans copier-coller.
+
+   Principes
+   - Aucune ressource externe (pas de police ni de CDN) : le site reste utilisable
+     hors ligne et sans transmission de données des élèves à un tiers.
+   - Jetons de design (variables --*) : une simulation ne les redéfinit pas, elle les
+     utilise. Pour une couleur propre à la simulation (ex. une grandeur physique),
+     déclarer une variable locale dans le <style> de la page, en clair ET en sombre.
+   - Thème clair / sombre automatique (prefers-color-scheme).
+   - Contrastes visés : AA (4,5:1 pour le texte courant).
+   - Gestes : cibles tactiles d'au moins 44 px, focus visible, mouvements réduits respectés.
+
+   Utilisation : <link rel="stylesheet" href="../shared/simulabo.css">
+   Documentation : docs/socle.md
+   ========================================================================== */
+
+/* ---------- 1. Jetons de design ---------- */
+:root {
+  /* Surfaces et texte */
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --tabs-bg: #DDE4E9;
+
+  /* Accent du site */
+  --accent: #1B5E8C;
+  --accent-ink: #FFFFFF;
+
+  /* Retours d'état (texte + fond) : ne jamais coder l'état par la seule couleur */
+  --ok: #17734A;   --ok-bg: #DDF1E6;
+  --warn: #8F5200; --warn-bg: #FBEBCB;
+  --info: #1B5E8C; --info-bg: #DCEAF4;
+  --bad: #A8281F;  --bad-bg: #F9DDDA;
+
+  /* Thèmes du catalogue (reprise de la page d'accueil) */
+  --t-matiere: #2E7D5B;
+  --t-mouvement: #C0561B;
+  --t-energie: #B8860B;
+  --t-ondes: #2D6CA2;
+
+  /* Couleurs de grandeurs physiques (convention : une couleur = une grandeur, sur tout le site) */
+  --c-force: #C62828;
+  --c-vitesse: #047857;
+  --c-position: #1D4ED8;
+  --c-energie: #B45309;
+  --c-temps: #7E22CE;
+
+  /* Afficheur type LCD */
+  --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-dim: #A98A45; --lcd-label: #8FA3AF;
+
+  /* Typographie : polices du système uniquement */
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-data: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Rythme */
+  --radius: 10px;
+  --radius-sm: 8px;
+  --gap: 16px;
+  --tap: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --tabs-bg: #0A1015;
+    --accent: #6BB4E8; --accent-ink: #0B1A24;
+    --ok: #67D39B;   --ok-bg: #12301F;
+    --warn: #F2A81D; --warn-bg: #3A2A0C;
+    --info: #6BB4E8; --info-bg: #14293A;
+    --bad: #F0877D;  --bad-bg: #3B1613;
+    --t-matiere: #5FBF93; --t-mouvement: #F0905A; --t-energie: #E3B341; --t-ondes: #6BB4E8;
+    --c-force: #F87171; --c-vitesse: #34D399; --c-position: #60A5FA; --c-energie: #FBBF24; --c-temps: #C084FC;
+    --lcd-bg: #0A1015;
+    color-scheme: dark;
+  }
+}
+
+/* ---------- 2. Base ---------- */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1 { font: 600 clamp(28px, 6vw, 40px)/1.05 var(--font-head); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h2 { font: 600 20px/1.2 var(--font-head); margin: 0; letter-spacing: .02em; }
+h3 { font: 600 17px/1.25 var(--font-head); margin: 0; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+kbd { font: 500 12px var(--font-data); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; background: var(--bg); color: var(--ink); }
+.sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: var(--accent-ink); padding: 10px 14px; border-radius: var(--radius-sm); z-index: 10; }
+.skip:focus { left: 8px; }
+
+/* ---------- 3. Mise en page ---------- */
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--gap); }
+.crumb a, .back { color: var(--muted); text-decoration: none; font-size: 14px; }
+.crumb a:hover, .back:hover { color: var(--ink); text-decoration: underline; }
+.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; }
+.panel { display: grid; grid-template-columns: 1fr; gap: var(--gap); }
+@media (min-width: 780px) { .panel { grid-template-columns: 1fr 1fr; align-items: stretch; } }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* Bandeau thématique : <p class="kicker" data-theme="ondes"> colore la pastille */
+.kicker[data-theme]::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; background: var(--muted); }
+.kicker[data-theme="matiere"]::before { background: var(--t-matiere); }
+.kicker[data-theme="mouvement"]::before { background: var(--t-mouvement); }
+.kicker[data-theme="energie"]::before { background: var(--t-energie); }
+.kicker[data-theme="ondes"]::before { background: var(--t-ondes); }
+
+/* ---------- 4. Cartes ---------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card h2 { display: flex; align-items: center; gap: 8px; }
+.card h2 svg { width: 20px; height: 20px; color: var(--accent); }
+.help { color: var(--muted); font-size: 14px; }
+
+/* ---------- 5. Boutons ---------- */
+button, .btn {
+  font: 600 15px var(--font-body); border-radius: var(--radius-sm); padding: 10px 16px; min-height: var(--tap);
+  cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+}
+button:hover:not(:disabled), .btn:hover { border-color: var(--muted); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primary, .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+button.small { padding: 6px 12px; font-size: 14px; min-height: 36px; }
+button svg { width: 18px; height: 18px; flex: none; }
+
+/* Onglets (groupe de boutons à choix unique, aria-pressed) */
+.tabs { display: flex; gap: 4px; padding: 4px; background: var(--tabs-bg); border-radius: var(--radius); overflow-x: auto; }
+.tab { flex: 1 0 auto; white-space: nowrap; background: transparent; border-color: transparent; color: var(--muted); padding: 9px 14px; font-size: 14px; }
+.tab:hover:not(:disabled) { color: var(--ink); border-color: transparent; }
+.tab[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+
+/* Interrupteur : <button class="sw" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span>Libellé</button> */
+.sw .track { width: 32px; height: 18px; border-radius: 9px; background: var(--line); padding: 2px; display: block; transition: background .15s; }
+.sw .knob { display: block; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+.sw[aria-checked="true"] { border-color: var(--accent); }
+.sw[aria-checked="true"] .track { background: var(--accent); }
+.sw[aria-checked="true"] .knob { transform: translateX(14px); }
+
+/* Pastille de choix (filtre, option) */
+.pill { border-radius: 99px; font-size: 13px; letter-spacing: .02em; }
+.pill[aria-pressed="true"] { background: var(--info-bg); color: var(--info); border-color: var(--info); }
+
+/* ---------- 6. Curseurs ---------- */
+.slider { display: grid; gap: 6px; }
+.slider label { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.slider label b { color: var(--accent); font-family: var(--font-data); font-weight: 600; }
+.slider input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+.slider .bounds { display: flex; justify-content: space-between; font: 500 12px var(--font-data); color: var(--muted); }
+
+/* ---------- 7. Scène (canvas / SVG) ---------- */
+.stage { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.stagebar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.cv { position: relative; }
+.cv canvas, .cv svg { display: block; width: 100%; height: auto; }
+canvas { touch-action: manipulation; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { width: 18px; height: 4px; border-radius: 2px; background: currentColor; display: inline-block; }
+
+/* ---------- 8. Afficheurs (LCD) ---------- */
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.lcd { background: var(--lcd-bg); border-radius: var(--radius-sm); padding: 10px 12px 12px; border: 1px solid var(--line); min-width: 0; }
+.lcd .lab { font: 500 12px/1.4 var(--font-data); letter-spacing: .04em; color: var(--lcd-label); } /* pas de majuscules forcées : Hz, mV, MΩ… doivent garder leur casse */
+.lcd .val { margin-top: 8px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.lcd .v { font: 600 clamp(26px, 6vw, 34px)/1 var(--font-data); color: var(--lcd-fg); font-variant-numeric: tabular-nums; }
+.lcd .u { font: 500 14px var(--font-data); color: var(--lcd-dim); }
+
+/* ---------- 9. Observation / retour d'état ---------- */
+.obs { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; background: var(--surface); transition: background .2s, border-color .2s; }
+.obs h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.obs p { font-size: 17px; line-height: 1.7; }
+.obs[data-tone="ok"]   { background: var(--ok-bg);   border-color: var(--ok);   color: var(--ok); }
+.obs[data-tone="warn"] { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+.obs[data-tone="info"] { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+.obs[data-tone="bad"]  { background: var(--bad-bg);  border-color: var(--bad);  color: var(--bad); }
+.status { font-size: 14px; color: var(--muted); min-height: 1.5em; }
+.status.err { color: var(--bad); }
+
+/* Retour d'un défi (après vérification) : l'icône ou le mot porte l'état, pas seulement la couleur */
+.fb { border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--line); font-size: 15px; }
+.fb[data-tone="ok"]   { background: var(--ok-bg);   border-color: var(--ok);   color: var(--ok); }
+.fb[data-tone="warn"] { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+.fb[data-tone="bad"]  { background: var(--bad-bg);  border-color: var(--bad);  color: var(--bad); }
+
+/* ---------- 10. Tableau de mesures ---------- */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+table.mesures { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.mesures caption { text-align: left; padding: 10px 12px; font: 600 16px var(--font-head); }
+table.mesures th, table.mesures td { padding: 8px 12px; text-align: right; border-top: 1px solid var(--line); white-space: nowrap; }
+table.mesures th { font: 600 13px var(--font-data); color: var(--muted); background: var(--bg); } /* idem : jamais de text-transform sur des unités */
+table.mesures th:first-child, table.mesures td:first-child { text-align: left; }
+table.mesures td.empty { text-align: center; color: var(--muted); font-style: italic; }
+
+/* ---------- 11. Notation vectorielle ---------- */
+.vec { position: relative; display: inline-block; font-style: normal; }
+.vec::before { content: "→"; position: absolute; left: 50%; top: -.72em; transform: translateX(-50%); font-size: .7em; line-height: 1; font-family: var(--font-body); }
+
+/* ---------- 12. Dépliants (aide, pour aller plus loin) ---------- */
+details { color: var(--muted); font-size: 14px; }
+details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
+
+/* ---------- 13. Pied de page ---------- */
+.sim-footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+
+/* ---------- 14. Préférences utilisateur et impression ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  .tab[aria-pressed="true"], .pill[aria-pressed="true"], .sw[aria-checked="true"] { outline: 2px solid Highlight; }
+}
+@media print {
+  body { background: #fff; color: #000; padding: 0; }
+  .tabs, .stagebar, .crumb, .skip, button { display: none !important; }
+  .card, .obs, .stage { break-inside: avoid; box-shadow: none; }
+}
