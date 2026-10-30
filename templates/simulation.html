@@ -1,0 +1,139 @@
+<!doctype html>
+<!--GABARIT-DEBUT
+  GABARIT DE SIMULATION · Simulabo PhCh
+  ----------------------------------------------------------------------------
+  Ne pas éditer ce fichier pour une simulation : lancer
+      python3 tools/new-sim.py
+  qui en fait une copie dans sims/, remplit les marques à double accolades et inscrit la simulation
+  au catalogue. Ensuite, remplacer le bloc « DÉMO » (physique) par la vôtre.
+
+  À conserver pour l'uniformité du site :
+  - les deux liens vers ../shared/ (styles et briques JavaScript) ;
+  - le fil d'Ariane, l'en-tête (kicker, h1 unique, sous-titre), la zone d'observation
+    (aria-live) et le pied de page ;
+  - aucune ressource externe (police, CDN, image distante, statistiques).
+  Avant d'ouvrir la pull request : python3 tools/check.py
+GABARIT-FIN-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{TITRE}} · Simulabo PhCh</title>
+<meta name="description" content="{{RESUME}}">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+canvas { aspect-ratio: 1000 / 320; }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="{{THEME}}">{{THEME_LABEL}} · {{NIVEAU}}</p>
+    <h1>{{TITRE}}</h1>
+    <p class="sub">{{RESUME}}</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+    <!-- ===== DÉMO : à remplacer par votre simulation ===== -->
+    <section class="stage" aria-label="Scène de la simulation">
+      <div class="cv">
+        <canvas id="cv" role="img" aria-label="Graphique d'un signal sinusoïdal : l'amplitude et la période se règlent avec les curseurs."></canvas>
+      </div>
+      <div class="legend"><span class="lg" style="color:var(--c-position)"><i></i>Signal s(t)</span></div>
+    </section>
+
+    <div class="panel">
+      <section class="card" aria-labelledby="h-reglages">
+        <h2 id="h-reglages">Réglages</h2>
+        <div id="sliders" class="card" style="padding:0;border:0;background:none"></div>
+        <div class="row"><button type="button" class="primary" id="mesurer">Relever une mesure</button></div>
+      </section>
+      <section class="card" aria-labelledby="h-mesures">
+        <h2 id="h-mesures">Valeurs affichées</h2>
+        <div class="readouts" id="lcds"></div>
+      </section>
+    </div>
+
+    <section class="obs" id="obs" aria-live="polite" data-tone="info">
+      <h2>Observation</h2>
+      <p data-obs-text>Déplace les curseurs et observe l'effet sur le signal.</p>
+    </section>
+
+    <div id="tableau"></div>
+    <div id="defi"></div>
+    <!-- ===== FIN DE LA DÉMO ===== -->
+
+    <details>
+      <summary>Pour aller plus loin</summary>
+      <ul>
+        <li>Hypothèses et limites du modèle utilisé : à compléter.</li>
+        <li>Lien avec le programme : à compléter (notions et capacités visées).</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  var S = Simulabo;
+  var etat = S.shareState({ A: 2, T: 4 });        // valeurs par défaut, modifiables par lien (#A=3&T=2)
+  var init = etat.read();
+
+  // Briques d'interface
+  var amp = S.slider("#sliders", { label: "Amplitude A", unit: "V", min: 0.5, max: 5, step: 0.1, value: init.A, digits: 1, bounds: true, onInput: update });
+  var per = S.slider("#sliders", { label: "Période T", unit: "ms", min: 1, max: 10, step: 0.5, value: init.T, digits: 1, bounds: true, onInput: update });
+  var lcdF = S.readout("#lcds", { label: "Fréquence f", unit: "Hz", digits: 0 });
+  var lcdU = S.readout("#lcds", { label: "Tension crête-crête", unit: "V", digits: 1 });
+  var table = S.measureTable("#tableau", {
+    caption: "Mesures relevées",
+    columns: [{ key: "A", label: "A", unit: "V", digits: 1 }, { key: "T", label: "T", unit: "ms", digits: 1 }, { key: "f", label: "f", unit: "Hz", digits: 0 }],
+    filename: "mesures-{{ID}}", max: 12
+  });
+
+  // Dessin
+  var scene = S.canvas("#cv", { width: 1000, height: 320, draw: draw });
+  function draw(ctx, W, H) {
+    var A = amp.get(), T = per.get();
+    ctx.strokeStyle = S.cssVar("--line"); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
+    ctx.strokeStyle = S.cssVar("--c-position"); ctx.lineWidth = 3; ctx.beginPath();
+    for (var x = 0; x <= W; x += 2) {
+      var t = x / W * 20;                          // 20 ms affichées
+      var y = H / 2 - Math.sin(2 * Math.PI * t / T) * A / 5 * (H / 2 - 16);
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function update() {
+    var A = amp.get(), T = per.get(), f = 1000 / T;
+    lcdF.set(f); lcdU.set(2 * A);
+    S.observe("#obs", "info", "Amplitude <b>" + S.fmt(A, 1) + " V</b>, période <b>" + S.fmt(T, 1) + " ms</b> : la fréquence vaut <b>" + S.fmt(f, 0) + " Hz</b>.");
+    etat.write({ A: A, T: T });
+    scene.redraw();
+  }
+  document.getElementById("mesurer").addEventListener("click", function () {
+    table.add({ A: amp.get(), T: per.get(), f: 1000 / per.get() });
+  });
+
+  S.defi("#defi", {
+    question: "Quelle est la fréquence d'un signal de période <b>5 ms</b> ?", unit: "Hz", answer: 200, tolerance: 0.02,
+    hint: "f = 1 / T, avec T en secondes.",
+    explain: "f = 1 / T = 1 / (5×10⁻³ s) = 200 Hz."
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>

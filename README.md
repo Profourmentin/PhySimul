@@ -9,6 +9,12 @@ Chaque simulation est un fichier HTML autonome. La page d'accueil (`index.html`)
 ```
 index.html                    page d'accueil et catalogue
 sims/                         une simulation = un fichier HTML autonome
+shared/simulabo.css           socle CSS commun (jetons, composants, clair/sombre)
+shared/simulabo.js            socle JavaScript commun (curseurs, afficheurs, tableau de mesures…)
+templates/simulation.html     gabarit d'une nouvelle simulation
+tools/new-sim.py              crée une simulation et l'inscrit au catalogue
+tools/check.py                contrôle de cohérence du site
+docs/socle.md                 mode d'emploi du socle et règles de charte
 enseignants/index.html        espace enseignant : liste des fiches d'activités
 enseignants/enseignants.css   styles communs de l'espace (aucune ressource externe)
 enseignants/fiches/           une fiche enseignant = un fichier HTML
@@ -16,6 +22,17 @@ README.md
 ```
 
 ## Ajouter une simulation
+
+### Méthode recommandée : le socle
+
+```
+python3 tools/new-sim.py     # crée sims/<nom>.html depuis le gabarit et l'inscrit au catalogue
+python3 tools/check.py       # contrôle avant la pull request
+```
+
+Le gabarit s'appuie sur `shared/simulabo.css` et `shared/simulabo.js` : même identité visuelle, thème clair/sombre, accessibilité de base, tableau de mesures, défi numérique. Mode d'emploi complet : [`docs/socle.md`](docs/socle.md).
+
+### Méthode manuelle (simulation autonome)
 
 1. Déposer le fichier dans `sims/`, par exemple `sims/refraction.html`.
 2. Dans `index.html`, ajouter une entrée à la liste JSON `catalogue-data` :
@@ -44,6 +61,12 @@ README.md
 - `theme` : `matiere`, `mouvement`, `energie`, `ondes`
 - `statut` : `dispo` (fiche cliquable) ou `prepa` (fiche « en préparation », sans lien)
 - `glyph` (vignette) : `bench`, `chrono`, `chrono-droite`, `refraction`, `spectrum`, `beaker`, `titration`, `gas`, `circuit`, `orbit`, `pendulum`, `reaction`
+
+## Contrôle automatique
+
+`python3 tools/check.py` vérifie le catalogue (champs, doublons, fichiers présents, vignettes), la liste de l'espace enseignant, et la charte de chaque simulation. Les simulations qui utilisent le socle sont contrôlées strictement ; les plus anciennes ne produisent que des avertissements (polices externes, sans thème sombre, etc.), à traiter simulation par simulation.
+
+Pour lancer ce contrôle à chaque pull request, copier `tools/github-actions-check.yml` vers `.github/workflows/check.yml` (à faire par le propriétaire du dépôt).
 
 ## Hébergement
 

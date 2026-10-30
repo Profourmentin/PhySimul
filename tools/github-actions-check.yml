@@ -1,0 +1,28 @@
+# Contrôle automatique de chaque pull request.
+#
+# INSTALLATION (une seule fois, par le propriétaire du dépôt) :
+#   copier ce fichier vers  .github/workflows/check.yml
+# Il n'est pas placé là directement : l'application GitHub utilisée par Claude n'a pas
+# le droit de modifier .github/workflows. Le propriétaire le fait en deux minutes
+# depuis l'interface web (Add file > Create new file > .github/workflows/check.yml).
+#
+# Effet : à chaque pull request, python3 tools/check.py s'exécute. Une erreur
+# (catalogue incohérent, fichier manquant, simulation non conforme au socle)
+# rend la vérification rouge ; les avertissements n'empêchent pas la fusion.
+name: Contrôle du site
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Contrôle de cohérence
+        run: python3 tools/check.py
