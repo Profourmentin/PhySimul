@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche enseignant · Loi d'Ohm, caractéristique d'un dipôle · Simulabo PhCh</title>
+<meta name="description" content="Fiche d'activité pour l'enseignant : relever des mesures de tension et d'intensité, tracer la caractéristique d'un conducteur ohmique, la comparer à celle d'une lampe et de capteurs résistifs, puis déterminer une résistance inconnue (Seconde).">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/loi-ohm.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Physique-chimie · Seconde</p>
+    <h1>Loi d'Ohm : caractéristique d'un dipôle</h1>
+    <p class="lead">Dans un circuit où un ampèremètre et un voltmètre sont déjà branchés, l'élève fait varier la tension, relève U et I, constate que la caractéristique d'un conducteur ohmique est une droite passant par l'origine dont la pente est R, la compare à celle d'une lampe et de capteurs résistifs, puis détermine une résistance inconnue.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Seconde, voie générale et technologique</li>
+      <li>Ondes et signaux · Signaux et capteurs</li>
+      <li>20 min sur la page + 3 min de prédiction (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette, papier</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/loi-ohm.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>L'activité relève du thème « Ondes et signaux », partie « Signaux et capteurs », du programme de physique-chimie de Seconde générale et technologique. Prérequis : lire un schéma électrique, savoir ce que mesurent un ampèremètre (branché en série) et un voltmètre (branché en dérivation), avoir déjà rencontré la loi d'Ohm au collège <span class="verify">À vérifier dans le BO</span>.</p>
+      <p class="note"><span class="verify">À vérifier dans le BO</span> Les capacités ci-dessous entre guillemets sont recopiées d'une progression académique (Versailles, 2020-2021) qui cite le programme ; elles n'ont pas été relues dans l'annexe du BO, qui n'a pas pu être rouverte pour cette fiche. Les formulations sans guillemets sont des reformulations issues d'une extraction automatique du BO. Relire le tout mot à mot avant diffusion.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>« Mesurer une tension et une intensité. »</td><td>Étape 2 : lecture des deux afficheurs. Les appareils sont déjà branchés : la page ne fait pas câbler le montage</td></tr>
+            <tr><td>« Utiliser la loi d'Ohm. »</td><td>Étapes 3 et 5 : calcul de U/I, lecture de la pente, défi « R inconnue »</td></tr>
+            <tr><td>« Représenter et exploiter la caractéristique d'un dipôle. » ; « Exploiter la caractéristique d'un dipôle électrique : point de fonctionnement, modélisation par une relation U = f(I) ou I = g(U). »</td><td>Graphique U = f(I) avec droite modèle (étape 3) et courbe de la lampe (étape 4). La relation I = g(U) n'est pas proposée. Le « point de fonctionnement » affiché est le point (I ; U) du réglage : le générateur est idéal et sa caractéristique n'est pas étudiée</td></tr>
+            <tr><td>Reconnaître une situation de proportionnalité <span class="verify">Formulation à vérifier</span></td><td>Étape 3 : points alignés avec l'origine, rapport U/I constant ; contre-exemple de la lampe (étape 4)</td></tr>
+            <tr><td>« Mesurer une grandeur physique à l'aide d'un capteur électrique résistif. »</td><td>Étape 4 bis (facultative) : thermistance CTN et photorésistance. La page donne la résistance du capteur pour une température ou un éclairement ; remonter de R à la grandeur n'est pas demandé</td></tr>
+            <tr><td>« Produire et utiliser une courbe d'étalonnage reliant la résistance d'un système avec une grandeur d'intérêt »</td><td>Amorce seulement : une série de mesures par température ou éclairement donne une valeur de R. La courbe R = f(θ) est à construire hors de la page (tableur, papier)</td></tr>
+            <tr><td>Capacité numérique : représenter la caractéristique d'un dipôle avec un langage de programmation <span class="verify">Formulation à vérifier</span></td><td>Prolongement : les mesures du tableau sont recopiées dans un script Python ou un tableur</td></tr>
+            <tr><td>« Exploiter la loi des mailles et la loi des nœuds dans un circuit électrique comportant au plus deux mailles. »</td><td>Non travaillée : le circuit n'a qu'une maille. À traiter avant ou après</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Compétences mobilisées : s'approprier (lire grandeurs, unités et schéma), analyser et raisonner (relier U, I et R, interpréter la forme de la caractéristique), réaliser (relever des mesures), valider (juger l'alignement des points aux incertitudes près), communiquer (conclure par une phrase avec la valeur de R).</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Démarche proposée : Prédire, Mesurer, Modéliser, Comparer, Transférer. Durée estimée : 3 minutes de prédiction hors page, puis environ 20 minutes sur la page, à confirmer en classe. La page n'impose pas d'ordre : les trois onglets (« Conducteur ohmique », « Autres dipôles », « Défi : R inconnue ») sont accessibles dès l'ouverture, c'est la consigne qui structure le parcours.</p>
+      <p class="note"><b>Consigne possible :</b> « Réglez U de 0 V à la tension la plus grande possible sans déclencher l'avertissement de puissance, relevez au moins 6 mesures, puis écrivez ce que vous constatez sur le graphique et sur la colonne U/I. Donnez la valeur de R. »</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. Prédire (3 min, hors page)</td><td>Hypothèse</td><td>Avant d'ouvrir la simulation : « Si on double la tension aux bornes d'un conducteur ohmique, que devient l'intensité ? Que devient-elle si on prend un conducteur de résistance plus grande ? » Réponse écrite ou vote à main levée.</td><td>Une phrase de prédiction, avant la manipulation</td></tr>
+            <tr><td>2. Mesurer (6 min)</td><td>Expérience</td><td>Onglet « Conducteur ohmique ». Règle U au curseur, lit le voltmètre et l'ampèremètre (I en mA), ajoute chaque mesure au tableau avec « Ajouter la mesure au tableau ». Le « Balayage auto » ajoute 8 mesures d'un coup.</td><td>Tableau de mesures (U, I), au moins 6 lignes</td></tr>
+            <tr><td>3. Modéliser (4 min)</td><td>Modélisation</td><td>Observe le graphique U = f(I) et la droite modèle en tirets, lit le coefficient k, compare avec la colonne U/I. Change de résistance et ajoute une seconde série : les deux droites s'affichent ensemble.</td><td>Phrase : « U est proportionnelle à I, U = R × I, R = … Ω » ; la droite la plus inclinée correspond à la plus grande résistance</td></tr>
+            <tr><td>4. Comparer (5 min)</td><td>Raisonnement</td><td>Onglet « Autres dipôles », lampe à filament : mêmes mesures, mais la courbe n'est pas une droite et U/I change. Facultatif : CTN (changer θ) ou photorésistance (changer E), une série par valeur.</td><td>Phrase : la lampe n'est pas un conducteur ohmique, car U/I n'est pas constant ; une CTN ou une photorésistance a une résistance qui dépend de θ ou de E</td></tr>
+            <tr><td>5. Transférer (5 min)</td><td>Résolution de problème</td><td>Onglet « Défi : R inconnue ». Mesure, exploite, écrit la valeur de R (en Ω), clique sur « Vérifier », puis « Voir la correction » si besoin. « Nouveau conducteur » tire une autre valeur.</td><td>Valeur de R justifiée par le tableau ou la pente</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>La page ne garde rien d'une visite à l'autre et n'exporte pas les mesures : l'élève recopie le tableau ou fait une capture d'écran. Changer d'onglet efface le tableau.</p>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>1, prédiction</td><td>L'intensité double (proportionnalité). Pour une même tension, une résistance plus grande donne une intensité plus petite</td><td>Conception fréquente : « plus R est grande, plus I est grande » (voir plus bas)</td></tr>
+                <tr><td>2, mesures (R = 220 Ω)</td><td>Exemple : U = 6,0 V donne I ≈ 27 mA. Le balayage automatique va jusqu'à 7,4 V (limite de puissance de 0,25 W)</td><td>Lecture à ±1 % près avec l'option « incertitudes de mesure ». La valeur réelle du composant s'écarte de la valeur nominale de ±3 % au plus, tirée au hasard à chaque chargement de la page</td></tr>
+                <tr><td>3, caractéristique</td><td>Droite passant par l'origine ; k ≈ 0,22 V/mA, soit R ≈ 220 Ω (1 V/mA = 1 000 Ω). Colonne U/I voisine de 220 Ω, à quelques pour cent près</td><td>Essais faits lors du test de la simulation (27/10/2026) : 225 Ω pour un conducteur « 220 Ω », 993 Ω pour un « 1 000 Ω ». Toute valeur à moins de 5 % de la valeur nominale est cohérente</td></tr>
+                <tr><td>3, deux résistances</td><td>La droite de R = 1 000 Ω est plus inclinée que celle de R = 220 Ω</td><td>Le graphique porte U en ordonnée : la pente est R. Pour une même tension, I est plus petite quand R est plus grande</td></tr>
+                <tr><td>4, lampe (6 V ; 0,1 A)</td><td>Courbe qui s'incurve. À 6 V : I = 100 mA, soit U/I = 60 Ω. À 1 V : environ 35 mA, soit 28 Ω. À 7,2 V : environ 111 mA, soit 65 Ω</td><td>Le rapport U/I augmente avec la tension : le filament s'échauffe. Ce n'est pas un conducteur ohmique</td></tr>
+                <tr><td>4 bis, CTN</td><td>Valeurs du modèle, sans bruit : 0 °C → 2,93 kΩ ; 20 °C → 1,22 kΩ ; 25 °C → 1,00 kΩ ; 60 °C → 291 Ω ; 100 °C → 94,5 Ω</td><td>La résistance diminue quand la température augmente</td></tr>
+                <tr><td>4 bis, photorésistance</td><td>Valeurs du modèle, sans bruit : 1 lx → 50,1 kΩ ; 10 lx → 10,0 kΩ ; 100 lx → 2,0 kΩ ; 1 000 lx → 398 Ω</td><td>La résistance diminue quand l'éclairement augmente</td></tr>
+                <tr><td>5, défi</td><td>La résistance nominale est l'une des valeurs : 68, 100, 150, 220, 330, 470, 680, 1 000, 1 500, 2 200 Ω</td><td>La page accepte la réponse à 5 % près de la valeur réelle du composant. Elle comprend « 0,47 kΩ », « 470 Ω », les espaces et la virgule</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top:12px">Contre-vérification faite à la création de la fiche : valeurs de CTN, de photorésistance et de lampe recalculées à part à partir des formules du modèle (CTN : R = 1 kΩ × exp[3 500 K × (1/T − 1/298,15 K)] ; photorésistance : R = 10 kΩ × (E / 10 lx)<sup>−0,7</sup> ; lampe : I = 0,1 A × (U / 6 V)<sup>0,58</sup>). Ces trois modèles sont empiriques et ne viennent d'aucune fiche constructeur.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <p>Ces obstacles sont courants en classe ; la page n'en traite que certains directement, les autres sont à anticiper dans la consigne.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Confondre tension et intensité, ou leur placement</td><td>« La tension traverse la résistance », « le courant aux bornes »</td><td>Le schéma place l'ampèremètre en série et le voltmètre en dérivation, avec les flèches I et U de sens opposés (convention récepteur). La page ne commente pas ces choix : à expliciter à l'oral</td></tr>
+            <tr><td>Croire que le courant s'use dans le dipôle</td><td>« Il y a moins de courant après la résistance »</td><td>Les charges animées défilent au même rythme dans toute la boucle principale, avant et après le dipôle (la branche du voltmètre n'en montre aucune, le voltmètre étant idéal). La page ne le commente pas : à faire formuler</td></tr>
+            <tr><td>Croire que R dépend de U ou de I</td><td>« Si on augmente la tension, la résistance augmente »</td><td>Pour le conducteur ohmique, la colonne U/I reste voisine d'une même valeur. Le contre-exemple de la lampe peut renforcer la confusion : préciser que le rapport U/I d'un dipôle n'est une constante, la résistance, que pour un conducteur ohmique</td></tr>
+            <tr><td>Confondre proportionnalité et fonction affine</td><td>« Mes points sont alignés, donc c'est la loi d'Ohm », sans regarder l'origine</td><td>Le texte d'observation dit « alignés avec l'origine ». La page juge l'alignement à partir de l'écart entre chaque rapport U/I et leur valeur ajustée (seuil de 6 %). À faire formuler : alignés ET passant par l'origine</td></tr>
+            <tr><td>Se tromper de pente</td><td>Lire R comme 1/pente, ou confondre U = f(I) et I = f(U)</td><td>Le graphique suit le programme (U = f(I)) : la pente est R, et l'étiquette « k = … V/mA » le rappelle. L'autre représentation, I = g(U), n'est pas proposée : à faire tracer sur papier ou au tableur</td></tr>
+            <tr><td>Se tromper dans les unités</td><td>Diviser des volts par des milliampères sans convertir, ou écrire R en kΩ au lieu de Ω</td><td>L'intensité est affichée en mA. Dans le défi, la page repère une réponse 1 000 fois trop petite ou trop grande et rappelle 1 mA = 0,001 A. Mais la colonne U/I (Ω) fait déjà la conversion : voir « Limites »</td></tr>
+            <tr><td>Exiger un rapport U/I exactement constant</td><td>« Mes valeurs de U/I sont différentes, donc la loi est fausse »</td><td>Avec l'option activée par défaut, les lectures varient d'environ 1 %. À commenter : une mesure n'est jamais exacte, on cherche une valeur compatible</td></tr>
+            <tr><td>Conclure à partir de trop peu de mesures</td><td>Deux ou trois points très proches</td><td>La page demande au moins 3 points avant de conclure (elle en suggère 4 dans le défi) et ne vérifie pas leur répartition. Le balayage automatique les répartit jusqu'à la limite</td></tr>
+            <tr><td>Penser qu'un capteur résistif a une résistance fixe</td><td>« La résistance d'une CTN, c'est 1 kΩ »</td><td>Une série de points par température ou éclairement : les droites ont des pentes différentes et la page l'écrit (« la résistance dépend de la grandeur à mesurer »)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>La page est un fichier HTML autonome : pas de compte, aucune donnée envoyée, aucune ressource externe (ni police ni script chargé depuis un serveur tiers).</p>
+      <p>Choix déjà intégrés :</p>
+      <ul class="plain">
+        <li>Les trois onglets, les curseurs et les cases à cocher ont un nom accessible et se règlent au clavier ; le focus est visible.</li>
+        <li>Le tableau de mesures est un vrai tableau HTML (en-têtes, colonnes U, I et U/I) : les valeurs mesurées sont lisibles sans le graphique. Les messages d'état du tableau (« Mesure ajoutée ») et la vérification du défi sont annoncés aux lecteurs d'écran ; la liste « Observations », qui se met à jour à chaque mesure, ne l'est pas.</li>
+        <li>Le schéma du circuit a une description qui reprend les valeurs affichées de I et de U au moment de la lecture.</li>
+        <li>Si l'appareil demande de réduire les animations, le défilement des charges démarre désactivé ; la case « Animer le courant » reste disponible.</li>
+        <li>Aucun débordement horizontal à 390 px de large.</li>
+      </ul>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> pas d'audit RGAA, pas de test avec un lecteur d'écran réel ni avec des élèves. Les afficheurs numériques du circuit sont dessinés dans le canvas : leurs valeurs ne sont pas annoncées au fil de l'eau, seulement relues via la description du schéma. Le graphique n'a qu'une description fixe ; ses points sont dans le tableau. Les séries du graphique ne se distinguent que par la couleur (la légende et le tableau les nomment). Pas de mode sombre. Pas de lien de retour vers le catalogue dans la page. Plusieurs boutons secondaires sont sous 44 px de haut, et l'audit du 28/10/2026 a relevé qu'à 390 px le titre du graphique chevauche le texte d'aide.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme : un élève règle U, l'autre lit et note, puis ils inversent pour le défi.</li>
+        <li>En classe entière : étape 1 par vote, une série de mesures projetée, puis exploration libre.</li>
+        <li>Pour alléger : rester sur l'onglet « Conducteur ohmique », décocher d'abord les incertitudes de mesure, proposer le Balayage auto, demander seulement la phrase « U = R × I, R = … Ω ».</li>
+        <li>Pour différencier vers le haut : faire prévoir I pour une tension donnée avant de la lire, ou faire déterminer θ à partir d'une résistance de CTN lue dans une série.</li>
+        <li>Pour le défi, demander d'abord R « à la main » à partir de deux mesures, avant de regarder la colonne U/I.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>Le générateur, les fils et les appareils de mesure sont idéaux : le voltmètre ne dérive aucun courant et l'ampèremètre n'a aucune résistance.</li>
+        <li>Le conducteur ohmique est parfaitement linéaire. Sa valeur réelle s'écarte de la valeur nominale de ±3 % au plus, alors que la page annonce une tolérance de 5 %.</li>
+        <li>La lampe, la CTN et la photorésistance suivent des lois empiriques de simulation, pas une fiche constructeur. La CTN et la photorésistance ne s'échauffent pas, alors qu'un vrai capteur chauffe sous une tension de plusieurs volts.</li>
+        <li>Le balayage automatique de la lampe monte à 7,2 V, soit 20 % au-dessus de sa tension nominale, pour bien faire apparaître la courbure. À ne pas reproduire sur une vraie lampe de 6 V.</li>
+        <li>Les « incertitudes de mesure » sont un bruit de l'ordre de 1 %, identique pour une même consigne ; elles ne représentent pas la résolution réelle d'un multimètre.</li>
+      </ul>
+      <p class="note"><b>Point d'attention sur le défi :</b> la colonne « U/I (Ω) » du tableau affiche directement le quotient, déjà converti en ohms. Pour le défi « R inconnue », un élève peut donc lire R sans calcul ni conversion, et la difficulté mA/A que la page prétend travailler disparaît. Tant que cette colonne reste affichée, mieux vaut demander la justification de la valeur (pente, ou calcul à la main sur deux points).</p>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Refaire l'expérience avec un conducteur ohmique, un générateur réglable et deux multimètres, puis comparer à la simulation.</li>
+        <li>Recopier les mesures dans un tableur ou en Python, tracer U = f(I) puis I = g(U), comparer les deux pentes (capacité numérique du programme).</li>
+        <li>Construire une courbe d'étalonnage R = f(θ) avec les séries de la CTN, puis s'en servir pour retrouver une température à partir d'une résistance.</li>
+        <li>Étudier un circuit à deux mailles avec la loi des nœuds et la loi des mailles (non travaillées par la page).</li>
+        <li>Évaluation courte : donner le tableau d'une série de mesures et demander la nature du dipôle et sa résistance éventuelle.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> les capacités citées viennent d'une progression académique lue le 30/10/2026 et d'une extraction automatique de l'annexe du BO faite le 27/10/2026 ; l'annexe n'a pas pu être rouverte le 30/10/2026. Les ressources d'accompagnement Éduscol sur l'électricité au lycée n'ont pas pu être ouvertes non plus : à consulter pour les points de vigilance officiels sur les conceptions des élèves. La liste des difficultés fréquentes repose sur la pratique courante d'enseignement, sans référence citée.</p>
+      <ul class="plain">
+        <li><a href="https://cache.media.education.gouv.fr/file/SP1-MEN-22-1-2019/98/9/spe634_annexe_1062989.pdf">Ministère de l'Éducation nationale, programme de physique-chimie de la classe de seconde générale et technologique (BO spécial n° 1 du 22 janvier 2019, annexe)</a></li>
+        <li><a href="https://phychim.ac-versailles.fr/IMG/pdf/progressivite__et_ressources_electricite_.pdf">Académie de Versailles, progressivité et ressources : notions d'électricité de la Seconde à la Terminale</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 30/10/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
