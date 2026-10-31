@@ -139,9 +139,15 @@ details { color: var(--muted); font-size: 14px; }
 details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
 details p { margin: 8px 0 0; max-width: 70ch; }
 .formula { font-family: var(--font-data); color: var(--ink); }
+.crumb { margin: 0; }
+.crumb a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted); text-decoration: none; font-size: 14px; }
+.crumb a:hover { color: var(--ink); text-decoration: underline; }
+@media print { .crumb { display: none; } }
 </style>
 
 <div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
   <header>
     <p class="kicker">TP de physique-chimie</p>
     <h1>Banc d'optique photovoltaïque</h1>
