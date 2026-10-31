@@ -63,7 +63,7 @@ Vérifié automatiquement pour toute simulation qui utilise le socle :
 - **Une couleur de thème** par domaine du programme (`--t-matiere`, `--t-mouvement`, `--t-energie`, `--t-ondes`), reprise par la pastille du `kicker`.
 - **Nombres à la française** : virgule décimale, vrai signe moins, espace fine avant l'unité.
 - **Symboles et unités jamais en majuscules forcées** : `text-transform: uppercase` transformerait « mV » en « MV » (mégavolt) ou « Hz » en « HZ ». Le socle ne l'applique donc ni aux libellés des afficheurs ni aux en-têtes de tableau.
-- **Aucune police externe** : pile système. Le titre utilise « Barlow Semi Condensed » seulement si elle est installée sur la machine, sinon Arial Narrow ou une police sans empattement du système.
+- **Polices hébergées sur le site** (`shared/fonts/`, licence SIL OFL 1.1) : Barlow Semi Condensed pour les titres, IBM Plex Sans pour le texte, IBM Plex Mono pour les valeurs. Aucun appel à Google Fonts ni à un CDN : pas de transmission de l'adresse IP des élèves, utilisable hors ligne. Les polices sont déclarées dans `shared/fonts.css`, chargé automatiquement par `simulabo.css`. Une simulation hors socle ajoute simplement `<link rel="stylesheet" href="../shared/fonts.css">`. Poids disponibles : Barlow 500, 600, 700 ; Plex Sans 400 à 600 ; Plex Mono 400, 500, 600. Un autre poids est remplacé par le plus proche : ne pas en demander d'autres sans ajouter le fichier.
 - **Couleurs propres à une simulation** : variable locale dans le `<style>` de la page, définie en clair et en sombre, jamais redéfinition des jetons du socle.
 
 ## Faire évoluer le socle
@@ -80,7 +80,7 @@ Le socle est partagé : toute modification touche toutes les simulations qui l'u
 Les onze premières simulations ont leur propre CSS et JavaScript. Elles continuent de fonctionner et le contrôle les signale par des avertissements, sans bloquer. Pour en migrer une :
 
 1. remplacer son bloc `:root { … }` et les composants communs par `<link rel="stylesheet" href="../shared/simulabo.css">` (garder dans le `<style>` seulement ce qui lui est propre) ;
-2. supprimer les liens vers Google Fonts ;
+2. supprimer les liens vers Google Fonts (déjà fait pour les simulations existantes : elles chargent `shared/fonts.css`) ;
 3. ajouter le lien de retour, le `lang="fr"`, les `aria-label` des canvas ;
 4. comparer avant et après sur téléphone, en clair et en sombre.
 

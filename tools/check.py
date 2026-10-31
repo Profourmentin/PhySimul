@@ -224,6 +224,12 @@ def main() -> int:
     rep = Report()
     for needed in ("shared/simulabo.css", "shared/simulabo.js", "templates/simulation.html"):
         if not (ROOT / needed).is_file(): rep.err(needed, "fichier du socle manquant")
+    fonts_css = ROOT / "shared" / "fonts.css"
+    if fonts_css.is_file():
+        for url in re.findall(r'url\("([^"]+)"\)', fonts_css.read_text(encoding="utf-8")):
+            if not (fonts_css.parent / url).is_file(): rep.err("shared/fonts.css", f"fichier de police introuvable : {url}")
+    else:
+        rep.err("shared/fonts.css", "fichier manquant")
     by_id, _ = check_catalogue(rep)
     check_fiches(rep, by_id)
     check_sims(rep)
