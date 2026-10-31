@@ -150,8 +150,8 @@ fieldset{border:0;padding:0;margin:0 0 10px}legend{font-weight:600;font-size:.95
    <div class="card" id="ex-card"></div>
    <div class="card">
     <div class="kick">Aide-mémoire</div>
-    <p style="margin:6px 0"><b>Concentration en masse</b> d’un soluté : <b>t = m / V</b><br><span class="mut">m en g, V (volume de la solution) en L, t en g·L⁻¹</span></p>
-    <p style="margin:6px 0">Dilution : <b>F = t<sub>mère</sub> / t<sub>fille</sub></b> et <b>V<sub>mère</sub> = V<sub>fille</sub> / F</b><br><span class="mut">La masse de soluté se conserve : t<sub>mère</sub> × V<sub>mère</sub> = t<sub>fille</sub> × V<sub>fille</sub></span></p>
+    <p style="margin:6px 0"><b>Concentration en masse</b> d’un soluté : <b>C<sub>m</sub> = m / V</b><br><span class="mut">m en g, V (volume de la solution) en L, C<sub>m</sub> en g·L⁻¹</span></p>
+    <p style="margin:6px 0">Dilution : <b>F = C<sub>m,mère</sub> / C<sub>m,fille</sub></b> et <b>V<sub>mère</sub> = V<sub>fille</sub> / F</b><br><span class="mut">La masse de soluté se conserve : C<sub>m,mère</sub> × V<sub>mère</sub> = C<sub>m,fille</sub> × V<sub>fille</sub></span></p>
     <p style="margin:6px 0"><b>Conversions</b> : 1 L = 1000 mL · 1 g = 1000 mg</p>
     <p style="margin:6px 0"><b>Concentration maximale</b> : au-delà de la solubilité, le solide ne se dissout plus (solution saturée).</p>
     <table class="tbl2"><tr><th>Soluté (eau, 20 °C)</th><th>Solubilité</th></tr><tr><td>chlorure de sodium</td><td>≈ 360 g·L⁻¹</td></tr><tr><td>sulfate de cuivre(II) pentahydraté</td><td>≈ 320 g·L⁻¹</td></tr><tr><td>permanganate de potassium</td><td>≈ 64 g·L⁻¹</td></tr></table>
@@ -187,7 +187,7 @@ const dec=(x,n)=>Math.abs(x*Math.pow(10,n)-Math.round(x*Math.pow(10,n)))<1e-9;
 const near=(x,y,tol=0.01)=>Math.abs(x-y)<=tol*Math.abs(y)+1e-9;
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 const U='g·L⁻¹';
-const TM='t<sub>mère</sub>',TF='t<sub>fille</sub>',VM='V<sub>mère</sub>',VF='V<sub>fille</sub>';
+const TM='C<sub>m,mère</sub>',TF='C<sub>m,fille</sub>',VM='V<sub>mère</sub>',VF='V<sub>fille</sub>';
 
 /* progression (facultative, locale au navigateur) */
 const KEY='physimul-dissolution-dilution';
@@ -290,11 +290,11 @@ function dilState(p,k){
 function protoDiss(p){
  const V=p.V,m=p.m;
  return {kind:'diss',p,weighAt:0,
-  intro:{title:'Situation de départ',detail:`On veut préparer <b>${fmt(V)} mL</b> de solution de ${p.solute.name} de concentration en masse <b>t = ${fmt(p.t)} ${U}</b>, par <b>dissolution</b> du solide dans l’eau.`,why:'Le soluté est un solide : on le pèse. Le solvant est l’eau distillée : on la verse jusqu’au volume voulu.',cap:'Matériel prêt sur la paillasse.'},
-  key:`<b>t = m / V</b> &nbsp;donc&nbsp; m = t × V = ${fmt(p.t)} × ${fmt(V/1000)} = <b>${fmt(m)} g</b>`,
+  intro:{title:'Situation de départ',detail:`On veut préparer <b>${fmt(V)} mL</b> de solution de ${p.solute.name} de concentration en masse <b>C<sub>m</sub> = ${fmt(p.t)} ${U}</b>, par <b>dissolution</b> du solide dans l’eau.`,why:'Le soluté est un solide : on le pèse. Le solvant est l’eau distillée : on la verse jusqu’au volume voulu.',cap:'Matériel prêt sur la paillasse.'},
+  key:`<b>C<sub>m</sub> = m / V</b> &nbsp;donc&nbsp; m = C<sub>m</sub> × V = ${fmt(p.t)} × ${fmt(V/1000)} = <b>${fmt(m)} g</b>`,
   state:k=>dissState(p,k),anims:{4:'shake',6:'flip'},
   steps:[
-   {short:'Peser la masse m de soluté',detail:`Poser la coupelle sur la balance, tarer, puis ajouter le solide à la spatule jusqu’à lire <b>m = ${fmt(m)} g</b>.`,why:'La masse à peser se déduit de la concentration visée : m = t × V. La tare retire la masse de la coupelle.'},
+   {short:'Peser la masse m de soluté',detail:`Poser la coupelle sur la balance, tarer, puis ajouter le solide à la spatule jusqu’à lire <b>m = ${fmt(m)} g</b>.`,why:'La masse à peser se déduit de la concentration visée : m = C<sub>m</sub> × V. La tare retire la masse de la coupelle.'},
    {short:'Introduire le solide dans la fiole jaugée avec un entonnoir',detail:'Verser le solide dans la fiole à travers l’entonnoir, puis rincer la coupelle et l’entonnoir à l’eau distillée au-dessus de la fiole.',why:'Aucun grain ne doit être perdu : toute la masse m doit se retrouver dans la fiole.'},
    {short:'Ajouter de l’eau distillée aux 2/3 de la fiole',detail:'Retirer l’entonnoir et verser de l’eau distillée jusqu’aux deux tiers environ de la fiole.',why:'On garde de la place pour agiter, et on ne risque pas de dépasser le trait de jauge.'},
    {short:'Boucher et agiter jusqu’à dissolution totale',detail:'Boucher la fiole et l’agiter jusqu’à ce que le solide ait entièrement disparu.',why:'Le soluté doit être entièrement dissous avant d’ajuster le volume.'},
@@ -406,42 +406,42 @@ function exT(){for(;;){
  if(v==='mg'){mTxt=`${fmt(m*1000)} mg`;conv+=`m = ${fmt(m*1000)} mg = ${fmt(m)} g<br>`;}
  if(v==='L')VTxt=`${fmt(V/1000)} L`;else conv+=`V = ${fmt(V)} mL = ${fmt(V/1000)} L<br>`;
  return {kind:'num',unit:U,ans:t,
-  q:`<b>Mode opératoire.</b> On pèse ${mTxt} de ${nm(key)}. On l’introduit dans une fiole jaugée de ${VTxt}, on ajoute de l’eau distillée, on agite jusqu’à dissolution totale, puis on complète jusqu’au trait de jauge.<br>Calcule la concentration en masse <i>t</i> de la solution obtenue.`,
-  hint:'Convertis m en grammes et V en litres, puis applique t = m / V.',
-  sol:`${conv}t = m / V = ${fmt(m)} g / ${fmt(V/1000)} L = <b>${fmt(t)} ${U}</b>`};}}
+  q:`<b>Mode opératoire.</b> On pèse ${mTxt} de ${nm(key)}. On l’introduit dans une fiole jaugée de ${VTxt}, on ajoute de l’eau distillée, on agite jusqu’à dissolution totale, puis on complète jusqu’au trait de jauge.<br>Calcule la concentration en masse C<sub>m</sub> de la solution obtenue.`,
+  hint:'Convertis m en grammes et V en litres, puis applique C<sub>m</sub> = m / V.',
+  sol:`${conv}C<sub>m</sub> = m / V = ${fmt(m)} g / ${fmt(V/1000)} L = <b>${fmt(t)} ${U}</b>`};}}
 function exM(){for(;;){
  const V=rnd([50,100,200,250,500]),t=rnd([2,4,5,8,10,12,15,20,25,40,50]),m=t*V/1000;if(!dec(m,2))continue;const key=rnd(Object.keys(SOLUTES));
  return {kind:'num',unit:'g',ans:m,
-  q:`On veut préparer <b>${fmt(V)} mL</b> de solution de ${nm(key)} de concentration en masse <b>t = ${fmt(t)} ${U}</b>. Quelle masse de soluté faut-il peser ?`,
-  hint:'Isole m dans t = m / V : m = t × V (V en litres).',
-  sol:`m = t × V = ${fmt(t)} ${U} × ${fmt(V/1000)} L = <b>${fmt(m)} g</b>`};}}
+  q:`On veut préparer <b>${fmt(V)} mL</b> de solution de ${nm(key)} de concentration en masse <b>C<sub>m</sub> = ${fmt(t)} ${U}</b>. Quelle masse de soluté faut-il peser ?`,
+  hint:'Isole m dans C<sub>m</sub> = m / V : m = C<sub>m</sub> × V (V en litres).',
+  sol:`m = C<sub>m</sub> × V = ${fmt(t)} ${U} × ${fmt(V/1000)} L = <b>${fmt(m)} g</b>`};}}
 function exV(){for(;;){
  const V=rnd([50,100,200,250,500]),t=rnd([2,4,5,8,10,20,25,40]),m=t*V/1000;if(!dec(m,2)||m<0.1)continue;const key=rnd(Object.keys(SOLUTES));
  return {kind:'num',unit:'mL',ans:V,
-  q:`Avec <b>${fmt(m)} g</b> de ${nm(key)}, quel volume de solution (en mL) peut-on préparer à la concentration en masse <b>t = ${fmt(t)} ${U}</b> ?`,
-  hint:'Isole V dans t = m / V : V = m / t. Le résultat est en litres : convertis-le en mL.',
-  sol:`V = m / t = ${fmt(m)} g / ${fmt(t)} ${U} = ${fmt(V/1000)} L = <b>${fmt(V)} mL</b>`};}}
+  q:`Avec <b>${fmt(m)} g</b> de ${nm(key)}, quel volume de solution (en mL) peut-on préparer à la concentration en masse <b>C<sub>m</sub> = ${fmt(t)} ${U}</b> ?`,
+  hint:'Isole V dans C<sub>m</sub> = m / V : V = m / C<sub>m</sub>. Le résultat est en litres : convertis-le en mL.',
+  sol:`V = m / C<sub>m</sub> = ${fmt(m)} g / ${fmt(t)} ${U} = ${fmt(V/1000)} L = <b>${fmt(V)} mL</b>`};}}
 function exF(){const d=genDilParams();
  return {kind:'num',unit:'(sans unité)',ans:d.F,
   q:`On dilue une solution de ${d.dye.name} de concentration en masse <b>${fmt(d.Cm)} ${U}</b> pour obtenir une solution de concentration <b>${fmt(d.Cf)} ${U}</b>. Quel est le facteur de dilution F ?`,
-  hint:'F = t<sub>mère</sub> / t<sub>fille</sub> : la solution mère est plus concentrée, donc F est supérieur à 1.',
+  hint:'F = C<sub>m,mère</sub> / C<sub>m,fille</sub> : la solution mère est plus concentrée, donc F est supérieur à 1.',
   sol:`F = ${TM} / ${TF} = ${fmt(d.Cm)} / ${fmt(d.Cf)} = <b>${fmt(d.F)}</b>`};}
 function exVm(){const d=genDilParams();
  return {kind:'num',unit:'mL',ans:d.Vm,
   q:`On veut préparer <b>${fmt(d.Vf)} mL</b> de solution de ${d.dye.name} à <b>${fmt(d.Cf)} ${U}</b> à partir d’une solution mère à <b>${fmt(d.Cm)} ${U}</b>. Quel volume de solution mère faut-il prélever (en mL) ?`,
-  hint:'Calcule d’abord F = t<sub>mère</sub> / t<sub>fille</sub>, puis V<sub>mère</sub> = V<sub>fille</sub> / F.',
+  hint:'Calcule d’abord F = C<sub>m,mère</sub> / C<sub>m,fille</sub>, puis V<sub>mère</sub> = V<sub>fille</sub> / F.',
   sol:`F = ${fmt(d.Cm)} / ${fmt(d.Cf)} = ${fmt(d.F)}<br>${VM} = ${VF} / F = ${fmt(d.Vf)} mL / ${fmt(d.F)} = <b>${fmt(d.Vm)} mL</b>`};}
 function exTf(){const d=genDilParams();
  return {kind:'num',unit:U,ans:d.Cf,
   q:`<b>Mode opératoire.</b> On prélève <b>${fmt(d.Vm)} mL</b> d’une solution de ${d.dye.name} à <b>${fmt(d.Cm)} ${U}</b> avec une pipette jaugée. On les introduit dans une fiole jaugée de <b>${fmt(d.Vf)} mL</b>, puis on complète avec de l’eau distillée jusqu’au trait de jauge. Quelle est la concentration en masse de la solution obtenue ?`,
-  hint:'La masse de soluté prélevée se conserve : t<sub>fille</sub> = t<sub>mère</sub> × V<sub>mère</sub> / V<sub>fille</sub>.',
+  hint:'La masse de soluté prélevée se conserve : C<sub>m,fille</sub> = C<sub>m,mère</sub> × V<sub>mère</sub> / V<sub>fille</sub>.',
   sol:`m = ${TM} × ${VM} = ${fmt(d.Cm)} × ${fmt(d.Vm/1000)} = ${fmt(d.Cm*d.Vm/1000)} g<br>${TF} = m / ${VF} = ${fmt(d.Cm*d.Vm/1000)} g / ${fmt(d.Vf/1000)} L = <b>${fmt(d.Cf)} ${U}</b>`};}
 function exSol(){const key=rnd(Object.keys(SOLUTES)),s=SOLUTES[key],V=rnd([50,100,200,250]),mmax=s.sol*V/1000,f=rnd([0.6,1.5]);
  const m=Math.round(mmax*f*10)/10,t=m/(V/1000),ok=t<=s.sol;
  return {kind:'choice',ans:ok,
   q:`La solubilité du ${s.name} dans l’eau à 20 °C est d’environ <b>${fmt(s.sol)} ${U}</b>. Peut-on dissoudre <b>${fmt(m)} g</b> de ce solide pour préparer <b>${fmt(V)} mL</b> de solution ?`,
   hint:'Calcule la concentration en masse que donnerait cette préparation et compare-la à la solubilité.',
-  sol:`t = m / V = ${fmt(m)} g / ${fmt(V/1000)} L = ${fmt(t)} ${U}<br>${fmt(t)} ${ok?'≤':'>'} ${fmt(s.sol)} ${U} : la concentration maximale ${ok?'n’est pas dépassée, <b>c’est possible</b>':'est dépassée, <b>c’est impossible</b> : le solide ne se dissoudra pas en totalité'}.`};}
+  sol:`C<sub>m</sub> = m / V = ${fmt(m)} g / ${fmt(V/1000)} L = ${fmt(t)} ${U}<br>${fmt(t)} ${ok?'≤':'>'} ${fmt(s.sol)} ${U} : la concentration maximale ${ok?'n’est pas dépassée, <b>c’est possible</b>':'est dépassée, <b>c’est impossible</b> : le solide ne se dissoudra pas en totalité'}.`};}
 const EXS=[exT,exM,exV,exF,exVm,exTf,exSol,exT,exM,exF];
 const CX={cur:null,streak:0,done:false};
 function exNew(){
@@ -489,7 +489,7 @@ const labHost=$('#lab-panel');
 const fbx=(id,c,h)=>{const f=$(id);if(f){f.className='fb '+c;f.innerHTML=h;}};
 function mission(){
  const t=L.task;
- if(L.kind==='diss')return `<div class="mission"><div class="kick">Mission</div>Prépare <b class="t">${fmt(t.V)} mL</b> de solution de ${t.solute.name} de concentration en masse <b class="t">t = ${fmt(t.t)} ${U}</b>, par dissolution.</div>`;
+ if(L.kind==='diss')return `<div class="mission"><div class="kick">Mission</div>Prépare <b class="t">${fmt(t.V)} mL</b> de solution de ${t.solute.name} de concentration en masse <b class="t">C<sub>m</sub> = ${fmt(t.t)} ${U}</b>, par dissolution.</div>`;
  return `<div class="mission"><div class="kick">Mission</div>Prépare <b class="t">${fmt(t.Vf)} mL</b> de solution fille de ${t.dye.name} à <b class="t">${TF} = ${fmt(t.Cf)} ${U}</b>, à partir d’une solution mère à <b class="t">${TM} = ${fmt(t.Cm)} ${U}</b>.</div>`;
 }
 function labNew(){
@@ -516,8 +516,8 @@ function labCalc(){
   <div class="field"><label for="in-m">m =</label><span class="inp"><input id="in-m" inputmode="decimal" autocomplete="off" placeholder="?"><span>g</span></span><button class="primary" id="ok-m">Valider</button></div>
   <div class="fb" id="fb-m" aria-live="polite"></div><div id="feas"></div>`;
   const check=()=>{const x=parseNum($('#in-m').value);if(isNaN(x)){fbx('#fb-m','info','Entre un nombre.');return;}
-   if(near(x,t.m,0.01)){fbx('#fb-m','ok',`<b>Exact.</b> m = t × V = ${fmt(t.t)} ${U} × ${fmt(t.V/1000)} L = <b>${fmt(t.m)} g</b>`);$('#in-m').disabled=true;$('#ok-m').disabled=true;feasStage();}
-   else{L.errs.calc++;fbx('#fb-m','ko',diag(x,t.m)||'Ce n’est pas la bonne masse. Rappel : t = m / V, donc m = t × V (V en litres).');}};
+   if(near(x,t.m,0.01)){fbx('#fb-m','ok',`<b>Exact.</b> m = C<sub>m</sub> × V = ${fmt(t.t)} ${U} × ${fmt(t.V/1000)} L = <b>${fmt(t.m)} g</b>`);$('#in-m').disabled=true;$('#ok-m').disabled=true;feasStage();}
+   else{L.errs.calc++;fbx('#fb-m','ko',diag(x,t.m)||'Ce n’est pas la bonne masse. Rappel : C<sub>m</sub> = m / V, donc m = C<sub>m</sub> × V (V en litres).');}};
   $('#ok-m').onclick=check;$('#in-m').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
  }else{
   labHost.innerHTML=`${mission()}
@@ -551,11 +551,11 @@ function feasStage(){
   const say=c.value==='1',s=t.solute.sol;
   if(say===t.feasible){
    $('#ok-fe').disabled=true;
-   if(t.feasible){fbx('#fb-fe','ok',`<b>Oui.</b> t = ${fmt(t.t)} ${U} ≤ ${fmt(s)} ${U} : la concentration maximale n’est pas dépassée.`);
+   if(t.feasible){fbx('#fb-fe','ok',`<b>Oui.</b> C<sub>m</sub> = ${fmt(t.t)} ${U} ≤ ${fmt(s)} ${U} : la concentration maximale n’est pas dépassée.`);
     $('#feas').insertAdjacentHTML('beforeend','<div class="btnrow"><button class="btn pri" id="go-mat">Choisir le matériel ▶</button></div>');$('#go-mat').onclick=()=>labGo(2);}
-   else{fbx('#fb-fe','ok',`<b>Bien vu !</b> t = ${fmt(t.t)} ${U} dépasse la solubilité (≈ ${fmt(s)} ${U}) : une telle solution ne peut pas exister. Dans ${fmt(t.V)} mL, on ne peut dissoudre au maximum que ${fmt(s*t.V/1000)} g.`);
+   else{fbx('#fb-fe','ok',`<b>Bien vu !</b> C<sub>m</sub> = ${fmt(t.t)} ${U} dépasse la solubilité (≈ ${fmt(s)} ${U}) : une telle solution ne peut pas exister. Dans ${fmt(t.V)} mL, on ne peut dissoudre au maximum que ${fmt(s*t.V/1000)} g.`);
     $('#feas').insertAdjacentHTML('beforeend','<div class="btnrow"><button class="btn pri" id="go-new">Nouvelle situation ▶</button></div>');$('#go-new').onclick=labNew;}
-  }else{L.errs.calc++;fbx('#fb-fe','ko',`Compare t = ${fmt(t.t)} ${U} à la solubilité du ${t.solute.name} (≈ ${fmt(s)} ${U}).`);}
+  }else{L.errs.calc++;fbx('#fb-fe','ko',`Compare C<sub>m</sub> = ${fmt(t.t)} ${U} à la solubilité du ${t.solute.name} (≈ ${fmt(s)} ${U}).`);}
  };
 }
 
@@ -692,7 +692,7 @@ function labBilan(){
  const t=L.task,e=L.errs,tot=e.calc+e.mat+e.man,st=tot<=1?'★★★':tot<=4?'★★☆':'★☆☆';
  let res='',sw='';
  if(L.kind==='diss'){
-  res=`<p style="margin:6px 0">Tu as pesé <b>${fmt(t.m)} g</b> de ${t.solute.name} pour obtenir <b>${fmt(t.V)} mL</b> de solution :<br>t = m / V = ${fmt(t.m)} g / ${fmt(t.V/1000)} L = <b>${fmt(t.t)} ${U}</b> ✓</p>`;
+  res=`<p style="margin:6px 0">Tu as pesé <b>${fmt(t.m)} g</b> de ${t.solute.name} pour obtenir <b>${fmt(t.V)} mL</b> de solution :<br>C<sub>m</sub> = m / V = ${fmt(t.m)} g / ${fmt(t.V/1000)} L = <b>${fmt(t.t)} ${U}</b> ✓</p>`;
   prog.labDiss=true;
  }else{
   const op=c=>clamp(0.92*Math.sqrt(c/t.Cm),0.07,0.95);
