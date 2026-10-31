@@ -133,7 +133,7 @@
 
   <div class="stage">
     <div id="legend"></div>
-    <div id="canvas-container"><canvas id="bench"></canvas></div>
+    <div id="canvas-container"><canvas id="bench" role="img" aria-label="Schéma d'optique : une lentille mince sur un axe optique horizontal, avec les foyers F et F'."></canvas></div>
     <div id="hint"></div>
   </div>
 </main>
@@ -197,6 +197,36 @@ function setMode(m) {
   update();
 }
 
+/* Description textuelle du schéma pour les lecteurs d'écran : ce qu'on voit + ce qu'on peut régler */
+function describeCanvas() {
+  const n = v => Math.abs(v).toFixed(1).replace('.', ',');
+  const conv = f > 0;
+  let t = `Schéma d'optique : lentille mince ${conv ? 'convergente' : 'divergente'} de distance focale ${n(f)} cm, au centre O d'un axe optique horizontal. Le foyer objet F est à ${n(f)} cm ${conv ? 'avant' : 'après'} la lentille, le foyer image F' à ${n(f)} cm ${conv ? 'après' : 'avant'}. La lumière vient de la gauche. `;
+  const p = imagePos();
+  if (mode === 1) {
+    t += theta === 0
+      ? `${nRays} rayons parallèles à l'axe arrivent sur la lentille. ${conv ? "Ils ressortent en convergeant vers le foyer image F'." : "Ils ressortent en divergeant, comme s'ils venaient du foyer image F'."} `
+      : `${nRays} rayons parallèles entre eux, inclinés de ${Math.abs(theta)} degrés, arrivent sur la lentille. ${conv ? "Ils convergent en un foyer secondaire, situé dans le plan focal image." : "Ils divergent, comme s'ils venaient d'un foyer secondaire du plan focal image."} `;
+    t += "Réglable : type de lentille, focale, inclinaison du faisceau, nombre de rayons.";
+  } else if (mode === 2) {
+    t += `Une source ponctuelle S est sur l'axe, à ${n(OA)} cm avant la lentille, et envoie ${nRays} rayons. `;
+    if (p === null) t += "La source est au foyer objet F : les rayons ressortent parallèles à l'axe. ";
+    else if (p > 0) t += `Les rayons convergent en un point image réel S' situé ${n(p)} cm après la lentille. `;
+    else t += `Les rayons ressortent en divergeant, comme s'ils venaient d'un point image virtuel S' situé ${n(p)} cm avant la lentille. `;
+    t += "Réglable : type de lentille, focale, position de la source, nombre de rayons.";
+  } else {
+    t += `Un objet AB, de ${n(AB)} cm de hauteur${AB < 0 ? ', dirigé vers le bas' : ''}, est à ${n(OA)} cm avant la lentille. `;
+    if (p === null) t += "L'objet est au foyer objet F : l'image se forme à l'infini. ";
+    else {
+      const g = p / OA;
+      t += `Son image A'B' est ${p > 0 ? 'réelle' : 'virtuelle'}, ${g > 0 ? 'droite' : 'renversée'}, à ${n(p)} cm ${p > 0 ? 'après' : 'avant'} la lentille, de hauteur ${n(g * AB)} cm. `;
+    }
+    if ($('chk_rays3').checked) t += "Trois rayons de construction partent du sommet B : l'un parallèle à l'axe, l'un passant par O, l'un dirigé vers F. ";
+    t += "Réglable : type de lentille, focale, position et taille de l'objet, ou en faisant glisser le sommet B de l'objet.";
+  }
+  canvas.setAttribute('aria-label', t);
+}
+
 function update() {
   readInputs();
   $('f_val').textContent = (f>0?'+':'−') + Math.abs(f).toFixed(1) + " cm";
@@ -206,6 +236,7 @@ function update() {
   $('ab_val').textContent = AB.toFixed(1) + " cm";
   updateLegend();
   updateObs();
+  describeCanvas();
   draw();
 }
 
