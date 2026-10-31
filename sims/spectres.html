@@ -215,10 +215,10 @@ footer{color:var(--muted);font-size:.82rem;margin-top:10px}
     </div>
     <div style="height:50px"></div>
     <div class="specgrid" id="grid2">
-      <div class="sr"><div class="lb"><b>Lumière blanche</b><br><small>spectre continu</small></div><canvas class="strip" id="st2c"></canvas></div>
-      <div class="sr"><div class="lb"><b>Émission</b><br><small id="lbE2"></small></div><canvas class="strip" id="st2e"></canvas></div>
-      <div class="sr"><div class="lb"><b>Absorption</b><br><small id="lbA2"></small></div><canvas class="strip" id="st2a"></canvas></div>
-      <div class="rulerwrap"><div></div><canvas id="ru2" style="height:30px"></canvas></div>
+      <div class="sr"><div class="lb"><b>Lumière blanche</b><br><small>spectre continu</small></div><canvas class="strip" id="st2c" role="img" aria-label="Spectre continu de la lumière blanche : toutes les couleurs, du violet (380 nm) au rouge (780 nm), sans raie"></canvas></div>
+      <div class="sr"><div class="lb"><b>Émission</b><br><small id="lbE2"></small></div><canvas class="strip" id="st2e" role="img"></canvas></div>
+      <div class="sr"><div class="lb"><b>Absorption</b><br><small id="lbA2"></small></div><canvas class="strip" id="st2a" role="img"></canvas></div>
+      <div class="rulerwrap"><div></div><canvas id="ru2" style="height:30px" aria-hidden="true"></canvas></div>
       <div class="ov"><div class="cross"></div><div class="xlab"></div><div class="marks"></div></div>
     </div>
     <p class="note" style="margin:8px 0 0">Survole les spectres pour lire la longueur d'onde. <b>Observation :</b> les raies sombres du spectre d'absorption sont aux mêmes longueurs d'onde que les raies brillantes du spectre d'émission du même élément.</p>
@@ -253,10 +253,10 @@ footer{color:var(--muted);font-size:.82rem;margin-top:10px}
     </div>
     <div style="height:50px"></div>
     <div class="specgrid" id="grid3">
-      <div class="sr"><div class="lb"><b>Spectre à analyser</b><br><small id="mType"></small></div><canvas class="strip" id="st3m"></canvas></div>
+      <div class="sr"><div class="lb"><b>Spectre à analyser</b><br><small id="mType"></small></div><canvas class="strip" id="st3m" role="img"></canvas></div>
       <hr style="border:0;border-top:1px solid var(--line);margin:8px 0">
       <div id="refRows"></div>
-      <div class="rulerwrap"><div></div><canvas id="ru3" style="height:30px"></canvas></div>
+      <div class="rulerwrap"><div></div><canvas id="ru3" style="height:30px" aria-hidden="true"></canvas></div>
       <div class="ov"><div class="cross"></div><div class="xlab"></div><div class="marks"></div></div>
     </div>
     <div class="row" style="margin-top:10px">
@@ -303,9 +303,9 @@ footer{color:var(--muted);font-size:.82rem;margin-top:10px}
     </div>
     <div class="specgrid" id="grid4" style="margin-top:6px">
       <div class="labs" id="labs4"></div>
-      <canvas class="strip" id="st4s"></canvas>
-      <div id="cmpBox" style="display:none;margin-top:6px"><canvas class="strip" id="st4c"></canvas><div class="note" id="cmpLb" style="margin-top:2px"></div></div>
-      <canvas id="ru4" style="height:30px"></canvas>
+      <canvas class="strip" id="st4s" role="img"></canvas>
+      <div id="cmpBox" style="display:none;margin-top:6px"><canvas class="strip" id="st4c" role="img"></canvas><div class="note" id="cmpLb" style="margin-top:2px"></div></div>
+      <canvas id="ru4" style="height:30px" aria-hidden="true"></canvas>
       <div class="ov full" style="top:74px"><div class="cross"></div><div class="xlab"></div><div class="marks"></div></div>
     </div>
     <label class="f">Comparer avec le spectre d'émission d'un élément</label>
@@ -401,6 +401,12 @@ const ELS={
 };
 const EK=Object.keys(ELS);
 const lineI=(k,l,s)=>{let v=0; for(const [c,i] of ELS[k].lines){const d=(l-c)/s; if(Math.abs(d)<6) v+=i*Math.exp(-d*d/2);} return Math.min(1,v);};
+/* Alternatives textuelles (lecteurs d'écran) : construites à partir de ELS / FR, les mêmes données que le dessin,
+   pour que la description reste toujours cohérente avec ce qui est affiché. */
+const elLines=k=>ELS[k].lines.map(x=>x[0]).sort((a,b)=>a-b);
+const listNm=a=>{const v=a.map(l=>fr(l,1)); return (v.length>1?v.slice(0,-1).join(', ')+' et '+v[v.length-1]:v[0])+' nm';};
+const deEl=k=>{const n=ELS[k].name.toLowerCase(); return (/^[hé]/.test(n)?'de l’':'du ')+n;};
+const setAlt=(cv,txt)=>{cv.setAttribute('role','img'); cv.setAttribute('aria-label',txt);};
 
 /* Fonctions de couleur pour les bandes spectrales */
 const colCont=l=>wl2rgb(l);
@@ -597,6 +603,8 @@ $('#optAlign').onchange=()=>draw2(); $('#optLab').onchange=()=>draw2();
 function draw2(){
   const k=S2.el, e=ELS[k], em=S2.mode==='emission';
   $('#lbE2').textContent=e.name; $('#lbA2').textContent=e.name;
+  setAlt($('#st2e'),`Spectre d’émission ${deEl(k)} : raies brillantes sur fond noir à ${listNm(elLines(k))}`);
+  setAlt($('#st2a'),`Spectre d’absorption ${deEl(k)} : spectre continu avec des raies sombres à ${listNm(elLines(k))}`);
   $('#benchTxt').innerHTML = em
     ? `<b>Émission.</b> Le gaz (${e.name.toLowerCase()}), excité par une décharge électrique, émet lui-même de la lumière. Cette lumière, dispersée par le prisme, donne un <b>spectre de raies brillantes</b> sur fond noir.`
     : `<b>Absorption.</b> Une lumière blanche (spectre continu) traverse le gaz froid (${e.name.toLowerCase()}). Le gaz absorbe certaines radiations : le spectre est <b>continu avec des raies sombres</b>, aux mêmes longueurs d'onde que les raies d'émission.`;
@@ -699,7 +707,7 @@ function buildRefRows(){
   const box=$('#refRows'); box.innerHTML='';
   for(const k of EK){
     const row=document.createElement('div'); row.className='sr';
-    row.innerHTML=`<div class="lb"><label><input type="checkbox" data-k="${k}"><span><b>${k}</b> <small>${ELS[k].name}</small></span></label></div><canvas class="strip" data-k="${k}"></canvas>`;
+    row.innerHTML=`<div class="lb"><label><input type="checkbox" data-k="${k}"><span><b>${k}</b> <small>${ELS[k].name}</small></span></label></div><canvas class="strip" data-k="${k}" role="img"></canvas>`;
     box.appendChild(row);
   }
   $$('#refRows input').forEach(i=>i.onchange=()=>{ i.checked?S3.sel.add(i.dataset.k):S3.sel.delete(i.dataset.k); });
@@ -719,7 +727,9 @@ function draw3(){
   $('#mType').textContent=S3.type==='emission'?'spectre d’émission':'spectre d’absorption';
   const t=S3.truth;
   paintStrip($('#st3m'),52,l=>S3.type==='emission'?colEm(t,l):colAbs(t,l));
-  $$('#refRows canvas').forEach(c=>paintStrip(c,26,l=>colEm([c.dataset.k],l)));
+  $$('#refRows canvas').forEach(c=>{paintStrip(c,26,l=>colEm([c.dataset.k],l)); setAlt(c,`Spectre d’émission de référence ${deEl(c.dataset.k)} : raies brillantes à ${listNm(elLines(c.dataset.k))}`);});
+  /* le spectre à analyser ne donne volontairement ni longueurs d'onde ni éléments : ce serait la réponse */
+  setAlt($('#st3m'),`Spectre à analyser : spectre d’${S3.type==='emission'?'émission d’un gaz inconnu, raies brillantes sur fond noir':'absorption d’un gaz inconnu, raies sombres sur fond continu'}. À comparer aux spectres de référence ci-dessous.`);
   paintRuler($('#ru3'));
   setMarks($('#grid3'),S3.markers.map(l=>({l,t:fr(l,1)})),'');
   updateScore();
@@ -792,10 +802,11 @@ function solarCol(l){
 }
 function draw4(){
   paintStrip($('#st4s'),120,solarCol);
+  {const ls=FR.map(f=>f.l); setAlt($('#st4s'),`Spectre de la lumière du Soleil : fond continu du violet au rouge, avec ${FR.length} raies sombres (dont ${FR.filter(f=>f.tel).length} d’origine terrestre) entre ${fr(Math.min(...ls),1)} et ${fr(Math.max(...ls),1)} nm. Chaque raie correspond à un bouton, au-dessus du spectre.`);}
   paintRuler($('#ru4'));
   const cmp=S4.cmp;
   $('#cmpBox').style.display=(cmp&&cmp!=='O2')?'block':'none';
-  if(cmp&&cmp!=='O2'){ paintStrip($('#st4c'),34,l=>colEm([cmp],l)); $('#cmpLb').textContent=`Spectre d’émission : ${ELS[cmp].name.toLowerCase()} (lampe à vapeur)`; }
+  if(cmp&&cmp!=='O2'){ paintStrip($('#st4c'),34,l=>colEm([cmp],l)); $('#cmpLb').textContent=`Spectre d’émission : ${ELS[cmp].name.toLowerCase()} (lampe à vapeur)`; setAlt($('#st4c'),`Spectre d’émission ${deEl(cmp)}, pour comparaison : raies brillantes sur fond noir à ${listNm(elLines(cmp))}`); }
   layoutLabs(); renderInfo();
   if(cmp&&cmp!=='O2') setMarks($('#grid4'),FR.filter(f=>f.el===cmp).map(f=>({l:f.l})),'al');
   else setMarks($('#grid4'),[]);
