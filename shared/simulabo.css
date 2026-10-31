@@ -5,7 +5,7 @@
    règles d'accessibilité à toutes les simulations, sans copier-coller.
 
    Principes
-   - Aucune ressource externe (pas de police ni de CDN) : le site reste utilisable
+   - Aucune ressource externe (polices hébergées dans shared/fonts/, pas de CDN) : le site reste utilisable
      hors ligne et sans transmission de données des élèves à un tiers.
    - Jetons de design (variables --*) : une simulation ne les redéfinit pas, elle les
      utilise. Pour une couleur propre à la simulation (ex. une grandeur physique),
@@ -17,6 +17,8 @@
    Utilisation : <link rel="stylesheet" href="../shared/simulabo.css">
    Documentation : docs/socle.md
    ========================================================================== */
+
+@import url("fonts.css"); /* polices hébergées : aucun appel externe */
 
 /* ---------- 1. Jetons de design ---------- */
 :root {
@@ -54,10 +56,10 @@
   /* Afficheur type LCD */
   --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-dim: #A98A45; --lcd-label: #8FA3AF;
 
-  /* Typographie : polices du système uniquement */
+  /* Typographie : polices hébergées (shared/fonts/), repli sur les polices du système */
   --font-head: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, system-ui, sans-serif;
-  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-data: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Rythme */
   --radius: 10px;
