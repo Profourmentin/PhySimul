@@ -4,218 +4,160 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Principe d'inertie · Simulabo PhCh</title>
-<link rel="stylesheet" href="../shared/fonts.css">
+<meta name="description" content="Pousse un mobile, lâche un palet ou une balle, joue au curling : observe les forces, la vitesse et la chronophotographie, avec et sans frottements.">
+<link rel="stylesheet" href="../shared/simulabo.css">
 <style>
-/* Simulation autonome : aucune bibliothèque externe, seulement les polices du site.
-   Palette et composants repris du simulateur « Banc d'optique photovoltaïque ». */
+/* Styles propres à cette simulation uniquement : le reste (jetons, boutons, onglets, interrupteurs,
+   curseur, afficheurs, observation, pied de page) vient du socle. */
+
+/* Couleurs du dessin : variables locales, définies en clair et en sombre.
+   P (poids) et v (vitesse) suivent la convention du socle ; R, F et f sont propres à cette simulation. */
 :root {
-  --bg: #EBEFF2;
-  --surface: #F8FAFB;
-  --ink: #14222C;
-  --muted: #566673;
-  --line: #CBD4DA;
-  --accent: #1B5E8C;
-  --accent-ink: #FFFFFF;
-  --tabs-bg: #DDE4E9;
-  --ok: #17734A;   --ok-bg: #DDF1E6;
-  --warn: #8F5200; --warn-bg: #FBEBCB;
-  --info: #1B5E8C; --info-bg: #DCEAF4;
-  --bad: #A8281F;  --bad-bg: #F9DDDA;
-  --cP: #C62828; --cR: #1D4ED8; --cF: #B45309; --cf: #7E22CE; --cv: #047857;
-  --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-dim: #A98A45; --lcd-label: #8FA3AF;
-  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --pi-P: var(--c-force); --pi-v: var(--c-vitesse);
+  --pi-R: #1D4ED8; --pi-F: #B45309; --pi-f: #7E22CE;
+  --pi-sky: #F4F7F9; --pi-skyHover: #E3F1FB; --pi-skyAtm: #E3E8ED; --pi-ground: #D1D6DC;
+  --pi-grid: #8E9AA6; --pi-txt: #4B5663; --pi-halo: #F4F7F9;
+  --pi-body: #1E293B; --pi-cg: #FFFFFF; --pi-plane: #CBD5E1; --pi-planeLine: #64748B; --pi-planeLineHover: #38BDF8;
+  --pi-cushion: rgba(56,189,248,.55); --pi-ghost: rgba(30,41,59,.14); --pi-ghostLine: rgba(30,41,59,.40); --pi-cross: #DC2626;
+  --pi-z1: #BAE6FD; --pi-z2: #E0F2FE; --pi-z3: #F1F5F9; --pi-zline: #EF4444; --pi-ztxt: #475569;
+  --pi-stone: #64748B; --pi-handle: #DC2626;
+  --pi-mline: #D97706; --pi-mtxt: #92400E; --pi-mbg: rgba(255,255,255,.92);
+
+  /* Cible du curling et bouton de poussée : identiques en clair et en sombre */
+  --pi-t1: #2563EB; --pi-t2: #FFFFFF; --pi-t3: #DC2626;
+  --pi-push-bg: #F2A81D; --pi-push-ink: #3B2600; --pi-push-line: #D68F0A; --pi-push-on: #D68F0A;
+
+  /* Mode « jeu » : décor d'arcade toujours sombre, quel que soit le thème */
+  --ar-bg: #0F172A; --ar-bg2: #1E293B; --ar-card: #182235; --ar-line: #334155; --ar-line2: #475569;
+  --ar-ink: #E2E8F0; --ar-muted: #94A3B8; --ar-white: #FFFFFF; --ar-gold: #FBBF24; --ar-ok: #10B981;
+  --ar-again: #6366F1; --ar-orange: #FDBA74; --ar-green: #34D399; --ar-red: #F43F5E;
+  --ar-p1: #60A5FA; --ar-p2: #F87171; --ar-p3: #34D399; --ar-p4: #FBBF24;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
-    --accent: #6BB4E8; --accent-ink: #0B1A24; --tabs-bg: #0A1015;
-    --ok: #67D39B;   --ok-bg: #12301F;
-    --warn: #F2A81D; --warn-bg: #3A2A0C;
-    --info: #6BB4E8; --info-bg: #14293A;
-    --bad: #F0877D;  --bad-bg: #3B1613;
-    --cP: #F87171; --cR: #60A5FA; --cF: #FBBF24; --cf: #C084FC; --cv: #34D399;
-    --lcd-bg: #0A1015;
-    color-scheme: dark;
+    --pi-R: #60A5FA; --pi-F: #FBBF24; --pi-f: #C084FC;
+    --pi-sky: #0F1A21; --pi-skyHover: #12303F; --pi-skyAtm: #1B2630; --pi-ground: #26343E;
+    --pi-grid: #6A7C89; --pi-txt: #B3C2CC; --pi-halo: #0F1A21;
+    --pi-body: #DCE6EC; --pi-cg: #0F1A21; --pi-plane: #2B3A46; --pi-planeLine: #8CA0AF; --pi-planeLineHover: #38BDF8;
+    --pi-cushion: rgba(56,189,248,.5); --pi-ghost: rgba(220,230,236,.14); --pi-ghostLine: rgba(220,230,236,.40); --pi-cross: #F87171;
+    --pi-z1: #1E5A7A; --pi-z2: #25708F; --pi-z3: #33424E; --pi-zline: #F87171; --pi-ztxt: #DCE6EC;
+    --pi-stone: #94A3B8; --pi-handle: #F87171;
+    --pi-mline: #FBBF24; --pi-mtxt: #FDE68A; --pi-mbg: rgba(15,26,33,.92);
   }
 }
-
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
-  padding-block: 18px 40px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+/* Dans la scène « jeu », le dessin prend la palette d'arcade (valeurs lues par le script sur .stage) */
+.stage.arcade {
+  --pi-P: #F87171; --pi-v: #34D399; --pi-R: #60A5FA; --pi-F: #FBBF24; --pi-f: #C084FC;
+  --pi-sky: #0F172A; --pi-skyHover: #0F172A; --pi-skyAtm: #0F172A; --pi-ground: #1E293B;
+  --pi-grid: #64748B; --pi-txt: #94A3B8; --pi-halo: #0F172A;
+  --pi-body: #F8FAFC; --pi-cg: #0F172A; --pi-plane: #1E293B; --pi-planeLine: #64748B; --pi-planeLineHover: #38BDF8;
+  --pi-cushion: rgba(56,189,248,.5); --pi-ghost: rgba(255,255,255,.1); --pi-ghostLine: rgba(255,255,255,.3); --pi-cross: #F87171;
+  --pi-z1: #0369A1; --pi-z2: #0284C7; --pi-z3: #475569; --pi-zline: #F87171; --pi-ztxt: #FFFFFF;
+  --pi-stone: #F8FAFC; --pi-handle: #FBBF24;
+  --pi-mline: #FBBF24; --pi-mtxt: #FDE68A; --pi-mbg: rgba(15,23,42,.92);
 }
-.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-h1 { font: 600 clamp(28px, 6vw, 40px)/1.05 var(--font-head); margin: 0; letter-spacing: .01em; text-wrap: balance; }
-h2 { font: 600 20px/1.2 var(--font-head); margin: 0; letter-spacing: .02em; }
-p { margin: 0; }
-.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
-.sub { color: var(--muted); margin: 6px 0 0; max-width: 64ch; }
-.crumb a { color: var(--muted); text-decoration: none; font-size: 14px; }
-.crumb a:hover { color: var(--ink); text-decoration: underline; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-kbd { font: 500 12px var(--font-data); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; background: var(--bg); color: var(--ink); }
 
-/* notation vectorielle : une flèche au-dessus de la lettre */
-.vec { position: relative; display: inline-block; font-style: normal; }
-.vec::before { content: "→"; position: absolute; left: 50%; top: -.72em; transform: translateX(-50%); font-size: .7em; line-height: 1; font-family: var(--font-body); }
+.col { display: flex; flex-direction: column; gap: 16px; }
+/* main est un .wrap imbriqué : sa marge auto l'empêche de s'étirer, d'où width:100% ; min-width:0 évite que les onglets (défilement horizontal) élargissent la page */
+main.wrap { width: 100%; }
+main, .tabs, .stage, .score { min-width: 0; }
 p .vec, .lab .vec, .obs .vec, .lg .vec { margin-inline: .04em; }
 
-button { font: 600 15px var(--font-body); border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-button:hover:not(:disabled) { border-color: var(--muted); }
-button:disabled { opacity: .5; cursor: not-allowed; }
-button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-button.primary:hover:not(:disabled) { filter: brightness(1.08); }
-button svg { width: 18px; height: 18px; flex: none; }
-
-/* choix de la situation */
-.tabs { display: flex; gap: 4px; padding: 4px; background: var(--tabs-bg); border-radius: 10px; overflow-x: auto; }
-.tab { flex: 1 0 auto; white-space: nowrap; background: transparent; border-color: transparent; color: var(--muted); padding: 9px 14px; font-size: 14px; }
-.tab:hover:not(:disabled) { color: var(--ink); border-color: transparent; }
-.tab[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
-.tab.game[aria-pressed="true"] { background: #0F172A; color: #FBBF24; }
+/* onglet du jeu */
+.tab.game[aria-pressed="true"] { background: var(--ar-bg); color: var(--ar-gold); }
 
 /* scène */
-.stage { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.stage.arcade { background: #0F172A; border: 3px solid #1E293B; }
-.stagebar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-.stagebar button { padding: 6px 12px; font-size: 14px; background: var(--surface); }
-.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.sw .track { width: 32px; height: 18px; border-radius: 9px; background: var(--line); padding: 2px; display: block; transition: background .15s; }
-.sw .knob { display: block; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
-.sw[aria-checked="true"] { border-color: var(--accent); }
-.sw[aria-checked="true"] .track { background: var(--accent); }
-.sw[aria-checked="true"] .knob { transform: translateX(14px); }
-.pill { border-radius: 99px !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: .06em; }
-.pill[aria-pressed="true"] { background: var(--info-bg); color: var(--info); border-color: var(--info); }
-.cv { position: relative; }
-canvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 320; touch-action: manipulation; }
+.stage.arcade { background: var(--ar-bg); border: 3px solid var(--ar-bg2); }
+.cv { overflow: hidden; }                       /* le ciel vide est rogné par une marge négative posée par le script */
 canvas.measuring { cursor: crosshair; }
 .mhint { position: absolute; left: 10px; top: 8px; right: 10px; font: 500 13px var(--font-data); color: var(--warn); background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; pointer-events: none; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
-.lg { display: inline-flex; align-items: center; gap: 6px; }
-.lg i { width: 18px; height: 4px; border-radius: 2px; background: currentColor; display: inline-block; }
 .legend .note { flex-basis: 100%; font-size: 12px; }
+.stagebar button { padding: 6px 12px; font-size: 14px; background: var(--surface); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
-/* afficheurs */
-.readouts { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 10px; }
-@media (max-width: 640px) { .readouts { grid-template-columns: 1fr 1fr; } .readouts .wide { grid-column: 1 / -1; } }
-.lcd { background: var(--lcd-bg); border-radius: 8px; padding: 10px 12px 12px; border: 1px solid var(--line); min-width: 0; }
-.lcd .lab .vec { text-transform: none; }
-.lcd .lab { font: 500 11px/1.4 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--lcd-label); }
-.lcd .val { margin-top: 8px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.lcd .v { font: 600 clamp(26px, 6vw, 34px)/1 var(--font-data); color: var(--lcd-fg); font-variant-numeric: tabular-nums; }
-.lcd .u { font: 500 14px var(--font-data); color: var(--lcd-dim); }
+/* afficheurs : le socle fournit .lcd ; on ajoute seulement le bilan sur deux lignes */
 .lcd .bil { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; font: 500 15px/1.35 var(--font-data); color: var(--lcd-fg); }
 .lcd .bil span { color: var(--lcd-dim); font-size: 14px; }
+@media (max-width: 640px) { .readouts .wide { grid-column: 1 / -1; } }
 
-.panel { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 780px) { .panel { grid-template-columns: 1fr 1fr; align-items: stretch; } }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.card h2 { display: flex; align-items: center; gap: 8px; }
-.card h2 svg { width: 20px; height: 20px; color: var(--accent); }
-.card p.help { color: var(--muted); font-size: 14px; }
-.pushbtn { width: 100%; padding: 16px; font-size: 17px; background: #F2A81D; color: #3B2600; border-color: #D68F0A; user-select: none; -webkit-user-select: none; touch-action: none; }
-.pushbtn.on { background: #D68F0A; transform: scale(.985); }
+/* commandes */
+.pushbtn { width: 100%; padding: 16px; font-size: 17px; background: var(--pi-push-bg); color: var(--pi-push-ink); border-color: var(--pi-push-line); user-select: none; -webkit-user-select: none; touch-action: none; }
+.pushbtn.on { background: var(--pi-push-on); transform: scale(.985); }
 .pushbtn:disabled { background: var(--bg); color: var(--muted); border-color: var(--line); }
-.go { width: 100%; padding: 14px; font-size: 17px; background: #17734A; color: #fff; border-color: #17734A; }
-.go:disabled { background: var(--bg); color: var(--muted); border-color: var(--line); }
-.slider { display: grid; gap: 6px; }
-.slider label { font-weight: 600; display: flex; justify-content: space-between; }
-.slider label b { color: var(--accent); font-family: var(--font-data); }
-.slider input { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+#ctlIncline { display: flex; flex-direction: column; gap: 14px; }
 .chrono-actions { display: flex; flex-direction: column; gap: 8px; }
-.status { font-size: 14px; color: var(--muted); min-height: 1.5em; }
-.status.err { color: var(--bad); }
-
-.obs { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--surface); transition: background .2s, border-color .2s; }
-.obs h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .obs h2 svg { width: 20px; height: 20px; }
-.obs p { font-size: 17px; line-height: 1.7; }
-.obs[data-tone="ok"] { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
-.obs[data-tone="warn"] { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
-.obs[data-tone="info"] { background: var(--info-bg); border-color: var(--info); color: var(--info); }
-.obs[data-tone="bad"] { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
-
-details { color: var(--muted); font-size: 14px; }
-details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
-details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
 
 /* jeu d'arcade (toujours sur fond sombre) */
 .score { display: flex; gap: 10px; overflow-x: auto; align-items: stretch; padding: 4px; }
-.pcard { min-width: 120px; flex: 1; background: #1E293B; border: 2px solid #334155; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; color: #E2E8F0; transition: all .2s; }
-.pcard:not(.cur) { background: #182235; }
-.pcard.cur { opacity: 1; transform: scale(1.02); box-shadow: 0 0 14px rgba(255,255,255,.14); }
+.pcard { min-width: 120px; flex: 1; background: var(--ar-bg2); border: 2px solid var(--ar-line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; color: var(--ar-ink); transition: all .2s; }
+.pcard:not(.cur) { background: var(--ar-card); }
+.pcard.cur { transform: scale(1.02); box-shadow: 0 0 14px rgba(255,255,255,.14); }
 .pcard .nm { font: 600 12px var(--font-data); letter-spacing: .1em; text-transform: uppercase; }
-.pcard .sc { font: 600 30px/1.1 var(--font-data); color: #fff; }
+.pcard .sc { font: 600 30px/1.1 var(--font-data); color: var(--ar-white); }
 .pcard .st { display: flex; gap: 4px; margin-top: 6px; }
 .pcard .st i { width: 10px; height: 10px; border-radius: 50%; background: #CBD5E1; }
-.pcard .st i.used { background: #334155; }
-.score .newgame { align-self: center; background: #1E293B; color: #E2E8F0; border-color: #334155; font-size: 13px; padding: 8px 12px; }
-.overlay { position: absolute; inset: 0; background: rgba(15,23,42,.95); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; color: #E2E8F0; text-align: center; overflow: auto; }
-.overlay h2 { font-size: clamp(28px, 6vw, 44px); color: #FBBF24; letter-spacing: .08em; text-transform: uppercase; }
-.overlay .count { display: flex; gap: 12px; }
-.overlay .count button { width: 76px; height: 76px; flex-direction: column; gap: 0; background: #1E293B; color: #fff; border: 2px solid #334155; border-radius: 14px; font-size: 28px; font-family: var(--font-head); }
-.overlay .count button small { font: 500 10px var(--font-data); letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
-.overlay .count button:hover { background: #FBBF24; color: #451A03; border-color: #FBBF24; }
-.overlay .rules { max-width: 52ch; font-size: 14px; color: #94A3B8; background: rgba(30,41,59,.6); border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; }
-.overlay .rules b { color: #FBBF24; }
-.gpanel { background: #0F172A; border: 3px solid #1E293B; border-radius: 14px; padding: 16px; color: #E2E8F0; display: flex; justify-content: center; align-items: center; min-height: 130px; text-align: center; }
+.pcard .st i.used { background: var(--ar-line); }
+.score .newgame { align-self: center; background: var(--ar-bg2); color: var(--ar-ink); border-color: var(--ar-line); font-size: 13px; padding: 8px 12px; }
+.setup { background: var(--ar-bg); display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 24px 16px; color: var(--ar-ink); text-align: center; }
+.setup h2 { font-size: clamp(28px, 6vw, 44px); color: var(--ar-gold); letter-spacing: .08em; text-transform: uppercase; }
+.setup .count { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.setup .count button { width: 76px; height: 76px; flex-direction: column; gap: 0; background: var(--ar-bg2); color: var(--ar-white); border: 2px solid var(--ar-line); border-radius: 14px; font-size: 28px; font-family: var(--font-head); }
+.setup .count button small { font: 500 10px var(--font-data); letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+.setup .count button:hover { background: var(--ar-gold); color: #451A03; border-color: var(--ar-gold); }
+.setup .rules { max-width: 52ch; font-size: 14px; color: var(--ar-muted); background: rgba(30,41,59,.6); border: 1px solid var(--ar-line); border-radius: 10px; padding: 12px 14px; }
+.setup .rules b { color: var(--ar-gold); }
+.setup kbd { background: var(--ar-bg2); color: var(--ar-ink); border-color: var(--ar-line2); }
+.gpanel { background: var(--ar-bg); border: 3px solid var(--ar-bg2); border-radius: 14px; padding: 16px; color: var(--ar-ink); display: flex; justify-content: center; align-items: center; min-height: 130px; text-align: center; }
 .gpanel > div { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .gpanel .turn { font: 600 14px var(--font-data); letter-spacing: .1em; text-transform: uppercase; }
 .gpanel .pushbtn { max-width: 520px; font-size: 18px; text-transform: uppercase; letter-spacing: .04em; }
-.gpanel .pulse { font: 600 22px var(--font-head); letter-spacing: .1em; text-transform: uppercase; color: #94A3B8; }
+.gpanel .pulse { font: 600 22px var(--font-head); letter-spacing: .1em; text-transform: uppercase; color: var(--ar-muted); }
 .gpanel .big { font: 700 40px/1.1 var(--font-head); }
-.gpanel .gmsg { color: #FDBA74; font-size: 14px; min-height: 1.3em; }
-.gpanel button.next { background: #10B981; border-color: #10B981; color: #fff; font-size: 18px; padding: 12px 24px; }
-.gpanel button.alt { background: #334155; border-color: #475569; color: #fff; }
-.gpanel button.again { background: #6366F1; border-color: #6366F1; color: #fff; }
-.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.back-link { display: inline-block; }
+.gpanel .gmsg { color: var(--ar-orange); font-size: 14px; min-height: 1.3em; }
+.gpanel .row { justify-content: center; }
+.gpanel button.next { background: var(--ar-ok); border-color: var(--ar-ok); color: #052E1F; font-size: 18px; padding: 12px 24px; }
+.gpanel button.alt { background: var(--ar-line); border-color: var(--ar-line2); color: var(--ar-white); }
+.gpanel button.again { background: var(--ar-again); border-color: var(--ar-again); color: var(--ar-white); }
+.setup :focus-visible, .gpanel :focus-visible, .score :focus-visible { outline-color: var(--ar-gold); }
 </style>
 </head>
 <body>
+<a class="skip" href="#sim">Aller à la simulation</a>
 <div class="wrap">
   <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
 
   <header>
-    <p class="kicker">Mouvement et interactions · Seconde</p>
+    <p class="kicker" data-theme="mouvement">Mouvement et interactions · Seconde</p>
     <h1>Le principe d'inertie</h1>
     <p class="sub">Pousse un mobile, lâche un palet, laisse tomber un objet : observe les forces et la vitesse, puis enregistre une chronophotographie pour savoir quand les forces se compensent.</p>
   </header>
 
-  <div class="tabs" id="tabs" role="group" aria-label="Situation étudiée">
-    <button type="button" class="tab" data-mode="horizontal" data-space-ok>Horizontal</button>
-    <button type="button" class="tab" data-mode="incline" data-space-ok>Plan incliné</button>
-    <button type="button" class="tab" data-mode="vertical" data-space-ok>Chute libre</button>
-    <button type="button" class="tab" data-mode="curling" data-space-ok>Curling (TP)</button>
-    <button type="button" class="tab game" data-mode="game" data-space-ok>Curling (jeu)</button>
-  </div>
-
-  <div class="score" id="score" hidden></div>
-
-  <section class="stage" id="stage" aria-label="Simulation">
-    <div class="stagebar" id="stagebar">
-      <button type="button" id="btnReset">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        Relancer
-      </button>
-      <div class="tools">
-        <button type="button" class="sw" id="swHover" role="switch" aria-checked="true"><span class="track"><span class="knob"></span></span>Coussin d'air</button>
-        <button type="button" class="sw" id="swAtm" role="switch" aria-checked="false" hidden><span class="track"><span class="knob"></span></span>Atmosphère</button>
-        <button type="button" class="pill" id="tgForces" aria-pressed="true">Forces</button>
-        <button type="button" class="pill" id="tgVel" aria-pressed="true">Vitesse</button>
-      </div>
+  <main id="sim" class="wrap">
+    <div class="tabs" id="tabs" role="group" aria-label="Situation étudiée">
+      <button type="button" class="tab" data-mode="horizontal" data-space-ok>Horizontal</button>
+      <button type="button" class="tab" data-mode="incline" data-space-ok>Plan incliné</button>
+      <button type="button" class="tab" data-mode="vertical" data-space-ok>Chute libre</button>
+      <button type="button" class="tab" data-mode="curling" data-space-ok>Curling (TP)</button>
+      <button type="button" class="tab game" data-mode="game" data-space-ok>Curling (jeu)</button>
     </div>
-    <div class="cv">
-      <canvas id="cv" width="1000" height="320" role="img" aria-label="Scène de la simulation : le mobile, ses graduations en mètres et, si elles sont affichées, les flèches des forces et de la vitesse. La description de ce qui se passe est donnée dans le bloc Observation en direct."></canvas>
-      <div class="mhint" id="mHint" role="status" hidden></div>
-      <div class="overlay" id="setup" hidden>
+
+    <div class="score" id="score" hidden></div>
+
+    <section class="stage" id="stage" aria-label="Simulation">
+      <div class="stagebar" id="stagebar">
+        <button type="button" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Relancer
+        </button>
+        <div class="tools">
+          <button type="button" class="sw" id="swHover" role="switch" aria-checked="true"><span class="track"><span class="knob"></span></span>Coussin d'air</button>
+          <button type="button" class="sw" id="swAtm" role="switch" aria-checked="false" hidden><span class="track"><span class="knob"></span></span>Atmosphère</button>
+          <button type="button" class="pill" id="tgForces" aria-pressed="true">Forces</button>
+          <button type="button" class="pill" id="tgVel" aria-pressed="true">Vitesse</button>
+        </div>
+      </div>
+      <div class="setup" id="setup" hidden>
         <h2>Curling arcade</h2>
         <p>Combien de joueurs pour cette partie ?</p>
         <div class="count" id="count">
@@ -229,111 +171,119 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
           <p style="margin-top:6px"><b>Commandes :</b> maintiens <kbd>Espace</kbd> (ou le bouton) pour pousser la pierre dans la zone 1, relâche pour la lancer. Plus tu pousses longtemps, plus elle ira vite.</p>
         </div>
       </div>
-    </div>
-    <div class="legend" id="legend"></div>
-  </section>
+      <div class="cv" id="cvbox">
+        <canvas id="cv" role="img" aria-label="Scène de la simulation : le mobile, ses graduations en mètres et, si elles sont affichées, les flèches des forces et de la vitesse. La description de ce qui se passe est donnée dans le bloc Observation en direct."></canvas>
+        <div class="mhint" id="mHint" role="status" hidden></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
 
-  <section class="gpanel" id="gpanel" hidden aria-live="polite">
-    <div id="gReady" hidden>
-      <p class="turn" id="gTurn"></p>
-      <button type="button" class="pushbtn" id="gPush" data-space-ok>Maintenir Espace ou cliquer</button>
-      <p class="gmsg" id="gMsg"></p>
-    </div>
-    <div id="gSliding" hidden><p class="pulse">La pierre glisse…</p></div>
-    <div id="gScored" hidden>
-      <p class="big" id="gPts"></p>
-      <p class="turn" id="gPtsTxt"></p>
-      <button type="button" class="next" id="gNext"></button>
-    </div>
-    <div id="gOver" hidden>
-      <p class="turn">Partie terminée</p>
-      <p class="big" id="gWin"></p>
-      <p id="gWinPts"></p>
-      <div class="row">
-        <button type="button" class="again" id="gAgain"></button>
-        <button type="button" class="alt" id="gChange">Modifier les joueurs</button>
+    <section class="gpanel" id="gpanel" hidden aria-live="polite">
+      <div id="gReady" hidden>
+        <p class="turn" id="gTurn"></p>
+        <button type="button" class="pushbtn" id="gPush" data-space-ok>Maintenir Espace ou cliquer</button>
+        <p class="gmsg" id="gMsg"></p>
       </div>
-    </div>
-  </section>
-
-  <div id="sci" style="display:flex;flex-direction:column;gap:16px">
-    <section class="readouts" aria-label="Mesures en direct">
-      <div class="lcd">
-        <div class="lab">Vitesse <span class="vec">v</span></div>
-        <div class="val"><span class="v" id="rV">0,00</span><span class="u">m/s</span></div>
+      <div id="gSliding" hidden><p class="pulse">La pierre glisse…</p></div>
+      <div id="gScored" hidden>
+        <p class="big" id="gPts"></p>
+        <p class="turn" id="gPtsTxt"></p>
+        <button type="button" class="next" id="gNext"></button>
       </div>
-      <div class="lcd">
-        <div class="lab">Somme des forces Σ<span class="vec">F</span> (valeur)</div>
-        <div class="val"><span class="v" id="rF">0</span><span class="u" id="rFu">N</span></div>
-      </div>
-      <div class="lcd wide">
-        <div class="lab">Bilan</div>
-        <div class="bil"><b id="rB1">Forces compensées</b><span id="rB2">immobile</span></div>
+      <div id="gOver" hidden>
+        <p class="turn">Partie terminée</p>
+        <p class="big" id="gWin"></p>
+        <p id="gWinPts"></p>
+        <div class="row">
+          <button type="button" class="again" id="gAgain"></button>
+          <button type="button" class="alt" id="gChange">Modifier les joueurs</button>
+        </div>
       </div>
     </section>
 
-    <div class="panel">
-      <section class="card" aria-label="Commandes">
-        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V3a2 2 0 0 0-4 0v9"/><path d="m6 13.5-2.9-2.9a2 2 0 0 0-2.8 2.8L8.6 21c.5.5 1.2.8 2 .8h3.5a5 5 0 0 0 5-5v-6.2a2 2 0 0 0-2-2h-3z"/></svg>Commandes</h2>
-        <div id="ctlPush" hidden>
-          <button type="button" class="pushbtn" id="btnPush" data-space-ok>Maintenir Espace ou cliquer</button>
-          <p class="help" id="pushHelp" style="margin-top:10px"></p>
+    <div id="sci" class="col">
+      <section class="readouts" aria-label="Mesures en direct">
+        <div class="lcd" role="group" aria-label="Vitesse v">
+          <div class="lab" aria-hidden="true">Vitesse <span class="vec">v</span></div>
+          <div class="val"><span class="v" id="rV">0,00</span><span class="u">m/s</span></div>
         </div>
-        <div id="ctlIncline" hidden style="display:flex;flex-direction:column;gap:14px">
-          <div class="slider">
-            <label for="angle"><span>Angle d'inclinaison <var style="font-style:normal">α</var></span><b id="angleVal">25°</b></label>
-            <input type="range" id="angle" min="10" max="60" step="1" value="25">
+        <div class="lcd" role="group" aria-label="Somme des forces ΣF (valeur)">
+          <div class="lab" aria-hidden="true">Somme des forces Σ<span class="vec">F</span> (valeur)</div>
+          <div class="val"><span class="v" id="rF">0</span><span class="u" id="rFu">N</span></div>
+        </div>
+        <div class="lcd wide" role="group" aria-label="Bilan">
+          <div class="lab" aria-hidden="true">Bilan</div>
+          <div class="bil"><b id="rB1">Forces compensées</b><span id="rB2">immobile</span></div>
+        </div>
+      </section>
+
+      <div class="panel">
+        <section class="card" aria-label="Commandes">
+          <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V3a2 2 0 0 0-4 0v9"/><path d="m6 13.5-2.9-2.9a2 2 0 0 0-2.8 2.8L8.6 21c.5.5 1.2.8 2 .8h3.5a5 5 0 0 0 5-5v-6.2a2 2 0 0 0-2-2h-3z"/></svg>Commandes</h2>
+          <div id="ctlPush" hidden>
+            <button type="button" class="pushbtn" id="btnPush" data-space-ok>Maintenir Espace ou cliquer</button>
+            <p class="help" id="pushHelp" style="margin-top:10px"></p>
+          </div>
+          <div id="ctlIncline" hidden>
+            <div id="angleHost"></div>
             <p class="help">Avec le coussin d'air désactivé, le palet ne glisse que si l'angle est assez grand.</p>
+            <button type="button" class="primary" id="btnDrop">Lâcher le palet</button>
           </div>
-          <button type="button" class="go" id="btnDrop">Lâcher le palet</button>
-        </div>
-        <div id="ctlVertical" hidden>
-          <button type="button" class="go" id="btnFall">Lâcher l'objet</button>
-          <p class="help" style="margin-top:10px">Active l'atmosphère pour comparer la chute avec et sans frottements de l'air.</p>
-        </div>
+          <div id="ctlVertical" hidden>
+            <button type="button" class="primary" id="btnFall">Lâcher l'objet</button>
+            <p class="help" style="margin-top:10px">Active l'atmosphère pour comparer la chute avec et sans frottements de l'air.</p>
+          </div>
+        </section>
+
+        <section class="card" aria-label="Chronophotographie">
+          <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Chronophotographie</h2>
+          <p class="help">Enregistre les positions successives du centre de masse, une toutes les <b id="dtTxt">200 ms</b>. L'enregistrement démarre dès que le mobile se met en mouvement.</p>
+          <div class="chrono-actions">
+            <button type="button" class="primary" id="btnChrono">Démarrer l'enregistrement</button>
+            <div id="chronoMore" hidden class="chrono-actions">
+              <button type="button" id="btnMeasure">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 15.3l-8.4 8.4c-.8.8-2.1.8-2.8 0l-7.1-7.1c-.8-.8-.8-2.1 0-2.8l8.4-8.4c.8-.8 2.1-.8 2.8 0l7.1 7.1c.8.8.8 2.1 0 2.8z"/><path d="M16 12l2 2"/><path d="M13 15l2 2"/><path d="M10 18l2 2"/></svg>
+                <span id="btnMeasureTxt">Mesurer sur l'écran</span>
+              </button>
+              <button type="button" id="btnPrint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Générer le document élève
+              </button>
+            </div>
+            <p class="status" id="chronoStatus" role="status"></p>
+          </div>
+        </section>
+      </div>
+
+      <section class="obs" id="obs" aria-live="polite">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Observation en direct</h2>
+        <p id="obsText" data-obs-text></p>
       </section>
 
-      <section class="card" aria-label="Chronophotographie">
-        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Chronophotographie</h2>
-        <p class="help">Enregistre les positions successives du centre de masse, une toutes les <b id="dtTxt">200 ms</b>. L'enregistrement démarre dès que le mobile se met en mouvement.</p>
-        <div class="chrono-actions">
-          <button type="button" class="primary" id="btnChrono">Démarrer l'enregistrement</button>
-          <div id="chronoMore" hidden class="chrono-actions">
-            <button type="button" id="btnMeasure">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 15.3l-8.4 8.4c-.8.8-2.1.8-2.8 0l-7.1-7.1c-.8-.8-.8-2.1 0-2.8l8.4-8.4c.8-.8 2.1-.8 2.8 0l7.1 7.1c.8.8.8 2.1 0 2.8z"/><path d="M16 12l2 2"/><path d="M13 15l2 2"/><path d="M10 18l2 2"/></svg>
-              <span id="btnMeasureTxt">Mesurer sur l'écran</span>
-            </button>
-            <button type="button" id="btnPrint">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Générer le document élève
-            </button>
-          </div>
-          <p class="status" id="chronoStatus" role="status"></p>
-        </div>
-      </section>
+      <details>
+        <summary>Mode d'emploi</summary>
+        <ul>
+          <li>Barre <kbd>Espace</kbd> ou bouton : pousse le mobile tant que tu maintiens appuyé.</li>
+          <li>Chronophotographie : démarre l'enregistrement, mets le mobile en mouvement, puis utilise « Mesurer sur l'écran » (clique sur deux croix rouges) ou génère le document élève à imprimer.</li>
+          <li>Les flèches de forces sont tracées à la même échelle entre elles ; la flèche de vitesse a sa propre échelle.</li>
+        </ul>
+      </details>
     </div>
+  </main>
 
-    <section class="obs" id="obs" data-tone="neutral" aria-live="polite">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Observation en direct</h2>
-      <p id="obsText"></p>
-    </section>
-
-    <details>
-      <summary>Mode d'emploi</summary>
-      <ul>
-        <li>Barre <kbd>Espace</kbd> ou bouton : pousse le mobile tant que tu maintiens appuyé.</li>
-        <li>Chronophotographie : démarre l'enregistrement, mets le mobile en mouvement, puis utilise « Mesurer sur l'écran » (clique sur deux croix rouges) ou génère le document élève à imprimer.</li>
-        <li>Les flèches de forces sont tracées à la même échelle entre elles ; la flèche de vitesse a sa propre échelle.</li>
-      </ul>
-    </details>
-  </div>
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
 </div>
 
+<script src="../shared/simulabo.js"></script>
 <script>
 (function () {
   "use strict";
 
   /* ------------------------------------------------------------------ constantes */
+  var SB = Simulabo;
   var W = 1000, H = 320, GROUND = 260, SC = 100;      // canvas logique, sol, pixels par mètre
   var GRAV = 9.81, DT = 1 / 240, CHRONO_MAX = 40;
   var ZONE1 = 250, ZONE3 = 600;                        // curling (px)
@@ -347,41 +297,37 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
     curling:    { m: 20, push: 40, fz3: 27,  dt: 0.2,  n: 48, q0: 0.5 }
   };
   var FSCALE = { horizontal: 0.5, incline: 0.5, vertical: 0.5, curling: 0.26 }; // px par newton
-  var PCOL = ["#60A5FA", "#F87171", "#34D399", "#FBBF24"];
-
-  var PAL = {
-    light: { sky: "#F4F7F9", skyHover: "#E3F1FB", skyAtm: "#E3E8ED", ground: "#D1D6DC", grid: "#8E9AA6", txt: "#4B5663", halo: "#F4F7F9",
-      body: "#1E293B", cg: "#FFFFFF", plane: "#CBD5E1", planeLine: "#64748B", planeLineHover: "#38BDF8", cushion: "rgba(56,189,248,.55)",
-      ghost: "rgba(30,41,59,.14)", ghostLine: "rgba(30,41,59,.40)", cross: "#DC2626",
-      P: "#C62828", R: "#1D4ED8", F: "#B45309", f: "#7E22CE", v: "#047857",
-      z1: "#BAE6FD", z2: "#E0F2FE", z3: "#F1F5F9", zline: "#EF4444", ztxt: "#475569", stone: "#64748B", handle: "#DC2626",
-      mline: "#D97706", mtxt: "#92400E", mbg: "rgba(255,255,255,.92)" },
-    dark: { sky: "#0F1A21", skyHover: "#12303F", skyAtm: "#1B2630", ground: "#26343E", grid: "#6A7C89", txt: "#B3C2CC", halo: "#0F1A21",
-      body: "#DCE6EC", cg: "#0F1A21", plane: "#2B3A46", planeLine: "#8CA0AF", planeLineHover: "#38BDF8", cushion: "rgba(56,189,248,.5)",
-      ghost: "rgba(220,230,236,.14)", ghostLine: "rgba(220,230,236,.40)", cross: "#F87171",
-      P: "#F87171", R: "#60A5FA", F: "#FBBF24", f: "#C084FC", v: "#34D399",
-      z1: "#1E5A7A", z2: "#25708F", z3: "#33424E", zline: "#F87171", ztxt: "#DCE6EC", stone: "#94A3B8", handle: "#F87171",
-      mline: "#FBBF24", mtxt: "#FDE68A", mbg: "rgba(15,26,33,.92)" },
-    arcade: { sky: "#0F172A", skyHover: "#0F172A", skyAtm: "#0F172A", ground: "#1E293B", grid: "#64748B", txt: "#94A3B8", halo: "#0F172A",
-      body: "#F8FAFC", cg: "#0F172A", plane: "#1E293B", planeLine: "#64748B", planeLineHover: "#38BDF8", cushion: "rgba(56,189,248,.5)",
-      ghost: "rgba(255,255,255,.1)", ghostLine: "rgba(255,255,255,.3)", cross: "#F87171",
-      P: "#F87171", R: "#60A5FA", F: "#FBBF24", f: "#C084FC", v: "#34D399",
-      z1: "#0369A1", z2: "#0284C7", z3: "#475569", zline: "#F87171", ztxt: "#FFFFFF", stone: "#F8FAFC", handle: "#FBBF24",
-      mline: "#FBBF24", mtxt: "#FDE68A", mbg: "rgba(15,23,42,.92)" },
-    print: { sky: "#FFFFFF", skyHover: "#FFFFFF", skyAtm: "#FFFFFF", ground: "#E5E7EB", grid: "#4B5563", txt: "#1F2937", halo: "#FFFFFF",
-      body: "#1E293B", cg: "#FFFFFF", plane: "#E5E7EB", planeLine: "#111827", planeLineHover: "#111827", cushion: "rgba(0,0,0,0)",
-      ghost: "rgba(15,23,42,.07)", ghostLine: "#334155", cross: "#DC2626",
-      P: "#000", R: "#000", F: "#000", f: "#000", v: "#000",
-      z1: "#E2E8F0", z2: "#F1F5F9", z3: "#F8FAFC", zline: "#EF4444", ztxt: "#334155", stone: "#64748B", handle: "#DC2626",
-      mline: "#000", mtxt: "#000", mbg: "#fff" }
-  };
+  /* Palette de l'écran : lue dans les variables CSS --pi-* (clair, sombre, jeu). Mise en cache,
+     relue quand le thème ou le mode change. La feuille imprimée est faite pour le papier : couleurs fixes. */
+  var PAL_KEYS = ["sky", "skyHover", "skyAtm", "ground", "grid", "txt", "halo", "body", "cg", "plane", "planeLine", "planeLineHover",
+    "cushion", "ghost", "ghostLine", "cross", "P", "R", "F", "f", "v", "z1", "z2", "z3", "zline", "ztxt", "stone", "handle",
+    "mline", "mtxt", "mbg", "t1", "t2", "t3"];
+  var PRINT = { sky: "#FFFFFF", skyHover: "#FFFFFF", skyAtm: "#FFFFFF", ground: "#E5E7EB", grid: "#4B5563", txt: "#1F2937", halo: "#FFFFFF",
+    body: "#1E293B", cg: "#FFFFFF", plane: "#E5E7EB", planeLine: "#111827", planeLineHover: "#111827", cushion: "rgba(0,0,0,0)",
+    ghost: "rgba(15,23,42,.07)", ghostLine: "#334155", cross: "#DC2626",
+    P: "#000", R: "#000", F: "#000", f: "#000", v: "#000",
+    z1: "#E2E8F0", z2: "#F1F5F9", z3: "#F8FAFC", zline: "#EF4444", ztxt: "#334155", stone: "#64748B", handle: "#DC2626",
+    mline: "#000", mtxt: "#000", mbg: "#fff", t1: "#2563EB", t2: "#FFFFFF", t3: "#DC2626", pcol: [] };
+  var palKey = "", palCache = null;
+  function readPalette() {
+    var cs = getComputedStyle($("stage")), o = {};
+    PAL_KEYS.forEach(function (k) { o[k] = cs.getPropertyValue("--pi-" + k).trim(); });
+    o.pcol = [1, 2, 3, 4].map(function (n) { return cs.getPropertyValue("--ar-p" + n).trim(); });
+    return o;
+  }
+  function palette() {
+    var key = S.mode === "game" ? "jeu" : (dark.matches ? "sombre" : "clair");
+    if (key !== palKey) { palKey = key; palCache = readPalette(); }
+    return palCache;
+  }
+  function PC(i) { return "var(--ar-p" + (i + 1) + ")"; }   // couleur du joueur i (style en ligne)
 
   /* ------------------------------------------------------------------ utilitaires */
   function $(id) { return document.getElementById(id); }
-  function fmt(x, d) { var n = +(+x).toFixed(d); return n.toFixed(d).replace(".", ","); }
+  var fmt = SB.fmt;
   function V(t) { return '<span class="vec">' + t + "</span>"; }
   var ZERO = V("0"), SIGMAF = "Σ" + V("F");
-  var FONT = '"IBM Plex Sans", system-ui, sans-serif';
+  var FONT = SB.cssVar("--font-body") || "system-ui, sans-serif";
   var TS = 1;   // agrandissement du texte du canvas sur écran étroit
   function fnt(w, px) { return w + " " + Math.round(px * TS) + "px " + FONT; }
 
@@ -396,7 +342,7 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   var MEAS = { active: false, pts: [], text: "" };
   var GM = { phase: "setup", n: 1, cur: 0, scores: [0], stones: [0], status: "ready", pts: null, msg: "" };
 
-  var cv = $("cv"), ctx = cv.getContext("2d");
+  var cv = $("cv"), scene;
   var dark = window.matchMedia("(prefers-color-scheme: dark)");
 
   /* ------------------------------------------------------------------ géométrie */
@@ -589,9 +535,9 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   }
   function syncGame() {
     var setup = S.mode === "game" && GM.phase === "setup";
-    $("setup").hidden = !setup;
+    $("setup").hidden = !setup; $("cvbox").hidden = setup;   // le choix des joueurs remplace la scène (et non plus un calque posé dessus)
     $("score").hidden = !(S.mode === "game" && GM.phase === "playing");
-    $("gpanel").hidden = S.mode !== "game";
+    $("gpanel").hidden = S.mode !== "game" || GM.phase === "setup";   // pas de cadre vide pendant le choix des joueurs
     $("gReady").hidden = !(GM.phase === "playing" && GM.status === "ready");
     $("gSliding").hidden = GM.status !== "sliding" || GM.phase !== "playing";
     $("gScored").hidden = GM.status !== "scored" || GM.phase !== "playing";
@@ -603,20 +549,20 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
       var cur = i === GM.cur && GM.status !== "gameover";
       var dots = "";
       for (var j = 0; j < 5; j++) dots += '<i class="' + (j < 5 - GM.stones[i] ? "" : "used") + '"></i>';
-      html += '<div class="pcard' + (cur ? " cur" : "") + '" style="' + (cur ? "border-color:" + PCOL[i] : "") + '">' +
-        '<span class="nm" style="color:' + (cur ? PCOL[i] : "#94A3B8") + '">Joueur ' + (i + 1) + '</span>' +
+      html += '<div class="pcard' + (cur ? " cur" : "") + '" style="' + (cur ? "border-color:" + PC(i) : "") + '">' +
+        '<span class="nm" style="color:' + (cur ? PC(i) : "var(--ar-muted)") + '">Joueur ' + (i + 1) + '</span>' +
         '<span class="sc">' + ("00" + sc).slice(-3) + '</span><span class="st" aria-label="' + (5 - GM.stones[i]) + ' pierres restantes">' + dots + '</span></div>';
     });
     html += '<button type="button" class="newgame" id="btnNewGame">Nouvelle partie</button>';
     $("score").innerHTML = html;
     $("btnNewGame").addEventListener("click", function () { GM.phase = "setup"; syncGame(); resetStone(); });
 
-    var t = $("gTurn"); t.textContent = "Au tour du joueur " + (GM.cur + 1); t.style.color = PCOL[GM.cur];
+    var t = $("gTurn"); t.textContent = "Au tour du joueur " + (GM.cur + 1); t.style.color = PC(GM.cur);
     $("gMsg").textContent = GM.msg || "";
     if (GM.status === "scored") {
       var p = GM.pts, g = $("gPts");
       g.textContent = p > 0 ? "+" + p + " pts" : "0 pt";
-      g.style.color = p === 100 ? "#FBBF24" : (p > 0 ? "#34D399" : "#F43F5E");
+      g.style.color = p === 100 ? "var(--ar-gold)" : (p > 0 ? "var(--ar-green)" : "var(--ar-red)");
       $("gPtsTxt").textContent = p === 100 ? "En plein dans le mille !" : (p > 0 ? "Bien joué !" : "Hors de la cible…");
       $("gNext").textContent = GM.n > 1 ? "Au joueur " + ((GM.cur + 1) % GM.n + 1) : "Pierre suivante";
     }
@@ -624,8 +570,8 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
       var max = Math.max.apply(null, GM.scores), win = [];
       GM.scores.forEach(function (s, i) { if (s === max) win.push(i + 1); });
       var w = $("gWin");
-      if (win.length === 1) { w.textContent = "Joueur " + win[0] + " gagne !"; w.style.color = PCOL[win[0] - 1]; }
-      else { w.textContent = "Égalité : joueurs " + win.join(" et "); w.style.color = "#fff"; }
+      if (win.length === 1) { w.textContent = "Joueur " + win[0] + " gagne !"; w.style.color = PC(win[0] - 1); }
+      else { w.textContent = "Égalité : joueurs " + win.join(" et "); w.style.color = "var(--ar-white)"; }
       $("gWinPts").textContent = "avec " + max + " point" + (max > 1 ? "s" : "");
       $("gAgain").textContent = "Rejouer (" + GM.n + (GM.n > 1 ? " joueurs" : " joueur") + ")";
     }
@@ -729,9 +675,9 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
       c.fillStyle = pal.z2; c.fillRect(ZONE1, GROUND, ZONE3 - ZONE1, H - GROUND);
       c.fillStyle = pal.z3; c.fillRect(ZONE3, GROUND, W - ZONE3, H - GROUND);
       var th = arcade ? H - GROUND : 22;     // la cible ne masque pas les graduations
-      c.fillStyle = "#2563EB"; c.fillRect(800, GROUND, 100, th);
-      c.fillStyle = "#FFFFFF"; c.fillRect(815, GROUND, 70, th);
-      c.fillStyle = "#DC2626"; c.fillRect(835, GROUND, 30, th);
+      c.fillStyle = pal.t1; c.fillRect(800, GROUND, 100, th);
+      c.fillStyle = pal.t2; c.fillRect(815, GROUND, 70, th);
+      c.fillStyle = pal.t3; c.fillRect(835, GROUND, 30, th);
       c.fillStyle = pal.zline; c.fillRect(ZONE1 - 2, GROUND, 4, H - GROUND); c.fillRect(ZONE3 - 2, GROUND, 4, H - GROUND);
       c.font = fnt(700, 14); c.fillStyle = pal.ztxt;
       var zy = arcade ? GROUND + 36 : GROUND + 53;
@@ -807,22 +753,18 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
     shape(c, p, function () { c.fillStyle = curl ? pal.stone : pal.body; c.fill(); });
     var cgCol = pal.cg;
     if (curl) {
-      c.fillStyle = arcade ? PCOL[GM.cur] : pal.handle; rr(c, p.cx - 10, GROUND - 28, 20, 8, 3); c.fill();
-      if (arcade) cgCol = PCOL[GM.cur];
+      c.fillStyle = arcade ? pal.pcol[GM.cur] : pal.handle; rr(c, p.cx - 10, GROUND - 28, 20, 8, 3); c.fill();
+      if (arcade) cgCol = pal.pcol[GM.cur];
     }
     c.fillStyle = cgCol; c.beginPath(); c.arc(p.cx, p.cy, 4, 0, 2 * Math.PI); c.fill();
     if (!arcade) drawVectors(c, pal, p);
   }
 
-  function palette() { return S.mode === "game" ? PAL.arcade : (dark.matches ? PAL.dark : PAL.light); }
-  function render() {
-    var dpr = Math.min(window.devicePixelRatio || 1, 2), vt = VT[S.kind], vh = H - vt;
+  function draw(c) {
     TS = Math.max(1, Math.min(2, 720 / Math.max(cv.clientWidth, 320)));
-    var cw = Math.round(W * dpr), ch = Math.round(vh * dpr);
-    if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; cv.style.aspectRatio = W + " / " + vh; }
-    ctx.setTransform(cw / W, 0, 0, ch / vh, 0, -vt * ch / vh);
-    drawScene(ctx, palette(), null);
+    drawScene(c, palette(), null);
   }
+  function render() { scene.redraw(); }
 
   /* ------------------------------------------------------------------ messages */
   function observation() {
@@ -873,21 +815,22 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   function setAttr(id, a, v) { var k = id + "@" + a; if (cache[k] !== v) { cache[k] = v; $(id).setAttribute(a, v); } }
 
   var LEGEND = {
-    horizontal: [["P", "Poids", "cP"], ["R", "Réaction du support", "cR"], ["F", "Force de poussée", "cF"], ["f", "Frottements", "cf"], ["v", "Vitesse", "cv"]],
-    curling:    [["P", "Poids", "cP"], ["R", "Réaction de la glace", "cR"], ["F", "Force de poussée", "cF"], ["f", "Frottements", "cf"], ["v", "Vitesse", "cv"]],
-    incline:    [["P", "Poids", "cP"], ["R", "Réaction du plan", "cR"], ["F", "Force de maintien", "cF"], ["f", "Frottements", "cf"], ["v", "Vitesse", "cv"]],
-    vertical:   [["P", "Poids", "cP"], ["F", "Force de maintien", "cF"], ["R", "Réaction du sol", "cR"], ["f", "Frottements de l'air", "cf"], ["v", "Vitesse", "cv"]]
+    horizontal: [["P", "Poids", "P"], ["R", "Réaction du support", "R"], ["F", "Force de poussée", "F"], ["f", "Frottements", "f"], ["v", "Vitesse", "v"]],
+    curling:    [["P", "Poids", "P"], ["R", "Réaction de la glace", "R"], ["F", "Force de poussée", "F"], ["f", "Frottements", "f"], ["v", "Vitesse", "v"]],
+    incline:    [["P", "Poids", "P"], ["R", "Réaction du plan", "R"], ["F", "Force de maintien", "F"], ["f", "Frottements", "f"], ["v", "Vitesse", "v"]],
+    vertical:   [["P", "Poids", "P"], ["F", "Force de maintien", "F"], ["R", "Réaction du sol", "R"], ["f", "Frottements de l'air", "f"], ["v", "Vitesse", "v"]]
   };
   function buildLegend() {
     var h = "";
-    LEGEND[S.kind].forEach(function (l) { h += '<span class="lg" style="color:var(--' + l[2] + ')"><i></i><span style="color:var(--ink)">' + V(l[0]) + " " + l[1] + "</span></span>"; });
+    LEGEND[S.kind].forEach(function (l) { h += '<span class="lg" style="color:var(--pi-' + l[2] + ')"><i></i><span style="color:var(--ink)">' + V(l[0]) + " " + l[1] + "</span></span>"; });
     h += '<span class="note">Les flèches de forces sont à la même échelle entre elles ; la flèche de vitesse a sa propre échelle.</span>';
     $("legend").innerHTML = h;
   }
 
   function applyModeUI() {
     var m = S.mode, k = S.kind, game = m === "game";
-    document.querySelectorAll(".tab").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-mode") === m ? "true" : "false"); });
+    tabsCtl.select(m, true);
+    cv.style.marginTop = -(VT[k] / W * 100) + "%";   // rogne le ciel vide (pourcentage de la largeur)
     $("stage").classList.toggle("arcade", game);
     $("stagebar").hidden = game; $("legend").hidden = game;
     $("sci").hidden = game;
@@ -947,8 +890,10 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
 
     // observation
     var o = observation();
-    if (cache.obsH !== o.html) { cache.obsH = o.html; $("obsText").innerHTML = o.html; }
-    setAttr("obs", "data-tone", o.tone);
+    if (cache.obsH !== o.html || cache.obsT !== o.tone) {   // on ne réécrit la zone annoncée que si le message change
+      cache.obsH = o.html; cache.obsT = o.tone;
+      SB.observe("#obs", o.tone === "neutral" ? "" : o.tone, o.html);
+    }
   }
 
   /* ------------------------------------------------------------------ document élève */
@@ -956,7 +901,7 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
     var k = S.kind, M = MODES[k];
     var vt = VT[k], off = document.createElement("canvas"); off.width = W * 2; off.height = (H - vt) * 2;
     var c = off.getContext("2d"); c.setTransform(2, 0, 0, 2, 0, -vt * 2);
-    drawScene(c, PAL.print, { clean: true });
+    drawScene(c, PRINT, { clean: true });
     var url = off.toDataURL("image/png");
     var typeText = { horizontal: "Mouvement horizontal", incline: "Descente sur plan incliné", vertical: "Chute verticale", curling: "Mouvement d'une pierre de curling (trois zones : poussée, glace balayée, glace rugueuse)" }[k];
     var scaleText = k === "vertical" ? "L'axe vertical est gradué en mètres (m), l'origine est en haut de l'image."
@@ -996,15 +941,15 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   }
 
   /* ------------------------------------------------------------------ événements */
-  document.querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); }); });
+  var tabsCtl = SB.tabs("#tabs", setMode, "horizontal");
   $("btnReset").addEventListener("click", function () { resetState(); });
-  $("swHover").addEventListener("click", function () { S.hover = !S.hover; $("swHover").setAttribute("aria-checked", String(S.hover)); });
-  $("swAtm").addEventListener("click", function () { S.atm = !S.atm; $("swAtm").setAttribute("aria-checked", String(S.atm)); });
+  // les interrupteurs .sw sont basculés par le socle, qui émet l'événement « switch »
+  $("swHover").addEventListener("switch", function (e) { S.hover = e.detail.checked; });
+  $("swAtm").addEventListener("switch", function (e) { S.atm = e.detail.checked; });
   $("tgForces").addEventListener("click", function () { S.showF = !S.showF; $("tgForces").setAttribute("aria-pressed", String(S.showF)); });
   $("tgVel").addEventListener("click", function () { S.showV = !S.showV; $("tgVel").setAttribute("aria-pressed", String(S.showV)); });
-  $("angle").addEventListener("input", function () {
-    S.angle = parseInt($("angle").value, 10); $("angleVal").textContent = S.angle + "°"; resetState();
-  });
+  SB.slider("#angleHost", { label: "Angle d'inclinaison α", unit: "°", min: 10, max: 60, step: 1, value: S.angle, digits: 0,
+    onInput: function (v) { S.angle = Math.round(v); resetState(); } });
   $("btnDrop").addEventListener("click", function () { S.released = true; });
   $("btnFall").addEventListener("click", function () { S.released = true; });
   bindPush($("btnPush")); bindPush($("gPush"));
@@ -1019,7 +964,7 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   $("btnPrint").addEventListener("click", printSheet);
   cv.addEventListener("click", function (e) {
     if (!MEAS.active) return;
-    var r = cv.getBoundingClientRect(), pt = { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * (H - VT[S.kind]) / r.height + VT[S.kind] };
+    var pt = scene.toLocal(e);
     var best = null, bd = 18;
     C.points.forEach(function (q) { var p = place(q), d = Math.hypot(p.cx - pt.x, p.cy - pt.y); if (d < bd) { bd = d; best = { x: p.cx, y: p.cy }; } });
     if (best) pt = best;
@@ -1033,15 +978,14 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   $("gChange").addEventListener("click", function () { GM.phase = "setup"; resetStone(); syncGame(); });
 
   /* ------------------------------------------------------------------ boucle */
-  var last = performance.now(), acc = 0;
-  function frame(now) {
-    var dt = Math.min((now - last) / 1000, 0.1); last = now;
+  scene = SB.canvas(cv, { width: W, height: H, draw: draw });
+  var acc = 0;
+  var loop = SB.loop(function (dt) {
     if (!MEAS.active) { acc += dt; while (acc >= DT) { step(); acc -= DT; } } else acc = 0;
     render(); updateUI();
-    requestAnimationFrame(frame);
-  }
+  });
   applyModeUI();
-  requestAnimationFrame(frame);
+  loop.start();
 })();
 </script>
 </body>
