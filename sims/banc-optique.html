@@ -1,313 +1,214 @@
-<!doctype html><html lang="fr"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Banc d'optique photovoltaïque</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="../shared/fonts.css">
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Banc d'optique photovoltaïque · Simulabo PhCh</title>
+<meta name="description" content="Règle la distance et l'angle d'incidence d'une cellule photovoltaïque, lis la puissance reçue et complète un tableau de mesures.">
+<link rel="stylesheet" href="../shared/simulabo.css">
 <style>
-/* Layout: un banc d'optique sombre en haut (source à gauche, cellule mobile sur le rail),
-   puis réglages et afficheurs côte à côte, puis le tableau de mesures. */
+/* Couleurs propres à cette simulation : le fond sombre du banc d'optique (clair puis sombre).
+   Le reste vient du socle. Le banc reste sombre dans les deux thèmes, pour que le faisceau ressorte. */
 :root {
-  --bg: #EBEFF2;
-  --surface: #F8FAFB;
-  --ink: #14222C;
-  --muted: #566673;
-  --line: #CBD4DA;
-  --accent: #1B5E8C;
-  --accent-ink: #FFFFFF;
-  --danger: #A8281F;
-  --beam: #F2A81D;
-  --lcd-bg: #0F1A21;
-  --lcd-fg: #FFC24A;
-  --lcd-dim: #A98A45;
-  --lcd-label: #8FA3AF;
-  --stage-a: #121C24;
-  --stage-b: #1B2832;
-  --stage-ink: #DCE6EC;
-  --stage-muted: #8EA2AF;
-  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --bench-a: #121C24;
+  --bench-b: #1B2832;
+  --bench-ink: #DCE6EC;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0D1419;
-    --surface: #162027;
-    --ink: #E4ECF0;
-    --muted: #93A4AF;
-    --line: #2A3944;
-    --accent: #6BB4E8;
-    --accent-ink: #0B1A24;
-    --danger: #F2877F;
-    --lcd-bg: #070C10;
-    --stage-a: #0A1015;
-    --stage-b: #141F27;
-    color-scheme: dark;
-  }
+  :root { --bench-a: #0A1015; --bench-b: #141F27; }
 }
-:root[data-theme="dark"] {
-  --bg: #0D1419;
-  --surface: #162027;
-  --ink: #E4ECF0;
-  --muted: #93A4AF;
-  --line: #2A3944;
-  --accent: #6BB4E8;
-  --accent-ink: #0B1A24;
-  --danger: #F2877F;
-  --lcd-bg: #070C10;
-  --stage-a: #0A1015;
-  --stage-b: #141F27;
-  color-scheme: dark;
+#sim { width: 100%; min-width: 0; }   /* sans cela, le <main> centré se dimensionne sur le contenu du SVG et déborde sur téléphone */
+.crumb a { display: inline-flex; align-items: center; min-height: var(--tap); }   /* cible de 44 px pour le retour au catalogue */
+
+/* Banc d'optique (SVG) */
+#stage { background: linear-gradient(180deg, var(--bench-a), var(--bench-b)); }
+#stage svg { user-select: none; -webkit-user-select: none; }
+#stage text { font-family: var(--font-body); fill: var(--bench-ink); }
+#stage .halo { paint-order: stroke; stroke: var(--bench-a); stroke-width: 4px; stroke-linejoin: round; }
+
+/* Réglages */
+.sliders { display: flex; flex-direction: column; gap: 16px; }
+.saisie { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
+.saisie label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.saisie input {
+  width: 5.6em; min-height: var(--tap); font: 500 16px var(--font-data); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 5px 8px; text-align: right;
 }
+.switches { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.sw { justify-content: flex-start; text-align: left; }
 
-* { box-sizing: border-box; }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.5;
-  padding-block: 20px 40px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-h1 { font: 600 clamp(28px, 6vw, 40px)/1.05 var(--font-head); margin: 0; letter-spacing: .01em; text-wrap: balance; }
-h2 { font: 600 20px/1.2 var(--font-head); margin: 0; letter-spacing: .02em; }
-.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
-.sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
-
-.stage { background: linear-gradient(180deg, var(--stage-a), var(--stage-b)); border-radius: 10px; border: 1px solid var(--line); overflow: hidden; }
-.stage svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
-.stage text { font-family: var(--font-body); fill: var(--stage-ink); }
-.stage .halo { paint-order: stroke; stroke: var(--stage-a); stroke-width: 4px; stroke-linejoin: round; }
-.hint { font-size: 13px; color: var(--muted); margin: -8px 0 0; }
-
-.panel { display: grid; grid-template-columns: 1fr; gap: 18px; }
-@media (min-width: 780px) { .panel { grid-template-columns: 1.1fr 1fr; align-items: start; } }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-
-.ctl { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; }
-.ctl label { font-weight: 600; }
-.ctl label small { font-weight: 400; color: var(--muted); }
-.ctl .num { display: flex; align-items: baseline; gap: 6px; }
-.ctl input[type="number"] {
-  width: 5.2em; font: 500 16px var(--font-data); color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; text-align: right;
-}
-.ctl .unit { font: 500 14px var(--font-data); color: var(--muted); min-width: 2em; }
-.ctl input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
-
-.readouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-@media (max-width: 560px) { .readouts { grid-template-columns: 1fr 1fr; } .readouts .lcd.power { grid-column: 1 / -1; } }
-.lcd { background: var(--lcd-bg); border-radius: 8px; padding: 10px 12px 12px; border: 1px solid var(--line); min-width: 0; }
-.lcd .lab { font: 500 11px/1.2 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--lcd-label); }
-.lcd .val { margin-top: 8px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.lcd .v { font: 600 clamp(26px, 6vw, 34px)/1 var(--font-data); color: var(--lcd-fg); font-variant-numeric: tabular-nums; }
+/* Afficheurs : la puissance occupe toute la largeur */
+.lcd.power { grid-column: 1 / -1; }
 .lcd.power .v { font-size: clamp(32px, 8vw, 44px); }
-.lcd .u { font: 500 14px var(--font-data); color: var(--lcd-dim); }
 
-.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-button {
-  font: 600 15px var(--font-body); border-radius: 8px; padding: 10px 16px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
-}
-button:hover { border-color: var(--muted); }
-button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-button.primary:hover { filter: brightness(1.08); }
-button.danger { color: var(--danger); }
-button:disabled { opacity: .45; cursor: not-allowed; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.opts { display: flex; flex-direction: column; gap: 10px; }
-.check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--ink); }
-.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+/* Tableau : le titre de la carte tient lieu de légende visible */
+#tableau caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-.table-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
-table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
-th { font: 600 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
-td { font-family: var(--font-data); font-size: 15px; }
-th:first-child, td:first-child { text-align: left; color: var(--muted); }
-tbody tr:last-child td { border-bottom: 0; }
-td.x { width: 1%; }
-td.x button { padding: 2px 9px; font-size: 18px; line-height: 1.2; color: var(--muted); background: transparent; border-color: transparent; }
-td.x button:hover { color: var(--danger); border-color: var(--line); }
-.empty { padding: 22px 16px; color: var(--muted); text-align: center; }
-.status { min-height: 1.5em; font-size: 14px; color: var(--muted); margin: 0; }
-textarea#fallback { width: 100%; min-height: 110px; font: 14px var(--font-data); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
-
-details { color: var(--muted); font-size: 14px; }
-details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
 details p { margin: 8px 0 0; max-width: 70ch; }
 .formula { font-family: var(--font-data); color: var(--ink); }
-.crumb { margin: 0; }
-.crumb a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted); text-decoration: none; font-size: 14px; }
-.crumb a:hover { color: var(--ink); text-decoration: underline; }
-@media print { .crumb { display: none; } }
 </style>
-
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
 <div class="wrap">
   <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
 
   <header>
-    <p class="kicker">TP de physique-chimie</p>
+    <p class="kicker" data-theme="energie">Énergie · Seconde</p>
     <h1>Banc d'optique photovoltaïque</h1>
     <p class="sub">Angle d'incidence et constante solaire : règle la distance et l'angle, lis la puissance fournie par la cellule et note tes mesures.</p>
   </header>
 
-  <section class="stage" aria-label="Banc d'optique">
-    <svg id="bench" viewBox="0 0 900 310" role="img" aria-label="Source lumineuse à gauche et cellule photovoltaïque mobile sur un rail gradué en centimètres">
-      <defs>
-        <linearGradient id="beamGrad" gradientUnits="userSpaceOnUse" x1="100" y1="0" x2="900" y2="0">
-          <stop offset="0" stop-color="#FFD36B" stop-opacity=".62"/>
-          <stop offset="1" stop-color="#F2A81D" stop-opacity=".36"/>
-        </linearGradient>
-        <clipPath id="clipBeam"><rect x="0" y="0" width="900" height="250"/></clipPath>
-        <mask id="shadowMask" maskUnits="userSpaceOnUse" x="0" y="0" width="900" height="310">
-          <rect x="0" y="0" width="900" height="310" fill="#fff"/>
-          <polygon id="shadow" fill="#000"/>
-        </mask>
-        <linearGradient id="railGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#C9D3DA"/>
-          <stop offset=".5" stop-color="#9FB0BB"/>
-          <stop offset="1" stop-color="#6F808B"/>
-        </linearGradient>
-        <linearGradient id="cellGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#2F7FB8"/>
-          <stop offset="1" stop-color="#1B4F78"/>
-        </linearGradient>
-        <radialGradient id="lensGrad" cx=".3" cy=".5" r=".8">
-          <stop offset="0" stop-color="#FFF3C4"/>
-          <stop offset="1" stop-color="#F2A81D"/>
-        </radialGradient>
-      </defs>
-
-      <!-- rail -->
-      <rect x="30" y="250" width="850" height="14" rx="3" fill="url(#railGrad)"/>
-      <g id="ticks"></g>
-
-      <!-- source lumineuse -->
-      <text x="36" y="96" font-size="17" font-weight="600">Source lumineuse</text>
-      <rect x="60" y="182" width="12" height="54" fill="#7E909B"/>
-      <rect x="46" y="236" width="40" height="14" rx="2" fill="#566874"/>
-      <rect x="36" y="118" width="62" height="64" rx="7" fill="#3A4A56" stroke="#5B6F7C" stroke-width="1.5"/>
-      <rect x="44" y="128" width="30" height="5" rx="2" fill="#22303A"/>
-      <rect x="44" y="140" width="30" height="5" rx="2" fill="#22303A"/>
-      <rect x="44" y="152" width="30" height="5" rx="2" fill="#22303A"/>
-      <ellipse cx="98" cy="150" rx="8" ry="24" fill="url(#lensGrad)"/>
-
-      <!-- faisceau -->
-      <g clip-path="url(#clipBeam)">
-        <g id="beamG" mask="url(#shadowMask)"><polygon id="beam" fill="url(#beamGrad)"/></g>
-        <g id="capG" style="display:none">
-          <polygon id="cap" fill="url(#beamGrad)"/>
-          <polyline id="capEdges" fill="none" stroke="#FFE19A" stroke-opacity=".9" stroke-width="1.3" stroke-linejoin="round"/>
-        </g>
-      </g>
-
-      <!-- cote de distance -->
-      <g id="dim" stroke="#8EA2AF" stroke-width="1.5" fill="none">
-        <line id="dimLine" y1="224" y2="224"/>
-        <line id="dimL" y1="216" y2="232"/>
-        <line id="dimR" y1="216" y2="232"/>
-      </g>
-      <text id="dimText" y="216" font-size="16" text-anchor="middle" font-family="IBM Plex Mono, monospace" class="halo"></text>
-
-      <!-- cellule -->
-      <text id="cellLabel" y="96" font-size="17" font-weight="600" text-anchor="middle" class="halo">Cellule photovoltaïque</text>
-      <g id="cellG">
-        <rect id="stand" x="-5" y="0" width="10" height="86" fill="#7E909B"/>
-        <rect id="rider" x="-16" y="86" width="32" height="14" rx="2" fill="#566874"/>
-        <polygon points="0,100 -5,108 5,108" fill="#FF6B5A"/>
-        <path id="arc" fill="none" stroke="#FFC24A" stroke-width="2"/>
-        <line id="normal" stroke="#DCE6EC" stroke-width="1.6" stroke-dasharray="6 5"/>
-        <text id="normalText" font-size="13" text-anchor="middle" class="halo">normale</text>
-        <text id="thetaText" font-size="17" font-style="italic" font-weight="600" text-anchor="middle" class="halo" style="fill:#FFC24A">θ</text>
-        <g id="cellRot">
-          <rect x="-4" y="-30" width="12" height="60" rx="2" fill="#2C3B46"/>
-          <rect x="-9" y="-30" width="6" height="60" rx="1.5" fill="url(#cellGrad)"/>
-          <g stroke="#9CCBEA" stroke-opacity=".6" stroke-width="1">
-            <line x1="-9" x2="-3" y1="-15" y2="-15"/><line x1="-9" x2="-3" y1="0" y2="0"/>
-            <line x1="-9" x2="-3" y1="15" y2="15"/>
-          </g>
-          <circle r="4" fill="#B6C5CE"/>
-        </g>
-        <rect id="hit" x="-30" y="-44" width="60" height="88" fill="transparent" style="cursor:ew-resize;touch-action:none"/>
-      </g>
-    </svg>
-  </section>
-  <p class="hint">Le faisceau a une ouverture fixe de 50°. La cellule n'en intercepte qu'une partie, qui dépend de sa distance et de son angle. Tu peux aussi faire glisser la cellule le long du banc.</p>
-
-  <div class="panel">
-    <section class="card" aria-label="Réglages">
-      <h2>Réglages</h2>
-      <div class="ctl">
-        <label for="dNum">Distance <small>source – cellule</small></label>
-        <div class="num"><input id="dNum" type="number" min="10" max="100" step="0.5" inputmode="decimal"><span class="unit">cm</span></div>
-        <input id="dRange" type="range" min="10" max="100" step="0.5" aria-label="Distance en centimètres">
-      </div>
-      <div class="ctl">
-        <label for="aNum">Angle d'incidence <small>θ</small></label>
-        <div class="num"><input id="aNum" type="number" min="0" max="90" step="1" inputmode="numeric"><span class="unit">°</span></div>
-        <input id="aRange" type="range" min="0" max="90" step="1" aria-label="Angle d'incidence en degrés">
-      </div>
-      <div class="opts">
-        <label class="check" for="cone"><input id="cone" type="checkbox">Visualiser le faisceau intercepté par la cellule</label>
-        <label class="check" for="noise"><input id="noise" type="checkbox">Mesures bruitées (±&#8239;1&#8239;%)</label>
+  <main id="sim" class="wrap" style="gap:16px">
+    <section class="stage" id="stage" aria-label="Banc d'optique">
+      <div class="cv">
+      <svg id="bench" viewBox="0 0 900 310" role="img" aria-label="Source lumineuse à gauche et cellule photovoltaïque mobile sur un rail gradué en centimètres">
+            <defs>
+              <linearGradient id="beamGrad" gradientUnits="userSpaceOnUse" x1="100" y1="0" x2="900" y2="0">
+                <stop offset="0" stop-color="#FFD36B" stop-opacity=".62"/>
+                <stop offset="1" stop-color="#F2A81D" stop-opacity=".36"/>
+              </linearGradient>
+              <clipPath id="clipBeam"><rect x="0" y="0" width="900" height="250"/></clipPath>
+              <mask id="shadowMask" maskUnits="userSpaceOnUse" x="0" y="0" width="900" height="310">
+                <rect x="0" y="0" width="900" height="310" fill="#fff"/>
+                <polygon id="shadow" fill="#000"/>
+              </mask>
+              <linearGradient id="railGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#C9D3DA"/>
+                <stop offset=".5" stop-color="#9FB0BB"/>
+                <stop offset="1" stop-color="#6F808B"/>
+              </linearGradient>
+              <linearGradient id="cellGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#2F7FB8"/>
+                <stop offset="1" stop-color="#1B4F78"/>
+              </linearGradient>
+              <radialGradient id="lensGrad" cx=".3" cy=".5" r=".8">
+                <stop offset="0" stop-color="#FFF3C4"/>
+                <stop offset="1" stop-color="#F2A81D"/>
+              </radialGradient>
+            </defs>
+      
+            <!-- rail -->
+            <rect x="30" y="250" width="850" height="14" rx="3" fill="url(#railGrad)"/>
+            <g id="ticks"></g>
+      
+            <!-- source lumineuse -->
+            <text x="36" y="96" font-size="17" font-weight="600">Source lumineuse</text>
+            <rect x="60" y="182" width="12" height="54" fill="#7E909B"/>
+            <rect x="46" y="236" width="40" height="14" rx="2" fill="#566874"/>
+            <rect x="36" y="118" width="62" height="64" rx="7" fill="#3A4A56" stroke="#5B6F7C" stroke-width="1.5"/>
+            <rect x="44" y="128" width="30" height="5" rx="2" fill="#22303A"/>
+            <rect x="44" y="140" width="30" height="5" rx="2" fill="#22303A"/>
+            <rect x="44" y="152" width="30" height="5" rx="2" fill="#22303A"/>
+            <ellipse cx="98" cy="150" rx="8" ry="24" fill="url(#lensGrad)"/>
+      
+            <!-- faisceau -->
+            <g clip-path="url(#clipBeam)">
+              <g id="beamG" mask="url(#shadowMask)"><polygon id="beam" fill="url(#beamGrad)"/></g>
+              <g id="capG" style="display:none">
+                <polygon id="cap" fill="url(#beamGrad)"/>
+                <polyline id="capEdges" fill="none" stroke="#FFE19A" stroke-opacity=".9" stroke-width="1.3" stroke-linejoin="round"/>
+              </g>
+            </g>
+      
+            <!-- cote de distance -->
+            <g id="dim" stroke="#8EA2AF" stroke-width="1.5" fill="none">
+              <line id="dimLine" y1="224" y2="224"/>
+              <line id="dimL" y1="216" y2="232"/>
+              <line id="dimR" y1="216" y2="232"/>
+            </g>
+            <text id="dimText" y="216" font-size="16" text-anchor="middle" font-family="IBM Plex Mono, monospace" class="halo"></text>
+      
+            <!-- cellule -->
+            <text id="cellLabel" y="56" font-size="17" font-weight="600" text-anchor="middle" class="halo">Cellule photovoltaïque</text>
+            <g id="cellG">
+              <rect id="stand" x="-5" y="0" width="10" height="86" fill="#7E909B"/>
+              <rect id="rider" x="-16" y="86" width="32" height="14" rx="2" fill="#566874"/>
+              <polygon points="0,100 -5,108 5,108" fill="#FF6B5A"/>
+              <path id="arc" fill="none" stroke="#FFC24A" stroke-width="2"/>
+              <line id="normal" stroke="#DCE6EC" stroke-width="1.6" stroke-dasharray="6 5"/>
+              <text id="normalText" font-size="13" text-anchor="middle" class="halo">normale</text>
+              <text id="thetaText" font-size="17" font-style="italic" font-weight="600" text-anchor="middle" class="halo" style="fill:#FFC24A">θ</text>
+              <g id="cellRot">
+                <rect x="-4" y="-30" width="12" height="60" rx="2" fill="#2C3B46"/>
+                <rect x="-9" y="-30" width="6" height="60" rx="1.5" fill="url(#cellGrad)"/>
+                <g stroke="#9CCBEA" stroke-opacity=".6" stroke-width="1">
+                  <line x1="-9" x2="-3" y1="-15" y2="-15"/><line x1="-9" x2="-3" y1="0" y2="0"/>
+                  <line x1="-9" x2="-3" y1="15" y2="15"/>
+                </g>
+                <circle r="4" fill="#B6C5CE"/>
+              </g>
+              <rect id="hit" x="-30" y="-44" width="60" height="88" fill="transparent" style="cursor:ew-resize;touch-action:none"/>
+            </g>
+          </svg>
       </div>
     </section>
+    <p class="help">Le faisceau a une ouverture fixe de 50°. La cellule n'en intercepte qu'une partie, qui dépend de sa distance et de son angle. Tu peux aussi faire glisser la cellule le long du banc.</p>
 
-    <section class="card" aria-label="Mesures en direct">
-      <h2>Mesure en direct</h2>
-      <div class="readouts">
-        <div class="lcd"><div class="lab">Distance d</div><div class="val"><span class="v" id="rd">–</span><span class="u">cm</span></div></div>
-        <div class="lcd"><div class="lab">Angle θ</div><div class="val"><span class="v" id="ra">–</span><span class="u">°</span></div></div>
-        <div class="lcd power"><div class="lab">Puissance P de la cellule</div><div class="val"><span class="v" id="rp">–</span><span class="u">mW</span></div></div>
-      </div>
-      <div class="row">
-        <button id="save" class="primary" type="button">Enregistrer la mesure</button>
-      </div>
+    <div class="panel">
+      <section class="card" aria-labelledby="h-reglages">
+        <h2 id="h-reglages">Réglages</h2>
+        <div id="sliders" class="sliders"></div>
+        <div class="saisie">
+          <label for="dNum">Saisir d <span class="help">(cm)</span> <input id="dNum" type="number" min="10" max="100" step="0.5" inputmode="decimal"></label>
+          <label for="aNum">Saisir θ <span class="help">(°)</span> <input id="aNum" type="number" min="0" max="90" step="1" inputmode="numeric"></label>
+        </div>
+        <div class="switches">
+          <button type="button" class="sw" id="cone" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span>Visualiser le faisceau intercepté par la cellule</button>
+          <button type="button" class="sw" id="noise" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span>Mesures bruitées (±&#8239;1&#8239;%)</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-mesure">
+        <h2 id="h-mesure">Mesure en direct</h2>
+        <div class="readouts" id="lcds"></div>
+        <div class="row"><button type="button" class="primary" id="save">Enregistrer la mesure</button></div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="h-tableau">
+      <h2 id="h-tableau">Tableau de mesures</h2>
+      <div id="tableau"></div>
+      <div class="row"><button type="button" id="undo">Retirer la dernière mesure</button></div>
     </section>
-  </div>
 
-  <section class="card" aria-label="Tableau de mesures">
-    <div class="table-head">
-      <h2>Tableau de mesures</h2>
-      <div class="row">
-        <button id="copy" type="button">Copier le tableau</button>
-        <button id="undo" type="button">Retirer la dernière</button>
-        <button id="clear" class="danger" type="button">Tout effacer</button>
-      </div>
-    </div>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>N°</th><th>d (cm)</th><th>θ (°)</th><th>P (mW)</th><th></th></tr></thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div id="empty" class="empty">Aucune mesure pour l'instant. Règle la distance et l'angle, puis appuie sur « Enregistrer la mesure ».</div>
-    </div>
-    <p class="status" id="status" role="status" aria-live="polite"></p>
-    <textarea id="fallback" readonly hidden aria-label="Tableau à copier"></textarea>
-  </section>
+    <details>
+      <summary>Modèle utilisé par la simulation</summary>
+      <p>La puissance reçue suit la loi <span class="formula">P = P₀ · (d₀ / d)² · cos θ</span> avec P₀ = 50 mW pour d₀ = 20 cm. Elle diminue comme l'inverse du carré de la distance et proportionnellement au cosinus de l'angle d'incidence θ, mesuré entre la normale à la cellule et la direction de la lumière.</p>
+      <p>Le faisceau de la source a une ouverture fixe. La cellule intercepte seulement la partie du faisceau comprise entre les rayons qui passent par ses deux bords. Plus la cellule est loin ou inclinée, plus cette partie est étroite (dans l'espace, l'angle solide intercepté varie comme cos θ / d²). Avec l'option « Visualiser le faisceau intercepté », le faisceau est atténué et seule la partie captée garde sa luminosité.</p>
+      <p>Le même raisonnement s'applique au rayonnement solaire : la constante solaire est l'éclairement reçu en incidence normale (θ = 0°) à la distance Terre-Soleil, environ 1&#8239;361 W·m⁻².</p>
+    </details>
+  </main>
 
-  <details>
-    <summary>Modèle utilisé par la simulation</summary>
-    <p>La puissance reçue suit la loi <span class="formula">P = P₀ · (d₀ / d)² · cos θ</span> avec P₀ = 50 mW pour d₀ = 20 cm. Elle diminue comme l'inverse du carré de la distance et proportionnellement au cosinus de l'angle d'incidence θ, mesuré entre la normale à la cellule et la direction de la lumière.</p>
-    <p>Le faisceau de la source a une ouverture fixe. La cellule intercepte seulement la partie du faisceau comprise entre les rayons qui passent par ses deux bords. Plus la cellule est loin ou inclinée, plus cette partie est étroite (dans l'espace, l'angle solide intercepté varie comme cos θ / d²). Avec l'option « Visualiser le faisceau intercepté », le faisceau est atténué et seule la partie captée garde sa luminosité.</p>
-    <p>Le même raisonnement s'applique au rayonnement solaire : la constante solaire est l'éclairement reçu en incidence normale (θ = 0°) à la distance Terre-Soleil, environ 1&#8239;361 W·m⁻².</p>
-  </details>
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
 </div>
 
+<script src="../shared/simulabo.js"></script>
 <script>
 (function () {
+  var S = Simulabo;
+  function $(id) { return document.getElementById(id); }
+
+  /* ----- Modèle et géométrie (inchangés) ----- */
   var X0 = 100, SC = 7.4, CY = 150, DMIN = 10, DMAX = 100;
   var ALPHA = 25, T = Math.tan(ALPHA * Math.PI / 180), H = 30; /* demi-ouverture du faisceau (°), demi-hauteur de la cellule (px) */
-  var KEY = "banc-optique-photovoltaique-v1";
-  var state = { d: 40, th: 0, noise: false, cone: false, rows: [] };
-  var eps = 1;
+  var XE = 900, FAR = (XE - X0) * T;
 
-  function $(id) { return document.getElementById(id); }
-  function fmt(v, n) { return v.toFixed(n).replace(".", ","); }
-  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+  /* Réglages partageables par lien : #d=40&th=30&cone=1&bruit=0 */
+  var etat = S.shareState({ d: 40, th: 0, cone: 0, bruit: 0 });
+  var init = etat.read();
+  var state = {
+    d: S.clamp(Math.round(init.d * 2) / 2, DMIN, DMAX),
+    th: S.clamp(Math.round(init.th), 0, 90),
+    cone: Number(init.cone) === 1,
+    noise: Number(init.bruit) === 1
+  };
+  var eps = 1;
+  var timer = null;
+
   function ideal(d, th) {
     var c = Math.cos(th * Math.PI / 180);
     if (th >= 90 || c < 1e-9) c = 0;
@@ -315,6 +216,12 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   }
   function reading() { return ideal(state.d, state.th) * (state.noise ? eps : 1); }
   function resample() { eps = 1 + (Math.random() * 2 - 1) * 0.01; }
+  function persist() {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      etat.write({ d: state.d, th: state.th, cone: state.cone ? 1 : 0, bruit: state.noise ? 1 : 0 });
+    }, 250);
+  }
 
   /* graduations du rail */
   (function ticks() {
@@ -329,19 +236,44 @@ details p { margin: 8px 0 0; max-width: 70ch; }
     g.innerHTML = s;
   })();
 
+  /* ----- Interface : briques du socle ----- */
+  var dS = S.slider("#sliders", { label: "Distance d (source – cellule)", unit: "cm", min: DMIN, max: DMAX, step: 0.5, value: state.d, digits: 1, bounds: true, onInput: function (v) { setD(v); } });
+  var aS = S.slider("#sliders", { label: "Angle d'incidence θ", unit: "°", min: 0, max: 90, step: 1, value: state.th, digits: 0, bounds: true, onInput: function (v) { setA(v); } });
+  var lcdD = S.readout("#lcds", { label: "Distance d", unit: "cm", digits: 1 });
+  var lcdA = S.readout("#lcds", { label: "Angle θ", unit: "°", digits: 0 });
+  var lcdP = S.readout("#lcds", { label: "Puissance P de la cellule", unit: "mW", digits: 2 });
+  lcdP.el.classList.add("power");
+  var table = S.measureTable("#tableau", {
+    caption: "Mesures enregistrées",
+    columns: [
+      { key: "n", label: "N°", digits: 0 },
+      { key: "d", label: "d", unit: "cm", digits: 1 },
+      { key: "th", label: "θ", unit: "°", digits: 0 },
+      { key: "p", label: "P", unit: "mW", digits: 2 }
+    ],
+    filename: "mesures-banc-optique",
+    empty: "Aucune mesure pour l'instant. Règle la distance et l'angle, puis appuie sur « Enregistrer la mesure »."
+  });
+  var statusEl = table.el.querySelector(".status");
+  var dNum = $("dNum"), aNum = $("aNum");
+
+  function setSwitch(btn, on) { btn.setAttribute("aria-checked", on ? "true" : "false"); }
+  setSwitch($("cone"), state.cone);
+  setSwitch($("noise"), state.noise);
+
+  /* ----- Dessin (géométrie inchangée) ----- */
+  function P(px, py) { return px.toFixed(1) + "," + py.toFixed(1); }
+  function far(ex, ey) { return P(XE, CY + (ey - CY) * (XE - X0) / (ex - X0)); }
+
   function render() {
     var d = state.d, th = state.th, r = th * Math.PI / 180;
     var x = X0 + d * SC, s = Math.sin(r), c = Math.cos(r);
 
     $("cellG").setAttribute("transform", "translate(" + x + "," + CY + ")");
     $("cellRot").setAttribute("transform", "rotate(" + th + ")");
-    $("stand").setAttribute("height", 86);
 
     /* faisceau d'ouverture fixe, ombre de la cellule et partie interceptée */
     var e1x = x + H * s, e1y = CY - H * c, e2x = x - H * s, e2y = CY + H * c;
-    var XE = 900, FAR = (XE - X0) * T;
-    function P(px, py) { return px.toFixed(1) + "," + py.toFixed(1); }
-    function far(ex, ey) { return P(XE, CY + (ey - CY) * (XE - X0) / (ex - X0)); }
     $("beam").setAttribute("points", P(X0, CY) + " " + P(XE, CY - FAR) + " " + P(XE, CY + FAR));
     $("shadow").setAttribute("points", P(e1x, e1y) + " " + far(e1x, e1y) + " " + far(e2x, e2y) + " " + P(e2x, e2y));
     $("cap").setAttribute("points", P(X0, CY) + " " + P(e1x, e1y) + " " + P(e2x, e2y));
@@ -368,31 +300,39 @@ details p { margin: 8px 0 0; max-width: 70ch; }
     }
 
     /* étiquette et cote */
-    $("cellLabel").setAttribute("x", clamp(x, 190, 790));
+    $("cellLabel").setAttribute("x", S.clamp(x, 190, 790));
     $("dimLine").setAttribute("x1", X0); $("dimLine").setAttribute("x2", x);
     $("dimL").setAttribute("x1", X0); $("dimL").setAttribute("x2", X0);
     $("dimR").setAttribute("x1", x); $("dimR").setAttribute("x2", x);
     $("dimText").setAttribute("x", (X0 + x) / 2);
-    $("dimText").textContent = "d = " + fmt(d, 1) + " cm";
+    $("dimText").textContent = "d = " + S.fmt(d, 1) + " cm";
 
-    /* champs */
-    $("dRange").value = d; $("aRange").value = th;
-    if (document.activeElement !== $("dNum")) $("dNum").value = d;
-    if (document.activeElement !== $("aNum")) $("aNum").value = th;
-    $("rd").textContent = fmt(d, 1);
-    $("ra").textContent = String(th);
-    $("rp").textContent = fmt(reading(), 2);
+    /* réglages et afficheurs */
+    var p = reading();
+    dS.set(d, true); aS.set(th, true);
+    if (document.activeElement !== dNum) dNum.value = d;
+    if (document.activeElement !== aNum) aNum.value = th;
+    lcdD.set(d); lcdA.set(th); lcdP.set(p);
+    $("bench").setAttribute("aria-label",
+      "Banc d'optique : la source lumineuse est à gauche, la cellule photovoltaïque est à " + S.fmt(d, 1) +
+      " cm de la source, avec un angle d'incidence de " + th + " degrés. Le faisceau a une ouverture fixe de 50 degrés" +
+      " et la cellule en intercepte une partie. Puissance fournie par la cellule : " + S.fmt(p, 2) +
+      " milliwatts. La distance et l'angle se règlent avec les curseurs.");
   }
 
-  function setD(v) { state.d = clamp(Math.round(v * 2) / 2, DMIN, DMAX); resample(); render(); }
-  function setA(v) { state.th = clamp(Math.round(v), 0, 90); resample(); render(); }
+  function setD(v) { state.d = S.clamp(Math.round(v * 2) / 2, DMIN, DMAX); resample(); persist(); render(); }
+  function setA(v) { state.th = S.clamp(Math.round(v), 0, 90); resample(); persist(); render(); }
 
-  $("dRange").addEventListener("input", function (e) { setD(parseFloat(e.target.value)); });
-  $("aRange").addEventListener("input", function (e) { setA(parseFloat(e.target.value)); });
-  $("dNum").addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setD(v); else render(); e.target.value = state.d; });
-  $("aNum").addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setA(v); else render(); e.target.value = state.th; });
-  $("noise").addEventListener("change", function (e) { state.noise = e.target.checked; resample(); persist(); render(); });
-  $("cone").addEventListener("change", function (e) { state.cone = e.target.checked; persist(); render(); });
+  dNum.addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setD(v); else render(); e.target.value = state.d; });
+  aNum.addEventListener("change", function (e) { var v = parseFloat(e.target.value); if (isFinite(v)) setA(v); else render(); e.target.value = state.th; });
+
+  /* le socle bascule lui-même les interrupteurs (role="switch") et émet l'événement « switch » */
+  $("cone").addEventListener("switch", function (e) {
+    state.cone = e.detail.checked; persist(); render();
+  });
+  $("noise").addEventListener("switch", function (e) {
+    state.noise = e.detail.checked; resample(); persist(); render();
+  });
 
   /* glisser la cellule */
   var bench = $("bench"), dragging = false;
@@ -411,83 +351,25 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   bench.addEventListener("pointerup", stopDrag);
   bench.addEventListener("pointercancel", stopDrag);
 
-  /* tableau */
-  function persist() {
-    try { localStorage.setItem(KEY, JSON.stringify({ rows: state.rows, noise: state.noise, cone: state.cone })); } catch (e) {}
-  }
-  function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (!raw) return;
-      var o = JSON.parse(raw);
-      if (o && Array.isArray(o.rows)) {
-        state.rows = o.rows.filter(function (r) { return r && isFinite(r.d) && isFinite(r.th) && isFinite(r.p); }).slice(0, 500);
-      }
-      state.noise = !!(o && o.noise);
-      state.cone = !!(o && o.cone);
-    } catch (e) {}
-  }
-  function say(t) { $("status").textContent = t; }
-
-  function renderRows() {
-    var html = "";
-    state.rows.forEach(function (r, i) {
-      html += "<tr><td>" + (i + 1) + "</td><td>" + fmt(r.d, 1) + "</td><td>" + r.th + "</td><td>" + fmt(r.p, 2) +
-        '</td><td class="x"><button type="button" data-i="' + i + '" aria-label="Supprimer la mesure ' + (i + 1) + '">×</button></td></tr>';
-    });
-    $("rows").innerHTML = html;
-    $("empty").hidden = state.rows.length > 0;
-    $("undo").disabled = $("copy").disabled = $("clear").disabled = state.rows.length === 0;
-  }
-
+  /* ----- Tableau de mesures ----- */
+  function say(t) { statusEl.textContent = t; }
   $("save").addEventListener("click", function () {
     var p = Math.round(reading() * 100) / 100;
-    state.rows.push({ d: state.d, th: state.th, p: p });
-    persist(); renderRows();
-    say("Mesure n°" + state.rows.length + " enregistrée : d = " + fmt(state.d, 1) + " cm, θ = " + state.th + " °, P = " + fmt(p, 2) + " mW.");
-  });
-  $("rows").addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-i]");
-    if (!b) return;
-    state.rows.splice(parseInt(b.getAttribute("data-i"), 10), 1);
-    persist(); renderRows(); say("Mesure supprimée.");
+    var n = table.rows().length + 1;
+    table.add({ n: n, d: state.d, th: state.th, p: p });
+    say("Mesure n°" + n + " enregistrée : d = " + S.fmt(state.d, 1) + " cm, θ = " + state.th + " °, P = " + S.fmt(p, 2) + " mW.");
   });
   $("undo").addEventListener("click", function () {
-    state.rows.pop(); persist(); renderRows(); say("Dernière mesure retirée.");
-  });
-  var clearTimer = null;
-  $("clear").addEventListener("click", function () {
-    var b = $("clear");
-    if (!clearTimer) {
-      b.textContent = "Confirmer l'effacement";
-      clearTimer = setTimeout(function () { b.textContent = "Tout effacer"; clearTimer = null; }, 4000);
-      return;
-    }
-    clearTimeout(clearTimer); clearTimer = null; b.textContent = "Tout effacer";
-    state.rows = []; persist(); renderRows(); say("Tableau effacé.");
-  });
-  $("copy").addEventListener("click", function () {
-    var lines = ["N°\td (cm)\tθ (°)\tP (mW)"];
-    state.rows.forEach(function (r, i) { lines.push([i + 1, fmt(r.d, 1), r.th, fmt(r.p, 2)].join("\t")); });
-    var text = lines.join("\n"), fb = $("fallback");
-    function fallback() {
-      fb.value = text; fb.hidden = false; fb.focus(); fb.select();
-      say("Copie automatique impossible : le texte est sélectionné, copie-le avec ton clavier.");
-    }
-    try {
-      navigator.clipboard.writeText(text).then(function () {
-        fb.hidden = true; say("Tableau copié. Colle-le dans un tableur.");
-      }, fallback);
-    } catch (e) { fallback(); }
+    var rows = table.rows();
+    if (!rows.length) { say("Aucune mesure à retirer."); return; }
+    rows.pop();
+    table.clear();
+    rows.forEach(function (r) { table.add(r); });
+    say("Dernière mesure retirée.");
   });
 
-  load();
-  $("noise").checked = state.noise;
-  $("cone").checked = state.cone;
-  resample();
-  renderRows();
   render();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
