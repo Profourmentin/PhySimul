@@ -1,0 +1,714 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Structure électronique : mission stabilité · Simulabo PhCh</title>
+<meta name="description" content="Remplis le cortège électronique, place l'élément dans le tableau périodique, puis forge l'ion stable : trois missions pour comprendre pourquoi les atomes forment des ions.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+canvas { aspect-ratio: 600 / 420; }
+.wrap, #sim, #sim > * { min-width: 0; }
+#sim { width: 100%; }
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.tab { flex: 1 1 auto; }
+sup { font-size: .68em; line-height: 0; }
+button[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+
+.progress { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.xp { font: 600 15px var(--font-data); margin-right: 6px; }
+.mchip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; background: var(--surface); color: var(--muted); }
+.mchip[data-done="true"] { border-color: var(--ok); color: var(--ok); background: var(--ok-bg); font-weight: 600; }
+
+.legend svg { width: 16px; height: 16px; flex: none; }
+.shells { display: flex; flex-wrap: wrap; gap: 6px 10px; padding: 10px 14px; border-top: 1px solid var(--line); font: 500 13px var(--font-data); }
+.shells span { border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; background: var(--bg); }
+
+.cfg { font: 600 22px/1.5 var(--font-data); }
+.cfg .sub-cfg { display: inline-block; margin-right: .55em; }
+.qline { font-size: 17px; line-height: 1.6; }
+.qline:focus { outline: none; }
+
+.boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; }
+.box { border: 2px solid var(--line); border-radius: var(--radius); padding: 10px; display: grid; gap: 8px; background: var(--bg); text-align: center; }
+.box[data-full="true"] { border-color: var(--accent); }
+.box .nm { font: 600 22px var(--font-head); }
+.box .cap { font-size: 12px; color: var(--muted); }
+.stepper { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.stepper button { width: 44px; padding: 0; font-size: 22px; }
+.stepper output { font: 600 24px var(--font-data); min-width: 1.5em; text-align: center; }
+.total { font: 600 16px var(--font-data); }
+
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; align-content: start; }
+.field label, .field .lbl { font-weight: 600; }
+.field input, .field select { min-height: 44px; font: 600 18px var(--font-data); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; }
+.field .st { font-size: 13px; min-height: 1.3em; color: var(--muted); }
+.field .st[data-s="ok"] { color: var(--ok); font-weight: 600; }
+.field .st[data-s="bad"] { color: var(--bad); font-weight: 600; }
+.opt { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; }
+.opt input { width: 20px; height: 20px; min-height: 0; accent-color: var(--accent); }
+.opts { display: grid; gap: 6px; }
+
+.step { display: grid; gap: 10px; padding-top: 4px; }
+.charges { display: flex; flex-wrap: wrap; gap: 8px; }
+.charges button { flex-direction: column; gap: 0; min-width: 96px; min-height: 58px; border-radius: 14px; line-height: 1.25; }
+.charges button b { font: 600 19px var(--font-data); }
+.charges button small { font-size: 12px; font-weight: 500; }
+
+.tablewrap { padding: 8px; }
+.ptable { border-collapse: separate; border-spacing: 3px; margin: 0 auto; }
+.ptable caption { text-align: left; padding: 4px 4px 8px; font: 600 16px var(--font-head); }
+.ptable th { font: 500 12px var(--font-data); color: var(--muted); padding: 2px 4px; background: none; border: 0; text-align: center; white-space: nowrap; }
+.ptable td { width: 36px; height: 44px; text-align: center; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); line-height: 1.1; padding: 2px; white-space: normal; }
+.ptable td.vide { border: 0; background: none; }
+.ptable td.pts { border: 1px dashed var(--line); color: var(--muted); background: none; font-size: 13px; }
+.ptable td b { display: block; font: 600 15px var(--font-head); }
+.ptable td small { font: 500 11px var(--font-data); color: var(--muted); }
+.ptable td[aria-current="true"] { border: 3px solid var(--accent); background: var(--info-bg); }
+.ptable td[aria-current="true"] small { color: var(--info); }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="matiere">Constitution et transformations de la matière · Seconde</p>
+    <h1>Structure électronique&nbsp;: mission stabilité</h1>
+    <p class="sub">Remplis le cortège électronique, place l’élément dans le tableau périodique, puis forge l’ion stable.</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+    <div class="progress">
+      <span class="xp" id="xp">0 XP</span>
+      <span class="mchip" id="chip-m1" data-done="false">Mission 1 : à faire</span>
+      <span class="mchip" id="chip-m2" data-done="false">Mission 2 : à faire</span>
+      <span class="mchip" id="chip-m3" data-done="false">Mission 3 : à faire</span>
+    </div>
+
+    <div class="tabs" id="tabs" role="group" aria-label="Choisir une activité">
+      <button class="tab" data-mode="explorer" type="button">Explorer</button>
+      <button class="tab" data-mode="m1" type="button" id="tab-m1">1 · Remplir</button>
+      <button class="tab" data-mode="m2" type="button" id="tab-m2">2 · Tableau</button>
+      <button class="tab" data-mode="m3" type="button" id="tab-m3">3 · Ions</button>
+    </div>
+
+    <section class="stage" aria-label="Schéma de l’atome">
+      <div class="cv">
+        <canvas id="cv" role="img" aria-label="Schéma d’un atome : un noyau entouré de couches sur lesquelles se placent les électrons. Choisis une activité pour commencer."></canvas>
+      </div>
+      <div class="legend">
+        <span class="lg"><svg viewBox="0 0 16 16" aria-hidden="true" style="color:var(--accent)"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg>électron d’une sous-couche s</span>
+        <span class="lg"><svg viewBox="0 0 16 16" aria-hidden="true" style="color:var(--accent)"><polygon points="8,1 15,8 8,15 1,8" fill="currentColor"/></svg>électron d’une sous-couche p</span>
+        <span class="lg"><svg viewBox="0 0 16 16" aria-hidden="true" style="color:var(--c-energie)"><circle cx="8" cy="8" r="4" fill="currentColor"/><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>électron de valence (couche externe)</span>
+        <span class="lg"><svg viewBox="0 0 16 16" aria-hidden="true" style="color:var(--muted)"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.5"/></svg>place libre</span>
+      </div>
+      <div class="shells" id="shells"></div>
+    </section>
+
+    <!-- ===== Explorer ===== -->
+    <section class="card" id="p-explorer" aria-labelledby="h-ex">
+      <h2 id="h-ex">Explorer le cortège électronique</h2>
+      <p class="help">Choisis un élément. <b>Avant</b> de regarder le schéma, prédis sa configuration électronique, puis vérifie.</p>
+      <div id="sl-z"></div>
+      <div class="row">
+        <button type="button" id="ex-build">Rejouer le remplissage</button>
+        <button type="button" class="sw" role="switch" aria-checked="true" id="sw-val"><span class="track"><span class="knob"></span></span>Électrons de valence en évidence</button>
+      </div>
+      <p class="cfg" id="ex-cfg"></p>
+      <div class="readouts" id="ex-lcds"></div>
+    </section>
+
+    <!-- ===== Mission 1 ===== -->
+    <section class="card" id="p-m1" aria-labelledby="h-m1" hidden>
+      <h2 id="h-m1">Mission 1 · Remplir le cortège électronique</h2>
+      <p class="qline" id="m1-q" tabindex="-1"></p>
+      <p class="help">Place les électrons dans les sous-couches, dans l’ordre : 1s, 2s, 2p, 3s, 3p. Chaque sous-couche a une capacité maximale.</p>
+      <div class="boxes" id="m1-boxes"></div>
+      <p class="total" id="m1-total" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" class="primary" id="m1-check">Valider la configuration</button>
+        <button type="button" id="m1-hint">Un indice</button>
+        <button type="button" class="primary" id="m1-next" hidden>Atome suivant</button>
+      </div>
+    </section>
+
+    <!-- ===== Mission 2 ===== -->
+    <section class="card" id="p-m2" aria-labelledby="h-m2" hidden>
+      <h2 id="h-m2">Mission 2 · Placer l’élément dans le tableau</h2>
+      <p class="qline" id="m2-q" tabindex="-1"></p>
+      <p class="cfg" id="m2-cfg"></p>
+      <p class="help">Observe la couche externe (celle qui a le plus grand numéro), puis donne la position de l’élément.</p>
+      <div class="fields">
+        <div class="field"><label for="m2-v">Électrons de valence</label><input id="m2-v" type="number" inputmode="numeric" min="0" max="8" step="1" aria-describedby="m2-vs"><span class="st" id="m2-vs"></span></div>
+        <div class="field"><label for="m2-r">Ligne (période)</label><input id="m2-r" type="number" inputmode="numeric" min="1" max="3" step="1" aria-describedby="m2-rs"><span class="st" id="m2-rs"></span></div>
+        <div class="field"><label for="m2-c">Colonne</label><input id="m2-c" type="number" inputmode="numeric" min="1" max="18" step="1" aria-describedby="m2-cs"><span class="st" id="m2-cs"></span></div>
+      </div>
+      <div class="row">
+        <button type="button" class="primary" id="m2-check">Vérifier la position</button>
+        <button type="button" id="m2-hint">Un indice</button>
+        <button type="button" class="primary" id="m2-next" hidden>Élément suivant</button>
+      </div>
+    </section>
+
+    <!-- ===== Mission 3 ===== -->
+    <section class="card" id="p-m3" aria-labelledby="h-m3" hidden>
+      <h2 id="h-m3">Mission 3 · Forger un ion stable</h2>
+      <p class="qline" id="m3-q" tabindex="-1"></p>
+      <div class="step">
+        <h3>1 · Prédis</h3>
+        <p class="help">Cet atome cherche une couche externe stable. Quel ion peut-il former ? Choisis une charge, puis teste ta prédiction : le schéma montre ce qui se passe.</p>
+        <div class="charges" id="m3-charges" role="group" aria-label="Charge de l’ion à tester"></div>
+        <div class="row"><button type="button" class="primary" id="m3-test">Tester ma prédiction</button></div>
+      </div>
+      <div class="readouts" id="m3-lcds"></div>
+      <div class="step" id="m3-explain" hidden>
+        <h3>2 · Explique</h3>
+        <div class="fields">
+          <div class="field">
+            <label for="m3-noble">L’ion testé a le même nombre d’électrons que quel gaz noble ?</label>
+            <select id="m3-noble">
+              <option value="">– Choisir –</option>
+              <option value="2">Hélium (He, 2 électrons)</option>
+              <option value="10">Néon (Ne, 10 électrons)</option>
+              <option value="18">Argon (Ar, 18 électrons)</option>
+              <option value="none">Aucun gaz noble</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="lbl" id="m3-rule-l">Quelle règle l’ion vérifie-t-il ?</span>
+            <div class="opts" role="radiogroup" aria-labelledby="m3-rule-l">
+              <label class="opt"><input type="radio" name="m3-rule" value="duet">Duet (2 électrons)</label>
+              <label class="opt"><input type="radio" name="m3-rule" value="octet">Octet (8 électrons)</label>
+              <label class="opt"><input type="radio" name="m3-rule" value="none">Aucune des deux</label>
+            </div>
+          </div>
+        </div>
+        <div class="row"><button type="button" class="primary" id="m3-check">Valider mon ion</button></div>
+      </div>
+      <div class="row"><button type="button" class="primary" id="m3-next" hidden>Atome suivant</button></div>
+    </section>
+
+    <section class="obs" id="obs" aria-live="polite" data-tone="info">
+      <h2>Observation</h2>
+      <p data-obs-text>Choisis une activité pour commencer.</p>
+    </section>
+
+    <section class="card" id="table-card" aria-labelledby="h-table">
+      <h2 id="h-table">Tableau périodique (Z de 1 à 18)</h2>
+      <div class="tablewrap"><table class="ptable" id="ptable"></table></div>
+    </section>
+
+    <section class="card" id="bilan" aria-labelledby="h-bilan" hidden>
+      <h2 id="h-bilan">Mission accomplie</h2>
+      <p class="qline">Score : <b id="bilan-xp">0 XP</b>. Tu sais répartir les électrons, lire le tableau périodique et prévoir un ion stable.</p>
+      <ul class="help" style="margin:0;padding-left:20px;display:grid;gap:6px">
+        <li>Les électrons se placent dans l’ordre <b>1s, 2s, 2p, 3s, 3p</b> (capacités 2, 2, 6, 2, 6) : une sous-couche est pleine avant la suivante.</li>
+        <li>Les <b>électrons de valence</b> sont ceux de la couche externe. La <b>ligne</b> est le numéro de cette couche ; les éléments d’une même <b>colonne</b> ont le même nombre d’électrons de valence.</li>
+        <li>Un ion monoatomique est stable quand il a la configuration d’un gaz noble : <b>duet</b> (2 électrons) ou <b>octet</b> (8 électrons) sur la couche externe. Perdre des électrons donne un <b>cation</b> (+), en gagner donne un <b>anion</b> (−).</li>
+      </ul>
+      <div class="row"><button type="button" id="bilan-reset">Rejouer la mission</button></div>
+    </section>
+
+    <details>
+      <summary>Pour aller plus loin</summary>
+      <ul>
+        <li>Modèle utilisé : cortège d’électrons réparti en couches et sous-couches (1s, 2s, 2p, 3s, 3p), pour les éléments de numéro atomique Z ≤ 18. Les électrons ne tournent pas réellement sur des cercles : le mouvement est une aide visuelle. Les ions sont limités à 18 électrons.</li>
+        <li>Lien avec le programme de Seconde (BO spécial n° 1 du 22 janvier 2019), thème « Constitution et transformations de la matière » : configuration électronique, électrons de valence, position dans le tableau périodique, stabilité des gaz nobles, règles du duet et de l’octet, ions monoatomiques.</li>
+        <li>Pour montrer un élément précis en classe : ouvre « Explorer », règle Z, puis copie l’adresse de la page, qui conserve le réglage.</li>
+        <li>Observe : les éléments d’une même colonne forment-ils des ions de même charge ? Pourquoi ?</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d’accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = Simulabo, h = S.h, $ = S.$;
+  var MINUS = "−";
+
+  /* ---------- Données : éléments de Z = 1 à 18 ---------- */
+  var EL = [
+    { z: 1, sym: "H", name: "hydrogène", col: 1 }, { z: 2, sym: "He", name: "hélium", col: 18 },
+    { z: 3, sym: "Li", name: "lithium", col: 1 }, { z: 4, sym: "Be", name: "béryllium", col: 2 },
+    { z: 5, sym: "B", name: "bore", col: 13 }, { z: 6, sym: "C", name: "carbone", col: 14 },
+    { z: 7, sym: "N", name: "azote", col: 15 }, { z: 8, sym: "O", name: "oxygène", col: 16 },
+    { z: 9, sym: "F", name: "fluor", col: 17 }, { z: 10, sym: "Ne", name: "néon", col: 18 },
+    { z: 11, sym: "Na", name: "sodium", col: 1 }, { z: 12, sym: "Mg", name: "magnésium", col: 2 },
+    { z: 13, sym: "Al", name: "aluminium", col: 13 }, { z: 14, sym: "Si", name: "silicium", col: 14 },
+    { z: 15, sym: "P", name: "phosphore", col: 15 }, { z: 16, sym: "S", name: "soufre", col: 16 },
+    { z: 17, sym: "Cl", name: "chlore", col: 17 }, { z: 18, sym: "Ar", name: "argon", col: 18 }
+  ];
+  var SUB = [
+    { n: "1s", max: 2, shell: 1, off: 0, t: "s" }, { n: "2s", max: 2, shell: 2, off: 0, t: "s" },
+    { n: "2p", max: 6, shell: 2, off: 2, t: "p" }, { n: "3s", max: 2, shell: 3, off: 0, t: "s" },
+    { n: "3p", max: 6, shell: 3, off: 2, t: "p" }
+  ];
+  var NOBLES = { 2: "hélium", 10: "néon", 18: "argon" };
+  var DU_NOBLE = { 2: "de l’hélium", 10: "du néon", 18: "de l’argon" };
+  var IONS = [ { z: 3, q: 1 }, { z: 4, q: 2 }, { z: 8, q: -2 }, { z: 9, q: -1 }, { z: 11, q: 1 },
+               { z: 12, q: 2 }, { z: 13, q: 3 }, { z: 16, q: -2 }, { z: 17, q: -1 } ];
+
+  /* ---------- Chimie ---------- */
+  function config(n) {
+    var c = [0, 0, 0, 0, 0], r = n;
+    for (var i = 0; i < SUB.length; i++) { var f = Math.min(r, SUB[i].max); c[i] = f; r -= f; }
+    return c;
+  }
+  function shellCounts(c) { return [c[0], c[1] + c[2], c[3] + c[4]]; }
+  function outer(c) { var s = shellCounts(c); for (var k = 2; k >= 0; k--) if (s[k] > 0) return k + 1; return 0; }
+  function valence(c) { var o = outer(c); return o ? shellCounts(c)[o - 1] : 0; }
+  function stability(c) { var o = outer(c), v = valence(c); if (o === 1 && v === 2) return "duet"; if (v === 8) return "octet"; return "none"; }
+  function diffIdx(a, b) { for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return i; return -1; }
+  function sum(c) { return c.reduce(function (a, b) { return a + b; }, 0); }
+  function family(el) { if (el.z === 1) return null; if (el.col === 1) return "alcalins"; if (el.col === 17) return "halogènes"; if (el.col === 18) return "gaz nobles"; return null; }
+
+  /* ---------- Texte ---------- */
+  function sup(t) { return "<sup>" + t + "</sup>"; }
+  function elid(el) { return /^[aeiouhé]/i.test(el.name); }
+  function de(el) { return (elid(el) ? "d’" : "de ") + el.name; }
+  function le(el) { return (elid(el) ? "l’" : "le ") + el.name; }
+  function Le(el) { var t = le(el); return t.charAt(0).toUpperCase() + t.slice(1); }
+  function plural(n, w) { return n + " " + w + (n > 1 ? "s" : ""); }
+  function cfgHTML(c) {
+    var vis = "", spoken = [];
+    for (var i = 0; i < c.length; i++) if (c[i] > 0) { vis += '<span class="sub-cfg">' + SUB[i].n + sup(c[i]) + "</span>"; spoken.push(SUB[i].n + " " + c[i]); }
+    return '<span aria-hidden="true">' + vis + '</span><span class="sr-only">Configuration : ' + spoken.join(", ") + "</span>";
+  }
+  function chargeTxt(q) { return (Math.abs(q) > 1 ? Math.abs(q) : "") + (q > 0 ? "+" : MINUS); }  // notation française : 2+, −
+  function chargeNum(q) { return (q > 0 ? "+" : MINUS) + Math.abs(q); }
+  function ionHTML(sym, q) { return sym + sup(chargeTxt(q)); }
+  function eMinus() { return "e" + sup(MINUS); }
+
+  /* ---------- Etat ---------- */
+  var etat = S.shareState({ m: "explorer", Z: 11 });
+  var init = etat.read();
+  var state = { mode: "explorer", xp: 0, done: { m1: false, m2: false, m3: false }, msg: {} };
+  var view = { z: 1, cfg: [0, 0, 0, 0, 0], valence: true, title: "Atome", phase: 0, fly: null, queue: [], dur: 0.5, onIdle: null, dirty: true };
+
+  function makeDeck(list) {
+    var arr = [];
+    return { next: function () {
+      if (!arr.length) { arr = list.slice(); for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } }
+      return arr.pop();
+    } };
+  }
+
+  /* ---------- Scène (canvas) ---------- */
+  var R = [60, 118, 176], CAP = [2, 8, 8], DIR = [1, -1, 1], SPD = [0.55, 0.38, 0.26];
+  var CW = 600, CH = 420, CX = 300, CY = 210, TWO_PI = Math.PI * 2;
+  var cvEl = $("#cv");
+
+  function slotPos(shell, slot) {
+    var k = shell - 1;
+    var a = -Math.PI / 2 + DIR[k] * SPD[k] * view.phase + TWO_PI * slot / CAP[k] + k * 0.4;
+    return { x: CX + R[k] * Math.cos(a), y: CY + R[k] * Math.sin(a), ux: Math.cos(a), uy: Math.sin(a) };
+  }
+  function drawElectron(ctx, x, y, type, fill, halo, surface) {
+    if (halo) { ctx.beginPath(); ctx.arc(x, y, 17, 0, TWO_PI); ctx.strokeStyle = halo; ctx.lineWidth = 3; ctx.stroke(); }
+    ctx.beginPath();
+    if (type === "p") { ctx.moveTo(x, y - 14); ctx.lineTo(x + 14, y); ctx.lineTo(x, y + 14); ctx.lineTo(x - 14, y); ctx.closePath(); }
+    else ctx.arc(x, y, 11, 0, TWO_PI);
+    ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = surface; ctx.stroke();
+  }
+  function draw(ctx, W, H) {
+    var line = S.cssVar("--line"), acc = S.cssVar("--accent"), val = S.cssVar("--c-energie"),
+        surf = S.cssVar("--surface"), ink = S.cssVar("--ink"), infobg = S.cssVar("--info-bg"), mono = S.cssVar("--font-data");
+    var cfg = view.cfg, o = outer(cfg), sc = shellCounts(cfg), occ = [[], [], []], i, j, k;
+    for (i = 0; i < SUB.length; i++) for (j = 0; j < cfg[i]; j++) occ[SUB[i].shell - 1][SUB[i].off + j] = SUB[i].t;
+    // couches
+    for (k = 0; k < 3; k++) {
+      var isOuter = view.valence && (k + 1) === o;
+      ctx.beginPath(); ctx.arc(CX, CY, R[k], 0, TWO_PI);
+      ctx.setLineDash(sc[k] > 0 ? [] : [6, 7]);
+      ctx.lineWidth = isOuter ? 4 : 2; ctx.strokeStyle = isOuter ? val : line; ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // places libres
+    for (k = 0; k < 3; k++) if (sc[k] > 0) for (j = 0; j < CAP[k]; j++) if (!occ[k][j]) {
+      var p = slotPos(k + 1, j);
+      ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, TWO_PI); ctx.setLineDash([3, 3]); ctx.lineWidth = 1.5; ctx.strokeStyle = S.cssVar("--muted"); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // noyau
+    ctx.beginPath(); ctx.arc(CX, CY, 29, 0, TWO_PI); ctx.fillStyle = infobg; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = acc; ctx.stroke();
+    ctx.fillStyle = ink; ctx.font = "600 20px " + mono; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(view.z + "+", CX, CY + 1);
+    // électrons
+    for (k = 0; k < 3; k++) for (j = 0; j < CAP[k]; j++) if (occ[k][j]) {
+      var q = slotPos(k + 1, j), isV = view.valence && (k + 1) === o;
+      drawElectron(ctx, q.x, q.y, occ[k][j], isV ? val : acc, isV ? val : null, surf);
+    }
+    // électron en vol
+    var f = view.fly;
+    if (f) {
+      var P = slotPos(f.shell, f.slot), e = f.t * f.t * (3 - 2 * f.t), D = 300;
+      var d = f.kind === "out" ? D * e : D * (1 - e);
+      ctx.globalAlpha = f.kind === "out" ? 1 - 0.7 * f.t : 0.35 + 0.65 * f.t;
+      drawElectron(ctx, P.x + P.ux * d, P.y + P.uy * d, SUB[f.i].t, ink, null, surf);
+      ctx.globalAlpha = 1;
+    }
+  }
+  var scene = S.canvas("#cv", { width: CW, height: CH, draw: draw });
+
+  function describe() {
+    var c = view.cfg, sc = shellCounts(c), n = sum(c);
+    var t = view.title + " : noyau de " + view.z + " proton" + (view.z > 1 ? "s" : "") + ", entouré de " + plural(n, "électron") +
+      " : " + sc[0] + " sur la couche 1, " + sc[1] + " sur la couche 2, " + sc[2] + " sur la couche 3.";
+    if (view.valence && n > 0) t += " Les " + plural(valence(c), "électron") + " de la couche externe sont les électrons de valence.";
+    cvEl.setAttribute("aria-label", t);
+    $("#shells").innerHTML = [0, 1, 2].map(function (k) { return "<span>couche " + (k + 1) + " : " + sc[k] + " " + eMinus() + "</span>"; }).join("");
+  }
+
+  /* ---------- Animation : file d'étapes « un électron à la fois » ---------- */
+  function afterStep() {
+    view.dirty = true; describe();
+    if (!view.fly && !view.queue.length && view.onIdle) { var cb = view.onIdle; view.onIdle = null; cb(); }
+  }
+  function startNext() {
+    var s = view.queue.shift(), i = s.i;
+    if (s.kind === "out") {
+      if (view.cfg[i] <= 0) return afterStep();
+      var slot = SUB[i].off + view.cfg[i] - 1; view.cfg[i]--;
+      view.fly = { kind: "out", shell: SUB[i].shell, slot: slot, t: 0, dur: view.dur, i: i };
+    } else {
+      if (view.cfg[i] >= SUB[i].max) return afterStep();
+      view.fly = { kind: "in", shell: SUB[i].shell, slot: SUB[i].off + view.cfg[i], t: 0, dur: view.dur, i: i };
+    }
+    describe();
+  }
+  function pushStep(kind, i) {
+    if (S.reducedMotion) { view.cfg[i] += kind === "in" ? 1 : -1; afterStep(); }
+    else view.queue.push({ kind: kind, i: i });
+  }
+  function setCfgNow(cfg) { view.queue = []; view.fly = null; view.onIdle = null; view.cfg = cfg.slice(); view.dirty = true; describe(); }
+  function pathSteps(from, to) {
+    var steps = [], n;
+    if (to > from) for (n = from + 1; n <= to; n++) steps.push({ kind: "in", i: diffIdx(config(n - 1), config(n)) });
+    else for (n = from; n > to; n--) steps.push({ kind: "out", i: diffIdx(config(n - 1), config(n)) });
+    return steps;
+  }
+  function goToN(from, to, dur, cb) {
+    view.dur = dur; view.onIdle = cb || null;
+    var steps = pathSteps(from, to);
+    if (!steps.length) { afterStep(); return; }
+    steps.forEach(function (s) { pushStep(s.kind, s.i); });
+    if (S.reducedMotion) afterStep();
+  }
+  var anim = S.loop(function (dt) {
+    if (!S.reducedMotion) view.phase += dt;
+    if (view.fly) {
+      view.fly.t += dt / view.fly.dur;
+      if (view.fly.t >= 1) { var f = view.fly; if (f.kind === "in") view.cfg[f.i]++; view.fly = null; afterStep(); }
+    } else if (view.queue.length) startNext();
+    if (!S.reducedMotion || view.dirty) { scene.redraw(); view.dirty = false; }
+  });
+
+  /* ---------- Observation, progression ---------- */
+  function say(tone, html) { state.msg[state.mode] = { tone: tone, html: html }; S.observe("#obs", tone, html); }
+  function renderProgress() {
+    $("#xp").textContent = state.xp + " XP";
+    ["m1", "m2", "m3"].forEach(function (m, idx) {
+      var chip = $("#chip-" + m), done = state.done[m];
+      chip.setAttribute("data-done", String(done));
+      chip.textContent = "Mission " + (idx + 1) + " : " + (done ? "réussie ✓" : "à faire");
+      $("#tab-" + m).textContent = (idx + 1) + " · " + ["Remplir", "Tableau", "Ions"][idx] + (done ? " ✓" : "");
+    });
+    var all = state.done.m1 && state.done.m2 && state.done.m3;
+    $("#bilan").hidden = !all; $("#bilan-xp").textContent = state.xp + " XP";
+  }
+  function award(first) { state.xp += first ? 50 : 25; }
+  function setDisabled(btn, on) { if (on) btn.setAttribute("aria-disabled", "true"); else btn.removeAttribute("aria-disabled"); }
+
+  /* ---------- Tableau périodique ---------- */
+  (function buildTable() {
+    var cols = [1, 2, "…", 13, 14, 15, 16, 17, 18], rows = [[], [], []];
+    EL.forEach(function (e) { var r = e.z <= 2 ? 1 : (e.z <= 10 ? 2 : 3); rows[r - 1][e.col] = e; });
+    var t = $("#ptable");
+    var html = '<caption>Lignes 1 à 3 et colonnes 1, 2 et 13 à 18 (les colonnes 3 à 12 ne sont pas représentées)</caption><thead><tr><td class="vide"></td>';
+    cols.forEach(function (c) { html += '<th scope="col">' + (c === "…" ? "3–12" : c) + "</th>"; });
+    html += "</tr></thead><tbody>";
+    rows.forEach(function (row, r) {
+      html += '<tr><th scope="row">ligne ' + (r + 1) + "</th>";
+      cols.forEach(function (c) {
+        if (c === "…") { html += '<td class="pts" aria-hidden="true">…</td>'; return; }
+        var e = row[c];
+        html += e ? '<td data-z="' + e.z + '"><b>' + e.sym + "</b><small>" + e.z + '</small><span class="sr-only"> ' + e.name + "</span></td>" : '<td class="vide"></td>';
+      });
+      html += "</tr>";
+    });
+    t.innerHTML = html + "</tbody>";
+  })();
+  function markTable(z) {
+    Array.prototype.forEach.call(document.querySelectorAll("#ptable td[data-z]"), function (td) {
+      if (z && Number(td.getAttribute("data-z")) === z) td.setAttribute("aria-current", "true"); else td.removeAttribute("aria-current");
+    });
+  }
+
+  /* ---------- Explorer ---------- */
+  var lcdSym = S.readout("#ex-lcds", { label: "Élément" });
+  var lcdN = S.readout("#ex-lcds", { label: "Électrons", digits: 0 });
+  var lcdV = S.readout("#ex-lcds", { label: "Électrons de valence", digits: 0 });
+  var lcdR = S.readout("#ex-lcds", { label: "Ligne", digits: 0 });
+  var lcdC = S.readout("#ex-lcds", { label: "Colonne", digits: 0 });
+  var slZ = S.slider("#sl-z", { label: "Numéro atomique Z", unit: "", min: 1, max: 18, step: 1, value: Math.max(1, Math.min(18, Math.round(init.Z))), digits: 0, bounds: true, onInput: function (v) { exploreZ(v, false); } });
+
+  function exploreInfo(el) {
+    var c = config(el.z), o = outer(c), v = valence(c), fam = family(el);
+    var msg = Le(el) + " (Z = " + el.z + ") a <b>" + plural(el.z, "électron") + "</b> : " + cfgHTML(c) +
+      ". Sa couche externe (couche " + o + ") contient <b>" + plural(v, "électron") + " de valence</b> : il est sur la <b>ligne " + o + "</b>, <b>colonne " + el.col + "</b>.";
+    if (fam) msg += " Famille des <b>" + fam + "</b>.";
+    if (el.z === 1) msg += " Attention : l’hydrogène est dans la colonne 1 mais n’est pas un alcalin.";
+    if (el.z === 2) msg += " L’hélium a sa couche 1 pleine (2 électrons) : il est dans la colonne 18, avec les gaz nobles.";
+    return msg;
+  }
+  function exploreFill(el) {
+    var c = config(el.z);
+    lcdSym.set(el.sym); lcdN.set(el.z); lcdV.set(valence(c)); lcdR.set(outer(c)); lcdC.set(el.col);
+    $("#ex-cfg").innerHTML = cfgHTML(c);
+    markTable(el.z);
+    say("info", exploreInfo(el));
+  }
+  function exploreZ(z, build) {
+    var el = EL[z - 1];
+    view.z = z; view.valence = $("#sw-val").getAttribute("aria-checked") === "true"; view.title = "Atome " + de(el);
+    etat.write({ m: state.mode, Z: z });
+    if (build) {
+      setCfgNow([0, 0, 0, 0, 0]);
+      say("info", "Les électrons arrivent un par un, dans l’ordre : 1s, puis 2s, puis 2p, puis 3s, puis 3p.");
+      goToN(0, z, 0.22, function () { exploreFill(el); });
+    } else { setCfgNow(config(z)); exploreFill(el); }
+  }
+  $("#ex-build").addEventListener("click", function () { exploreZ(slZ.get(), true); });
+  $("#sw-val").addEventListener("switch", function (e) { view.valence = e.detail.checked; view.dirty = true; describe(); });
+
+  /* ---------- Mission 1 ---------- */
+  var m1 = { el: null, user: [0, 0, 0, 0, 0], tries: 0, hints: 0, solved: false, deck: makeDeck(EL.slice(2)), refs: [] };
+  (function buildBoxes() {
+    var host = $("#m1-boxes");
+    SUB.forEach(function (s, i) {
+      var out = h("output", { text: "0" });
+      var minus = h("button", { type: "button", "aria-label": "Retirer un électron de la sous-couche " + s.n, text: MINUS, onclick: function () { m1Change(i, -1); } });
+      var plus = h("button", { type: "button", "aria-label": "Ajouter un électron à la sous-couche " + s.n, text: "+", onclick: function () { m1Change(i, 1); } });
+      var box = h("div", { class: "box", role: "group", "aria-label": "Sous-couche " + s.n }, h("div", { class: "nm", text: s.n }), h("div", { class: "cap", text: "capacité : " + s.max }), h("div", { class: "stepper" }, minus, out, plus));
+      host.appendChild(box); m1.refs[i] = { box: box, out: out, minus: minus, plus: plus };
+    });
+  })();
+  function m1Update() {
+    m1.refs.forEach(function (r, i) {
+      r.out.textContent = m1.user[i];
+      r.box.setAttribute("data-full", String(m1.user[i] >= SUB[i].max));
+      setDisabled(r.plus, m1.solved || m1.user[i] >= SUB[i].max);
+      setDisabled(r.minus, m1.solved || m1.user[i] <= 0);
+    });
+    $("#m1-total").textContent = "Électrons placés : " + sum(m1.user) + " / " + m1.el.z;
+  }
+  function m1Change(i, d) {
+    if (m1.solved) return;
+    if (d > 0 && m1.user[i] >= SUB[i].max) return;
+    if (d < 0 && m1.user[i] <= 0) return;
+    m1.user[i] += d; pushStep(d > 0 ? "in" : "out", i); m1Update();
+  }
+  function m1New() {
+    m1.el = m1.deck.next(); m1.user = [0, 0, 0, 0, 0]; m1.tries = 0; m1.hints = 0; m1.solved = false;
+    $("#m1-next").hidden = true; $("#m1-check").hidden = false; $("#m1-hint").hidden = false;
+    $("#m1-q").innerHTML = "Atome cible : <b>" + m1.el.name + " (" + m1.el.sym + ")</b>, Z = " + m1.el.z + ". L’atome est neutre : il a <b>" + plural(m1.el.z, "électron") + "</b> à placer.";
+    m1Enter(true);
+    say("info", "Place les " + m1.el.z + " électrons, puis valide. Prédis d’abord combien d’électrons iront dans chaque sous-couche.");
+  }
+  function m1Enter(fresh) {
+    var el = m1.el; view.z = el.z; view.valence = false; view.title = "Atome " + de(el);
+    setCfgNow(fresh ? [0, 0, 0, 0, 0] : m1.user); m1Update();
+  }
+  $("#m1-check").addEventListener("click", function () {
+    if (m1.solved) return;
+    var el = m1.el, ok = config(el.z), u = m1.user, total = sum(u);
+    m1.tries++;
+    if (total !== el.z) {
+      say("bad", "<b>Pas encore.</b> " + (total < el.z ? "Il manque " + plural(el.z - total, "électron") + " : " : "Tu as placé " + plural(total - el.z, "électron") + " de trop : ") +
+        "un atome neutre a autant d’électrons que de protons, donc " + plural(el.z, "électron") + " (Z = " + el.z + ").");
+      return;
+    }
+    var bad = diffIdx(u, ok);
+    if (bad === -1) {
+      m1.solved = true; award(m1.tries === 1); state.done.m1 = true; renderProgress(); m1Update();
+      $("#m1-check").hidden = true; $("#m1-hint").hidden = true; $("#m1-next").hidden = false;
+      say("ok", "<b>Bravo.</b> Configuration exacte : " + cfgHTML(ok) + ". On remplit chaque sous-couche jusqu’à sa capacité avant de passer à la suivante. (+" + (m1.tries === 1 ? 50 : 25) + " XP)");
+      return;
+    }
+    var later = false; for (var j = bad + 1; j < SUB.length; j++) if (u[j] > 0) later = true;
+    if (u[bad] < SUB[bad].max && later) say("bad", "<b>Pas encore.</b> La sous-couche <b>" + SUB[bad].n + "</b> n’est pas pleine alors qu’une sous-couche suivante contient déjà des électrons. L’ordre est 1s, 2s, 2p, 3s, 3p.");
+    else say("bad", "<b>Pas encore.</b> Le nombre total est bon, mais la sous-couche <b>" + SUB[bad].n + "</b> n’est pas remplie comme il faut. Rappelle-toi sa capacité : " + SUB[bad].max + " électrons au maximum.");
+  });
+  $("#m1-hint").addEventListener("click", function () {
+    var ok = config(m1.el.z); m1.hints++;
+    if (m1.hints === 1) say("warn", "<b>Indice :</b> l’ordre de remplissage est 1s (2 électrons au maximum), 2s (2), 2p (6), 3s (2), 3p (6). On remplit une sous-couche entièrement avant de passer à la suivante.");
+    else {
+      var full = 0; for (var i = 0; i < SUB.length; i++) if (ok[i] === SUB[i].max) full++;
+      say("warn", "<b>Indice :</b> pour Z = " + m1.el.z + ", <b>" + full + "</b> sous-couche" + (full > 1 ? "s sont pleines" : " est pleine") + (full === 5 ? "." : ". Les électrons restants vont dans la sous-couche suivante."));
+    }
+  });
+  $("#m1-next").addEventListener("click", function () { m1New(); $("#m1-q").focus(); });
+
+  /* ---------- Mission 2 ---------- */
+  var m2 = { el: null, tries: 0, hints: 0, solved: false, deck: makeDeck(EL) };
+  var m2f = { v: $("#m2-v"), r: $("#m2-r"), c: $("#m2-c") };
+  function m2Status(id, s, txt) { var e = $("#m2-" + id + "s"); e.setAttribute("data-s", s || ""); e.textContent = txt || ""; }
+  function m2New() {
+    m2.el = m2.deck.next(); m2.tries = 0; m2.hints = 0; m2.solved = false;
+    ["v", "r", "c"].forEach(function (k) { m2f[k].value = ""; m2f[k].disabled = false; m2Status(k); });
+    $("#m2-next").hidden = true; $("#m2-check").hidden = false; $("#m2-hint").hidden = false;
+    var el = m2.el;
+    $("#m2-q").innerHTML = "Élément : <b>" + el.name + " (" + el.sym + ")</b>, Z = " + el.z + ".";
+    $("#m2-cfg").innerHTML = cfgHTML(config(el.z));
+    m2Enter();
+    say("info", "Repère la couche externe dans la configuration, puis donne le nombre d’électrons de valence, la ligne et la colonne.");
+  }
+  function m2Enter() {
+    var el = m2.el; view.z = el.z; view.valence = m2.solved; view.title = "Atome " + de(el);
+    setCfgNow(config(el.z)); markTable(m2.solved ? el.z : 0);
+  }
+  $("#m2-check").addEventListener("click", function () {
+    if (m2.solved) return;
+    var el = m2.el, c = config(el.z), exp = { v: valence(c), r: outer(c), c: el.col };
+    var got = { v: S.parseNum(m2f.v.value), r: S.parseNum(m2f.r.value), c: S.parseNum(m2f.c.value) };
+    if (isNaN(got.v) || isNaN(got.r) || isNaN(got.c)) { say("warn", "<b>À vérifier :</b> remplis les trois champs avec des nombres entiers."); return; }
+    m2.tries++;
+    var all = true, tips = [];
+    ["v", "r", "c"].forEach(function (k) {
+      var ok = got[k] === exp[k]; all = all && ok;
+      m2Status(k, ok ? "ok" : "bad", ok ? "✓ juste" : "✗ à revoir");
+    });
+    if (all) {
+      m2.solved = true; award(m2.tries === 1); state.done.m2 = true; renderProgress();
+      ["v", "r", "c"].forEach(function (k) { m2f[k].disabled = true; });
+      $("#m2-check").hidden = true; $("#m2-hint").hidden = true; $("#m2-next").hidden = false;
+      view.valence = true; view.dirty = true; describe(); markTable(el.z);
+      var fam = family(el);
+      say("ok", "<b>Bravo.</b> La couche externe est la couche " + exp.r + " : " + le(el) + " est sur la <b>ligne " + exp.r + "</b>. Elle contient <b>" + plural(exp.v, "électron") + " de valence</b> : <b>colonne " + exp.c + "</b>." +
+        (fam ? " C’est un élément de la famille des <b>" + fam + "</b>." : "") +
+        (el.z === 2 ? " L’hélium est un cas particulier : 2 électrons de valence, mais colonne 18 (couche 1 pleine, comme les gaz nobles)." : "") +
+        (el.z === 1 ? " L’hydrogène est en colonne 1, mais ce n’est pas un alcalin." : "") + " (+" + (m2.tries === 1 ? 50 : 25) + " XP)");
+      return;
+    }
+    if (got.v !== exp.v) tips.push("Les électrons de valence sont ceux de la <b>dernière couche</b> (celle qui a le plus grand numéro).");
+    if (got.r !== exp.r) tips.push("La <b>ligne</b> est le numéro de la couche externe.");
+    if (got.c !== exp.c) tips.push(got.v === exp.v ? "Pour la <b>colonne</b> : avec 1 ou 2 électrons de valence, colonne 1 ou 2 ; avec 3 à 8, colonne 13 à 18 (on ajoute 10). Un seul cas particulier : l’hélium." : "Corrige d’abord les électrons de valence : la colonne en dépend.");
+    if (m2.tries >= 3) tips.push("Réponse : " + exp.v + " électron(s) de valence, ligne " + exp.r + ", colonne " + exp.c + ".");
+    say("bad", "<b>Pas encore.</b> " + tips.join(" "));
+  });
+  $("#m2-hint").addEventListener("click", function () {
+    m2.hints++;
+    if (m2.hints === 1) say("warn", "<b>Indice :</b> regarde le plus grand numéro de couche dans la configuration (le premier chiffre de 1s, 2s, 2p, 3s, 3p). Additionne les électrons de cette couche.");
+    else say("warn", "<b>Indice :</b> colonne = nombre d’électrons de valence s’il est 1 ou 2 ; sinon nombre d’électrons de valence + 10. Un seul cas particulier : l’hélium.");
+  });
+  $("#m2-next").addEventListener("click", function () { m2New(); $("#m2-q").focus(); });
+
+  /* ---------- Mission 3 ---------- */
+  var m3 = { item: null, el: null, sel: null, nE: 0, q: 0, tested: false, busy: false, tries: 0, solved: false, deck: makeDeck(IONS) };
+  var lcdP = S.readout("#m3-lcds", { label: "Protons (Z)", digits: 0 });
+  var lcdE = S.readout("#m3-lcds", { label: "Électrons", digits: 0 });
+  var lcdQ = S.readout("#m3-lcds", { label: "Charge de l’ion (en e)" });
+  var lcdO = S.readout("#m3-lcds", { label: "Électrons sur la couche externe", digits: 0 });
+  function m3Readouts() {
+    var c = config(m3.nE);
+    lcdP.set(m3.el.z); lcdE.set(m3.nE); lcdQ.set(m3.nE === m3.el.z ? "0" : chargeNum(m3.el.z - m3.nE)); lcdO.set(valence(c));
+  }
+  function m3Title() {
+    var q = m3.el.z - m3.nE;
+    view.title = q === 0 ? "Atome " + de(m3.el) : "Ion de charge " + (q > 0 ? "plus " : "moins ") + Math.abs(q) + " formé à partir de l’atome " + de(m3.el);
+  }
+  function m3Busy(b) { m3.busy = b; setDisabled($("#m3-test"), b || m3.solved); setDisabled($("#m3-check"), b || m3.solved); }
+  function m3Charges() {
+    var host = $("#m3-charges"); host.innerHTML = ""; m3.sel = null;
+    [3, 2, 1, -1, -2, -3].forEach(function (q) {
+      var e = m3.el.z - q; if (e < 1 || e > 18) return;
+      var b = h("button", { type: "button", class: "pill", "aria-pressed": "false", "aria-label": "Ion de charge " + (q > 0 ? "plus " : "moins ") + Math.abs(q) + " : " + (q > 0 ? "perd " : "gagne ") + plural(Math.abs(q), "électron"),
+        html: "<b>" + ionHTML(m3.el.sym, q) + "</b><small>" + (q > 0 ? "perd " : "gagne ") + Math.abs(q) + " " + eMinus() + "</small>",
+        onclick: function () {
+          if (m3.solved) return;
+          m3.sel = q; Array.prototype.forEach.call(host.children, function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        } });
+      host.appendChild(b);
+    });
+  }
+  function m3New() {
+    m3.item = m3.deck.next(); m3.el = EL[m3.item.z - 1]; m3.nE = m3.el.z; m3.q = 0; m3.tested = false; m3.tries = 0; m3.solved = false;
+    $("#m3-explain").hidden = true; $("#m3-next").hidden = true; $("#m3-test").hidden = false;
+    $("#m3-noble").value = ""; Array.prototype.forEach.call(document.querySelectorAll('input[name="m3-rule"]'), function (r) { r.checked = false; });
+    $("#m3-q").innerHTML = "Atome : <b>" + m3.el.name + " (" + m3.el.sym + ")</b>, Z = " + m3.el.z + ". Neutre, il a " + plural(m3.el.z, "électron") + " ; sa couche externe n’est pas stable.";
+    m3Charges(); m3Busy(false); m3Enter();
+    say("info", "Prédis la charge de l’ion que cet atome peut former, puis clique sur « Tester ma prédiction ».");
+  }
+  function m3Enter() {
+    view.z = m3.el.z; view.valence = true; m3Title(); setCfgNow(config(m3.nE)); m3Readouts(); markTable(m3.el.z);
+  }
+  $("#m3-test").addEventListener("click", function () {
+    if (m3.busy || m3.solved) return;
+    if (m3.sel === null) { say("warn", "<b>À vérifier :</b> choisis d’abord une charge à tester."); return; }
+    var target = m3.el.z - m3.sel, from = m3.nE, q = m3.sel;
+    m3Busy(true); m3.nE = target;
+    goToN(from, target, 0.55, function () {
+      m3.q = q; m3.tested = true; m3Title(); m3Readouts(); m3Busy(false);
+      var c = config(target), st = stability(c), o = outer(c), v = valence(c);
+      var head = "<b>" + ionHTML(m3.el.sym, q) + "</b> : " + m3.el.z + " protons, " + target + " électrons. Couche externe (couche " + o + ") : " + plural(v, "électron") + ". ";
+      if (st === "none") say("warn", head + "Ni duet ni octet : cet ion n’est <b>pas stable</b>. Teste une autre charge.");
+      else say("ok", head + "<b>" + (st === "duet" ? "Duet" : "Octet") + "</b> : la couche externe est complète" + (NOBLES[target] ? ", comme celle " + DU_NOBLE[target] + "." : "."));
+      $("#m3-explain").hidden = false;
+    });
+  });
+  $("#m3-check").addEventListener("click", function () {
+    if (m3.busy || m3.solved || !m3.tested) return;
+    var noble = $("#m3-noble").value, rEl = document.querySelector('input[name="m3-rule"]:checked');
+    if (!noble || !rEl) { say("warn", "<b>À vérifier :</b> réponds aux deux questions avant de valider."); return; }
+    var c = config(m3.nE), expNoble = NOBLES[m3.nE] ? String(m3.nE) : "none", expRule = stability(c), tips = [];
+    if (noble !== expNoble) tips.push("Compte les électrons de l’ion testé : il en a " + m3.nE + ". Un gaz noble qui a le même nombre d’électrons : hélium (2), néon (10), argon (18).");
+    if (rEl.value !== expRule) tips.push("Duet : 2 électrons sur la couche externe (couche 1, comme l’hélium). Octet : 8 électrons sur la couche externe (comme le néon ou l’argon). Regarde la couche externe de l’ion.");
+    if (tips.length) { m3.tries++; say("bad", "<b>Pas encore.</b> " + tips.join(" ")); return; }
+    if (m3.q !== m3.item.q) { say("info", "<b>Bien observé :</b> l’ion " + ionHTML(m3.el.sym, m3.q) + " n’est pas stable. Teste une autre charge."); return; }
+    m3.solved = true; award(m3.tries === 0); state.done.m3 = true; renderProgress(); m3Busy(false);
+    $("#m3-test").hidden = true; $("#m3-explain").hidden = true; $("#m3-next").hidden = false;
+    var q = m3.item.q, el = m3.el;
+    say("ok", "<b>Bravo.</b> L’atome " + de(el) + " " + (q > 0 ? "perd " : "gagne ") + plural(Math.abs(q), "électron") + " et devient l’ion <b>" + ionHTML(el.sym, q) + "</b> (" + (q > 0 ? "cation" : "anion") + "), qui a la configuration " + DU_NOBLE[m3.nE] + " (" + (expRule === "duet" ? "duet" : "octet") + "). Dans le tableau, les éléments de la colonne " + el.col + " forment des ions de même charge. (+" + (m3.tries === 0 ? 50 : 25) + " XP)");
+  });
+  $("#m3-next").addEventListener("click", function () { m3New(); $("#m3-q").focus(); });
+
+  /* ---------- Bilan ---------- */
+  $("#bilan-reset").addEventListener("click", function () {
+    state.xp = 0; state.done = { m1: false, m2: false, m3: false }; renderProgress(); setMode("explorer"); tabsApi.select("explorer", true);
+  });
+
+  /* ---------- Navigation entre activités ---------- */
+  var DEFAULTS = {
+    explorer: "Déplace le curseur : prédis d’abord la configuration électronique, puis vérifie avec le schéma.",
+    m1: "Place les électrons dans les sous-couches, puis valide.", m2: "Donne la position de l’élément dans le tableau.", m3: "Prédis la charge de l’ion, puis teste."
+  };
+  function setMode(m) {
+    state.mode = m;
+    ["explorer", "m1", "m2", "m3"].forEach(function (k) { $("#p-" + k).hidden = (k !== m); });
+    $("#table-card").hidden = (m === "m1");
+    if (m === "explorer") exploreZ(slZ.get(), false);
+    else if (m === "m1") { if (!m1.el) m1New(); else m1Enter(false); }
+    else if (m === "m2") { if (!m2.el) m2New(); else m2Enter(); }
+    else { if (!m3.el) m3New(); else m3Enter(); }
+    var saved = state.msg[m]; if (m !== "explorer") S.observe("#obs", saved ? saved.tone : "info", saved ? saved.html : DEFAULTS[m]);
+    etat.write({ m: m, Z: slZ.get() });
+  }
+  var start = ["explorer", "m1", "m2", "m3"].indexOf(init.m) >= 0 ? init.m : "explorer";
+  var tabsApi = S.tabs("#tabs", setMode, start);
+  renderProgress();
+  anim.start();
+})();
+</script>
+</body>
+</html>
