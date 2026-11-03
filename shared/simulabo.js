@@ -18,7 +18,7 @@
 (function (global) {
   "use strict";
 
-  var Simulabo = { version: "1.0.0" };
+  var Simulabo = { version: "1.1.0" };
 
   /* ---------- Outils : DOM ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -368,6 +368,164 @@
     return { read: read, write: write, link: function () { return global.location.href; } };
   }
 
+
+  /* ---------- Prédire · Observer · Expliquer (v2, bêta) ----------
+     Démarche en trois temps : l'élève s'engage sur une prédiction AVANT de manipuler,
+     observe, puis confronte sa prédiction à l'observation et explique avec ses mots.
+     Le retour ne dit jamais seulement « faux » : un écart est présenté comme une information.
+
+     const p = poe("#poe", {
+        question: "Si on double la période T, que devient la fréquence f ?",
+        choices: [{id:"a", text:"Elle double"}, {id:"b", text:"Elle est divisée par 2"}, {id:"c", text:"Elle ne change pas"}],
+        answer: "b",
+        observe: "Règle T à 4 ms puis à 8 ms et compare les fréquences affichées.",
+        explain: "f = 1 / T : si T double, f est divisée par 2.",
+        why: { a: "…", c: "…" },            // optionnel : message ciblé selon la mauvaise prédiction
+        lock: "#zone-simulation",          // optionnel : zone rendue inactive (inert) jusqu'à la prédiction
+        confidence: true,                  // optionnel (défaut true) : « Sûr·e de toi ? »
+        onStep: function (n) {}            // optionnel : 1 prédire, 2 observer, 3 expliquer
+     });
+     p.state()  -> {prediction, confidence, observation, explanation, step, match}
+     p.reset()
+     Rien n'est envoyé ni enregistré : « Copier ma démarche » place le texte dans le presse-papiers. */
+  function poe(host, o) {
+    host = resolve(host);
+    var id = nextId("poe");
+    var lockEl = o.lock ? resolve(o.lock) : null;
+    var useConf = o.confidence !== false;
+    var st = { step: 1, prediction: null, confidence: null, observation: "", explanation: "", match: null, skipped: false };
+    var LAB = ["", "Pas sûr·e", "Plutôt sûr·e", "Sûr·e"];
+
+    function radios(name, items) {
+      return items.map(function (c) {
+        var rid = id + "-" + name + "-" + c.id;
+        return h("label", { class: "poe-opt", for: rid }, h("input", { type: "radio", name: id + "-" + name, id: rid, value: c.id }), h("span", { html: c.text }));
+      });
+    }
+    var choiceBox = h("fieldset", { class: "poe-fs" }, h("legend", { html: o.question }));
+    radios("c", o.choices).forEach(function (n) { choiceBox.appendChild(n); });
+    var confBox = null;
+    if (useConf) {
+      var confRow = h("div", { class: "row" });
+      radios("k", [{ id: "1", text: LAB[1] }, { id: "2", text: LAB[2] }, { id: "3", text: LAB[3] }]).forEach(function (n) { confRow.appendChild(n); });
+      confBox = h("fieldset", { class: "poe-fs poe-conf" }, h("legend", { text: "À quel point es-tu sûr·e de ta prédiction ?" }), confRow);
+    }
+    var bPredict = h("button", { type: "button", class: "primary", text: "Valider ma prédiction" });
+    var bSkip = h("button", { type: "button", class: "small", text: "Explorer d'abord, sans prédire" });
+    var err1 = h("p", { class: "status err", role: "alert" });
+
+    var p1 = h("div", { class: "poe-panel", "data-s": "1" },
+      h("h3", { tabindex: "-1", text: "1. Prédis" }),
+      h("p", { class: "help", text: "Avant de toucher à la simulation, choisis ce qui va se passer. Se tromper n'est pas grave : l'écart avec l'observation est justement ce qui fait comprendre." }),
+      choiceBox, confBox, h("div", { class: "row" }, bPredict, bSkip), err1);
+
+    var recap = h("p", { class: "poe-recap" });
+    var notes = h("textarea", { id: id + "-obs", rows: "2", class: "poe-ta", placeholder: "Par exemple : les valeurs que tu as lues, ce qui a changé…" });
+    var bObs = h("button", { type: "button", class: "primary", text: "J'ai observé : comparer avec ma prédiction" });
+    var p2 = h("div", { class: "poe-panel", "data-s": "2", hidden: true },
+      h("h3", { tabindex: "-1", text: "2. Observe" }), recap,
+      h("p", { html: o.observe }),
+      h("label", { for: id + "-obs", class: "poe-lab", text: "Mes observations (facultatif)" }), notes, h("div", { class: "row" }, bObs));
+
+    var cmp = h("div", { class: "fb", role: "status", "aria-live": "polite" });
+    var expl = h("textarea", { id: id + "-exp", rows: "3", class: "poe-ta", placeholder: "Écris ton explication, même incomplète." });
+    var bExp = h("button", { type: "button", class: "primary", text: "Voir l'explication attendue" });
+    var expected = h("div", { class: "fb", "data-tone": "info", hidden: true });
+    var bCopy = h("button", { type: "button", class: "small", text: "Copier ma démarche" });
+    var bReset = h("button", { type: "button", class: "small", text: "Recommencer" });
+    var status3 = h("p", { class: "status", "aria-live": "polite" });
+    var p3 = h("div", { class: "poe-panel", "data-s": "3", hidden: true },
+      h("h3", { tabindex: "-1", text: "3. Explique" }), cmp,
+      h("label", { for: id + "-exp", class: "poe-lab", text: o.explainPrompt || "Avec tes mots, explique ce que tu as observé." }), expl,
+      h("div", { class: "row" }, bExp), expected, h("div", { class: "row" }, bCopy, bReset), status3);
+
+    var steps = h("ol", { class: "poe-steps", "aria-label": "Étapes" },
+      h("li", { text: "Prédire" }), h("li", { text: "Observer" }), h("li", { text: "Expliquer" }));
+    var root = h("section", { class: "poe", id: id }, h("h2", { text: "Prédire · Observer · Expliquer" }), steps, p1, p2, p3);
+    host.appendChild(root);
+
+    function choiceText(cid) { var f = o.choices.filter(function (c) { return c.id === cid; })[0]; return f ? f.text.replace(/<[^>]+>/g, "") : ""; }
+    function go(n, noFocus) {
+      st.step = n;
+      [p1, p2, p3].forEach(function (p, i) { p.hidden = i + 1 !== n; });
+      Array.prototype.forEach.call(steps.children, function (li, i) {
+        if (i + 1 === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+        li.className = i + 1 < n ? "done" : "";
+      });
+      if (lockEl) { if (n >= 2) lockEl.removeAttribute("inert"); else lockEl.setAttribute("inert", ""); lockEl.classList.toggle("poe-locked", n < 2); }
+      var hd = $("h3", [p1, p2, p3][n - 1]); if (hd && !noFocus) hd.focus();
+      if (o.onStep) o.onStep(n);
+    }
+    function checked(name) { var r = $('input[name="' + id + "-" + name + '"]:checked', root); return r ? r.value : null; }
+
+    bPredict.addEventListener("click", function () {
+      var c = checked("c"), k = useConf ? checked("k") : "0";
+      if (!c) { err1.textContent = "Choisis une réponse avant de valider."; return; }
+      if (!k) { err1.textContent = "Indique aussi ton degré de certitude."; return; }
+      err1.textContent = "";
+      st.prediction = c; st.confidence = useConf ? Number(k) : null; st.skipped = false;
+      recap.innerHTML = "Ta prédiction : <b></b>" + (useConf ? " (" + LAB[Number(k)].toLowerCase() + ")" : "") + ".";
+      $("b", recap).textContent = choiceText(c);
+      go(2);
+    });
+    bSkip.addEventListener("click", function () {
+      st.prediction = null; st.confidence = null; st.skipped = true;
+      recap.textContent = "Tu explores sans avoir prédit. Tu pourras comparer avec la réponse attendue à l'étape suivante.";
+      go(2);
+    });
+    bObs.addEventListener("click", function () {
+      st.observation = notes.value.trim();
+      var ok = st.prediction != null && st.prediction === o.answer;
+      st.match = st.prediction == null ? null : ok;
+      var tone, html;
+      if (st.prediction == null) { tone = "info"; html = "<b>Pas de prédiction à comparer.</b> Lis l'explication attendue ci-dessous et vérifie qu'elle correspond à ce que tu as observé."; }
+      else if (ok) { tone = "ok"; html = "<b>Ta prédiction se confirme.</b> Ce que tu as observé correspond à ce que tu attendais."; }
+      else {
+        tone = "warn"; html = "<b>Ta prédiction ne correspond pas à l'observation.</b> C'est une information utile : ce que tu pensais n'est pas ce qui se produit. ";
+        if (o.why && o.why[st.prediction]) html += o.why[st.prediction];
+        if (st.confidence === 3) html += " Tu étais sûr·e de toi : retourne dans la simulation et regarde précisément ce qui t'a surpris·e.";
+      }
+      cmp.setAttribute("data-tone", tone); cmp.innerHTML = html;
+      go(3);
+    });
+    bExp.addEventListener("click", function () {
+      st.explanation = expl.value.trim();
+      if (!st.explanation) { status3.textContent = "Écris d'abord ton explication, même en une phrase : c'est elle que l'on compare ensuite."; expl.focus(); return; }
+      status3.textContent = ""; expected.hidden = false; expected.innerHTML = "<b>Explication attendue.</b> " + o.explain;
+    });
+    function summary() {
+      var lines = ["Prédiction : " + (st.prediction ? choiceText(st.prediction) + (st.confidence ? " (" + LAB[st.confidence].toLowerCase() + ")" : "") : "non prédit"),
+        "Observations : " + (st.observation || "—"), "Mon explication : " + (st.explanation || expl.value.trim() || "—")];
+      return lines.join("\n");
+    }
+    bCopy.addEventListener("click", function () {
+      var t = summary();
+      function fb() { status3.textContent = "Copie automatique impossible : sélectionne et copie ton texte à la main."; }
+      try { navigator.clipboard.writeText(t).then(function () { status3.textContent = "Démarche copiée : colle-la dans ton cahier ou ton document."; }, fb); } catch (e) { fb(); }
+    });
+    function reset() {
+      st = { step: 1, prediction: null, confidence: null, observation: "", explanation: "", match: null, skipped: false };
+      $$("input[type=radio]", root).forEach(function (r) { r.checked = false; });
+      notes.value = ""; expl.value = ""; expected.hidden = true; status3.textContent = ""; err1.textContent = "";
+      go(1);
+    }
+    bReset.addEventListener("click", reset);
+    if (lockEl) { lockEl.setAttribute("inert", ""); lockEl.classList.add("poe-locked"); }
+    go(1, true); // au chargement, on ne déplace pas le focus : le lien d'évitement et le fil d'Ariane restent les premiers atteints au clavier
+    return { el: root, state: function () { var c = {}; Object.keys(st).forEach(function (k) { c[k] = st[k]; }); return c; }, reset: reset, step: function () { return st.step; } };
+  }
+
+  /* ---------- Pied de page commun (v2) ----------
+     footer("#hote", {base: "../"})   // base : chemin relatif vers la racine du site */
+  function footer(host, o) {
+    host = resolve(host); var b = (o && o.base) || "";
+    host.appendChild(h("footer", { class: "sim-footer" },
+      h("span", { text: "Simulabo PhCh · simulations libres d'accès, sans compte ni collecte de données." }),
+      h("a", { href: b + "index.html", text: "Catalogue" }), h("a", { href: b + "enseignants/index.html", text: "Enseignants" }),
+      h("a", { href: b + "a-propos/index.html", text: "À propos" }), h("a", { href: b + "a-propos/accessibilite.html", text: "Accessibilité" }),
+      h("a", { href: b + "a-propos/licence.html", text: "Licence" })));
+  }
+
   /* ---------- Export ---------- */
   Simulabo.$ = $; Simulabo.$$ = $$; Simulabo.h = h;
   Simulabo.clamp = clamp; Simulabo.lerp = lerp; Simulabo.mapRange = mapRange;
@@ -376,5 +534,6 @@
   Simulabo.slider = slider; Simulabo.readout = readout; Simulabo.tabs = tabs; Simulabo.observe = observe;
   Simulabo.canvas = canvas; Simulabo.cssVar = cssVar; Simulabo.loop = loop;
   Simulabo.measureTable = measureTable; Simulabo.defi = defi; Simulabo.shareState = shareState;
+  Simulabo.poe = poe; Simulabo.footer = footer;
   global.Simulabo = Simulabo;
 })(window);

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Période et fréquence d'un signal · Simulabo PhCh</title>
+<meta name="description" content="Règle la période d'un signal sur un oscilloscope virtuel, lis-la sur l'écran et découvre comment elle est liée à la fréquence : f = 1/T.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Propre à cette simulation : l'écran de l'oscilloscope reste sombre en thème clair comme en thème sombre. */
+.scope { background: var(--lcd-bg); }
+.scope canvas { aspect-ratio: 1000 / 600; }
+.stage .legend b { font-family: var(--font-data); font-weight: 600; color: var(--ink); }
+.beta { font: 600 12px var(--font-data); letter-spacing: .06em; padding: 3px 8px; border-radius: 4px; background: var(--info-bg); color: var(--info); border: 1px solid var(--info); margin-left: 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="ondes">Ondes et signaux · Seconde</p>
+    <h1>Période et fréquence d'un signal<span class="beta" title="Simulation pilote du composant Prédire-Observer-Expliquer (version 2, bêta)">V2 bêta</span></h1>
+    <p class="sub">Un oscilloscope virtuel affiche un signal qui se répète. Prédis d'abord ce qui va se passer, règle la période, lis-la sur l'écran, puis explique le lien avec la fréquence.</p>
+  </header>
+
+  <main id="sim" class="wrap">
+    <div id="poe"></div>
+
+    <section class="stage" aria-label="Écran de l'oscilloscope">
+      <div class="scope cv">
+        <canvas id="cv" role="img" aria-label="Oscillogramme"></canvas>
+      </div>
+      <div class="legend">
+        <span class="lg" style="color:var(--lcd-fg)"><i></i>Tension u(t)</span>
+        <span>Une division = <b>1 V</b> en vertical, <b id="lg-base">2 ms</b> en horizontal.</span>
+      </div>
+    </section>
+
+    <div id="zone-reglages" class="panel">
+      <section class="card" id="card-reg" aria-labelledby="h-reg">
+        <h2 id="h-reg">Réglages</h2>
+        <div id="sl" class="card" style="padding:0;border:0;background:none"></div>
+        <div>
+          <p class="help" id="lab-base" style="margin-bottom:6px">Base de temps (durée d'une division horizontale)</p>
+          <div class="tabs" id="base" role="group" aria-labelledby="lab-base">
+            <button class="tab" data-mode="1">1 ms/div</button>
+            <button class="tab" data-mode="2">2 ms/div</button>
+            <button class="tab" data-mode="5">5 ms/div</button>
+          </div>
+        </div>
+        <button class="sw" role="switch" aria-checked="true" id="sw-t"><span class="track"><span class="knob"></span></span>Repérer une période sur l'écran</button>
+        <div class="row"><button type="button" class="primary" id="mesurer">Relever une mesure</button></div>
+      </section>
+      <section class="card" aria-labelledby="h-val">
+        <h2 id="h-val">Valeurs</h2>
+        <div class="readouts" id="lcds"></div>
+        <p class="help">La fréquence est le nombre de périodes par seconde. Elle s'exprime en hertz (Hz).</p>
+      </section>
+    </div>
+
+    <section class="obs" id="obs" aria-live="polite" data-tone="info">
+      <h2>Observation</h2>
+      <p data-obs-text>Règle la période et regarde combien de divisions elle occupe.</p>
+    </section>
+
+    <div id="tableau"></div>
+    <div id="defi"></div>
+
+    <details>
+      <summary>Pour aller plus loin</summary>
+      <ul>
+        <li>Lien avec le programme : « Ondes et signaux », signal périodique, période, fréquence, relation f = 1/T (BO spécial n° 1 du 22 janvier 2019, physique-chimie de Seconde). Rattachement proposé, à confirmer.</li>
+        <li>Modèle : signal sinusoïdal idéal, sans bruit ni déformation. Un signal réel (son enregistré, tension de capteur) est rarement aussi régulier.</li>
+        <li>Pour un son, la fréquence détermine sa hauteur : plus f est grande, plus le son est aigu.</li>
+        <li>Prolongement : mesurer la période sur plusieurs oscillations réduit l'incertitude de lecture.</li>
+      </ul>
+    </details>
+  </main>
+
+  <div id="pied"></div>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  var S = Simulabo;
+  var W = 1000, H = 600, DIV = 100;                       // 10 x 6 divisions de 100 px logiques
+  var etat = S.shareState({ T: 4, A: 2, base: 2 });
+  var init = etat.read();
+  var base = [1, 2, 5].indexOf(init.base) >= 0 ? init.base : 2;
+  var showT = true;
+
+  var sT = S.slider("#sl", { label: "Période T", unit: "ms", min: 1, max: 10, step: 0.5, value: S.clamp(init.T, 1, 10), digits: 1, bounds: true, onInput: update });
+  var sA = S.slider("#sl", { label: "Amplitude", unit: "V", min: 0.5, max: 2.5, step: 0.5, value: S.clamp(init.A, 0.5, 2.5), digits: 1, bounds: true, onInput: update });
+  var lcdT = S.readout("#lcds", { label: "Période T", unit: "ms", digits: 1 });
+  var lcdF = S.readout("#lcds", { label: "Fréquence f = 1/T", unit: "Hz", digits: 0 });
+  var lcdN = S.readout("#lcds", { label: "Divisions par période", unit: "div", digits: 1 });
+  var table = S.measureTable("#tableau", {
+    caption: "Mesures relevées",
+    columns: [{ key: "T", label: "T", unit: "ms", digits: 1 }, { key: "f", label: "f", unit: "Hz", digits: 0 }, { key: "p", label: "f × T (T en s)", unit: "", digits: 2 }],
+    filename: "periode-frequence", max: 12
+  });
+
+  var scene = S.canvas("#cv", { width: W, height: H, draw: draw });
+  // après le canvas : la sélection initiale appelle update(), qui redessine la scène
+  var tabs = S.tabs("#base", function (v) { base = Number(v); update(); }, String(base));
+  function draw(ctx, w, h) {
+    var T = sT.get(), A = sA.get();
+    ctx.fillStyle = S.cssVar("--lcd-bg"); ctx.fillRect(0, 0, w, h);
+    // graduations
+    ctx.lineWidth = 1; ctx.strokeStyle = "rgba(143,163,175,.28)";
+    var i;
+    for (i = 0; i <= 10; i++) { ctx.beginPath(); ctx.moveTo(i * DIV, 0); ctx.lineTo(i * DIV, h); ctx.stroke(); }
+    for (i = 0; i <= 6; i++) { ctx.beginPath(); ctx.moveTo(0, i * DIV); ctx.lineTo(w, i * DIV); ctx.stroke(); }
+    ctx.strokeStyle = "rgba(143,163,175,.6)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, h); ctx.stroke();
+    // petites graduations sur l'axe horizontal (cinquièmes de division)
+    ctx.lineWidth = 1;
+    for (i = 0; i <= 50; i++) { ctx.beginPath(); ctx.moveTo(i * DIV / 5, h / 2 - 5); ctx.lineTo(i * DIV / 5, h / 2 + 5); ctx.stroke(); }
+    // signal u(t) = A sin(2 pi t / T), t en ms
+    ctx.strokeStyle = S.cssVar("--lcd-fg"); ctx.lineWidth = 4; ctx.lineJoin = "round"; ctx.beginPath();
+    for (var x = 0; x <= w; x += 2) {
+      var t = x / DIV * base;
+      var y = h / 2 - A * Math.sin(2 * Math.PI * t / T) * DIV;
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // repère d'une période : de t = 0 à t = T
+    var xT = T / base * DIV;
+    if (showT && xT <= w) {
+      var yb = h - 46;
+      ctx.strokeStyle = "#FFFFFF"; ctx.fillStyle = "#FFFFFF"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0, yb); ctx.lineTo(xT, yb); ctx.moveTo(0, yb - 12); ctx.lineTo(0, yb + 12); ctx.moveTo(xT, yb - 12); ctx.lineTo(xT, yb + 12); ctx.stroke();
+      ctx.setLineDash([6, 8]); ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,.55)";
+      ctx.beginPath(); ctx.moveTo(xT, h / 2); ctx.lineTo(xT, yb - 12); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font = '600 34px ' + S.cssVar("--font-data");
+      var lab = "une période = " + S.fmt(T / base, 1) + " div";
+      var tw = ctx.measureText(lab).width, tx, ty;
+      if (xT >= 440) { ctx.textAlign = "center"; tx = xT / 2; ty = yb - 20; }   // assez large : texte centré sous la période
+      else { ctx.textAlign = "left"; tx = xT + 18; ty = yb + 12; }               // période courte : texte à droite du repère
+      ctx.fillStyle = S.cssVar("--lcd-bg");                                       // fond : le texte reste lisible sur la courbe
+      ctx.fillRect(ctx.textAlign === "center" ? tx - tw / 2 - 6 : tx - 6, ty - 32, tw + 12, 42);
+      ctx.fillStyle = "#FFFFFF"; ctx.fillText(lab, tx, ty);
+    }
+    // texte alternatif à jour
+    document.getElementById("cv").setAttribute("aria-label",
+      "Oscillogramme : signal sinusoïdal d'amplitude " + S.fmt(A, 1) + (A >= 2 ? " volts" : " volt") + " et de période " + S.fmt(T, 1) +
+      (T >= 2 ? " millisecondes" : " milliseconde") + ". Avec la base de temps " + base + (base >= 2 ? " millisecondes" : " milliseconde") +
+      " par division, une période occupe " + S.fmt(T / base, 1) + " divisions.");
+  }
+
+  function update() {
+    var T = sT.get(), A = sA.get(), f = 1000 / T, n = T / base;
+    lcdT.set(T); lcdF.set(f); lcdN.set(n);
+    document.getElementById("lg-base").textContent = base + " ms";
+    var msg = "Une période occupe <b>" + S.fmt(n, 1) + " divisions</b> de <b>" + base + " ms</b> : T = " + S.fmt(n, 1) + " × " + base + " = <b>" + S.fmt(T, 1) + " ms</b>. " +
+      "Le signal se répète <b>" + S.fmt(f, 0) + "</b> fois par seconde : f = 1 / T = <b>" + S.fmt(f, 0) + " Hz</b>.";
+    if (n > 10) msg += " La période dépasse la largeur de l'écran : choisis une base de temps plus grande pour la lire.";
+    S.observe("#obs", n > 10 ? "warn" : "info", msg);
+    etat.write({ T: T, A: A, base: base });
+    scene.redraw();
+  }
+  document.getElementById("sw-t").addEventListener("switch", function (e) { showT = e.detail.checked; scene.redraw(); });
+  document.getElementById("mesurer").addEventListener("click", function () {
+    var T = sT.get();
+    table.add({ T: T, f: 1000 / T, p: (1000 / T) * (T / 1000) });
+  });
+
+  S.poe("#poe", {
+    question: "On <b>double</b> la période T du signal. Que devient sa fréquence f ?",
+    choices: [
+      { id: "a", text: "Elle double aussi." },
+      { id: "b", text: "Elle est divisée par 2." },
+      { id: "c", text: "Elle ne change pas." }
+    ],
+    answer: "b",
+    observe: "Règle T à 2 ms et note la fréquence affichée, puis règle T à 4 ms et compare. Essaie aussi une autre paire de valeurs (par exemple 3 ms et 6 ms). Tu peux relever tes mesures dans le tableau.",
+    why: {
+      a: "Quand la période grandit, le signal met plus de temps à se répéter : il se répète moins souvent par seconde, donc sa fréquence diminue.",
+      c: "La fréquence dépend de la période : si le signal met deux fois plus de temps à se répéter, il se répète deux fois moins souvent par seconde."
+    },
+    explain: "f = 1 / T : la fréquence est l'inverse de la période. Si T est multipliée par 2, f est divisée par 2. Dans le tableau, le produit f × T (avec T en secondes) vaut toujours 1.",
+    explainPrompt: "Avec tes mots, explique le lien entre la période et la fréquence que tu as observé.",
+    lock: "#card-reg"
+  });
+
+  S.defi("#defi", {
+    question: "Sur l'écran, une période occupe <b>4 divisions</b> et la base de temps est de <b>2 ms/div</b>. Calcule la fréquence du signal.",
+    unit: "Hz", answer: 125, tolerance: 0.02,
+    hint: "Calcule d'abord la période T en millisecondes (nombre de divisions × durée d'une division), convertis-la en secondes, puis utilise f = 1 / T.",
+    explain: "T = 4 × 2 ms = 8 ms = 8×10⁻³ s, donc f = 1 / T = 1 / (8×10⁻³ s) = 125 Hz."
+  });
+
+  S.footer("#pied", { base: "../" });
+  update();
+})();
+</script>
+</body>
+</html>

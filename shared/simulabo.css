@@ -18,71 +18,8 @@
    Documentation : docs/socle.md
    ========================================================================== */
 
-@import url("fonts.css"); /* polices hébergées : aucun appel externe */
-
-/* ---------- 1. Jetons de design ---------- */
-:root {
-  /* Surfaces et texte */
-  --bg: #EBEFF2;
-  --surface: #F8FAFB;
-  --ink: #14222C;
-  --muted: #566673;
-  --line: #CBD4DA;
-  --tabs-bg: #DDE4E9;
-
-  /* Accent du site */
-  --accent: #1B5E8C;
-  --accent-ink: #FFFFFF;
-
-  /* Retours d'état (texte + fond) : ne jamais coder l'état par la seule couleur */
-  --ok: #17734A;   --ok-bg: #DDF1E6;
-  --warn: #8F5200; --warn-bg: #FBEBCB;
-  --info: #1B5E8C; --info-bg: #DCEAF4;
-  --bad: #A8281F;  --bad-bg: #F9DDDA;
-
-  /* Thèmes du catalogue (reprise de la page d'accueil) */
-  --t-matiere: #2E7D5B;
-  --t-mouvement: #C0561B;
-  --t-energie: #B8860B;
-  --t-ondes: #2D6CA2;
-
-  /* Couleurs de grandeurs physiques (convention : une couleur = une grandeur, sur tout le site) */
-  --c-force: #C62828;
-  --c-vitesse: #047857;
-  --c-position: #1D4ED8;
-  --c-energie: #B45309;
-  --c-temps: #7E22CE;
-
-  /* Afficheur type LCD */
-  --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-dim: #A98A45; --lcd-label: #8FA3AF;
-
-  /* Typographie : polices hébergées (shared/fonts/), repli sur les polices du système */
-  --font-head: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-
-  /* Rythme */
-  --radius: 10px;
-  --radius-sm: 8px;
-  --gap: 16px;
-  --tap: 44px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
-    --tabs-bg: #0A1015;
-    --accent: #6BB4E8; --accent-ink: #0B1A24;
-    --ok: #67D39B;   --ok-bg: #12301F;
-    --warn: #F2A81D; --warn-bg: #3A2A0C;
-    --info: #6BB4E8; --info-bg: #14293A;
-    --bad: #F0877D;  --bad-bg: #3B1613;
-    --t-matiere: #5FBF93; --t-mouvement: #F0905A; --t-energie: #E3B341; --t-ondes: #6BB4E8;
-    --c-force: #F87171; --c-vitesse: #34D399; --c-position: #60A5FA; --c-energie: #FBBF24; --c-temps: #C084FC;
-    --lcd-bg: #0A1015;
-    color-scheme: dark;
-  }
-}
+@import url("fonts.css");  /* polices hébergées : aucun appel externe */
+@import url("tokens.css"); /* jetons de design : source unique (v2) */
 
 /* ---------- 2. Base ---------- */
 * { box-sizing: border-box; }
@@ -234,3 +171,25 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   .tabs, .stagebar, .crumb, .skip, button { display: none !important; }
   .card, .obs, .stage { break-inside: avoid; box-shadow: none; }
 }
+
+/* ---------- 15. Prédire · Observer · Expliquer (v2, bêta) ---------- */
+.poe { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.poe-steps { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; counter-reset: poe; }
+.poe-steps li { counter-increment: poe; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 6px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); font-size: 14px; font-weight: 600; }
+.poe-steps li::before { content: counter(poe); width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--font-data); border: 1.5px solid currentColor; }
+.poe-steps li.done { color: var(--ok); }
+.poe-steps li.done::before { content: "\2713"; }
+.poe-steps li[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.poe-panel { display: flex; flex-direction: column; gap: 12px; }
+.poe-panel h3:focus { outline: none; }
+.poe-fs { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.poe-fs legend { font-weight: 600; padding: 0; margin-bottom: 6px; font-size: 16px; }
+.poe-opt { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg); cursor: pointer; min-height: var(--tap); }
+.poe-opt:hover { border-color: var(--muted); }
+.poe-opt:has(input:checked) { border-color: var(--accent); background: var(--info-bg); box-shadow: inset 0 0 0 1px var(--accent); }
+.poe-opt input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+.poe-conf .poe-opt { flex: 1 1 150px; }
+.poe-recap { padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info); }
+.poe-lab { font-weight: 600; font-size: 14px; }
+.poe-ta { width: 100%; font: 400 15px/1.5 var(--font-body); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--bg); color: var(--ink); resize: vertical; }
+.poe-locked { opacity: .55; pointer-events: none; user-select: none; }
