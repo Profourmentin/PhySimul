@@ -66,6 +66,14 @@ Vérifié automatiquement pour toute simulation qui utilise le socle :
 - **Polices hébergées sur le site** (`shared/fonts/`, licence SIL OFL 1.1) : Barlow Semi Condensed pour les titres, IBM Plex Sans pour le texte, IBM Plex Mono pour les valeurs. Aucun appel à Google Fonts ni à un CDN : pas de transmission de l'adresse IP des élèves, utilisable hors ligne. Les polices sont déclarées dans `shared/fonts.css`, chargé automatiquement par `simulabo.css`. Une simulation hors socle ajoute simplement `<link rel="stylesheet" href="../shared/fonts.css">`. Poids disponibles : Barlow 500, 600, 700 ; Plex Sans 400 à 600 ; Plex Mono 400, 500, 600. Un autre poids est remplacé par le plus proche : ne pas en demander d'autres sans ajouter le fichier.
 - **Couleurs propres à une simulation** : variable locale dans le `<style>` de la page, définie en clair et en sombre, jamais redéfinition des jetons du socle.
 
+## Nouveautés de la v2 (bêta)
+
+- **`shared/tokens.css`** : jetons de design en source unique, importés par `simulabo.css` (simulations) et `site.css` (pages du site). Ajouts : `--tb-*` (fonds de thème), `--grid`, `--vec`. Les couleurs de thème sont celles de l'accueil.
+- **`shared/site.css`** : feuille de style des pages du site (accueil, À propos). Ne pas l'utiliser dans une simulation.
+- **`Simulabo.poe(host, options)`** : démarche Prédire · Observer · Expliquer. L'élève s'engage sur une prédiction (avec son degré de certitude) avant de manipuler, observe, puis compare et explique avec ses mots. Un écart avec l'observation est présenté comme une information, jamais comme une faute. Options : `question`, `choices`, `answer`, `observe`, `explain`, `why` (messages ciblés selon la prédiction), `lock` (zone rendue inactive jusqu'à la prédiction), `confidence`, `onStep`. Rien n'est enregistré : « Copier ma démarche » place le texte dans le presse-papiers. Exemple complet : `sims/periode-frequence.html`.
+- **`Simulabo.footer(host, {base})`** : pied de page commun avec les liens À propos, accessibilité et licence.
+- Version de `simulabo.js` : 1.1.0.
+
 ## Faire évoluer le socle
 
 Le socle est partagé : toute modification touche toutes les simulations qui l'utilisent. Règles :

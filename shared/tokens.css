@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Simulabo PhCh : jetons de design (source unique)
+   --------------------------------------------------------------------------
+   Importé par shared/simulabo.css (simulations) et shared/site.css (pages du site).
+   Version 2 : les couleurs de thème sont celles de l'accueil (matière = vert d'eau,
+   mouvement = bleu, énergie = ambre, ondes = violet) ; ajout des fonds --tb-*,
+   de la grille millimétrée (--grid) et de la couleur des vecteurs (--vec).
+   ========================================================================== */
+
+:root {
+  /* Surfaces et texte */
+  --bg: #EBEFF2;
+  --surface: #F8FAFB;
+  --ink: #14222C;
+  --muted: #566673;
+  --line: #CBD4DA;
+  --tabs-bg: #DDE4E9;
+
+  /* Accent du site */
+  --accent: #1B5E8C;
+  --accent-ink: #FFFFFF;
+
+  /* Retours d'état (texte + fond) : ne jamais coder l'état par la seule couleur */
+  --ok: #17734A;   --ok-bg: #DDF1E6;
+  --warn: #8F5200; --warn-bg: #FBEBCB;
+  --info: #1B5E8C; --info-bg: #DCEAF4;
+  --bad: #A8281F;  --bad-bg: #F9DDDA;
+
+  /* Thèmes du catalogue (reprise de la page d'accueil) */
+  --t-matiere: #0E7566;   --tb-matiere: #DDF0EC;
+  --t-mouvement: #1B5E8C; --tb-mouvement: #DCEAF4;
+  --t-energie: #A65F00;   --tb-energie: #FBEBCB;
+  --t-ondes: #6244A0;     --tb-ondes: #E9E2F5;
+
+  /* Papier millimétré et vecteurs (identité de l'accueil) */
+  --grid: #D8E5E0; --grid-major: #BBD0C8; --vec: #B56F00;
+
+  /* Couleurs de grandeurs physiques (convention : une couleur = une grandeur, sur tout le site) */
+  --c-force: #C62828;
+  --c-vitesse: #047857;
+  --c-position: #1D4ED8;
+  --c-energie: #B45309;
+  --c-temps: #7E22CE;
+
+  /* Afficheur type LCD */
+  --lcd-bg: #0F1A21; --lcd-fg: #FFC24A; --lcd-dim: #A98A45; --lcd-label: #8FA3AF;
+
+  /* Typographie : polices hébergées (shared/fonts/), repli sur les polices du système */
+  --font-head: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Rythme */
+  --radius: 10px;
+  --radius-sm: 8px;
+  --gap: 16px;
+  --tap: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
+    --tabs-bg: #0A1015;
+    --accent: #6BB4E8; --accent-ink: #0B1A24;
+    --ok: #67D39B;   --ok-bg: #12301F;
+    --warn: #F2A81D; --warn-bg: #3A2A0C;
+    --info: #6BB4E8; --info-bg: #14293A;
+    --bad: #F0877D;  --bad-bg: #3B1613;
+    --t-matiere: #52C7B3;   --tb-matiere: #12302C;
+    --t-mouvement: #6BB4E8; --tb-mouvement: #14293A;
+    --t-energie: #F2A81D;   --tb-energie: #3A2A0C;
+    --t-ondes: #B49CF0;     --tb-ondes: #261E3D;
+    --grid: #182630; --grid-major: #233744; --vec: #F2A81D;
+    --c-force: #F87171; --c-vitesse: #34D399; --c-position: #60A5FA; --c-energie: #FBBF24; --c-temps: #C084FC;
+    --lcd-bg: #0A1015;
+    color-scheme: dark;
+  }
+}

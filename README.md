@@ -9,12 +9,16 @@ Chaque simulation est un fichier HTML autonome. La page d'accueil (`index.html`)
 ```
 index.html                    page d'accueil et catalogue
 sims/                         une simulation = un fichier HTML autonome
-shared/simulabo.css           socle CSS commun (jetons, composants, clair/sombre)
+shared/tokens.css             jetons de design (source unique, v2)
+shared/simulabo.css           socle CSS des simulations (composants, clair/sombre)
+shared/site.css               feuille de style des pages du site (accueil, À propos), v2
 shared/simulabo.js            socle JavaScript commun (curseurs, afficheurs, tableau de mesures…)
 templates/simulation.html     gabarit d'une nouvelle simulation
 tools/new-sim.py              crée une simulation et l'inscrit au catalogue
 tools/check.py                contrôle de cohérence du site
 docs/socle.md                 mode d'emploi du socle et règles de charte
+docs/v2-beta.md               contenu, décisions et limites de la bêta v2
+a-propos/                     pages À propos, accessibilité et licence (v2)
 enseignants/index.html        espace enseignant : liste des fiches d'activités
 enseignants/enseignants.css   styles communs de l'espace (aucune ressource externe)
 enseignants/fiches/           une fiche enseignant = un fichier HTML

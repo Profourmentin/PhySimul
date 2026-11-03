@@ -3,259 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<meta name="robots" content="noindex">
+<title>Simulabo PhCh · v2 bêta</title>
+<meta name="description" content="Simulations interactives de physique-chimie pour le lycée : parcours par chapitre, recherche, fiches enseignant. Sans compte ni collecte de données.">
+<link rel="stylesheet" href="shared/site.css">
 </head>
 <body>
-<title>Simulabo PhCh</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="shared/fonts.css">
-<style>
-/* Concept : un cahier de TP. Le fond est du papier millimétré, la figure d'ouverture est une
-   chronophotographie tracée à l'échelle (1 petit carreau = 0,1 m), le catalogue est un classeur de fiches.
-   Palette et polices reprennent celles du simulateur « Banc d'optique photovoltaïque ». */
-:root {
-  --bg: #F2F6F5;
-  --surface: #FFFFFF;
-  --ink: #12202A;
-  --muted: #566673;
-  --line: #CCD7D4;
-  --accent: #1B5E8C;
-  --accent-ink: #FFFFFF;
-  --grid: #D8E5E0;
-  --grid-major: #BBD0C8;
-  --vec: #B56F00;
-  --ok: #17734A;
-  --ok-bg: #DDF1E6;
-  --new: #FFFFFF;
-  --new-bg: #1B5E8C;
-  --t-matiere: #0E7566;   --tb-matiere: #DDF0EC;
-  --t-mouvement: #1B5E8C; --tb-mouvement: #DCEAF4;
-  --t-energie: #A65F00;   --tb-energie: #FBEBCB;
-  --t-ondes: #6244A0;     --tb-ondes: #E9E2F5;
-  --font-head: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
-    --accent: #6BB4E8; --accent-ink: #0B1A24;
-    --grid: #182630; --grid-major: #233744; --vec: #F2A81D;
-    --ok: #67D39B; --ok-bg: #12301F; --new: #0B1A24; --new-bg: #6BB4E8;
-    --t-matiere: #52C7B3;   --tb-matiere: #12302C;
-    --t-mouvement: #6BB4E8; --tb-mouvement: #14293A;
-    --t-energie: #F2A81D;   --tb-energie: #3A2A0C;
-    --t-ondes: #B49CF0;     --tb-ondes: #261E3D;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0D1419; --surface: #162027; --ink: #E4ECF0; --muted: #93A4AF; --line: #2A3944;
-  --accent: #6BB4E8; --accent-ink: #0B1A24;
-  --grid: #182630; --grid-major: #233744; --vec: #F2A81D;
-  --ok: #67D39B; --ok-bg: #12301F; --new: #0B1A24; --new-bg: #6BB4E8;
-  --t-matiere: #52C7B3;   --tb-matiere: #12302C;
-  --t-mouvement: #6BB4E8; --tb-mouvement: #14293A;
-  --t-energie: #F2A81D;   --tb-energie: #3A2A0C;
-  --t-ondes: #B49CF0;     --tb-ondes: #261E3D;
-  color-scheme: dark;
-}
-
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 84px); }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body {
-  background: var(--bg); color: var(--ink);
-  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
-  padding-block: 0 56px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 20; }
-.wrap { max-width: 1160px; margin: 0 auto; }
-h1, h2, h3 { font-family: var(--font-head); margin: 0; text-wrap: balance; }
-p { margin: 0; }
-a { color: inherit; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-.mono { font-family: var(--font-data); }
-.kicker { font: 500 12px/1 var(--font-data); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-
-/* ---------- en-tête ---------- */
-.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding-block: 18px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 26px/1 var(--font-head); letter-spacing: .01em; }
-.brand svg { width: 34px; height: 34px; flex: none; }
-.brand small { font: 500 11px/1 var(--font-data); letter-spacing: .14em; color: var(--muted); text-transform: uppercase; align-self: flex-end; padding-bottom: 3px; }
-.nav { display: flex; gap: 4px; flex-wrap: wrap; }
-.nav a { text-decoration: none; font-weight: 500; font-size: 15px; padding: 7px 12px; border-radius: 6px; color: var(--muted); }
-.nav a:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
-
-/* ---------- hero ---------- */
-.hero { display: grid; grid-template-columns: 1fr; gap: 32px; padding-block: 28px 44px; align-items: center; }
-@media (min-width: 940px) { .hero { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 56px; padding-block: 40px 56px; } }
-.hero h1 { font-weight: 700; font-size: clamp(42px, 8vw, 74px); line-height: .96; letter-spacing: -.005em; margin-top: 14px; }
-.hero h1 em { font-style: normal; color: var(--accent); }
-.hero .lead { margin-top: 18px; color: var(--muted); max-width: 52ch; font-size: 17px; }
-.searchbar { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; }
-.field { position: relative; flex: 1 1 260px; min-width: 0; }
-.field svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
-.field input {
-  width: 100%; font: 400 16px var(--font-body); color: var(--ink); background: var(--surface);
-  border: 1.5px solid var(--line); border-radius: 8px; padding: 14px 44px 14px 44px; min-height: 52px;
-}
-.field input::placeholder { color: var(--muted); opacity: .85; }
-.field input:hover { border-color: var(--muted); }
-.field kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 500 12px var(--font-data); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; background: var(--bg); }
-.field input:focus + kbd, .field input:not(:placeholder-shown) + kbd { display: none; }
-button { font: 600 15px var(--font-body); border-radius: 8px; padding: 12px 18px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
-button:hover { border-color: var(--muted); }
-button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); min-height: 52px; }
-button.primary:hover { filter: brightness(1.08); }
-.suggest { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
-.suggest button { font: 500 13px var(--font-data); padding: 5px 11px; border-radius: 999px; background: transparent; }
-.stats { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 26px; font: 500 13px var(--font-data); color: var(--muted); letter-spacing: .02em; }
-.stats b { color: var(--ink); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
-
-/* feuille millimétrée avec chronophotographie */
-.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; box-shadow: 0 1px 0 var(--line), 0 14px 30px -18px color-mix(in srgb, var(--ink) 40%, transparent); }
-.sheet-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; padding: 10px 14px; border-bottom: 1px solid var(--line); font: 500 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.sheet svg { display: block; width: 100%; height: auto; }
-.sheet svg text { font-family: var(--font-data); font-size: 12px; fill: var(--muted); }
-.sheet .gridline { stroke: var(--grid); stroke-width: 1; }
-.sheet .gridmajor { stroke: var(--grid-major); stroke-width: 1.2; }
-.sheet .axis { stroke: var(--ink); stroke-width: 1.6; fill: none; }
-.sheet .path { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 5; fill: none; }
-.sheet .pt { fill: var(--accent); }
-.sheet .vec { stroke: var(--vec); stroke-width: 2.2; stroke-linecap: round; }
-.sheet #arrHead { fill: var(--vec); }
-.sheet .intro .pt { animation: pop .45s cubic-bezier(.2, .8, .3, 1.3) backwards; animation-delay: calc(var(--i) * 70ms); transform-box: fill-box; transform-origin: center; }
-.sheet .intro .vec { animation: fade .4s ease-out backwards; animation-delay: calc(var(--i) * 70ms + 120ms); }
-@keyframes pop { from { opacity: 0; transform: scale(.2); } }
-@keyframes fade { from { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .sheet .intro .pt, .sheet .intro .vec { animation: none; } }
-.sheet-ctl { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 12px 14px 14px; border-top: 1px solid var(--line); }
-@media (min-width: 520px) { .sheet-ctl { grid-template-columns: 1fr 1fr; align-items: end; } }
-.sheet-ctl label { font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; gap: 10px; }
-.sheet-ctl label output { font-family: var(--font-data); font-weight: 500; font-variant-numeric: tabular-nums; }
-.sheet-ctl input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
-.read { display: flex; flex-wrap: wrap; gap: 4px 18px; font: 500 13px var(--font-data); color: var(--muted); font-variant-numeric: tabular-nums; }
-.read b { color: var(--ink); font-weight: 600; }
-.legend { padding: 0 14px 12px; font: 400 12px var(--font-data); color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
-.legend i { display: inline-block; vertical-align: middle; margin-right: 6px; }
-.legend .d { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
-.legend .a { width: 16px; height: 2px; background: var(--vec); position: relative; top: -1px; }
-
-/* ---------- thèmes ---------- */
-section { padding-block: 8px; }
-.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 16px; }
-.sec-head h2 { font-size: clamp(26px, 4.4vw, 34px); font-weight: 600; letter-spacing: .005em; }
-.sec-head p { color: var(--muted); font-size: 15px; max-width: 56ch; }
-.themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 44px; }
-.tile {
-  --tc: var(--t-mouvement); --tb: var(--tb-mouvement);
-  display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: center; text-align: left;
-  padding: 14px 16px; border-radius: 8px; background: var(--surface); border: 1.5px solid var(--line); color: var(--ink); min-width: 0;
-}
-.tile:hover { border-color: var(--tc); }
-.tile[aria-pressed="true"] { border-color: var(--tc); background: var(--tb); box-shadow: inset 0 0 0 1px var(--tc); }
-.tile[data-th="matiere"] { --tc: var(--t-matiere); --tb: var(--tb-matiere); }
-.tile[data-th="energie"] { --tc: var(--t-energie); --tb: var(--tb-energie); }
-.tile[data-th="ondes"] { --tc: var(--t-ondes); --tb: var(--tb-ondes); }
-.tile .ico { grid-row: 1 / span 2; width: 42px; height: 42px; border-radius: 8px; background: var(--tb); color: var(--tc); display: grid; place-items: center; }
-.tile[aria-pressed="true"] .ico { background: var(--surface); }
-.tile .ico svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.tile .ico svg circle { fill: currentColor; stroke: none; }
-.tile .n { font: 500 11px/1 var(--font-data); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); align-self: end; }
-.tile .name { font: 600 20px/1.1 var(--font-head); letter-spacing: .01em; grid-column: 2; align-self: start; }
-.tile .count { grid-row: 1 / span 2; grid-column: 3; font: 600 15px var(--font-data); font-variant-numeric: tabular-nums; color: var(--tc); min-width: 1.6em; text-align: right; }
-.tile.zero { opacity: .55; }
-
-/* ---------- catalogue ---------- */
-.toolbar { background: var(--bg); padding-block: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
-@media (min-width: 720px) { .toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; } }
-.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.tools .field { flex: 2 1 240px; }
-.tools .field input { min-height: 44px; padding-block: 10px; }
-select {
-  font: 500 14px var(--font-body); color: var(--ink); background: var(--surface); border: 1.5px solid var(--line);
-  border-radius: 8px; padding: 10px 12px; min-height: 44px; flex: 1 1 140px; min-width: 0; max-width: 100%;
-}
-.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); padding: 0 4px; white-space: nowrap; }
-.check input { width: 18px; height: 18px; accent-color: var(--accent); }
-.meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 8px; min-height: 28px; }
-.count-live { font: 500 13px var(--font-data); color: var(--muted); }
-button.link { background: transparent; border: 0; padding: 4px 6px; font-weight: 600; font-size: 14px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-button.link[hidden] { display: none; }
-
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 18px; padding-bottom: 20px; }
-.card {
-  --tc: var(--t-mouvement); --tb: var(--tb-mouvement);
-  position: relative; display: flex; flex-direction: column; background: var(--surface);
-  border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0;
-}
-.card[data-th="matiere"] { --tc: var(--t-matiere); --tb: var(--tb-matiere); }
-.card[data-th="energie"] { --tc: var(--t-energie); --tb: var(--tb-energie); }
-.card[data-th="ondes"] { --tc: var(--t-ondes); --tb: var(--tb-ondes); }
-.card.live:hover { border-color: var(--tc); box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--ink) 55%, transparent); transform: translateY(-2px); }
-.card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
-@media (prefers-reduced-motion: reduce) { .card, .card.live:hover { transition: none; transform: none; } }
-.card.soon { border-style: dashed; background: transparent; }
-.thumb {
-  position: relative; aspect-ratio: 5 / 3; color: var(--tc); border-bottom: 1px solid var(--line);
-  background:
-    linear-gradient(color-mix(in srgb, var(--tc) 13%, transparent) 1px, transparent 1px) 0 0 / 10px 10px,
-    linear-gradient(90deg, color-mix(in srgb, var(--tc) 13%, transparent) 1px, transparent 1px) 0 0 / 10px 10px,
-    var(--tb);
-}
-.card.soon .thumb { opacity: .62; }
-.thumb svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.thumb .s { stroke: var(--tc); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-.thumb .dash { stroke-dasharray: 4 5; stroke-width: 1.8; }
-.thumb .f { fill: var(--tc); stroke: none; }
-.thumb .v { stroke: var(--vec); fill: none; stroke-width: 3; stroke-linecap: round; }
-.thumb .beam { fill: var(--vec); opacity: .4; }
-.thumb .water { fill: var(--tc); opacity: .16; }
-.thumb .sun { fill: var(--vec); }
-.badge { position: absolute; top: 10px; left: 10px; font: 600 11px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; padding: 5px 8px; border-radius: 4px; }
-.badge.new { background: var(--new-bg); color: var(--new); }
-.badge.soon { background: var(--surface); color: var(--muted); border: 1px dashed var(--muted); }
-.card-body { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 16px; flex: 1; }
-.card .meta { font: 500 11px/1.3 var(--font-data); letter-spacing: .1em; text-transform: uppercase; color: var(--tc); display: flex; flex-wrap: wrap; gap: 2px 10px; }
-.card .meta span + span { color: var(--muted); }
-.card h3 { font-size: 24px; font-weight: 600; line-height: 1.1; letter-spacing: .005em; }
-.card h3 a { text-decoration: none; }
-.card h3 a::after { content: ""; position: absolute; inset: 0; }
-.card .desc { color: var(--muted); font-size: 14.5px; }
-.tags { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.tags li { font: 400 12px var(--font-data); padding: 3px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
-.fiche-link { position: relative; z-index: 2; align-self: flex-start; font: 600 13px var(--font-body); color: var(--accent); text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; min-height: 32px; }
-.foot { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font: 500 13px var(--font-data); color: var(--muted); }
-.foot .go { color: var(--accent); font-weight: 600; font-family: var(--font-body); font-size: 14px; }
-.card.live:hover .go { text-decoration: underline; text-underline-offset: 3px; }
-mark { background: color-mix(in srgb, var(--vec) 32%, transparent); color: inherit; border-radius: 2px; padding: 0 1px; }
-.empty { grid-column: 1 / -1; padding: 40px 20px; text-align: center; border: 1.5px dashed var(--line); border-radius: 8px; color: var(--muted); }
-.empty h3 { color: var(--ink); font-size: 24px; margin-bottom: 6px; }
-.empty button { margin-top: 14px; }
-
-/* ---------- contribuer ---------- */
-#contribuer { margin-top: 44px; padding: 28px 0 0; border-top: 1px solid var(--line); }
-.contrib { display: grid; grid-template-columns: 1fr; gap: 28px; }
-@media (min-width: 900px) { .contrib { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; } }
-.steps { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
-.steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
-.steps li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 600 15px var(--font-data); border: 1.5px solid var(--accent); color: var(--accent); }
-.steps b { display: block; font-weight: 600; }
-.steps span { color: var(--muted); font-size: 15px; }
-.code { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
-.code-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--line); font: 500 12px var(--font-data); color: var(--muted); letter-spacing: .04em; }
-.code-head button { padding: 5px 12px; font-size: 13px; }
-.code pre { margin: 0; padding: 14px; overflow-x: auto; font: 400 13px/1.6 var(--font-data); color: var(--ink); tab-size: 2; }
-.code .k { color: var(--accent); }
-.code .st { color: var(--muted); }
-.status { min-height: 1.4em; padding: 0 14px 10px; font-size: 13px; color: var(--muted); }
-footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; color: var(--muted); font-size: 14px; }
-footer .mono { font-size: 12px; letter-spacing: .06em; }
-</style>
-
+<div class="beta-bar" role="note"><b>Version 2 · bêta</b><span>Cette version est en test : des changements sont à prévoir.</span><a href="https://github.com/Profourmentin/PhySimul/issues">Signaler un problème</a></div>
 <div class="wrap">
   <header class="top">
     <a class="brand" href="#" aria-label="Simulabo PhCh, accueil">
@@ -263,13 +17,14 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
       Simulabo <small>PhCh</small>
     </a>
     <nav class="nav" aria-label="Navigation principale">
+      <a href="#parcours">Parcours</a>
       <a href="#catalogue">Catalogue</a>
-      <a href="#themes">Thèmes</a>
-      <a href="#contribuer">Contribuer</a>
       <a href="enseignants/index.html">Enseignants</a>
+      <a href="a-propos/index.html">À propos</a>
     </nav>
   </header>
 
+  <main id="contenu">
   <section class="hero" aria-labelledby="h1">
     <div>
       <p class="kicker">Physique-chimie · Lycée</p>
@@ -311,20 +66,23 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     </figure>
   </section>
 
-  <section id="themes" aria-labelledby="hThemes">
+  <section id="parcours" aria-labelledby="hPar">
     <div class="sec-head">
-      <h2 id="hThemes">Parcourir par thème</h2>
-      <p>Les quatre thèmes du programme. Un clic filtre le catalogue, un second clic le réinitialise.</p>
+      <h2 id="hPar">Parcours par chapitre</h2>
+      <p>Les simulations rangées selon les chapitres du programme, niveau par niveau.</p>
     </div>
-    <div class="themes" id="themeTiles"></div>
+    <div class="seg" id="parSeg" role="group" aria-label="Niveau"></div>
+    <div id="parPanel" aria-live="polite"></div>
+    <p class="par-foot">Rattachements aux programmes : propositions à valider, d'après le BO spécial n° 1 du 22 janvier 2019 (physique-chimie de Seconde et de Première spécialité) et le programme d'enseignement scientifique de Première. Terminale : à venir.</p>
   </section>
 
-  <section id="catalogue" aria-labelledby="hCat">
+  <section id="catalogue" aria-labelledby="hCat" style="margin-top:44px">
     <div class="sec-head">
       <h2 id="hCat">Catalogue</h2>
-      <p>Simulations et cours interactifs. Les fiches en pointillés sont en préparation.</p>
+      <p>Toutes les ressources, avec recherche et filtres. Les fiches en pointillés sont en préparation.</p>
     </div>
     <div class="toolbar">
+      <div class="chips" id="themeChips" role="group" aria-label="Filtrer par thème"></div>
       <div class="tools" role="search">
         <div class="field">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
@@ -346,30 +104,31 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     </div>
     <div class="grid" id="grid"></div>
   </section>
+  </main>
 
-  <section id="contribuer" aria-labelledby="hContrib">
-    <div class="contrib">
-      <div>
-        <p class="kicker">Un site qui grandit</p>
-        <h2 id="hContrib" style="font-size:clamp(28px,5vw,40px);font-weight:600;margin-top:10px">Ajouter une simulation prend trois minutes</h2>
-        <p style="color:var(--muted);margin-top:10px;max-width:54ch">Chaque simulation reste un fichier HTML autonome. Le catalogue lit une simple liste : une entrée de plus, et la fiche apparaît avec sa recherche, son thème et son niveau.</p>
-        <ol class="steps">
-          <li><div><b>Déposer le fichier</b><span>Place la simulation dans le dossier <span class="mono">sims/</span> du dépôt.</span></div></li>
-          <li><div><b>Décrire la fiche</b><span>Copie l'entrée ci-contre dans la liste du catalogue et remplace les champs.</span></div></li>
-          <li><div><b>Publier</b><span>Un envoi sur GitHub met le site en ligne automatiquement.</span></div></li>
-        </ol>
-      </div>
-      <div class="code">
-        <div class="code-head"><span>Une entrée du catalogue</span><button id="copy" type="button">Copier</button></div>
-        <pre id="snippet" tabindex="0" aria-label="Exemple d'entrée du catalogue"></pre>
-        <p class="status" id="copyStatus" role="status" aria-live="polite"></p>
-      </div>
+  <footer class="site-footer">
+    <div>
+      <h2>Simulabo PhCh</h2>
+      <p>Simulations de physique-chimie pour le lycée. Aucun compte, aucune donnée collectée, aucune ressource externe.</p>
     </div>
-  </section>
-
-  <footer>
-    <span>Simulabo PhCh · physique-chimie pour le lycée, programme de seconde et de première.</span>
-    <span class="mono">Aucun compte · aucune donnée collectée</span>
+    <div>
+      <h2>Ressources</h2>
+      <ul>
+        <li><a href="#parcours">Parcours par chapitre</a></li>
+        <li><a href="#catalogue">Catalogue</a></li>
+        <li><a href="enseignants/index.html">Espace enseignant</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Le projet</h2>
+      <ul>
+        <li><a href="a-propos/index.html">À propos</a></li>
+        <li><a href="a-propos/accessibilite.html">Accessibilité</a></li>
+        <li><a href="a-propos/licence.html">Licence et mentions</a></li>
+        <li><a href="https://github.com/Profourmentin/PhySimul">Code source</a></li>
+      </ul>
+    </div>
+    <p class="legal">Version 2 bêta · polices Barlow Semi Condensed et IBM Plex (licence SIL OFL 1.1) hébergées sur le site.</p>
   </footer>
 </div>
 
@@ -502,6 +261,102 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     "theme": "matiere", "niveau": "Seconde", "type": "Jeu", "duree": 25,
     "notions": ["cortège électronique", "configuration électronique", "électrons de valence", "tableau périodique", "gaz nobles", "règles du duet et de l'octet", "ions monoatomiques"],
     "statut": "dispo", "url": "sims/structure-electronique.html", "date": "2026-11-02", "glyph": "orbit"
+  },
+  {
+    "id": "periode-frequence",
+    "titre": "Période et fréquence d'un signal",
+    "resume": "Règle la période d'un signal sur un oscilloscope virtuel, lis-la sur l'écran et découvre le lien avec la fréquence : prédis, observe, explique.",
+    "theme": "ondes", "niveau": "Seconde", "type": "Simulation", "duree": 15,
+    "notions": ["signal périodique", "période", "fréquence", "relation f = 1/T", "base de temps", "oscillogramme", "oscilloscope"],
+    "statut": "dispo", "url": "sims/periode-frequence.html", "date": "2026-11-03", "glyph": "wave", "poe": true
+  }
+]
+</script>
+
+<script type="application/json" id="parcours-data">
+[
+  {
+    "niveau": "Seconde",
+    "intro": "Les trois thèmes du programme de Seconde, dans l'ordre du programme. Ordre proposé : à adapter à votre progression.",
+    "chapitres": [
+      {
+        "theme": "matiere",
+        "titre": "Constitution et transformations de la matière",
+        "sims": [
+          "dissolution-dilution",
+          "structure-electronique-mission-stabilite"
+        ]
+      },
+      {
+        "theme": "mouvement",
+        "titre": "Mouvement et interactions",
+        "sims": [
+          "gravitation",
+          "principe-inertie"
+        ]
+      },
+      {
+        "theme": "ondes",
+        "titre": "Ondes et signaux",
+        "sims": [
+          "periode-frequence",
+          "spectres-lumineux",
+          "refraction-lumiere",
+          "lentilles-foyers-images",
+          "loi-ohm"
+        ]
+      },
+      {
+        "theme": "energie",
+        "titre": "Activités d'approfondissement",
+        "note": "Rattachement au programme à valider : ces activités ne correspondent pas à un chapitre précis du programme de Seconde.",
+        "sims": [
+          "banc-optique-photovoltaique",
+          "energie-pendule"
+        ]
+      }
+    ]
+  },
+  {
+    "niveau": "Première",
+    "intro": "Spécialité physique-chimie et enseignement scientifique. Ordre proposé : à adapter à votre progression.",
+    "chapitres": [
+      {
+        "theme": "matiere",
+        "titre": "Constitution et transformations de la matière",
+        "sims": [
+          "equilibrer-oxydoreduction",
+          "titrage-colorimetrique",
+          "combustion-energie-liaison"
+        ]
+      },
+      {
+        "theme": "mouvement",
+        "titre": "Mouvement et interactions",
+        "sims": [
+          "gaz-parfaits-mariotte",
+          "description-mouvement"
+        ]
+      },
+      {
+        "theme": "energie",
+        "titre": "L'énergie : conversions et transferts",
+        "sims": []
+      },
+      {
+        "theme": "ondes",
+        "titre": "Ondes et signaux",
+        "sims": []
+      },
+      {
+        "theme": "matiere",
+        "titre": "Enseignement scientifique : une longue histoire de la matière",
+        "note": "Rattachement de la datation radioactive à ce thème : à confirmer avec le programme.",
+        "sims": [
+          "decroissance-radioactive-carbone-14"
+        ]
+      }
+    ]
   }
 ]
 </script>
@@ -601,6 +456,11 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     } else if (g === "reaction") {
       s += '<line class="s dash" x1="16" y1="80" x2="184" y2="80"/><path class="s" d="M16 80H48C74 80 80 20 100 20C120 20 126 98 152 98H184"/>';
       s += '<line class="v" x1="168" y1="83" x2="168" y2="96"/><line class="v" x1="164" y1="91" x2="168" y2="96"/><line class="v" x1="172" y1="91" x2="168" y2="96"/><circle class="f" cx="100" cy="20" r="4.5"/>';
+    } else if (g === "wave") {
+      var wd = "";
+      for (var wx = 10; wx <= 190; wx += 3) wd += (wx === 10 ? "M" : " L") + wx + " " + (56 - 30 * Math.sin(2 * Math.PI * (wx - 10) / 80)).toFixed(1);
+      s += '<line class="s dash" x1="10" y1="56" x2="190" y2="56"/><path class="s" d="' + wd + '"/>';
+      s += '<line class="v" x1="10" y1="102" x2="90" y2="102"/><line class="v" x1="10" y1="96" x2="10" y2="108"/><line class="v" x1="90" y1="96" x2="90" y2="108"/>';
     } else if (g === "pendulum") {
       s += '<line class="s dash" x1="100" y1="12" x2="100" y2="100"/><path class="s dash" d="M52 78Q100 118 148 78"/>';
       s += '<line class="s" x1="100" y1="12" x2="54" y2="78"/><circle class="f" cx="54" cy="78" r="10"/><circle class="f" cx="100" cy="12" r="3.5"/>';
@@ -608,16 +468,13 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     return '<svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + s + '</svg>';
   }
 
-  /* ---------- tuiles de thèmes ---------- */
-  var tilesEl = $("themeTiles");
-  tilesEl.innerHTML = THEMES.map(function (t) {
-    return '<button type="button" class="tile" data-th="' + t.id + '" aria-pressed="false">' +
-      '<span class="ico"><svg viewBox="0 0 32 32" aria-hidden="true">' + t.ico + '</svg></span>' +
-      '<span class="n">Thème ' + t.n + '</span><span class="name">' + esc(t.court) + '</span>' +
-      '<span class="count" aria-hidden="true"></span></button>';
+  /* ---------- filtres de thème (pastilles) ---------- */
+  var chipsEl = $("themeChips");
+  chipsEl.innerHTML = THEMES.map(function (t) {
+    return '<button type="button" class="chip" data-th="' + t.id + '" aria-pressed="false">' + esc(t.court) + ' <span class="n" aria-hidden="true"></span></button>';
   }).join("");
-  tilesEl.addEventListener("click", function (e) {
-    var b = e.target.closest(".tile"); if (!b) return;
+  chipsEl.addEventListener("click", function (e) {
+    var b = e.target.closest(".chip"); if (!b) return;
     var id = b.getAttribute("data-th");
     state.theme = state.theme === id ? "" : id;
     update();
@@ -679,6 +536,7 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
   function card(it) {
     var live = it.statut === "dispo", t = TH[it.theme];
     var badge = isNew(it) ? '<span class="badge new">Nouveau</span>' : (live ? "" : '<span class="badge soon">En préparation</span>');
+    if (it.poe) badge += '<span class="badge poe" title="Démarche Prédire, Observer, Expliquer">P·O·E</span>';
     var title = live ? '<a href="' + esc(it.url) + '">' + hl(it.titre) + '</a>' : hl(it.titre);
     var tags = it.notions.slice(0, 3).map(function (n) { return "<li>" + hl(n) + "</li>"; }).join("");
     var info = [it.niveau].concat(it.duree ? [it.duree + " min"] : []).join(" · ");
@@ -700,16 +558,46 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     $("count").textContent = list.length + (list.length > 1 ? " fiches" : " fiche") + " sur " + DATA.length;
     var active = state.q || state.theme || state.niveau || state.type || state.dispo;
     $("reset").hidden = !active;
-    var tiles = tilesEl.querySelectorAll(".tile");
-    Array.prototype.forEach.call(tiles, function (b) {
+    Array.prototype.forEach.call(chipsEl.querySelectorAll(".chip"), function (b) {
       var id = b.getAttribute("data-th");
       var n = DATA.filter(function (d) { return d.theme === id && matches(d, true); }).length;
-      b.querySelector(".count").textContent = n;
+      b.querySelector(".n").textContent = n;
       b.setAttribute("aria-pressed", state.theme === id ? "true" : "false");
-      b.setAttribute("aria-label", TH[id].court + ", thème " + TH[id].n + ", " + n + (n > 1 ? " fiches" : " fiche"));
+      b.setAttribute("aria-label", TH[id].court + ", " + n + (n > 1 ? " fiches" : " fiche"));
       b.classList.toggle("zero", n === 0 && state.theme !== id);
     });
   }
+
+  /* ---------- parcours par chapitre ---------- */
+  var PAR = JSON.parse($("parcours-data").textContent);
+  var BYID = {}; DATA.forEach(function (d) { BYID[d.id] = d; });
+  var parIdx = 0;
+  function stepHtml(id) {
+    var it = BYID[id]; if (!it) return "";
+    var live = it.statut === "dispo";
+    var title = live ? '<a class="t" href="' + esc(it.url) + '">' + esc(it.titre) + '</a>' : '<span class="t off">' + esc(it.titre) + '</span>';
+    var sub = [];
+    if (live) { if (it.duree) sub.push(it.duree + " min"); sub.push(esc(it.type)); } else sub.push("Bientôt");
+    var extra = (it.poe ? '<span class="tag" title="Prédire, Observer, Expliquer">P·O·E</span>' : "") + (it.fiche ? '<a href="' + esc(it.fiche) + '">Fiche enseignant</a>' : "");
+    return '<li class="' + (live ? "live" : "soon") + '"><div>' + title + '<div class="sub"><span>' + sub.join(" · ") + '</span>' + extra + '</div></div></li>';
+  }
+  function renderParcours() {
+    var p = PAR[parIdx];
+    var html = p.intro ? '<p class="par-intro">' + esc(p.intro) + '</p>' : "";
+    html += '<div class="par-grid">' + p.chapitres.map(function (c) {
+      var t = TH[c.theme], ids = c.sims.filter(function (id) { return BYID[id]; });
+      var nd = ids.filter(function (id) { return BYID[id].statut === "dispo"; }).length;
+      return '<article class="chap" data-th="' + c.theme + '"><p class="meta"><span>' + esc(t.court) + '</span><span>' + nd + '/' + ids.length + ' disponible' + (nd > 1 ? "s" : "") + '</span></p>' +
+        '<h3>' + esc(c.titre) + '</h3>' +
+        (ids.length ? '<ol>' + ids.map(stepHtml).join("") + '</ol>' : '<p class="empty-chap">Pas encore de simulation pour ce chapitre. <a href="a-propos/index.html#contribuer">Proposer une ressource</a></p>') +
+        (c.note ? '<p class="note">' + esc(c.note) + '</p>' : '') + '</article>';
+    }).join("") + '</div>';
+    $("parPanel").innerHTML = html;
+    Array.prototype.forEach.call($("parSeg").querySelectorAll("button"), function (b, i) { b.setAttribute("aria-pressed", i === parIdx ? "true" : "false"); });
+  }
+  $("parSeg").innerHTML = PAR.map(function (p, i) { return '<button type="button" data-i="' + i + '" aria-pressed="false">' + esc(p.niveau) + '</button>'; }).join("");
+  $("parSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; parIdx = Number(b.getAttribute("data-i")); renderParcours(); });
+  renderParcours();
 
   var nd = DATA.filter(function (d) { return d.statut === "dispo"; }).length;
   $("stats").innerHTML = '<span><b>' + nd + '</b> disponible' + (nd > 1 ? "s" : "") + '</span><span><b>' + (DATA.length - nd) + '</b> en préparation</span><span><b>' + THEMES.length + '</b> thèmes</span>';
@@ -741,18 +629,6 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     $("read").innerHTML = 'Portée <b>' + fr(V0 * V0 * Math.sin(2 * a) / G, 1) + ' m</b> · Hauteur max <b>' + fr(vy0 * vy0 / (2 * G), 1) + ' m</b> · Durée <b>' + fr(T, 1) + ' s</b>';
   }
   $("alpha").addEventListener("input", function (e) { chrono(parseInt(e.target.value, 10)); });
-
-  /* ---------- extrait à copier ---------- */
-  var SNIPPET = '{\n  "id": "refraction-lumiere",\n  "titre": "Réfraction de la lumière",\n  "resume": "Une phrase qui donne envie d\'ouvrir la simulation.",\n  "theme": "ondes",\n  "niveau": "Seconde",\n  "type": "Simulation",\n  "duree": 15,\n  "notions": ["Snell-Descartes", "indice de réfraction"],\n  "statut": "dispo",\n  "url": "sims/refraction.html",\n  "date": "2026-11-05",\n  "glyph": "refraction"\n}';
-  $("snippet").textContent = SNIPPET;
-  $("copy").addEventListener("click", function () {
-    function fallback() {
-      var r = document.createRange(); r.selectNodeContents($("snippet"));
-      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-      $("copyStatus").textContent = "Copie automatique impossible : le texte est sélectionné, copie-le avec ton clavier.";
-    }
-    try { navigator.clipboard.writeText(SNIPPET).then(function () { $("copyStatus").textContent = "Entrée copiée."; }, fallback); } catch (e) { fallback(); }
-  });
 
   chrono(45);
   update();

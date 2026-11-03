@@ -52,6 +52,7 @@ class Page(HTMLParser):
         self.imgs_without_alt = 0
         self.canvas_unlabeled = 0
         self.has_dark = False
+        self.links = []             # href des liens <a>
         self._in_style = False
 
     def handle_starttag(self, tag, attrs):
@@ -75,6 +76,7 @@ class Page(HTMLParser):
         if tag == "img" and "alt" not in a: self.imgs_without_alt += 1
         if tag == "canvas" and not (a.get("aria-label") or a.get("aria-labelledby") or a.get("role") == "presentation"):
             self.canvas_unlabeled += 1
+        if tag == "a" and a.get("href"): self.links.append(a["href"])
         if tag == "a" and "../index.html" in (a.get("href") or ""): self.back_link = True
 
     def handle_endtag(self, tag):
@@ -215,6 +217,48 @@ def check_sims(rep):
                 rep.warn(where, "redéfinit les jetons de couleur : utiliser ceux du socle")
 
 
+def check_parcours(rep, by_id):
+    """Parcours par chapitre de l'accueil (v2) : bloc JSON « parcours-data » de index.html."""
+    text = (ROOT / "index.html").read_text(encoding="utf-8")
+    if 'id="parcours-data"' not in text:
+        return  # accueil v1 : pas de parcours
+    data = load_json(text, "parcours-data", rep, "index.html")
+    if data is None:
+        return
+    placed = set()
+    for p in data:
+        seen = set()
+        for c in p.get("chapitres", []):
+            where = f"parcours[{p.get('niveau')} / {c.get('titre')}]"
+            if c.get("theme") not in THEMES: rep.err(where, f"thème inconnu « {c.get('theme')} »")
+            for sid in c.get("sims", []):
+                if sid not in by_id: rep.err(where, f"identifiant absent du catalogue : {sid}")
+                if sid in seen: rep.err(where, f"simulation placée deux fois dans le niveau {p.get('niveau')} : {sid}")
+                seen.add(sid); placed.add(sid)
+    for cid, e in by_id.items():
+        if cid not in placed:
+            rep.warn(f"catalogue[{cid}]", "absente des parcours par chapitre (index.html, « parcours-data »)")
+
+
+def check_site_pages(rep):
+    """Pages du site (accueil, À propos, espace enseignant) : liens internes, ressources externes, langue."""
+    pages = [ROOT / "index.html", ROOT / "enseignants" / "index.html"] + sorted((ROOT / "a-propos").glob("*.html"))
+    for f in pages:
+        if not f.is_file():
+            continue
+        where = str(f.relative_to(ROOT))
+        p = parse(f)
+        if p.lang != "fr": rep.err(where, "attribut lang=\"fr\" manquant")
+        if p.h1 != 1: rep.err(where, f"{p.h1} titre(s) h1 (un seul attendu)")
+        if p.external: rep.err(where, "ressource externe : " + ", ".join(sorted(set(p.external))))
+        for href in p.links:
+            if re.match(r"^(https?:|mailto:|tel:|#|javascript:)", href, re.I) or not href:
+                continue
+            target = (f.parent / href.split("#")[0].split("?")[0]).resolve()
+            if href.split("#")[0] and not target.exists():
+                rep.err(where, f"lien interne cassé : {href}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--strict", action="store_true", help="les avertissements font échouer le contrôle")
@@ -230,8 +274,13 @@ def main() -> int:
             if not (fonts_css.parent / url).is_file(): rep.err("shared/fonts.css", f"fichier de police introuvable : {url}")
     else:
         rep.err("shared/fonts.css", "fichier manquant")
+    if (ROOT / "index.html").read_text(encoding="utf-8").find("shared/site.css") >= 0:
+        for needed in ("shared/site.css", "shared/tokens.css"):   # accueil v2
+            if not (ROOT / needed).is_file(): rep.err(needed, "fichier manquant")
     by_id, _ = check_catalogue(rep)
     check_fiches(rep, by_id)
+    check_parcours(rep, by_id)
+    check_site_pages(rep)
     check_sims(rep)
 
     for line in rep.errors + rep.warnings:
