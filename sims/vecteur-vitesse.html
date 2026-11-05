@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Construire un vecteur vitesse · Simulabo PhCh</title>
+<meta name="description" content="Seconde, Mouvement et interactions : construire le vecteur vitesse d’un point à partir d’une chronophotographie. Exercices générés au hasard, trois niveaux, retours gradués.">
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --text:#1b2430; --muted:#566274; --border:#cfd7e2;
+  --accent:#1d5fbf; --accent-ink:#ffffff; --accent-soft:#e7f0fd;
+  --ok:#17703a; --ok-bg:#e5f4ea; --bad:#a8231b; --bad-bg:#fcebe9; --info:#1d4f91; --info-bg:#eaf1fb;
+  --vec:#c2410c; --ghost:#0f766e; --avec:#1d5fbf;
+  --canvas:#ffffff; --grid:#e3e8ef; --grid5:#c5cdd9; --pt:#1b2430;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161c; --surface:#1a2029; --text:#e8ecf1; --muted:#9aa6b6; --border:#2f3a49;
+    --accent:#6ea8ff; --accent-ink:#0b1220; --accent-soft:#1c2a40;
+    --ok:#6fd99a; --ok-bg:#16301f; --bad:#ff9b92; --bad-bg:#3a1a18; --info:#9cc4ff; --info-bg:#1b2a40;
+    --vec:#ff9d66; --ghost:#4fd1c5; --avec:#7db4ff;
+    --canvas:#141a22; --grid:#222b37; --grid5:#34404f; --pt:#e8ecf1;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161c; --surface:#1a2029; --text:#e8ecf1; --muted:#9aa6b6; --border:#2f3a49;
+  --accent:#6ea8ff; --accent-ink:#0b1220; --accent-soft:#1c2a40;
+  --ok:#6fd99a; --ok-bg:#16301f; --bad:#ff9b92; --bad-bg:#3a1a18; --info:#9cc4ff; --info-bg:#1b2a40;
+  --vec:#ff9d66; --ghost:#4fd1c5; --avec:#7db4ff;
+  --canvas:#141a22; --grid:#222b37; --grid5:#34404f; --pt:#e8ecf1;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 40px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+a{color:var(--accent)}
+a.back{display:inline-flex;align-items:center;min-height:44px;font-weight:600;text-decoration:none}
+a.back:hover{text-decoration:underline}
+.kicker{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-size:1.7rem;line-height:1.2;margin:.2rem 0 .5rem}
+h2{font-size:1.05rem;line-height:1.3;margin:0}
+.lead{margin:0 0 .5rem;color:var(--muted);max-width:70ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:14px 0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;font-weight:600;margin-bottom:6px}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg label{position:relative;display:block}
+.seg input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.seg span{display:flex;align-items:center;min-height:44px;padding:0 14px;font-weight:600;white-space:nowrap}
+.seg input:checked + span{background:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible + span{outline:3px solid var(--text);outline-offset:-5px}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{min-height:44px;font-size:.92rem}
+.btn:disabled{opacity:.55;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.score{margin-left:auto;color:var(--muted);font-size:.92rem}
+.enonce{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.enonce p{margin:.2rem 0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 16px;margin:.6rem 0 0;padding:0;list-style:none}
+.facts li{background:var(--accent-soft);border-radius:8px;padding:8px 10px;font-size:.95rem}
+.layout{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:980px){
+  .layout{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}
+  .stage{position:sticky;top:12px}
+}
+.stage{margin:0}
+.scene{width:100%;height:auto;display:block;background:var(--canvas);border:1px solid var(--border);border-radius:10px}
+.gl{stroke:var(--grid);stroke-width:.03}
+.gl.maj{stroke:var(--grid5);stroke-width:.05}
+.ptc{fill:var(--pt)}
+.cur{fill:none;stroke:var(--accent);stroke-width:.08}
+.lbl{fill:var(--text);font-size:.72px;paint-order:stroke;stroke:var(--canvas);stroke-width:.2px;stroke-linejoin:round}
+.lbl.cur-l{font-weight:700;fill:var(--accent)}
+.sb{font-size:.5px}
+.hit{fill:transparent;cursor:pointer}
+.traj{fill:none;stroke:var(--muted);stroke-width:.05;stroke-dasharray:.25 .2}
+.rul{stroke:var(--text);stroke-width:.06}
+.rl{fill:var(--text);font-size:.62px;text-anchor:middle;paint-order:stroke;stroke:var(--canvas);stroke-width:.2px}
+.svec line{stroke:var(--vec);stroke-width:.14;stroke-linecap:round}
+.svec polygon{fill:var(--vec)}
+.ghost line{stroke:var(--ghost);stroke-width:.12;stroke-dasharray:.3 .2}
+.ghost polygon{fill:none;stroke:var(--ghost);stroke-width:.1}
+.avec line{stroke:var(--avec);stroke-width:.09}
+.avec polygon{fill:var(--avec)}
+.vl{fill:var(--vec);font-size:.8px;font-weight:700;font-style:italic;paint-order:stroke;stroke:var(--canvas);stroke-width:.2px}
+.handle{cursor:grab;touch-action:none}
+.handle .hitH{fill:transparent;stroke:none}
+.handle .ringH{fill:var(--canvas);stroke:var(--vec);stroke-width:.12}
+.handle:focus{outline:none}
+.handle:focus-visible .hitH{stroke:var(--accent);stroke-width:.1;stroke-dasharray:.2 .15}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.readout{margin:.5rem 0 0;color:var(--muted);font-size:.92rem;min-height:1.5em}
+.stage figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+details.alt{margin-top:8px;font-size:.92rem}
+details summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:600}
+details.alt summary{padding:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border:1px solid var(--border);padding:4px 8px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+caption{text-align:left;color:var(--muted);padding-bottom:4px}
+.steps{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card.done{opacity:.92}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.num{display:inline-grid;place-items:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:.9rem;margin-right:8px}
+.badge{font-size:.8rem;color:var(--muted);font-weight:600;white-space:nowrap}
+.card.done .badge{color:var(--ok)}
+.card p{margin:.4rem 0}
+.opts{display:grid;gap:6px;margin-bottom:10px}
+.opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px;border:1px solid var(--border);border-radius:10px;cursor:pointer}
+.opt input{width:20px;height:20px;margin:0;flex:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip{min-width:52px;min-height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:700;cursor:pointer}
+.chip:disabled{opacity:.6}
+.chip.good{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+input[type=text],select{min-height:44px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit}
+input[type=text]{width:9em}
+select{max-width:100%}
+.unit{font-weight:600}
+.formula{background:var(--info-bg);color:var(--text);border-left:4px solid var(--info);padding:8px 10px;border-radius:6px;margin:.5rem 0}
+.fb{margin-top:8px;border-radius:8px}
+.fb:not(:empty){padding:8px 10px}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb.info{background:var(--info-bg);color:var(--info)}
+.fb.ok,.fb.bad,.fb.info{border:1px solid currentColor}
+.fb strong{color:inherit}
+.chk{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:4px}
+.chk li{padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border)}
+.chk li.ok{border-color:var(--ok);color:var(--ok)}
+.chk li.bad{border-color:var(--bad);color:var(--bad)}
+.vec{position:relative;font-style:italic;display:inline-block}
+.vec::before{content:"→";position:absolute;top:-.62em;left:.05em;font-size:.75em;font-style:normal}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.88rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+details.note,details.rappel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 16px;margin-top:16px}
+details.note ul,details.rappel ul{margin:.3rem 0 .8rem;padding-left:1.2rem}
+footer{margin-top:24px;color:var(--muted);font-size:.88rem}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="back" href="../index.html">← Catalogue des simulations</a>
+  <div class="kicker">Mouvement et interactions · Seconde</div>
+  <h1>Construire un vecteur vitesse</h1>
+  <p class="lead">À partir d’une chronophotographie, tu observes le mouvement, tu mesures, tu calcules, puis tu traces le vecteur vitesse d’un point. Chaque exercice est tiré au hasard.</p>
+
+  <div class="controls">
+    <fieldset>
+      <legend class="sr-only">Niveau</legend>
+      <div class="seg" role="radiogroup" aria-label="Niveau de l’exercice">
+        <label><input type="radio" name="niveau" value="1" checked><span>1 · Pas à pas</span></label>
+        <label><input type="radio" name="niveau" value="2"><span>2 · Autonome</span></label>
+        <label><input type="radio" name="niveau" value="3"><span>3 · Expert</span></label>
+      </div>
+    </fieldset>
+    <button class="btn primary" id="btnNew" type="button">Nouvel exercice</button>
+    <button class="btn" id="btnLink" type="button" title="Copie un lien qui ouvre exactement cet exercice">Copier le lien de l’exercice</button>
+    <button class="btn" id="btnTheme" type="button">Thème : auto</button>
+    <span class="score" id="score">Exercices terminés : 0 · sans aide : 0</span>
+  </div>
+</header>
+
+<main>
+  <noscript><p>Cette simulation a besoin de JavaScript.</p></noscript>
+  <section class="enonce" aria-labelledby="enonceTitre">
+    <h2 id="enonceTitre">Exercice <span id="exoNum"></span></h2>
+    <p id="exoTxt"></p>
+    <ul class="facts" id="facts"></ul>
+  </section>
+
+  <div class="layout">
+    <figure class="stage" id="stage">
+      <svg id="scene" class="scene" viewBox="0 0 24 14" role="group" aria-label="Chronophotographie sur un quadrillage de 1 centimètre"></svg>
+      <div class="tools">
+        <button class="btn small" id="btnReplay" type="button">↻ Rejouer l’enregistrement</button>
+        <button class="btn small" id="btnTraj" type="button" hidden aria-pressed="false">Afficher la trajectoire</button>
+        <button class="btn small primary" id="btnCheck2" type="button" hidden>Vérifier le vecteur</button>
+      </div>
+      <p class="readout" id="readout"></p>
+      <figcaption id="cap"></figcaption>
+      <details class="alt"><summary>Tableau des positions (alternative texte au schéma)</summary><div id="altTable"></div></details>
+      <div class="legend" id="legend" hidden></div>
+    </figure>
+    <div class="steps" id="steps"></div>
+  </div>
+
+  <details class="rappel">
+    <summary>Rappel de cours</summary>
+    <ul>
+      <li>Le vecteur vitesse d’un point M a quatre caractéristiques : un <strong>point d’application</strong> (M), une <strong>direction</strong> (celle du mouvement), un <strong>sens</strong> (celui du mouvement) et une <strong>valeur</strong> (en m/s).</li>
+      <li>Entre deux positions successives M et M′ séparées par une durée Δt courte, la valeur de la vitesse est <em>v = MM′ / Δt</em>. Le vecteur déplacement <span class="vec">MM′</span> donne la direction et le sens.</li>
+      <li>On représente le vecteur par une flèche, avec une <strong>échelle</strong> : si 1 cm représente 2 m/s, une vitesse de 6 m/s se représente par une flèche de 3 cm.</li>
+      <li>Un vecteur vitesse <strong>constant</strong> garde la même valeur <em>et</em> la même direction <em>et</em> le même sens.</li>
+    </ul>
+  </details>
+
+  <details class="note">
+    <summary>Repères pour l’enseignant</summary>
+    <ul>
+      <li><strong>Programme de Seconde, « Décrire un mouvement »</strong> : approcher le vecteur vitesse d’un point par le vecteur déplacement entre deux positions successives voisines séparées de Δt, et le représenter ; caractériser un mouvement rectiligne uniforme ou non uniforme et différentes trajectoires ; exploiter une chronophotographie pour représenter des vecteurs vitesse et décrire la variation du vecteur vitesse ; capacité mathématique « représenter des vecteurs ».</li>
+      <li><strong>Convention retenue</strong> : le vecteur vitesse en M<sub>i</sub> est approché avec M<sub>i</sub> et M<sub>i+1</sub>, comme dans la formulation du programme (M et M′). La méthode centrée (M<sub>i−1</sub>, M<sub>i+1</sub>) et la construction du vecteur variation de vitesse relèvent de la Première et ne sont pas abordées ici.</li>
+      <li><strong>Démarche</strong> : observer (trajectoire, évolution des distances), construire (mesure, échelle, valeur, tracé avec les quatre caractéristiques), puis prédire avant de voir tous les vecteurs et expliquer.</li>
+      <li><strong>Niveaux</strong> : 1 = trajectoires rectilignes, origine imposée, formules rappelées ; 2 = toutes les trajectoires, rappels repliés ; 3 = conversions cm/ms → m/s et origine à placer soi-même.</li>
+      <li><strong>Même exercice pour toute la classe</strong> : « Copier le lien de l’exercice » reproduit exactement le même énoncé (niveau et numéro).</li>
+      <li><strong>Limites</strong> : la distance sur le schéma est donnée par un outil de mesure (pas de lecture de règle, pas d’incertitude) ; aucune sauvegarde des résultats ; durée par exercice estimée à 10–15 min, à confirmer en classe.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>Aucun compte, aucun suivi. Seul le choix du thème est mémorisé sur ton appareil. · Simulabo PhCh</footer>
+</div>
+<div class="sr-only" id="live" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ───────── Constantes et utilitaires ───────── */
+var W=24,H=14,MARG=1.8;
+var NS='http://www.w3.org/2000/svg';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var f1=function(x){return x.toFixed(1).replace('.',',')};
+var fg=function(x){return String(Number(x.toPrecision(3))).replace('.',',')};
+var SUBS='₀₁₂₃₄₅₆₇₈₉';
+var sub=function(n){return String(n).split('').map(function(c){return SUBS[+c]}).join('')};
+var Mh=function(k){return 'M<sub>'+k+'</sub>'};
+var VEC=function(t){return '<span class="vec">'+t+'</span>'};
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function parseNum(s){
+  s=String(s).trim().replace(/\s/g,'').replace(',','.').replace(/[a-zA-Zµ°%/²·]+$/,'');
+  if(!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(s))return NaN;
+  return parseFloat(s);
+}
+function close(a,b,rel){rel=rel||0.03;return Math.abs(a-b)<=rel*Math.abs(b)}
+
+/* ───────── Contextes d’exercice ───────── */
+/* niveaux 1-2 : échelle en m, Δt en s ; niveau 3 : échelle en cm, Δt en ms */
+var CTX_SI={
+  rect:[
+    {txt:'Chronophotographie d’une voiture, vue de dessus, sur une route droite.',pairs:[[5,1],[10,2],[5,0.5]]},
+    {txt:'Chronophotographie d’un cycliste, vue de dessus, sur une piste droite.',pairs:[[2,0.5],[1,0.5]]},
+    {txt:'Chronophotographie d’un train, vue de dessus, sur une voie droite.',pairs:[[10,2],[20,2]]},
+    {txt:'Chronophotographie d’un skieur sur une piste droite, vue de dessus.',pairs:[[2,1],[5,1]]}
+  ],
+  circ:[
+    {txt:'Chronophotographie d’un cheval de bois d’un carrousel, vue de dessus.',pairs:[[2,1],[1.5,1]]},
+    {txt:'Chronophotographie d’un coureur sur une piste circulaire, vue de dessus.',pairs:[[3,1]]},
+    {txt:'Chronophotographie d’une voiture dans un rond-point, vue de dessus.',pairs:[[4,1],[3,0.5]]}
+  ],
+  para:[
+    {txt:'Chronophotographie d’un ballon de football après un coup franc, vue de côté.',pairs:[[1,0.2],[2,0.4]]},
+    {txt:'Chronophotographie d’une balle de tennis après un service, vue de côté.',pairs:[[1,0.1]]},
+    {txt:'Chronophotographie d’un ballon de basket lancé vers le panier, vue de côté.',pairs:[[0.5,0.1]]}
+  ],
+  pend:[
+    {txt:'Chronophotographie d’un enfant sur une balançoire, vue de côté.',pairs:[[0.4,0.25]]},
+    {txt:'Chronophotographie de la masse d’un grand pendule, vue de côté.',pairs:[[0.3,0.2]]}
+  ]
+};
+var CTX_LAB={
+  rect:[
+    {txt:'Chronophotographie d’un chariot sur un banc à coussin d’air, vue de dessus.',pairs:[[5,100]]},
+    {txt:'Chronophotographie d’un mobile autoporteur sur une table horizontale, vue de dessus.',pairs:[[2,40]]},
+    {txt:'Chronophotographie d’une bille roulant sur un rail horizontal, vue de dessus.',pairs:[[1,20]]}
+  ],
+  circ:[
+    {txt:'Chronophotographie d’une pastille collée au bord d’un disque en rotation, vue de face.',pairs:[[1,20]]},
+    {txt:'Chronophotographie d’un mobile autoporteur attaché à un fil, vue de dessus.',pairs:[[2,40]]}
+  ],
+  para:[
+    {txt:'Chronophotographie d’une balle de ping-pong lancée, vidéo à 25 images par seconde.',pairs:[[4,40]]},
+    {txt:'Chronophotographie d’une bille lancée depuis une table, vidéo à 25 images par seconde.',pairs:[[3,40]]}
+  ],
+  pend:[
+    {txt:'Chronophotographie d’un pendule simple de laboratoire.',pairs:[[2,50]]}
+  ]
+};
+var EV=[0.1,0.2,0.5,1,2,5,10,20,50];
+var GRP={mru:'rect',acc:'rect',ral:'rect',circ:'circ',para:'para',pend:'pend'};
+
+var TRUTH={
+  mru:{traj:'rect',val:'const',dir:'const',nom:'rectiligne uniforme (trajectoire droite, valeur de la vitesse constante)'},
+  acc:{traj:'rect',val:'aug',dir:'const',nom:'rectiligne non uniforme (trajectoire droite, vitesse qui augmente)'},
+  ral:{traj:'rect',val:'dim',dir:'const',nom:'rectiligne non uniforme (trajectoire droite, vitesse qui diminue)'},
+  circ:{traj:'circ',val:'const',dir:'change',nom:'circulaire uniforme (trajectoire circulaire, valeur de la vitesse constante)'},
+  para:{traj:'quel',val:'mixte',dir:'change',nom:'curviligne et non uniforme (la valeur de la vitesse varie)'},
+  pend:{traj:'circ',val:'mixte',dir:'change',nom:'circulaire (arc de cercle) et non uniforme (la valeur de la vitesse varie)'}
+};
+var LAB={
+  traj:{rect:'rectiligne',circ:'circulaire (arc de cercle)',quel:'curviligne quelconque'},
+  val:{const:'reste la même',aug:'augmente',dim:'diminue',mixte:'varie dans les deux sens'},
+  dir:{const:'reste la même',change:'change'}
+};
+
+/* ───────── Génération d’un exercice ───────── */
+function rawPoints(type,r,U,pick){
+  var pts=[],k,x=0,y=0;
+  if(type==='mru'||type==='acc'||type==='ral'){
+    var N=9;
+    var th=(r()<0.2?U(0.9,1.3):U(0,0.75))*pick([1,-1])+(r()<0.5?0:Math.PI);
+    var steps=[];
+    if(type==='mru'){var s=U(1.3,2.0);for(k=0;k<N-1;k++)steps.push(s)}
+    else{var s0=U(0.8,1.1),a=U(0.12,0.2);for(k=0;k<N-1;k++)steps.push(s0+a*k);if(type==='ral')steps.reverse()}
+    pts.push({x:0,y:0});
+    steps.forEach(function(st){x+=st*Math.cos(th);y+=st*Math.sin(th);pts.push({x:x,y:y})});
+  }else if(type==='circ'){
+    var R=U(3.6,4.8),dphi=U(0.32,0.42),sg=pick([1,-1]),a0=U(0,2*Math.PI);
+    for(k=0;k<9;k++)pts.push({x:R*Math.cos(a0+sg*dphi*k),y:R*Math.sin(a0+sg*dphi*k)});
+  }else if(type==='para'){
+    var vx=U(1.0,1.5),vy=U(1.9,2.8),ka=U(3.8,5.2),fl=pick([1,-1]);
+    for(k=0;k<10;k++)pts.push({x:fl*vx*k,y:-(vy*k-0.5*(vy/ka)*k*k)});
+  }else{ /* pend */
+    var Rp=U(4.2,5.2),pm=U(0.32,0.40),fx=pick([1,-1]),Np=9,ph=[],tot=0;
+    for(k=0;k<Np-1;k++){var p=pm*(0.45+0.55*Math.sin(Math.PI*(k+0.5)/(Np-1)));ph.push(p);tot+=p}
+    var al=-tot/2;pts.push({x:fx*Rp*Math.sin(al),y:Rp*Math.cos(al)});
+    ph.forEach(function(p){al+=p;pts.push({x:fx*Rp*Math.sin(al),y:Rp*Math.cos(al)})});
+  }
+  return pts;
+}
+function fit(raw,U){
+  var xs=raw.map(function(p){return p.x}),ys=raw.map(function(p){return p.y});
+  var minx=Math.min.apply(null,xs),maxx=Math.max.apply(null,xs),miny=Math.min.apply(null,ys),maxy=Math.max.apply(null,ys);
+  var w=maxx-minx,h=maxy-miny,aw=W-2*MARG,ah=H-2*MARG;
+  var f=Math.min(1,aw/(w||1),ah/(h||1));
+  var ox=MARG+U(0,aw-w*f),oy=MARG+U(0,ah-h*f);
+  return raw.map(function(p){return {x:Math.round(((p.x-minx)*f+ox)*1000)/1000,y:Math.round(((p.y-miny)*f+oy)*1000)/1000}});
+}
+function makeExercise(level,seed){
+  var r=mulberry32((seed^(level*0x9E3779B1))>>>0);
+  var U=function(a,b){return a+(b-a)*r()};
+  var pick=function(a){return a[Math.floor(r()*a.length)]};
+  var types=level===1?['mru','acc','ral']:['mru','acc','ral','circ','para','pend'];
+  var type=pick(types),grp=GRP[type];
+  for(var n=0;n<400;n++){
+    var pts=fit(rawPoints(type,r,U,pick),U),N=pts.length,k;
+    var d=[];for(k=0;k<N-1;k++)d.push(Math.hypot(pts[k+1].x-pts[k].x,pts[k+1].y-pts[k].y));
+    var ctx=pick((level===3?CTX_LAB:CTX_SI)[grp]),pair=pick(ctx.pairs);
+    var Em=level===3?pair[0]/100:pair[0],dts=level===3?pair[1]/1000:pair[1];
+    var idx=[];for(k=(level===1?2:1);k<=N-3;k++)idx.push(k);
+    for(k=idx.length-1;k>0;k--){var j=Math.floor(r()*(k+1));var tmp=idx[k];idx[k]=idx[j];idx[j]=tmp}
+    for(var q=0;q<idx.length;q++){
+      var i=idx[q],dS=Math.round(d[i]*10)/10;
+      if(dS<0.8)continue;
+      var evs=EV.filter(function(Ev){
+        var L=dS*Em/dts/Ev;
+        if(L<1.2||L>3.4)return false;
+        for(var m=0;m<N-1;m++){
+          var Lk=d[m]*Em/dts/Ev;
+          if(Lk<0.6||Lk>5.2)return false;
+          var tx=pts[m].x+(pts[m+1].x-pts[m].x)/d[m]*Lk,ty=pts[m].y+(pts[m+1].y-pts[m].y)/d[m]*Lk;
+          if(tx<0.3||tx>W-0.3||ty<0.3||ty>H-0.3)return false;
+        }
+        return true;
+      });
+      if(!evs.length)continue;
+      var Ev=pick(evs),D=dS*Em,v=D/dts,L=v/Ev;
+      var cen={x:0,y:0};pts.forEach(function(p){cen.x+=p.x/N;cen.y+=p.y/N});
+      return {
+        type:type,ctx:ctx,pts:pts,N:N,d:d,i:i,dS:dS,Em:Em,dts:dts,Ev:Ev,D:D,v:v,L:L,cen:cen,level:level,seed:seed,
+        convert:level===3,Ecm:level===3?pair[0]:null,dtms:level===3?pair[1]:null,
+        u:{x:(pts[i+1].x-pts[i].x)/d[i],y:(pts[i+1].y-pts[i].y)/d[i]}
+      };
+    }
+  }
+  return null;
+}
+function safeExercise(level,seed){
+  for(var s=0;s<60;s++){var e=makeExercise(level,seed+s);if(e){e.seed=seed;return e}}
+  return null;
+}
+
+/* ───────── État ───────── */
+var S={level:1,seed:0,ex:null,stage:null,att:{},assisted:false,hd:null,locked:false,drag:null,ghost:false,rp:null,
+       score:{done:0,clean:0},trajOn:false};
+var timer=null;
+var svg=$('#scene'),stepsEl=$('#steps');
+
+function stages(){var o=['obs','mes','dist','dt','vit','len','tr','pred','bilan'];return S.ex.convert?o:o.filter(function(s){return s!=='dt'})}
+function numOf(st){return stages().indexOf(st)+1}
+
+/* ───────── Dessin ───────── */
+function arrow(o,t,cls){
+  var dx=t.x-o.x,dy=t.y-o.y,l=Math.hypot(dx,dy);if(l<0.05)return '';
+  var ux=dx/l,uy=dy/l,hl=Math.min(0.5,l*0.5),hw=0.2,bx=t.x-ux*hl,by=t.y-uy*hl;
+  return '<g class="'+cls+'"><line x1="'+o.x+'" y1="'+o.y+'" x2="'+bx+'" y2="'+by+'"/><polygon points="'+t.x+','+t.y+' '+(bx-uy*hw)+','+(by+ux*hw)+' '+(bx+uy*hw)+','+(by-ux*hw)+'"/></g>';
+}
+function normalOut(k){
+  var ex=S.ex,p=ex.pts,N=p.length,a=p[Math.max(0,k-1)],b=p[Math.min(N-1,k+1)];
+  var tx=b.x-a.x,ty=b.y-a.y,l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
+  var nx=-ty,ny=tx,dot=nx*(p[k].x-ex.cen.x)+ny*(p[k].y-ex.cen.y);
+  if(Math.abs(dot)<0.25){if(ny>0){nx=-nx;ny=-ny}}
+  else if(dot<0){nx=-nx;ny=-ny}
+  return {x:nx,y:ny};
+}
+function smoothPath(p){
+  var d='M'+p[0].x+' '+p[0].y;
+  for(var k=0;k<p.length-1;k++){
+    var p0=p[k-1]||p[k],p1=p[k],p2=p[k+1],p3=p[k+2]||p2;
+    d+=' C'+(p1.x+(p2.x-p0.x)/6)+' '+(p1.y+(p2.y-p0.y)/6)+' '+(p2.x-(p3.x-p1.x)/6)+' '+(p2.y-(p3.y-p1.y)/6)+' '+p2.x+' '+p2.y;
+  }
+  return d;
+}
+function sceneHTML(){
+  var ex=S.ex,g='',x,y,k;
+  for(x=0;x<=W;x++)g+='<line class="gl'+(x%5===0?' maj':'')+'" x1="'+x+'" y1="0" x2="'+x+'" y2="'+H+'"/>';
+  for(y=0;y<=H;y++)g+='<line class="gl'+(y%5===0?' maj':'')+'" x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'"/>';
+  g+='<path id="trajPath" class="traj" d="'+smoothPath(ex.pts)+'" style="display:none"/>';
+  g+='<g id="gRuler"></g><g id="gAll"></g><g id="gGhost"></g><g id="gVec"></g><g id="gPts">';
+  ex.pts.forEach(function(p,k){
+    var n=normalOut(k),cur=k===ex.i;
+    g+='<g class="pg" data-k="'+k+'"><circle class="hit" data-k="'+k+'" cx="'+p.x+'" cy="'+p.y+'" r="0.7"/>'
+      +'<circle class="ptc" cx="'+p.x+'" cy="'+p.y+'" r="0.2"/>'
+      +(cur?'<circle class="cur" cx="'+p.x+'" cy="'+p.y+'" r="0.5"/>':'')
+      +'<text class="lbl'+(cur?' cur-l':'')+'" x="'+(p.x+n.x*0.8)+'" y="'+(p.y+n.y*0.8)+'" text-anchor="middle" dominant-baseline="central">M<tspan class="sb" dy=".22">'+k+'</tspan></text></g>';
+  });
+  g+='</g><g id="gHandles" style="display:none">';
+  if(ex.level===3)g+='<g id="hTail" class="handle" tabindex="0" role="button" aria-label="Origine de la flèche. Flèches du clavier pour déplacer."><circle class="hitH" r="1.5"/><circle class="ringH" r="0.34"/></g>';
+  g+='<g id="hTip" class="handle" tabindex="0" role="button" aria-label="Extrémité de la flèche. Flèches du clavier pour déplacer, Maj pour aller plus vite."><circle class="hitH" r="1.5"/><circle class="ringH" r="0.34"/></g></g>';
+  svg.innerHTML=g;
+  bindHandle($('#hTip'),'tip');
+  if(ex.level===3)bindHandle($('#hTail'),'tail');
+  $$('.hit',svg).forEach(function(c){c.addEventListener('click',function(){pickPos(+c.getAttribute('data-k'))})});
+}
+function toSvg(e){
+  var pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+  var p=pt.matrixTransform(svg.getScreenCTM().inverse());return {x:p.x,y:p.y};
+}
+function clampSnap(v,max){return Math.min(max-0.2,Math.max(0.2,Math.round(v*10)/10))}
+function placeHandles(){
+  var tip=$('#hTip');if(!tip)return;
+  tip.setAttribute('transform','translate('+S.hd.tip.x+' '+S.hd.tip.y+')');
+  var tl=$('#hTail');if(tl)tl.setAttribute('transform','translate('+S.hd.tail.x+' '+S.hd.tail.y+')');
+  drawStudent();
+}
+function drawStudent(){
+  var o=S.hd.tail,t=S.hd.tip,g=$('#gVec');if(!g)return;
+  var len=Math.hypot(t.x-o.x,t.y-o.y),lab='';
+  if(len>0.4){
+    var n={x:-(t.y-o.y)/len,y:(t.x-o.x)/len},no=normalOut(S.ex.i);
+    if(n.x*no.x+n.y*no.y>0){n.x=-n.x;n.y=-n.y} /* côté intérieur : les noms de points sont à l’extérieur */
+    lab='<text class="vl" x="'+((o.x+t.x)/2+n.x*0.8)+'" y="'+((o.y+t.y)/2+n.y*0.8)+'" text-anchor="middle" dominant-baseline="central">v<tspan class="sb" dy=".22">'+S.ex.i+'</tspan></text>';
+  }
+  g.innerHTML=arrow(o,t,'svec')+lab;
+  $('#readout').textContent=S.stage==='tr'?'Flèche : longueur '+f1(len)+' cm.':'';
+}
+function describe(){
+  var o=S.hd.tail,t=S.hd.tip,dx=t.x-o.x,dy=t.y-o.y;
+  return 'Flèche de '+f1(Math.hypot(dx,dy))+' centimètres : '+f1(Math.abs(dx))+' vers la '+(dx>=0?'droite':'gauche')+' et '+f1(Math.abs(dy))+' vers le '+(dy<=0?'haut':'bas')+'.';
+}
+function move(key,x,y){
+  if(S.locked)return;
+  S.hd[key]={x:clampSnap(x,W),y:clampSnap(y,H)};
+  placeHandles();
+}
+function bindHandle(el,key){
+  el.addEventListener('pointerdown',function(e){
+    if(S.locked)return;
+    el.setPointerCapture(e.pointerId);S.drag=key;e.preventDefault();
+    try{el.focus({preventScroll:true})}catch(_){}
+  });
+  el.addEventListener('pointermove',function(e){if(S.drag!==key)return;var p=toSvg(e);move(key,p.x,p.y)});
+  var end=function(){if(S.drag===key){S.drag=null;$('#live').textContent=describe()}};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+  el.addEventListener('keydown',function(e){
+    var st=e.shiftKey?0.5:0.1,dx=0,dy=0;
+    if(e.key==='ArrowLeft')dx=-st;else if(e.key==='ArrowRight')dx=st;else if(e.key==='ArrowUp')dy=-st;else if(e.key==='ArrowDown')dy=st;else return;
+    e.preventDefault();
+    if(S.locked)return;
+    var c=S.hd[key];move(key,c.x+dx,c.y+dy);$('#live').textContent=describe();
+  });
+}
+function setShown(n){
+  $$('#gPts .pg').forEach(function(g){g.style.display=(+g.getAttribute('data-k')<n)?'':'none'});
+}
+function drawRuler(){
+  var ex=S.ex,a=ex.pts[ex.i],b=ex.pts[ex.i+1];
+  $('#gRuler').innerHTML='<line class="rul" x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'"/>';
+}
+function drawGhost(){
+  var ex=S.ex,o=ex.pts[ex.i],t={x:o.x+ex.u.x*ex.L,y:o.y+ex.u.y*ex.L};
+  $('#gGhost').innerHTML=arrow(o,t,'ghost');
+}
+function revealAll(){
+  var ex=S.ex,g='';
+  for(var k=0;k<ex.N-1;k++){
+    var Lk=ex.d[k]*ex.Em/ex.dts/ex.Ev,ux=(ex.pts[k+1].x-ex.pts[k].x)/ex.d[k],uy=(ex.pts[k+1].y-ex.pts[k].y)/ex.d[k];
+    g+=arrow(ex.pts[k],{x:ex.pts[k].x+ux*Lk,y:ex.pts[k].y+uy*Lk},'avec');
+  }
+  $('#gAll').innerHTML=g;
+  var lg=$('#legend');lg.hidden=false;
+  lg.innerHTML='<span><i style="border-color:var(--avec)"></i>vecteurs vitesse en chaque position (même échelle)</span><span><i style="border-color:var(--vec)"></i>ton vecteur en '+Mh(ex.i)+'</span>';
+  $('#btnTraj').hidden=false;
+}
+
+/* ───────── Cartes ───────── */
+function head(st,title){return '<div class="chead"><h2><span class="num" aria-hidden="true">'+numOf(st)+'</span>'+title+'</h2><span class="badge" data-badge>À faire</span></div>'}
+var FB='<div class="fb" role="status" aria-live="polite"></div>';
+function radio(name,val,label){return '<label class="opt"><input type="radio" name="'+name+'" value="'+val+'"><span>'+label+'</span></label>'}
+function help(html){
+  return S.level===1?'<p class="formula"><strong>Rappel :</strong> '+html+'</p>'
+    :'<details class="help"><summary>Besoin d’un rappel ?</summary><p class="formula">'+html+'</p></details>';
+}
+function numForm(form,id,label,unit){
+  return '<form data-form="'+form+'" novalidate><div class="row"><label for="'+id+'"><strong>'+label+'</strong></label><input type="text" id="'+id+'" inputmode="decimal" autocomplete="off"><span class="unit">'+unit+'</span><button class="btn primary" type="button" data-submit>Valider</button></div></form>';
+}
+function cardsHTML(){
+  var ex=S.ex,i=ex.i,h='';
+  var Edisp=ex.convert?fg(ex.Ecm)+' cm':fg(ex.Em)+' m';
+  var dtDisp=ex.convert?ex.dtms+' ms':fg(ex.dts)+' s';
+  h+='<section class="card" id="c-obs" hidden>'+head('obs','Observer le mouvement')
+    +'<form data-form="obs" novalidate>'
+    +'<fieldset><legend>Quelle est la trajectoire du point ?</legend><div class="opts">'
+    +radio('traj','rect','Rectiligne (une droite)')+radio('traj','circ','Circulaire (un arc de cercle)')+radio('traj','quel','Curviligne quelconque')+'</div></fieldset>'
+    +'<fieldset><legend>Entre deux positions successives (toujours la même durée Δt), la distance parcourue…</legend><div class="opts">'
+    +radio('val','const','reste la même')+radio('val','aug','augmente')+radio('val','dim','diminue')+radio('val','mixte','varie dans les deux sens (elle augmente puis diminue, ou l’inverse)')+'</div></fieldset>'
+    +'<button class="btn primary" type="button" data-submit>Valider</button></form>'+FB+'</section>';
+  h+='<section class="card" id="c-mes" hidden>'+head('mes','Choisir les deux positions')
+    +'<p>On construit le vecteur vitesse au point <strong>'+Mh(i)+'</strong> (entouré sur le schéma). On l’approche à l’aide de la position <em>suivante</em>. Sélectionne-la : clique sur le schéma ou choisis un bouton.</p>'
+    +'<div class="chips" role="group" aria-label="Positions du point">'+ex.pts.map(function(_,k){return '<button type="button" class="chip" data-pos="'+k+'" aria-label="Position M '+k+'">'+Mh(k)+'</button>'}).join('')+'</div>'+FB+'</section>';
+  h+='<section class="card" id="c-dist" hidden>'+head('dist','Distance réelle')
+    +'<p>Sur le schéma, '+Mh(i)+Mh(i+1)+' = <strong>'+f1(ex.dS)+' cm</strong>. Échelle : <strong>1 cm sur le schéma représente '+Edisp+'</strong> dans la réalité.</p>'
+    +'<p>Calcule la distance réelle <em>D</em> = '+Mh(i)+Mh(i+1)+', <strong>en mètres</strong>.</p>'
+    +help(ex.convert?'D = d × échelle, puis convertis en mètres (1 cm = 0,01 m).':'D = d × échelle, où d est la distance sur le schéma et l’échelle la distance réelle représentée par 1 cm.')
+    +numForm('dist','in-dist','D =','m')+FB+'</section>';
+  if(ex.convert){
+    h+='<section class="card" id="c-dt" hidden>'+head('dt','Durée')
+      +'<p>La durée entre deux positions successives est <strong>Δt = '+dtDisp+'</strong>. Convertis-la <strong>en secondes</strong>.</p>'
+      +help('1 ms = 0,001 s.')+numForm('dt','in-dt','Δt =','s')+FB+'</section>';
+  }
+  h+='<section class="card" id="c-vit" hidden>'+head('vit','Valeur de la vitesse')
+    +'<p>Calcule la valeur <em>v</em> de la vitesse moyenne entre '+Mh(i)+' et '+Mh(i+1)+', <strong>en m/s</strong>, avec D = '+fg(ex.D)+' m et Δt = '+fg(ex.dts)+' s.</p>'
+    +help('<em>v</em> = D / Δt (une distance divisée par une durée).')
+    +numForm('vit','in-vit','v =','m/s')+FB+'</section>';
+  h+='<section class="card" id="c-len" hidden>'+head('len','Longueur de la flèche')
+    +'<p>Échelle des vitesses : <strong>1 cm représente '+fg(ex.Ev)+' m/s</strong>. Quelle longueur <em>L</em> doit avoir la flèche du vecteur vitesse sur le schéma ? (v = '+fg(ex.v)+' m/s)</p>'
+    +help('<em>L</em> = v / échelle. Exemple : si 1 cm représente 2 m/s, une vitesse de 6 m/s se représente par 3 cm.')
+    +numForm('len','in-len','L =','cm')+FB+'</section>';
+  h+='<section class="card" id="c-tr" hidden>'+head('tr','Tracer le vecteur vitesse')
+    +(ex.level===3
+      ?'<p>Sur le schéma, place l’<strong>origine</strong> puis l’<strong>extrémité</strong> de la flèche (glisse les deux poignées, ou utilise les flèches du clavier). Le vecteur vitesse au point '+Mh(i)+' doit avoir ses quatre caractéristiques correctes.</p>'
+      :'<p>L’origine est imposée en '+Mh(i)+'. Glisse la poignée de l’<strong>extrémité</strong> (souris, doigt, ou flèches du clavier) pour donner à la flèche la bonne direction, le bon sens et la longueur <em>L</em> que tu viens de calculer.</p>')
+    +'<p>Un vecteur se décrit par : <strong>point d’application</strong>, <strong>direction</strong>, <strong>sens</strong>, <strong>valeur</strong>.</p>'
+    +'<div class="actions"><button class="btn primary" type="button" id="btnCheck">Vérifier le vecteur</button><button class="btn" type="button" id="btnGhost" hidden>Montrer la flèche attendue</button></div>'
+    +'<ul class="chk" id="chk" hidden></ul>'+FB+'</section>';
+  h+='<section class="card" id="c-pred" hidden>'+head('pred','Prédire, observer, expliquer')
+    +'<p>Avant de regarder : de '+Mh(0)+' à '+Mh(ex.N-2)+', que va devenir le vecteur vitesse ?</p>'
+    +'<form data-form="pred" novalidate>'
+    +'<div class="row"><label for="p-val">Sa valeur (la longueur de la flèche)</label><select id="p-val"><option value="">Choisir…</option><option value="const">reste la même</option><option value="aug">augmente</option><option value="dim">diminue</option><option value="mixte">varie dans les deux sens</option></select></div>'
+    +'<div class="row"><label for="p-dir">Sa direction et son sens</label><select id="p-dir"><option value="">Choisir…</option><option value="const">restent les mêmes</option><option value="change">changent</option></select></div>'
+    +'<button class="btn primary" type="button" data-submit>Valider ma prédiction et voir les vecteurs</button></form>'+FB+'</section>';
+  h+='<section class="card" id="c-bilan" hidden>'+head('bilan','Bilan')+'<div id="bilanBody"></div></section>';
+  return h;
+}
+
+/* ───────── Flux ───────── */
+function setFb(card,kind,html){var f=$('.fb',card);f.className='fb '+kind;f.innerHTML=(kind==='ok'?'✓ ':kind==='bad'?'✗ ':'ℹ ')+html}
+function openStage(st){
+  S.stage=st;var c=$('#c-'+st);c.hidden=false;
+  $$('.card.active').forEach(function(x){x.classList.remove('active')});c.classList.add('active');
+  var behavior=reduce?'auto':'smooth';
+  if(st==='tr'){
+    $('#gHandles').style.display='';$('#btnCheck2').hidden=false;placeHandles();
+    $('#stage').scrollIntoView({block:'center',behavior:behavior});
+    try{$('#hTip').focus({preventScroll:true})}catch(_){}
+  }else{
+    var el=$('input[type=text],select,input[type=radio],.chip:not(:disabled)',c);
+    if(el){try{el.focus({preventScroll:true})}catch(_){}}
+    c.scrollIntoView({block:'nearest',behavior:behavior});
+  }
+  if(st==='bilan')buildBilan();
+}
+function complete(st,assisted){
+  if(assisted)S.assisted=true;
+  var c=$('#c-'+st);c.classList.add('done');c.classList.remove('active');
+  $('[data-badge]',c).textContent='✓ Fait';
+  $$('input,select,button',c).forEach(function(x){if(!x.hasAttribute('data-keep'))x.disabled=true});
+  var o=stages(),nx=o[o.indexOf(st)+1];if(nx)openStage(nx);
+}
+
+function pickPos(k){
+  if(S.stage!=='mes')return;
+  var ex=S.ex,i=ex.i,c=$('#c-mes');
+  if(k===i+1){
+    drawRuler();$$('.chip',c).forEach(function(b){if(+b.getAttribute('data-pos')===k)b.classList.add('good')});
+    setFb(c,'ok','Bien vu : '+Mh(i)+Mh(i+1)+' = '+f1(ex.dS)+' cm sur le schéma.');
+    complete('mes');
+  }else if(k===i){
+    setFb(c,'bad','C’est le point où l’on construit le vecteur. Choisis la position qui vient <em>juste après</em>.');
+  }else if(k===i-1){
+    setFb(c,'bad',Mh(i-1)+' vient <em>avant</em> '+Mh(i)+'. Dans cette activité, on prend la position suivante, '+Mh(i+1)+'.');
+  }else{
+    setFb(c,'bad','Il faut deux positions <em>successives</em> : séparées d’un seul Δt. Choisis la position qui suit '+Mh(i)+'.');
+  }
+}
+
+function numeric(st,form,exp,hint,sol){
+  var card=form.closest('.card'),inp=$('input[type=text]',form),val=parseNum(inp.value);
+  if(isNaN(val)){setFb(card,'bad','Écris un nombre (la virgule est acceptée).');return}
+  var n=S.att[st]=(S.att[st]||0)+1;
+  if(close(val,exp)){setFb(card,'ok',sol);complete(st,false);return}
+  var msg=hint(val)||'Ce n’est pas tout à fait ça. Relis l’énoncé et vérifie ton calcul.';
+  if(n>=2)msg+=' <em>Indice :</em> '+$('.formula',card).textContent.replace('Rappel :','').trim();
+  var extra='';
+  if(n>=3)extra=' <button type="button" class="btn small" data-reveal="'+st+'">Voir la réponse</button>';
+  setFb(card,'bad',msg+extra);
+}
+function revealNumeric(st){
+  var ex=S.ex,card=$('#c-'+st),inp=$('input[type=text]',card),sol;
+  var map={dist:[ex.D,distSol],dt:[ex.dts,dtSol],vit:[ex.v,vitSol],len:[ex.L,lenSol]};
+  inp.value=fg(map[st][0]);setFb(card,'info','Réponse : '+map[st][1]());complete(st,true);
+}
+function distSol(){var ex=S.ex;return ex.convert?'D = '+f1(ex.dS)+' × '+fg(ex.Ecm)+' = '+fg(ex.dS*ex.Ecm)+' cm = '+fg(ex.D)+' m.':'D = '+f1(ex.dS)+' × '+fg(ex.Em)+' = '+fg(ex.D)+' m.'}
+function dtSol(){var ex=S.ex;return 'Δt = '+ex.dtms+' ms = '+fg(ex.dts)+' s.'}
+function vitSol(){var ex=S.ex;return 'v = D / Δt = '+fg(ex.D)+' / '+fg(ex.dts)+' = '+fg(ex.v)+' m/s.'}
+function lenSol(){var ex=S.ex;return 'L = v / échelle = '+fg(ex.v)+' / '+fg(ex.Ev)+' = '+fg(ex.L)+' cm.'}
+
+var FORMS={
+  obs:function(form){
+    var card=$('#c-obs'),ex=S.ex,T=TRUTH[ex.type],tr=form.elements.traj.value,va=form.elements.val.value;
+    if(!tr||!va){setFb(card,'bad','Réponds aux deux questions.');return}
+    var n=S.att.obs=(S.att.obs||0)+1,okT=tr===T.traj,okV=va===T.val,m=[];
+    if(okT&&okV){setFb(card,'ok','Le mouvement est <strong>'+T.nom+'</strong>.');complete('obs',false);return}
+    if(!okT)m.push('Trajectoire : relie mentalement les positions. Est-ce une droite, un arc de cercle ou une autre courbe ?');
+    if(!okV)m.push('Distance : les positions sont enregistrées à intervalles de temps <em>égaux</em>. Si elles sont plus écartées, le point a parcouru plus de distance pendant le même Δt. Compare le début, le milieu et la fin.');
+    if(n>=2){
+      setFb(card,'info','Réponse : trajectoire '+LAB.traj[T.traj]+', distance qui '+LAB.val[T.val].replace('reste la même','reste la même')+'. Le mouvement est <strong>'+T.nom+'</strong>.');
+      complete('obs',true);
+    }else setFb(card,'bad',m.join('<br>'));
+  },
+  dist:function(form){
+    var ex=S.ex;
+    numeric('dist',form,ex.D,function(v){
+      if(close(v,ex.dS))return 'Tu as repris la distance du schéma. Applique l’échelle : 1 cm sur le schéma représente '+(ex.convert?fg(ex.Ecm)+' cm':fg(ex.Em)+' m')+'.';
+      if(ex.convert&&close(v,ex.dS*ex.Ecm))return 'Attention à l’unité : D doit être exprimée en mètres.';
+      if(close(v,ex.dS/(ex.convert?ex.Ecm:ex.Em)))return 'Tu as divisé par l’échelle ; il faut multiplier.';
+      return '';
+    },'<strong>'+distSol()+'</strong>');
+  },
+  dt:function(form){
+    var ex=S.ex;
+    numeric('dt',form,ex.dts,function(v){
+      if(close(v,ex.dtms))return 'Tu n’as pas converti : 1 ms = 0,001 s.';
+      if(close(v,ex.dtms/100)||close(v,ex.dtms/10000))return 'Vérifie la conversion : 1 ms = 10⁻³ s.';
+      return '';
+    },'<strong>'+dtSol()+'</strong>');
+  },
+  vit:function(form){
+    var ex=S.ex;
+    numeric('vit',form,ex.v,function(v){
+      if(close(v,ex.D*ex.dts))return 'Tu as multiplié D par Δt. Une vitesse est une distance <em>divisée</em> par une durée.';
+      if(close(v,ex.dS/ex.dts))return 'Tu as utilisé la distance du schéma. Utilise la distance réelle D.';
+      if(ex.convert&&close(v,ex.D/ex.dtms))return 'Δt doit être exprimée en secondes.';
+      if(close(v,ex.dts/ex.D))return 'Tu as inversé le quotient : c’est D / Δt.';
+      return '';
+    },'<strong>'+vitSol()+'</strong>');
+  },
+  len:function(form){
+    var ex=S.ex;
+    numeric('len',form,ex.L,function(v){
+      if(close(v,ex.v))return 'Tu as redonné la vitesse. Convertis-la en longueur avec l’échelle des vitesses.';
+      if(close(v,ex.v*ex.Ev))return 'Tu as multiplié par l’échelle ; il faut diviser.';
+      return '';
+    },'<strong>'+lenSol()+'</strong> Ta flèche fera '+fg(ex.L)+' carreaux du quadrillage.');
+  },
+  pred:function(form){
+    var card=$('#c-pred'),ex=S.ex,T=TRUTH[ex.type],pv=$('#p-val').value,pd=$('#p-dir').value;
+    if(!pv||!pd){setFb(card,'bad','Choisis une réponse pour chaque question.');return}
+    var okV=pv===T.val,okD=pd===T.dir;
+    revealAll();
+    var m='<strong>Observe maintenant les flèches bleues.</strong><br>Valeur : '+(okV?'✓ prévision juste.':'✗ tu avais prévu « '+LAB.val[pv]+' », on observe « '+LAB.val[T.val]+' ».')
+      +'<br>Direction et sens : '+(okD?'✓ prévision juste.':'✗ tu avais prévu « '+LAB.dir[pd]+' », on observe « '+LAB.dir[T.dir]+' ».');
+    setFb(card,okV&&okD?'ok':'info',m);
+    S.predOK=okV&&okD;
+    complete('pred',false);
+  }
+};
+
+/* ───────── Vérification du tracé ───────── */
+function checkTrace(){
+  if(S.stage!=='tr')return;
+  var ex=S.ex,card=$('#c-tr'),P=ex.pts[ex.i],o=S.hd.tail,t=S.hd.tip,dx=t.x-o.x,dy=t.y-o.y,len=Math.hypot(dx,dy);
+  var n=S.att.tr=(S.att.tr||0)+1;
+  var org=Math.hypot(o.x-P.x,o.y-P.y)<=0.35;
+  var ang=len<0.15?180:Math.acos(Math.max(-1,Math.min(1,(dx*ex.u.x+dy*ex.u.y)/len)))*180/Math.PI;
+  var dirOK=ang<=8||ang>=172,senOK=ang<=8,valOK=Math.abs(len-ex.L)<=Math.max(0.25,0.08*ex.L);
+  var li=[];
+  li.push([org,'Point d’application : '+(org?'l’origine est bien en '+M(ex.i)+'.':'l’origine doit être placée sur le point '+M(ex.i)+' lui-même.')]);
+  li.push([dirOK,'Direction : '+(dirOK?'celle de la droite ('+M(ex.i)+M(ex.i+1)+').':'la direction du vecteur vitesse est celle du déplacement, la droite ('+M(ex.i)+M(ex.i+1)+').')]);
+  if(!dirOK)li.push([false,'Sens : vérifie d’abord la direction.']);
+  else li.push([senOK,'Sens : '+(senOK?'dans le sens du mouvement.':'inverse. Le vecteur vitesse est orienté dans le sens du mouvement, de '+M(ex.i)+' vers '+M(ex.i+1)+'.')]);
+  li.push([valOK,'Valeur : '+(valOK?'longueur correcte ('+f1(len)+' cm).':'tu as calculé L = '+fg(ex.L)+' cm ; ta flèche mesure '+f1(len)+' cm'+(len<0.4?' (presque nulle).':'.'))]);
+  var ul=$('#chk');ul.hidden=false;
+  ul.innerHTML=li.map(function(x){return '<li class="'+(x[0]?'ok':'bad')+'">'+(x[0]?'✓ ':'✗ ')+x[1]+'</li>'}).join('');
+  if(org&&dirOK&&senOK&&valOK){
+    S.locked=true;$$('#hTip,#hTail').forEach(function(h){h.setAttribute('tabindex','-1');h.style.cursor='default'});
+    $('#gHandles').style.display='none';$('#btnCheck2').hidden=true;$('#btnGhost').hidden=true;
+    drawStudent();
+    setFb(card,'ok','Bravo : les quatre caractéristiques sont correctes. Le vecteur vitesse en '+Mh(ex.i)+' est tangent à la trajectoire, dans le sens du mouvement.');
+    $('#btnCheck').disabled=true;
+    complete('tr',false);
+  }else{
+    setFb(card,'bad','Corrige les points marqués ✗, puis vérifie à nouveau.');
+    if(n>=2)$('#btnGhost').hidden=false;
+  }
+}
+
+/* ───────── Bilan ───────── */
+function explanation(type){
+  switch(type){
+    case 'mru':return 'Les flèches sont identiques : même valeur, même direction, même sens. Le vecteur vitesse est <strong>constant</strong>, ce qui caractérise un mouvement rectiligne uniforme.';
+    case 'acc':return 'La direction et le sens ne changent pas (trajectoire droite), mais la valeur augmente : les flèches s’allongent. Le vecteur vitesse n’est pas constant.';
+    case 'ral':return 'La direction et le sens ne changent pas (trajectoire droite), mais la valeur diminue : les flèches raccourcissent. Le vecteur vitesse n’est pas constant.';
+    case 'circ':return 'Toutes les flèches ont la même longueur, mais leur direction change à chaque position : le vecteur vitesse est tangent au cercle. <strong>La valeur de la vitesse est constante, pas le vecteur vitesse.</strong>';
+    case 'para':return 'La direction change et la valeur varie : les flèches raccourcissent en montant puis s’allongent en redescendant. Le vecteur vitesse est toujours tangent à la trajectoire. Au sommet, il est horizontal mais <strong>il n’est pas nul</strong>.';
+    default:return 'La direction change à chaque position (le vecteur vitesse est tangent à l’arc de cercle) et la valeur varie : les flèches s’allongent vers le bas de la trajectoire puis raccourcissent. La vitesse est maximale en bas.';
+  }
+}
+function buildBilan(){
+  var ex=S.ex;
+  S.score.done++;if(!S.assisted)S.score.clean++;updateScore();
+  var next=S.level<3?'<button class="btn" type="button" id="btnNext">Passer au niveau '+(S.level+1)+'</button>':'';
+  $('#bilanBody').innerHTML=
+    '<p>Au point '+Mh(ex.i)+', le vecteur vitesse '+VEC('v')+'<sub>'+ex.i+'</sub> a pour caractéristiques :</p>'
+    +'<ul><li>point d’application : '+Mh(ex.i)+' ;</li><li>direction : la droite ('+Mh(ex.i)+Mh(ex.i+1)+') ;</li><li>sens : de '+Mh(ex.i)+' vers '+Mh(ex.i+1)+' ;</li><li>valeur : <em>v</em> = '+fg(ex.v)+' m/s, soit une flèche de '+fg(ex.L)+' cm pour l’échelle 1 cm ↔ '+fg(ex.Ev)+' m/s.</li></ul>'
+    +'<p><strong>Expliquer.</strong> '+explanation(ex.type)+'</p>'
+    +'<p>'+(S.assisted?'Tu as utilisé de l’aide sur cet exercice : refais-en un autre pour t’entraîner.':'Exercice réussi sans afficher de réponse.')+'</p>'
+    +'<div class="actions"><button class="btn primary" type="button" id="btnAgain">Nouvel exercice</button>'+next+'<button class="btn" type="button" id="btnTrace">Copier ma trace</button></div>'
+    +'<div class="fb" role="status" aria-live="polite" id="traceFb"></div>';
+}
+function traceText(){
+  var ex=S.ex;
+  return 'Exercice '+ex.seed+' (niveau '+S.level+') — '+ex.ctx.txt+'\n'
+    +'M'+sub(ex.i)+'M'+sub(ex.i+1)+' = '+f1(ex.dS)+' cm sur le schéma ; échelle : 1 cm = '+(ex.convert?fg(ex.Ecm)+' cm':fg(ex.Em)+' m')+'\n'
+    +distSol()+'\n'+(ex.convert?dtSol()+'\n':'')+vitSol()+'\n'+lenSol()+'\n'
+    +'Vecteur vitesse en M'+sub(ex.i)+' : direction (M'+sub(ex.i)+'M'+sub(ex.i+1)+'), sens de M'+sub(ex.i)+' vers M'+sub(ex.i+1)+', valeur '+fg(ex.v)+' m/s.\n'
+    +'Mouvement : '+TRUTH[ex.type].nom+'.';
+}
+function copyText(txt,done){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true)},function(){done(false)});return}
+  var ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+  var ok=false;try{ok=document.execCommand('copy')}catch(_){}document.body.removeChild(ta);done(ok);
+}
+function M(k){return 'M'+sub(k)}
+function updateScore(){$('#score').textContent='Exercices terminés : '+S.score.done+' · sans aide : '+S.score.clean}
+
+/* ───────── Nouvel exercice ───────── */
+function newExercise(seed){
+  if(timer){clearInterval(timer);timer=null}
+  S.rp=null;S.att={};S.assisted=false;S.locked=false;S.drag=null;S.trajOn=false;S.predOK=null;
+  S.seed=seed;S.ex=safeExercise(S.level,seed);
+  var ex=S.ex;
+  if(!ex){stepsEl.innerHTML='<p>Impossible de générer l’exercice. Recharge la page.</p>';return}
+  $('#exoNum').textContent='n° '+seed+' · niveau '+S.level;
+  $('#exoTxt').textContent=ex.ctx.txt+' Le point est repéré à intervalles de temps réguliers.';
+  var Edisp=ex.convert?fg(ex.Ecm)+' cm':fg(ex.Em)+' m',dtDisp=ex.convert?ex.dtms+' ms':fg(ex.dts)+' s';
+  $('#facts').innerHTML='<li>Durée entre deux positions : <strong>Δt = '+dtDisp+'</strong></li>'
+    +'<li>Échelle des distances : <strong>1 cm sur le schéma ↔ '+Edisp+'</strong></li>'
+    +'<li>But : construire le vecteur vitesse au point <strong>'+Mh(ex.i)+'</strong></li>';
+  $('#cap').textContent='Quadrillage : 1 carreau = 1 cm sur le schéma. Positions '+M(0)+' à '+M(ex.N-1)+', enregistrées toutes les Δt.';
+  sceneHTML();
+  /* poignées */
+  var P=ex.pts[ex.i],ang=Math.atan2(ex.u.y,ex.u.x)+(Math.random()<0.5?1:-1)*(1.6+Math.random()*0.8),tail;
+  if(ex.level===3){
+    var cands=[{x:W-2.5,y:H-2.2},{x:2.5,y:H-2.2},{x:W-2.5,y:2.2},{x:2.5,y:2.2}];
+    tail=cands.map(function(c){return {c:c,m:Math.min.apply(null,ex.pts.map(function(p){return Math.hypot(p.x-c.x,p.y-c.y)}))}}).sort(function(a,b){return b.m-a.m})[0].c;
+  }else tail={x:P.x,y:P.y};
+  S.hd={tail:tail,tip:{x:clampSnap(tail.x+1.6*Math.cos(ang),W),y:clampSnap(tail.y+1.6*Math.sin(ang),H)}};
+  $('#gHandles').style.display='none';
+  $('#btnTraj').hidden=true;$('#btnTraj').setAttribute('aria-pressed','false');$('#btnTraj').textContent='Afficher la trajectoire';
+  $('#btnCheck2').hidden=true;$('#legend').hidden=true;$('#readout').textContent='';
+  $('#btnReplay').textContent=reduce?'Rejouer pas à pas':'↻ Rejouer l’enregistrement';
+  /* tableau alternatif */
+  $('#altTable').innerHTML='<table><caption>Coordonnées des positions, origine en bas à gauche du schéma, en cm</caption><thead><tr><th scope="col">Position</th><th scope="col">Instant</th><th scope="col">x</th><th scope="col">y</th></tr></thead><tbody>'
+    +ex.pts.map(function(p,k){return '<tr><th scope="row">'+M(k)+'</th><td>'+k+' Δt</td><td>'+f1(p.x)+'</td><td>'+f1(H-p.y)+'</td></tr>'}).join('')+'</tbody></table>';
+  stepsEl.innerHTML=cardsHTML();
+  S.stage=null;openStage('obs');
+  window.scrollTo(0,Math.max(0,window.scrollY));
+  $('#live').textContent='Nouvel exercice numéro '+seed+', niveau '+S.level+'.';
+  try{history.replaceState(null,'','?niveau='+S.level+'&exo='+seed)}catch(_){}
+}
+function randSeed(){
+  var a=new Uint32Array(1);
+  if(window.crypto&&crypto.getRandomValues){crypto.getRandomValues(a);return 100000+(a[0]%900000)}
+  return 100000+Math.floor(Math.random()*900000);
+}
+
+/* ───────── Événements ───────── */
+/* Validation indépendante de l'événement « submit » : un aperçu intégré (iframe sandbox sans allow-forms) le bloque. */
+function runForm(form){var f=form&&form.getAttribute('data-form');if(f&&FORMS[f])FORMS[f](form)}
+stepsEl.addEventListener('submit',function(e){e.preventDefault()});
+stepsEl.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.matches&&e.target.matches('input[type=text]')){e.preventDefault();runForm(e.target.closest('form'))}
+});
+stepsEl.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-submit')){e.preventDefault();runForm(b.closest('form'))}
+  else if(b.hasAttribute('data-pos'))pickPos(+b.getAttribute('data-pos'));
+  else if(b.hasAttribute('data-reveal'))revealNumeric(b.getAttribute('data-reveal'));
+  else if(b.id==='btnCheck')checkTrace();
+  else if(b.id==='btnGhost'){S.assisted=true;drawGhost()}
+  else if(b.id==='btnAgain')newExercise(randSeed());
+  else if(b.id==='btnNext'){setLevel(S.level+1)}
+  else if(b.id==='btnTrace'){copyText(traceText(),function(ok){var f=$('#traceFb');f.className='fb '+(ok?'ok':'info');f.textContent=ok?'✓ Trace copiée : colle-la dans ton cahier numérique.':'ℹ Copie impossible ici : sélectionne et copie le texte à la main.'})}
+});
+$('#btnCheck2').addEventListener('click',checkTrace);
+$('#btnNew').addEventListener('click',function(){newExercise(randSeed())});
+$('#btnLink').addEventListener('click',function(){
+  var url=location.href.split('#')[0].split('?')[0]+'?niveau='+S.level+'&exo='+S.seed;
+  copyText(url,function(ok){$('#live').textContent=ok?'Lien de l’exercice copié.':'Copie du lien impossible.';$('#btnLink').textContent=ok?'Lien copié ✓':'Copie impossible'; setTimeout(function(){$('#btnLink').textContent='Copier le lien de l’exercice'},2200)});
+});
+function setLevel(n){
+  S.level=n;var r=$('input[name=niveau][value="'+n+'"]');if(r)r.checked=true;newExercise(randSeed());
+}
+$$('input[name=niveau]').forEach(function(r){r.addEventListener('change',function(){setLevel(+r.value)})});
+
+$('#btnReplay').addEventListener('click',function(){
+  var N=S.ex.N;
+  if(timer){clearInterval(timer);timer=null}
+  if(reduce){
+    S.rp=(S.rp===null||S.rp>=N)?1:S.rp+1;setShown(S.rp);
+    $('#btnReplay').textContent=S.rp>=N?'Rejouer pas à pas':'Position suivante ('+S.rp+'/'+N+')';
+    if(S.rp>=N)S.rp=null;
+  }else{
+    var n=1;setShown(1);
+    timer=setInterval(function(){n++;setShown(n);if(n>=N){clearInterval(timer);timer=null}},450);
+  }
+});
+$('#btnTraj').addEventListener('click',function(){
+  S.trajOn=!S.trajOn;$('#trajPath').style.display=S.trajOn?'':'none';
+  $('#btnTraj').setAttribute('aria-pressed',String(S.trajOn));
+  $('#btnTraj').textContent=S.trajOn?'Masquer la trajectoire':'Afficher la trajectoire';
+});
+
+/* thème */
+(function(){
+  var root=document.documentElement,btn=$('#btnTheme'),modes=['auto','light','dark'],lab={auto:'auto',light:'clair',dark:'sombre'},cur='auto';
+  try{var s=localStorage.getItem('simulabo-theme');if(s==='light'||s==='dark')cur=s}catch(_){}
+  function apply(){if(cur==='auto')root.removeAttribute('data-theme');else root.setAttribute('data-theme',cur);btn.textContent='Thème : '+lab[cur]}
+  btn.addEventListener('click',function(){cur=modes[(modes.indexOf(cur)+1)%3];try{if(cur==='auto')localStorage.removeItem('simulabo-theme');else localStorage.setItem('simulabo-theme',cur)}catch(_){}apply()});
+  apply();
+})();
+
+/* démarrage */
+(function(){
+  var q=new URLSearchParams(location.search),lv=parseInt(q.get('niveau'),10),ex=parseInt(q.get('exo'),10);
+  S.level=(lv>=1&&lv<=3)?lv:1;
+  var r=$('input[name=niveau][value="'+S.level+'"]');if(r)r.checked=true;
+  newExercise(ex>0?ex:randSeed());
+})();
+
+window.__vv={S:S,makeExercise:makeExercise,safeExercise:safeExercise,TRUTH:TRUTH};
+})();
+</script>
+</body>
+</html>
