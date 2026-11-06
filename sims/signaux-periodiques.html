@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Animation pour la classe de Seconde : repérer le motif d'un signal sonore périodique, mesurer sa période, calculer sa fréquence, décider s'il est audible, puis relier fréquence et hauteur, forme du signal et timbre.">
+<title>Signaux sonores périodiques · Simulabo PhCh</title>
+<style>
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --ink:#1a2233; --muted:#4d5870; --line:#cfd6e4;
+  --accent:#1c58b8; --accent-ink:#ffffff; --accent-soft:#e3ecfb;
+  --ok:#146c43; --ok-bg:#e2f4ea; --warn:#7a4e00; --warn-bg:#fff0cf; --bad:#9c2227; --bad-bg:#fde6e6; --info:#1c3f86; --info-bg:#e8eefb;
+  --focus:#d96a00;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#10151f; --surface:#192130; --ink:#e8edf7; --muted:#a8b3c9; --line:#33405a;
+    --accent:#7db0ff; --accent-ink:#0b1626; --accent-soft:#1f2f4c;
+    --ok:#7fe0aa; --ok-bg:#12301f; --warn:#ffd27d; --warn-bg:#3a2c0b; --bad:#ffa3a7; --bad-bg:#3d1719; --info:#b5cdfa; --info-bg:#1c2a45;
+    --focus:#ffb454;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+[hidden]{display:none!important}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px 56px}
+.back{display:inline-flex;align-items:center;min-height:44px;font-weight:600}
+.kicker{margin:2px 0 0;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-size:1.7rem;line-height:1.2;margin:.2em 0 .3em}
+h2{font-size:1.3rem;line-height:1.25;margin:.3em 0 .4em}
+h3{font-size:1.05rem;margin:1.1em 0 .3em}
+p{margin:.4em 0}
+.lead{color:var(--muted);margin:.2em 0 .8em}
+.small{font-size:.9rem;color:var(--muted)}
+.sound{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:.92rem}
+.sound label{display:flex;gap:10px;align-items:center;font-weight:600}
+.sound input[type=range]{width:160px}
+.stepper{list-style:none;margin:14px 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.stepper button{min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.stepper button[aria-current="step"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.goal{background:var(--info-bg);color:var(--info);border-radius:10px;padding:8px 12px;margin:6px 0 10px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{font-weight:700;padding:0;margin-bottom:6px}
+.btn{min-height:44px;padding:8px 16px;border-radius:10px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+select,input[type=text]{min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;max-width:100%}
+input[type=text]{width:7.5em}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--accent)}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.chip{display:flex;gap:8px;align-items:center;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer}
+.chip:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.chip input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.field{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:8px 0}
+.field > label:first-child{min-width:11em;font-weight:600}
+.fb{display:flex;gap:8px;padding:8px 10px;border-radius:10px;margin:6px 0;border:1px solid currentColor}
+.fb .ic{font-weight:800;flex:none;width:1.4em;text-align:center}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.warn{background:var(--warn-bg);color:var(--warn)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb.info{background:var(--info-bg);color:var(--info)}
+.recall{border-left:5px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 10px 10px 0;margin:14px 0}
+.recall h3{margin:0 0 4px}
+.recall ul{margin:.3em 0 0;padding-left:1.2em}
+figure.scope{margin:8px 0}
+.scope canvas{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);touch-action:pan-y;background:#0d1726}
+.scope .ctl,.scope .ctl2{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:8px 0}
+.scope .ctl2{display:grid;grid-template-columns:1fr;gap:2px 12px}
+@media (min-width:640px){.scope .ctl2{grid-template-columns:1fr 1fr}}
+.scope-note{font-size:.9rem;color:var(--muted);margin:6px 0}
+.readout{margin:4px 0;font-size:1.05rem}
+.readout strong{font-variant-numeric:tabular-nums}
+.chk{display:flex;gap:8px;align-items:center;min-height:44px;font-weight:600}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+details.alt{margin:6px 0;font-size:.92rem}
+details summary{cursor:pointer;min-height:32px;padding:4px 0;font-weight:600}
+.zwrap{margin:10px 0 4px}
+.zbar{display:flex;height:48px;border-radius:8px;overflow:hidden;border:1px solid var(--line);position:relative}
+.zbar > div{display:flex;align-items:center;justify-content:center;text-align:center;font-size:.82rem;font-weight:700;padding:0 4px}
+.z-infra{flex:0 0 26.02%;background:repeating-linear-gradient(45deg,rgba(130,110,210,.35) 0 6px,transparent 6px 12px)}
+.z-audible{flex:0 0 59.98%;background:rgba(60,170,120,.28)}
+.z-ultra{flex:1 1 auto;background:radial-gradient(circle,rgba(230,140,60,.55) 1.5px,transparent 2px) 0 0/8px 8px}
+.zmark{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--ink);box-shadow:0 0 0 2px var(--surface)}
+.zticks{position:relative;height:24px;font-size:.8rem;color:var(--muted)}
+.zticks span{position:absolute;top:2px;transform:translateX(-50%);white-space:nowrap}
+.big{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+.quiz-btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.quiz-btns .btn{flex:1 1 140px}
+table.q{border-collapse:collapse;width:100%}
+table.q th,table.q td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.q td label{display:inline-flex;gap:6px;align-items:center;min-height:44px;margin-right:12px}
+table.q input{width:20px;height:20px;accent-color:var(--accent)}
+footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.tag{display:inline-block;padding:1px 8px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;font-weight:700;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a class="back" href="../index.html">← Catalogue des simulations</a>
+  <p class="kicker">Ondes et signaux · Seconde</p>
+  <h1>Signaux sonores périodiques</h1>
+  <p class="lead">Repère le motif d’un signal, mesure sa période, calcule sa fréquence, puis relie-la à ce que tu entends : audible ou non, grave ou aigu, quel timbre ?</p>
+
+  <div class="sound" role="group" aria-label="Réglages sonores">
+    <label for="vol">Volume du simulateur
+      <input type="range" id="vol" min="0" max="100" step="5" value="40">
+    </label>
+    <span class="small">Garde un volume modéré : une écoute prolongée à fort niveau abîme l’audition. Chaque son s’arrête seul au bout de 6 s.</span>
+  </div>
+
+  <ol class="stepper" id="stepper" aria-label="Étapes de l’activité"></ol>
+</header>
+
+<main>
+
+<!-- ============ ÉTAPE 1 ============ -->
+<section id="step1" class="panel" aria-labelledby="t1">
+  <h2 id="t1">1 · Repérer le motif</h2>
+  <p class="goal"><strong>Objectif :</strong> reconnaître un signal sonore périodique.</p>
+
+  <div class="card">
+    <fieldset>
+      <legend>Choisis une source sonore</legend>
+      <div id="srcList" class="chips"></div>
+    </fieldset>
+    <p class="small">Les sons sont synthétisés par ton appareil : les formes des signaux d’instruments sont des modèles simplifiés.</p>
+  </div>
+
+  <div class="card">
+    <fieldset>
+      <legend><span class="tag">Prédire</span> Quand un micro enregistrera ce son, le signal sera-t-il périodique ?</legend>
+      <div class="chips" id="pred1">
+        <label class="chip"><input type="radio" name="pred1" value="oui"><span>Oui, périodique</span></label>
+        <label class="chip"><input type="radio" name="pred1" value="non"><span>Non, pas périodique</span></label>
+        <label class="chip"><input type="radio" name="pred1" value="nsp"><span>Je ne sais pas</span></label>
+      </div>
+    </fieldset>
+    <p class="row"><button type="button" class="btn" id="reveal1">Voir le signal</button></p>
+    <div id="fbPred1" aria-live="polite"></div>
+  </div>
+
+  <div class="card" id="obs1" hidden>
+    <h3><span class="tag">Observer</span> Ce que le micro enregistre</h3>
+    <canvas id="air" width="1280" height="280" role="img" aria-label="Animation ralentie : un haut-parleur à gauche met l’air en mouvement ; la perturbation se propage vers un micro à droite." style="width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:var(--surface)"></canvas>
+    <p class="small" id="airNote"></p>
+    <div id="scope1"></div>
+    <p class="row"><button type="button" class="btn ghost" id="listen1">Écouter ce son</button><span class="small" id="listenMsg1"></span></p>
+  </div>
+
+  <div class="card" id="verdict1" hidden>
+    <fieldset>
+      <legend><span class="tag">Expliquer</span> Après observation, ce signal est-il périodique ?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="verdict1" value="oui"><span>Oui, périodique</span></label>
+        <label class="chip"><input type="radio" name="verdict1" value="non"><span>Non, pas périodique</span></label>
+      </div>
+    </fieldset>
+    <p class="row"><button type="button" class="btn" id="check1">Vérifier</button></p>
+    <div id="fb1" aria-live="polite"></div>
+  </div>
+
+  <div class="recall">
+    <h3>À retenir</h3>
+    <ul>
+      <li>Un signal est <strong>périodique</strong> quand un même <strong>motif</strong> se répète à l’identique, à intervalles de temps égaux.</li>
+      <li>Le plus petit motif qui se répète a pour durée la <strong>période T</strong> du signal.</li>
+    </ul>
+  </div>
+  <p class="row"><button type="button" class="btn" data-goto="2">Étape suivante : mesurer la période →</button></p>
+</section>
+
+<!-- ============ ÉTAPE 2 ============ -->
+<section id="step2" class="panel" aria-labelledby="t2" hidden>
+  <h2 id="t2">2 · Mesurer la période, calculer la fréquence</h2>
+  <p class="goal"><strong>Objectif :</strong> déterminer la période T d’un signal sonore périodique à partir de sa représentation temporelle, puis calculer sa fréquence f = 1 / T.</p>
+
+  <div class="card">
+    <p class="row"><button type="button" class="btn ghost" id="new2">Nouveau signal (au hasard)</button>
+    <label class="chk"><input type="checkbox" id="noise2"> Signal bruité (comme avec un vrai capteur)</label></p>
+    <div id="scope2"></div>
+    <p class="small">Place les deux curseurs sur deux endroits identiques du signal : par exemple de sommet à sommet. Tu peux les faire glisser sur l’écran ou utiliser les curseurs de réglage.</p>
+  </div>
+
+  <div class="card">
+    <h3>Ma mesure</h3>
+    <div class="field">
+      <label for="N2">Nombre de motifs entre mes deux curseurs</label>
+      <select id="N2"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+    </div>
+    <div class="field">
+      <label for="T2">Période T</label>
+      <input type="text" id="T2" inputmode="decimal" autocomplete="off">
+      <label for="T2u" class="small">unité</label>
+      <select id="T2u"><option value="1e-6">µs</option><option value="1e-3" selected>ms</option><option value="1">s</option></select>
+    </div>
+    <div class="field">
+      <label for="f2">Fréquence f = 1 / T</label>
+      <input type="text" id="f2" inputmode="decimal" autocomplete="off">
+      <label for="f2u" class="small">unité</label>
+      <select id="f2u"><option value="1" selected>Hz</option><option value="1000">kHz</option></select>
+    </div>
+    <p class="row"><button type="button" class="btn" id="check2">Vérifier ma mesure</button>
+    <button type="button" class="btn ghost" id="ref2" disabled>Voir la valeur de référence</button></p>
+    <div id="fb2" aria-live="polite"></div>
+  </div>
+
+  <div class="recall">
+    <h3>À retenir</h3>
+    <ul>
+      <li>La période T s’exprime en secondes (s), la fréquence f en hertz (Hz) : <strong>f = 1 / T</strong> et <strong>T = 1 / f</strong>.</li>
+      <li>Mesurer sur <strong>plusieurs motifs</strong> puis diviser par leur nombre réduit l’incertitude de lecture.</li>
+      <li>1 ms = 10⁻³ s ; 1 µs = 10⁻⁶ s ; 1 kHz = 10³ Hz.</li>
+    </ul>
+  </div>
+  <p class="row"><button type="button" class="btn" data-goto="3">Étape suivante : audible ou non ? →</button></p>
+</section>
+
+<!-- ============ ÉTAPE 3 ============ -->
+<section id="step3" class="panel" aria-labelledby="t3" hidden>
+  <h2 id="t3">3 · Ce son est-il audible ?</h2>
+  <p class="goal"><strong>Objectif :</strong> citer les domaines de fréquences des sons audibles, des infrasons et des ultrasons, et classer un son à partir de sa fréquence ou de sa période.</p>
+
+  <div class="card">
+    <h3>Explorer</h3>
+    <label for="fSlider" class="big" id="fRead">f = 440 Hz</label>
+    <input type="range" id="fSlider" min="0" max="1000" step="1" value="529" aria-describedby="fStatus">
+    <div class="zwrap" aria-hidden="true">
+      <div class="zbar"><div class="z-infra">Infrasons</div><div class="z-audible">Sons audibles</div><div class="z-ultra">Ultrasons</div><div class="zmark" id="zmark"></div></div>
+      <div class="zticks"><span style="left:0%;transform:none">1 Hz</span><span style="left:26.02%">20 Hz</span><span style="left:86%">20 kHz</span><span style="left:100%;transform:translateX(-100%)">100 kHz</span></div>
+    </div>
+    <p id="fStatus"><strong id="fZone"></strong> · période T = <span id="fT"></span></p>
+    <p class="row"><button type="button" class="btn ghost" id="listen3">Écouter</button><span class="small" id="listenMsg3"></span></p>
+    <p class="small">Les très petits haut-parleurs reproduisent mal les sons très graves, et avec l’âge on perçoit de moins en moins les sons les plus aigus : « audible » désigne ici le domaine de fréquences de référence.</p>
+  </div>
+
+  <div class="card">
+    <h3>S’entraîner <span class="small" id="score3"></span></h3>
+    <p class="big" id="q3text"></p>
+    <div class="quiz-btns" role="group" aria-label="Choisis la catégorie du son">
+      <button type="button" class="btn ghost" data-zone="infra">Infrason</button>
+      <button type="button" class="btn ghost" data-zone="audible">Son audible</button>
+      <button type="button" class="btn ghost" data-zone="ultra">Ultrason</button>
+    </div>
+    <div id="fb3" aria-live="polite"></div>
+    <p class="row"><button type="button" class="btn" id="next3" hidden>Question suivante</button><button type="button" class="btn ghost" id="listenQ3" hidden>Écouter ce son</button></p>
+  </div>
+
+  <div class="recall">
+    <h3>À retenir</h3>
+    <ul>
+      <li>Les sons audibles ont une fréquence comprise entre <strong>20 Hz et 20 kHz</strong> (20 000 Hz).</li>
+      <li>En dessous de 20 Hz : <strong>infrasons</strong>. Au-dessus de 20 kHz : <strong>ultrasons</strong>. Ils existent, mais l’oreille humaine ne les perçoit pas.</li>
+    </ul>
+  </div>
+  <p class="row"><button type="button" class="btn" data-goto="4">Étape suivante : hauteur et timbre →</button></p>
+</section>
+
+<!-- ============ ÉTAPE 4 ============ -->
+<section id="step4" class="panel" aria-labelledby="t4" hidden>
+  <h2 id="t4">4 · Hauteur et timbre</h2>
+  <p class="goal"><strong>Objectif :</strong> relier qualitativement la fréquence à la hauteur d’un son, et la forme du signal à son timbre.</p>
+
+  <div class="card">
+    <h3>A · La hauteur</h3>
+    <fieldset>
+      <legend><span class="tag">Prédire</span> Un son devient plus aigu. Sa période va…</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="hp" value="grande"><span>augmenter</span></label>
+        <label class="chip"><input type="radio" name="hp" value="petite"><span>diminuer</span></label>
+        <label class="chip"><input type="radio" name="hp" value="pareille"><span>rester la même</span></label>
+      </div>
+    </fieldset>
+    <h3><span class="tag">Observer</span> Compare deux sons</h3>
+    <p class="small">Son A : fréquence fixe. Son B : règle sa fréquence et son amplitude, et compare les deux signaux (même base de temps).</p>
+    <div class="two">
+      <div><p class="readout"><strong>Son A</strong> · f = <span id="hAf"></span> · T = <span id="hAT"></span></p><div id="scopeHA"></div><p class="row"><button type="button" class="btn ghost" id="listenHA">Écouter A</button></p></div>
+      <div><p class="readout"><strong>Son B</strong> · f = <span id="hBf"></span> · T = <span id="hBT"></span></p><div id="scopeHB"></div><p class="row"><button type="button" class="btn ghost" id="listenHB">Écouter B</button></p></div>
+    </div>
+    <div class="field"><label for="hFreq">Fréquence de B</label><input type="range" id="hFreq" min="0" max="1000" step="1" value="402"></div>
+    <div class="field"><label for="hAmp">Amplitude de B</label><input type="range" id="hAmp" min="20" max="100" step="5" value="100"></div>
+    <h3><span class="tag">Expliquer</span> Complète</h3>
+    <p>Plus un son est aigu, plus sa fréquence est
+      <select id="hc1" aria-label="Fréquence : grande ou petite"><option value="">—</option><option value="grande">grande</option><option value="petite">petite</option></select>
+      et plus sa période est
+      <select id="hc2" aria-label="Période : grande ou petite"><option value="">—</option><option value="grande">grande</option><option value="petite">petite</option></select>.</p>
+    <p>Si je change seulement l’amplitude de B, la hauteur du son
+      <select id="hc3" aria-label="La hauteur change ou ne change pas"><option value="">—</option><option value="change">change</option><option value="nechangepas">ne change pas</option></select>.</p>
+    <p class="row"><button type="button" class="btn" id="checkH">Vérifier</button></p>
+    <div id="fbH" aria-live="polite"></div>
+  </div>
+
+  <div class="card">
+    <h3>B · Le timbre</h3>
+    <p class="small">Deux sons de même fréquence, mais de formes différentes. Écoute-les et observe leurs signaux.</p>
+    <div class="field"><label for="tFreq">Fréquence commune</label><input type="range" id="tFreq" min="0" max="1000" step="1" value="490"><span class="readout" id="tf"></span></div>
+    <div class="two">
+      <div><div class="field"><label for="tShapeA">Forme du son A</label><select id="tShapeA"></select></div><div id="scopeTA"></div><p class="row"><button type="button" class="btn ghost" id="listenTA">Écouter A</button></p></div>
+      <div><div class="field"><label for="tShapeB">Forme du son B</label><select id="tShapeB"></select></div><div id="scopeTB"></div><p class="row"><button type="button" class="btn ghost" id="listenTB">Écouter B</button></p></div>
+    </div>
+    <h3><span class="tag">Expliquer</span> Compare A et B</h3>
+    <table class="q">
+      <tbody id="tQ"></tbody>
+    </table>
+    <p class="row"><button type="button" class="btn" id="checkT">Vérifier</button></p>
+    <div id="fbT" aria-live="polite"></div>
+  </div>
+
+  <div class="recall">
+    <h3>À retenir</h3>
+    <ul>
+      <li><strong>Hauteur</strong> : plus la fréquence est grande (donc la période petite), plus le son est <strong>aigu</strong>. Un son aigu n’est pas forcément un son fort.</li>
+      <li><strong>Timbre</strong> : il dépend de la <strong>forme du signal</strong>. Deux sons de même hauteur mais de formes différentes ont des timbres différents : c’est ce qui permet de distinguer deux instruments jouant la même note.</li>
+      <li>L’<strong>amplitude</strong> est liée à l’intensité sonore (le son est plus ou moins fort), pas à la hauteur.</li>
+    </ul>
+  </div>
+  <p class="row"><button type="button" class="btn" data-goto="5">Étape suivante : le défi →</button></p>
+</section>
+
+<!-- ============ ÉTAPE 5 ============ -->
+<section id="step5" class="panel" aria-labelledby="t5" hidden>
+  <h2 id="t5">5 · Défi : analyser un son inconnu</h2>
+  <p class="goal"><strong>Objectif :</strong> mobiliser tout ce que tu as appris sur un signal enregistré par un capteur sonore.</p>
+
+  <div class="card">
+    <p class="row"><button type="button" class="btn ghost" id="new5">Nouveau défi</button></p>
+    <div id="scope5"></div>
+  </div>
+
+  <div class="card">
+    <h3>Ton analyse</h3>
+    <div class="field"><label for="N5">Motifs entre mes curseurs</label>
+      <select id="N5"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+    <div class="field"><label for="T5">Période T</label><input type="text" id="T5" inputmode="decimal" autocomplete="off">
+      <select id="T5u" aria-label="Unité de la période"><option value="1e-6">µs</option><option value="1e-3" selected>ms</option><option value="1">s</option></select></div>
+    <div class="field"><label for="f5">Fréquence f</label><input type="text" id="f5" inputmode="decimal" autocomplete="off">
+      <select id="f5u" aria-label="Unité de la fréquence"><option value="1" selected>Hz</option><option value="1000">kHz</option></select></div>
+    <div class="field"><label for="z5">Ce son est…</label>
+      <select id="z5"><option value="">— choisir —</option><option value="infra">un infrason</option><option value="audible">un son audible</option><option value="ultra">un ultrason</option></select></div>
+    <div class="field"><label for="h5">Comparé au diapason (440 Hz), il est…</label>
+      <select id="h5"><option value="">— choisir —</option><option value="grave">plus grave</option><option value="aigu">plus aigu</option><option value="meme">de même hauteur</option></select></div>
+    <div class="field"><label for="s5">Forme du signal</label>
+      <select id="s5"><option value="">— choisir —</option><option value="sin">sinusoïdal</option><option value="tri">triangulaire</option><option value="sq">carré</option><option value="saw">en dents de scie</option></select>
+      <span class="small">(le diapason donne un signal sinusoïdal)</span></div>
+    <div class="field"><label for="t5">Même timbre que le diapason ?</label>
+      <select id="t5"><option value="">— choisir —</option><option value="oui">oui</option><option value="non">non</option></select></div>
+    <p class="row"><button type="button" class="btn" id="check5">Vérifier mon analyse</button>
+    <button type="button" class="btn ghost" id="corr5" disabled>Voir la correction</button></p>
+    <div id="fb5" aria-live="polite"></div>
+  </div>
+</section>
+
+</main>
+
+<details class="card" id="prof">
+  <summary>Repères pour l’enseignant</summary>
+  <p><strong>Programme de Seconde</strong> (BO spécial n° 1 du 22 janvier 2019), thème « Ondes et signaux », partie 1 « Émission et perception d’un son » :</p>
+  <ul>
+    <li>définir et déterminer la période et la fréquence d’un signal sonore, notamment à partir de sa représentation temporelle ; mesurer la période ; relation entre période et fréquence ;</li>
+    <li>citer les domaines de fréquences des sons audibles, des infrasons et des ultrasons ;</li>
+    <li>relier qualitativement la fréquence à la hauteur ; lien entre forme du signal et timbre ; lien qualitatif entre amplitude et intensité sonore ;</li>
+    <li>capacité mathématique : identifier une fonction périodique et déterminer sa période ; compétence « Valider » : estimer une incertitude, comparer à une valeur de référence.</li>
+  </ul>
+  <p><strong>Choix didactiques.</strong> Chaque étape suit la séquence <em>Prédire, Observer, Expliquer</em>. Le timbre est relié à la <em>forme du signal</em>, comme le programme de Seconde le formule : le spectre en fréquence, le fondamental et les harmoniques ne sont volontairement pas abordés. Le retour sur les mesures est gradué (indices sur les erreurs courantes : oubli de diviser par le nombre de motifs, confusion des unités, motif incomplet) et la valeur de référence n’est donnée qu’à la demande. Les durées affichées sont à valider en classe.</p>
+  <p class="small">Les signaux sont calculés par le simulateur (aucun enregistrement). Les sons sont synthétisés localement avec l’API Web Audio.</p>
+</details>
+
+<footer>
+  <p>Aucun compte, aucun suivi, aucune donnée envoyée : tout se passe sur ton appareil. Programme : <a href="https://cache.media.education.gouv.fr/file/SP1-MEN-22-1-2019/98/9/spe634_annexe_1062989.pdf">physique-chimie de Seconde, BO spécial n° 1 du 22 janvier 2019</a>.</p>
+</footer>
+</div>
+
+<script>
+'use strict';
+/*PURE-START*/
+const TB=[5e-6,10e-6,20e-6,50e-6,100e-6,200e-6,500e-6,1e-3,2e-3,5e-3,10e-3,20e-3,50e-3,100e-3];
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const logRand=(a,b)=>Math.exp(rnd(Math.log(a),Math.log(b)));
+const sig2=x=>Number(x.toPrecision(2));
+const sig3=x=>Number(x.toPrecision(3));
+function fmt(x,n=3){ if(!isFinite(x)) return '—'; if(x===0) return '0'; return Number(x.toPrecision(n)).toLocaleString('fr-FR',{maximumFractionDigits:12}); }
+function fmtTime(s){ const a=Math.abs(s); if(a>=1) return fmt(s)+' s'; if(a>=1e-3) return fmt(s*1e3)+' ms'; return fmt(s*1e6)+' µs'; }
+function fmtFreq(f){ return f>=1000 ? fmt(f/1000)+' kHz' : fmt(f)+' Hz'; }
+const sup=n=>String(n).replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+function tbLabel(t){ return fmtTime(t)+'/div'; }
+function parseNum(str){ const s=String(str).trim().replace(/\s+/g,'').replace(',','.'); if(s==='') return NaN; const v=Number(s); return isFinite(v)?v:NaN; }
+function zoneOf(f){ return f<20?'infra':(f<=20000?'audible':'ultra'); }
+function hash(n){ const x=Math.sin(n*127.1+311.7)*43758.5453; return x-Math.floor(x); }
+function vnoise(x){ const i=Math.floor(x), f=x-i; const a=hash(i), b=hash(i+1); const s=f*f*(3-2*f); return (a+(b-a)*s)*2-1; }
+function wave(kind,u){
+  u-=Math.floor(u);
+  switch(kind){
+    case 'sin': return Math.sin(2*Math.PI*u);
+    case 'sq':  return u<0.5?1:-1;
+    case 'tri': return 2*Math.abs(2*(u-Math.floor(u+0.5)))-1;
+    case 'saw': return 2*(u-Math.floor(u+0.5));
+  }
+  return 0;
+}
+function clapSig(t){
+  const P=0.014, tau=0.003, f0=300;
+  const tk=k=>P*(k+0.8*(hash(k*3.7+1)-0.5));
+  const k0=Math.floor(t/P)-4;
+  let s=0;
+  for(let k=k0;k<=k0+6;k++){
+    const d=t-tk(k);
+    if(d>=0){ s+=(0.45+0.55*hash(k*5.3+2))*Math.exp(-d/tau)*Math.sin(2*Math.PI*f0*d); }
+  }
+  return clamp(0.9*s,-1,1);
+}
+function sample(sig,t){
+  let v;
+  if(sig.kind==='noise') v=0.6*(0.6*vnoise(t*6000)+0.4*vnoise(t*15500+17));
+  else if(sig.kind==='clap') v=clapSig(t);
+  else v=wave(sig.kind,t*sig.f+(sig.phase||0));
+  v*=(sig.amp==null?1:sig.amp);
+  if(sig.noise) v+=sig.noise*vnoise(t*30000+5);
+  return v;
+}
+const isPeriodic=sig=>sig.kind!=='noise'&&sig.kind!=='clap';
+function contentFreq(sig){ return sig.kind==='noise'?15500:(sig.kind==='clap'?300:sig.f); }
+function niceTb(T){ for(const t of TB){ if(t*10>=3*T*0.999) return t; } return TB[TB.length-1]; }
+const UMAX={sin:0.25,tri:0.5,sq:0,saw:0.5};
+const SHAPE_NAME={sin:'sinusoïdal',tri:'triangulaire',sq:'carré',saw:'en dents de scie'};
+const MAX_LABEL={sin:'sommets',tri:'sommets',sq:'fronts montants',saw:'chutes brutales'};
+function peakTimes(sig,t0,t1){
+  const T=1/sig.f, ph=sig.phase||0, out=[];
+  for(let k=Math.floor(t0/T+ph-UMAX[sig.kind])-1; k<1e6; k++){
+    const t=(k+UMAX[sig.kind]-ph)*T;
+    if(t>t1) break;
+    if(t>=t0) out.push(t);
+  }
+  return out;
+}
+function evalMeasure(o){
+  const msgs=[]; let okT=false, okF=false;
+  const {Tuser,fuser,Ttrue,delta,N}=o;
+  const ftrue=1/Ttrue;
+  if(!(Tuser>0)){ msgs.push({t:'warn',m:'Renseigne ta valeur de T avec son unité.'}); }
+  else{
+    const r=Tuser/Ttrue, e=Math.abs(r-1);
+    if(e<=0.05){ okT=true; msgs.push({t:'ok',m:'Période T = '+fmtTime(Tuser)+' : ta mesure est compatible avec la valeur de référence (écart d’environ '+fmt(e*100,2)+' %).'}); }
+    else if(N>1 && delta>0 && Math.abs(Tuser-delta)/delta<0.03){ msgs.push({t:'bad',m:'Tu as recopié la durée entre les curseurs. Elle contient '+N+' motifs : pour obtenir la période d’un seul motif, il faut diviser par '+N+'.'}); }
+    else if(Math.abs(Math.log10(r))>2.7 && Math.abs(Math.log10(r)-Math.round(Math.log10(r)))<0.08){ msgs.push({t:'bad',m:'Ta valeur de T est décalée d’un facteur 10'+sup(Math.abs(Math.round(Math.log10(r))))+' environ : vérifie l’unité (µs, ms ou s).'}); }
+    else if(Math.abs(r-2)<0.12){ msgs.push({t:'warn',m:'Ta valeur de T est environ deux fois trop grande. Un motif est la plus petite portion qui se répète à l’identique : en as-tu pris deux ?'}); }
+    else if(Math.abs(r-0.5)<0.06){ msgs.push({t:'warn',m:'Ta valeur de T est environ deux fois trop petite. Un motif complet ne se limite pas à une moitié : regarde ce qui se répète à l’identique.'}); }
+    else if(e<=0.15){ msgs.push({t:'warn',m:'Ta mesure est approximative. Place les curseurs sur deux points identiques de deux motifs, et mesure sur plusieurs motifs pour réduire l’incertitude de lecture.'}); }
+    else { msgs.push({t:'bad',m:'Ta valeur de T s’écarte nettement de la valeur de référence. Vérifie que tes curseurs encadrent bien un nombre entier de motifs, et le nombre N indiqué.'}); }
+  }
+  if(!(fuser>0)){ msgs.push({t:'warn',m:'Renseigne ta valeur de f avec son unité.'}); }
+  else if(Tuser>0){
+    const fc=1/Tuser, ratio=fuser/fc;
+    if(Math.abs(ratio-1)<=0.03){ okF=true; msgs.push({t:'ok',m:'Fréquence f = '+fmtFreq(fuser)+' : le calcul f = 1 / T est cohérent avec ta période.'}); }
+    else if(Math.abs(Math.log10(ratio))>2.7 && Math.abs(Math.log10(ratio)-Math.round(Math.log10(ratio)))<0.08){ msgs.push({t:'bad',m:'Ta fréquence est décalée d’une puissance de 10 par rapport à 1 / T : pense à convertir T en secondes (1 ms = 10⁻³ s) avant de calculer.'}); }
+    else { msgs.push({t:'bad',m:'Ta fréquence ne correspond pas à 1 / T. Rappel : f = 1 / T, avec T en secondes et f en hertz.'}); }
+  }
+  else {
+    if(Math.abs(fuser/ftrue-1)<=0.05){ okF=true; msgs.push({t:'ok',m:'Fréquence compatible avec la valeur de référence.'}); }
+  }
+  return {okT,okF,msgs};
+}
+/*PURE-END*/
+
+/* ---------- Préférences, utilitaires DOM ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR=Math.min(2,window.devicePixelRatio||1);
+const fr=s=>String(s).replace(/ ([:;!?»%])/g,'\u00a0$1').replace(/« /g,'«\u00a0');
+const val=name=>{ const e=document.querySelector('input[name="'+name+'"]:checked'); return e?e.value:null; };
+const ICON={ok:'✔',warn:'!',bad:'✖',info:'ℹ'};
+function showFb(el,msgs){
+  el.innerHTML='';
+  msgs.forEach(m=>{
+    const d=document.createElement('div'); d.className='fb '+m.t;
+    const i=document.createElement('span'); i.className='ic'; i.setAttribute('aria-hidden','true'); i.textContent=ICON[m.t]||'';
+    const s=document.createElement('span'); s.textContent=fr(m.m);
+    d.append(i,s); el.appendChild(d);
+  });
+}
+const colors={};
+function readColors(){ const cs=getComputedStyle(document.documentElement); ['ink','surface','muted','accent','line'].forEach(k=>colors[k]=cs.getPropertyValue('--'+k).trim()); }
+readColors();
+if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{readColors();});
+
+/* ---------- Son ---------- */
+const NORM={sin:1,tri:1.1,sq:0.4,saw:0.55,noise:0.8,clap:1};
+const AudioEng={
+  ctx:null,master:null,nodes:[],timers:[],btn:null,btnLabel:'',vol:40,
+  level(){ return 0.4*Math.pow(this.vol/100,1.5); },
+  ready(){
+    if(!this.ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; try{ this.ctx=new AC(); }catch(e){ return false; } }
+    if(this.ctx.state==='suspended') this.ctx.resume();
+    return true;
+  },
+  canPlay(sig){ if(!isPeriodic(sig)) return true; return sig.f>=20 && sig.f<=20000; },
+  play(sig,btn){
+    this.stop();
+    if(!this.ready()) return {ok:false,reason:'Ton navigateur ne permet pas de produire du son.'};
+    if(!this.canPlay(sig)) return {ok:false,reason:'Ce son n’est pas audible : le simulateur ne le joue pas.'};
+    const ctx=this.ctx, now=ctx.currentTime;
+    const master=ctx.createGain(); master.gain.setValueAtTime(0,now);
+    master.gain.linearRampToValueAtTime(this.level()*(NORM[sig.kind]||1)*(sig.amp==null?1:sig.amp),now+0.08);
+    master.connect(ctx.destination); this.master=master; this.nodes=[master];
+    if(isPeriodic(sig)){
+      if(sig.f>=ctx.sampleRate/2-200) { this.stop(); return {ok:false,reason:'Ce son dépasse ce que ton appareil peut produire.'}; }
+      const o=ctx.createOscillator(); o.type={sin:'sine',tri:'triangle',sq:'square',saw:'sawtooth'}[sig.kind]; o.frequency.value=sig.f; o.connect(master); o.start(); this.nodes.push(o);
+    } else if(sig.kind==='noise'){
+      const buf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate), d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+      const s=ctx.createBufferSource(); s.buffer=buf; s.loop=true; s.connect(master); s.start(); this.nodes.push(s);
+    } else {
+      const hit=()=>{ const t=ctx.currentTime; const o=ctx.createOscillator(); o.frequency.value=300; const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(1,t+0.002); g.gain.exponentialRampToValueAtTime(0.0005,t+0.05); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.06); };
+      const loop=()=>{ hit(); this.timers.push(setTimeout(loop,350+Math.random()*450)); };
+      loop();
+    }
+    this.btn=btn||null;
+    if(btn){ this.btnLabel=btn.textContent; btn.textContent='■ Arrêter'; }
+    this.timers.push(setTimeout(()=>this.stop(),6000));
+    return {ok:true};
+  },
+  stop(){
+    this.timers.forEach(t=>{clearTimeout(t);}); this.timers=[];
+    const nodes=this.nodes, master=this.master; this.nodes=[]; this.master=null;
+    if(master&&this.ctx){ try{ master.gain.cancelScheduledValues(this.ctx.currentTime); master.gain.setValueAtTime(master.gain.value,this.ctx.currentTime); master.gain.linearRampToValueAtTime(0,this.ctx.currentTime+0.05); }catch(e){} }
+    setTimeout(()=>nodes.forEach(n=>{ try{ if(n.stop) n.stop(); }catch(e){} try{ n.disconnect(); }catch(e){} }),90);
+    if(this.btn){ this.btn.textContent=this.btnLabel; this.btn=null; }
+  }
+};
+function bindListen(btn,getSig,msgEl){
+  btn.addEventListener('click',()=>{
+    if(AudioEng.btn===btn){ AudioEng.stop(); return; }
+    const r=AudioEng.play(getSig(),btn);
+    if(msgEl) msgEl.textContent=r.ok?'':fr(r.reason);
+  });
+}
+$('#vol').addEventListener('input',e=>{ AudioEng.vol=+e.target.value; });
+
+/* ---------- Oscilloscope ---------- */
+const W=640,H=320;
+const groups={};
+class Scope{
+  constructor(host,o){
+    this.o=Object.assign({cursors:false,bands:false,run:false,group:null,label:'Oscilloscope : trace d’un signal sonore en fonction du temps',tb:1e-3,c1:2,c2:5},o);
+    this.sig=this.o.sig; this.tb=this.o.tb; this.c1=this.o.c1; this.c2=this.o.c2; this.toff=0; this.running=this.o.run&&!REDUCED; this.bandsOn=false; this.drag=0;
+    const id='sc'+(Scope.n=(Scope.n||0)+1); this.id=id;
+    const opts=TB.map(t=>'<option value="'+String(t)+'">'+tbLabel(t)+'</option>').join('');
+    host.innerHTML='<figure class="scope">'
+      +'<canvas width="'+W*DPR+'" height="'+H*DPR+'" role="img" aria-label="'+this.o.label+'"></canvas>'
+      +'<p class="scope-note" id="'+id+'n"></p>'
+      +'<div class="ctl"><label for="'+id+'tb"><strong>Base de temps</strong></label><select id="'+id+'tb">'+opts+'</select>'
+      +'<button type="button" class="btn ghost" id="'+id+'run"></button></div>'
+      +(this.o.cursors?'<div class="ctl2"><div><label for="'+id+'c1">Curseur 1 (trait plein)</label><input type="range" id="'+id+'c1" min="0" max="10" step="0.02"></div>'
+        +'<div><label for="'+id+'c2">Curseur 2 (pointillés)</label><input type="range" id="'+id+'c2" min="0" max="10" step="0.02"></div></div>'
+        +'<p class="readout">Durée entre les curseurs : <strong id="'+id+'dt">—</strong></p>':'')
+      +(this.o.bands?'<label class="chk"><input type="checkbox" id="'+id+'b"> Marquer les motifs entre les curseurs</label>':'')
+      +'<details class="alt" id="'+id+'d"><summary>Version texte du signal</summary><p id="'+id+'a"></p></details></figure>';
+    this.cv=$('canvas',host); this.ctx=this.cv.getContext('2d'); this.host=host;
+    this.selTb=$('#'+id+'tb'); this.btnRun=$('#'+id+'run'); this.note=$('#'+id+'n'); this.alt=$('#'+id+'a'); this.det=$('#'+id+'d');
+    if(this.o.group){ const g=groups[this.o.group]=groups[this.o.group]||{tb:this.tb,scopes:[]}; g.scopes.push(this); this.tb=g.tb; }
+    this.selTb.value=String(this.tb);
+    this.selTb.addEventListener('change',()=>this.setTb(Number(this.selTb.value)));
+    this.btnRun.addEventListener('click',()=>{ this.running=!this.running; this.refreshRun(); this.draw(); });
+    this.det.addEventListener('toggle',()=>this.updateAlt());
+    if(this.o.cursors){
+      this.s1=$('#'+id+'c1'); this.s2=$('#'+id+'c2'); this.dt=$('#'+id+'dt');
+      this.s1.value=this.c1; this.s2.value=this.c2;
+      this.s1.addEventListener('input',()=>{ this.c1=+this.s1.value; this.draw(); });
+      this.s2.addEventListener('input',()=>{ this.c2=+this.s2.value; this.draw(); });
+      const dx=e=>{ const r=this.cv.getBoundingClientRect(); return clamp(Math.round((e.clientX-r.left)/r.width*10/0.02)*0.02,0,10); };
+      this.cv.addEventListener('pointerdown',e=>{ const x=dx(e); this.drag=(Math.abs(x-this.c1)<=Math.abs(x-this.c2))?1:2; this.cv.setPointerCapture(e.pointerId); this.setCursor(this.drag,x); });
+      this.cv.addEventListener('pointermove',e=>{ if(this.drag) this.setCursor(this.drag,dx(e)); });
+      const end=()=>{ this.drag=0; };
+      this.cv.addEventListener('pointerup',end); this.cv.addEventListener('pointercancel',end);
+    }
+    if(this.o.bands){ this.cb=$('#'+id+'b'); this.cb.addEventListener('change',()=>{ this.bandsOn=this.cb.checked; this.draw(); }); }
+    this.refreshRun(); Scope.all.push(this); this.draw();
+  }
+  setCursor(n,x){ if(n===1){ this.c1=x; this.s1.value=x; } else { this.c2=x; this.s2.value=x; } this.draw(); }
+  setCursors(a,b){ this.c1=a; this.c2=b; if(this.s1){ this.s1.value=a; this.s2.value=b; } this.draw(); }
+  setSig(sig){ this.sig=sig; this.toff=0; this.draw(); }
+  setTb(v,propagate=true){
+    this.tb=v; this.selTb.value=String(v);
+    const g=this.o.group&&groups[this.o.group];
+    if(g&&propagate){ g.tb=v; g.scopes.forEach(s=>{ if(s!==this) s.setTb(v,false); }); }
+    this.draw();
+  }
+  freeze(){ this.running=false; this.refreshRun(); this.draw(); }
+  refreshRun(){ this.btnRun.textContent=this.running?'Figer l’image':'Relancer l’animation'; }
+  visible(){ return this.cv.offsetParent!==null; }
+  delta(){ return Math.abs(this.c2-this.c1)*this.tb; }
+  geom(){ const span=this.tb*10, fc=contentFreq(this.sig); return {span,pxPerPeriod:W/(span*fc)}; }
+  updateNote(){
+    const {span,pxPerPeriod}=this.geom();
+    let m='Un écran de 10 divisions dure '+fmtTime(span)+'.';
+    if(isPeriodic(this.sig)){
+      if(span<1.3/this.sig.f) m+=' Moins de deux motifs sont visibles : choisis une base de temps plus grande.';
+      else if(pxPerPeriod<12) m+=' Les motifs sont trop serrés pour être distingués : choisis une base de temps plus petite.';
+    }
+    this.note.textContent=fr(m);
+  }
+  updateAlt(){
+    if(!this.det.open) return;
+    if(this.running){ this.alt.textContent=fr('L’image défile : appuie sur « Figer l’image » pour obtenir la description du signal.'); return; }
+    const s=this.sig, span=this.tb*10;
+    let d='Écran de '+fmtTime(span)+' (10 divisions de '+fmtTime(this.tb)+'). ';
+    if(s.kind==='noise') d+='Signal très irrégulier, sans motif qui se répète.';
+    else if(s.kind==='clap') d+='Oscillations dont l’amplitude diminue après chaque claquement ; les claquements sont irréguliers et aucun motif ne se répète à l’identique.';
+    else if(span*s.f>40) d+='Plus de 40 motifs sont visibles : choisis une base de temps plus grande.';
+    else {
+      const pk=peakTimes(s,this.toff,this.toff+span).map(t=>fmtTime(t-this.toff));
+      d+='Signal '+SHAPE_NAME[s.kind]+', d’amplitude constante. Instants des '+MAX_LABEL[s.kind]+' successifs : '+(pk.length?pk.join(' ; '):'aucun sur cet écran')+'.';
+    }
+    this.alt.textContent=fr(d);
+  }
+  draw(){
+    const ctx=this.ctx; ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.fillStyle='#0d1726'; ctx.fillRect(0,0,W,H);
+    ctx.lineWidth=1; ctx.strokeStyle='#26405f';
+    ctx.beginPath(); for(let i=0;i<=10;i++){ const x=Math.round(i*W/10)+0.5; ctx.moveTo(x,0); ctx.lineTo(x,H); } for(let j=0;j<=8;j++){ const y=Math.round(j*H/8)+0.5; ctx.moveTo(0,y); ctx.lineTo(W,y); } ctx.stroke();
+    ctx.strokeStyle='#4a74a8'; ctx.beginPath(); ctx.moveTo(0,H/2+0.5); ctx.lineTo(W,H/2+0.5); ctx.moveTo(W/2+0.5,0); ctx.lineTo(W/2+0.5,H); ctx.stroke();
+    ctx.strokeStyle='#4a74a8'; ctx.beginPath(); for(let i=0;i<50;i++){ const x=Math.round(i*W/50)+0.5; ctx.moveTo(x,H/2-3); ctx.lineTo(x,H/2+3); } ctx.stroke();
+    const {span,pxPerPeriod}=this.geom(), sig=this.sig;
+    const yOf=v=>H/2-clamp(v,-1.3,1.3)*3*(H/8);
+    // bandes de motifs
+    if(this.o.cursors&&this.bandsOn){
+      const d=Math.abs(this.c2-this.c1), a=Math.min(this.c1,this.c2);
+      if(d>0.05){
+        const kmin=-Math.ceil(a/d), kmax=Math.ceil((10-a)/d);
+        for(let k=kmin;k<=kmax;k++){
+          const x0=(a+k*d)*W/10, x1=(a+(k+1)*d)*W/10;
+          if(((k%2)+2)%2===0){ ctx.fillStyle='rgba(255,209,102,0.16)'; ctx.fillRect(x0,0,x1-x0,H); }
+          ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.setLineDash([2,4]); ctx.beginPath(); ctx.moveTo(x0,0); ctx.lineTo(x0,H); ctx.stroke(); ctx.setLineDash([]);
+        }
+      }
+    }
+    // trace
+    ctx.strokeStyle='#5ef0a5'; ctx.fillStyle='#5ef0a5'; ctx.lineWidth=2.2; ctx.lineJoin='round';
+    if(pxPerPeriod>=12){
+      ctx.beginPath();
+      for(let x=0;x<=W;x+=0.5){ const y=yOf(sample(sig,this.toff+x/W*span)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+      ctx.stroke();
+    } else {
+      for(let x=0;x<W;x++){
+        let mn=1e9,mx=-1e9;
+        for(let k=0;k<16;k++){ const v=sample(sig,this.toff+(x+k/16)/W*span); if(v<mn) mn=v; if(v>mx) mx=v; }
+        const y1=yOf(mx), y2=yOf(mn); ctx.fillRect(x,y1,1.2,Math.max(1.5,y2-y1));
+      }
+    }
+    // curseurs
+    if(this.o.cursors){
+      [[this.c1,1,[]],[this.c2,2,[8,6]]].forEach(([c,n,dash])=>{
+        const x=c*W/10; ctx.strokeStyle=n===1?'#ffd166':'#7cc4ff'; ctx.fillStyle=ctx.strokeStyle; ctx.lineWidth=2.4; ctx.setLineDash(dash);
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillRect(clamp(x-12,0,W-24),0,24,26); ctx.fillStyle='#0d1726'; ctx.font='bold 18px system-ui,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(n),clamp(x,12,W-12),14);
+      });
+      const dlt=this.delta();
+      this.dt.textContent=dlt<this.tb*0.05?'—':fmtTime(dlt);
+    }
+    this.updateNote(); this.updateAlt();
+  }
+}
+Scope.all=[];
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.1,(now-last)/1000); last=now;
+  if(!document.hidden){
+    for(const s of Scope.all){ if(s.running&&s.visible()){ s.toff+=dt*s.tb; s.draw(); } }
+    drawAir(now);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Animation haut-parleur / air / micro ---------- */
+function drawAir(now){
+  const cv=$('#air'); if(!cv||cv.offsetParent===null||!st1.src) return;
+  if(REDUCED && cv._done) return;
+  const ctx=cv.getContext('2d'); ctx.setTransform(cv.width/640,0,0,cv.height/140,0,0);
+  const sig=st1.src.sig, N=contentFreq(sig)/1.2, ta=REDUCED?0.4:now/1000;
+  ctx.clearRect(0,0,640,140); ctx.fillStyle=colors.surface; ctx.fillRect(0,0,640,140);
+  const d0=7*sample(sig,ta*N);
+  // haut-parleur
+  ctx.fillStyle=colors.ink; ctx.fillRect(14,44,26,52);
+  ctx.beginPath(); ctx.moveTo(40,52); ctx.lineTo(66+d0,24); ctx.lineTo(66+d0,116); ctx.lineTo(40,88); ctx.closePath(); ctx.fillStyle=colors.muted; ctx.fill();
+  // particules d'air
+  ctx.fillStyle=colors.accent;
+  for(let r=0;r<6;r++){ const y=28+r*17; for(let i=0;i<46;i++){ const x0=92+i*11.5; const dsp=8*sample(sig,(ta-(x0-66)/260)*N); ctx.beginPath(); ctx.arc(x0+dsp,y,2.5,0,6.2832); ctx.fill(); } }
+  // micro
+  ctx.fillStyle=colors.ink; ctx.beginPath(); ctx.arc(618,70,11,0,6.2832); ctx.fill(); ctx.fillRect(616,78,4,24); ctx.fillRect(606,100,24,4);
+  ctx.fillStyle=colors.muted; ctx.font='13px system-ui,sans-serif'; ctx.textAlign='left'; ctx.fillText('haut-parleur',8,20); ctx.textAlign='right'; ctx.fillText('micro',632,20);
+  if(REDUCED) cv._done=true;
+}
+
+/* ---------- Pagination ---------- */
+const STEPS=['1 · Le motif','2 · Période et fréquence','3 · Audible ?','4 · Hauteur et timbre','5 · Défi'];
+const stepper=$('#stepper');
+STEPS.forEach((t,i)=>{ const li=document.createElement('li'); const b=document.createElement('button'); b.type='button'; b.textContent=t; b.dataset.step=i+1; b.addEventListener('click',()=>goto(i+1)); li.appendChild(b); stepper.appendChild(li); });
+function goto(n,focus=true){
+  AudioEng.stop();
+  $$('.panel').forEach(p=>p.hidden=(p.id!=='step'+n));
+  $$('#stepper button').forEach(b=>{ if(+b.dataset.step===n) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); });
+  Scope.all.forEach(s=>s.draw());
+  const h=$('#t'+n); if(focus&&h){ h.setAttribute('tabindex','-1'); h.focus(); }
+}
+$$('[data-goto]').forEach(b=>b.addEventListener('click',()=>{
+  const n=+b.dataset.goto;
+  if(n===2) enterStep2();
+  goto(n);
+}));
+
+/* ============ ÉTAPE 1 ============ */
+const SOURCES=[
+  {id:'diapason',label:'Diapason',sig:{kind:'sin',f:440,amp:1,phase:0.15},tb:1e-3,txt:'un diapason'},
+  {id:'flute',label:'Flûte',sig:{kind:'tri',f:523,amp:1,phase:0.3},tb:2e-3,txt:'une flûte'},
+  {id:'clarinette',label:'Clarinette',sig:{kind:'sq',f:294,amp:1,phase:0.2},tb:2e-3,txt:'une clarinette'},
+  {id:'violon',label:'Violon',sig:{kind:'saw',f:392,amp:1,phase:0.1},tb:2e-3,txt:'un violon'},
+  {id:'vent',label:'Souffle du vent',sig:{kind:'noise',amp:1},tb:200e-6,txt:'le souffle du vent'},
+  {id:'claquement',label:'Claquement de mains',sig:{kind:'clap',amp:1},tb:5e-3,txt:'des claquements de mains'}
+];
+const st1={src:SOURCES[0],revealed:false};
+SOURCES.forEach((s,i)=>{
+  const l=document.createElement('label'); l.className='chip';
+  l.innerHTML='<input type="radio" name="src1" value="'+s.id+'"'+(i===0?' checked':'')+'><span>'+s.label+'</span>';
+  $('#srcList').appendChild(l);
+});
+const sc1=new Scope($('#scope1'),{sig:st1.src.sig,tb:st1.src.tb,run:true,label:'Oscilloscope : trace du signal enregistré par le micro, en fonction du temps.'});
+function airNote(){
+  const sig=st1.src.sig, N=contentFreq(sig)/1.2;
+  $('#airNote').textContent=fr('Animation très ralentie (environ '+fmt(N,2)+' fois) : en réalité, l’air vibre beaucoup trop vite pour être vu.');
+}
+function reset1(){
+  AudioEng.stop();
+  st1.src=SOURCES.find(s=>s.id===val('src1'));
+  st1.revealed=false;
+  $('#obs1').hidden=true; $('#verdict1').hidden=true;
+  $$('input[name="pred1"],input[name="verdict1"]').forEach(r=>r.checked=false);
+  $('#fbPred1').innerHTML=''; $('#fb1').innerHTML='';
+  sc1.setSig(st1.src.sig); sc1.setTb(st1.src.tb); sc1.running=!REDUCED; sc1.refreshRun();
+  airNote();
+}
+$$('input[name="src1"]').forEach(r=>r.addEventListener('change',reset1));
+$('#reveal1').addEventListener('click',()=>{
+  if(!val('pred1')){ showFb($('#fbPred1'),[{t:'warn',m:'Fais d’abord ta prévision, même si tu hésites : choisis « Je ne sais pas » si tu n’as pas d’idée.'}]); return; }
+  $('#fbPred1').innerHTML='';
+  st1.revealed=true; $('#obs1').hidden=false; $('#verdict1').hidden=false;
+  airNote(); sc1.draw();
+  $('#obs1').scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'nearest'});
+});
+bindListen($('#listen1'),()=>st1.src.sig,$('#listenMsg1'));
+$('#check1').addEventListener('click',()=>{
+  const v=val('verdict1'); if(!v){ showFb($('#fb1'),[{t:'warn',m:'Choisis une réponse.'}]); return; }
+  const per=isPeriodic(st1.src.sig), good=(v==='oui')===per, msgs=[];
+  const pred=val('pred1'), predOk=pred==='nsp'?null:((pred==='oui')===per);
+  msgs.push({t:good?'ok':'bad',m:good?'Bonne conclusion.':'Ce n’est pas ça : regarde de nouveau le signal.'});
+  if(per) msgs.push({t:'info',m:'Le signal est périodique : un même motif se répète à l’identique, à intervalles de temps égaux. Pour '+st1.src.txt+', on voit ici le motif se répéter sur tout l’écran. La durée d’un motif est la période T, que tu vas mesurer à l’étape suivante.'});
+  else if(st1.src.sig.kind==='noise') msgs.push({t:'info',m:'Non périodique : le signal est irrégulier, aucun motif ne se répète. Un bruit n’a pas de période.'});
+  else msgs.push({t:'info',m:'Non périodique : après chaque claquement, l’amplitude diminue puis le signal s’éteint ; les claquements sont irréguliers. Aucun motif ne se répète à l’identique, donc il n’y a pas de période.'});
+  if(predOk===true) msgs.push({t:'ok',m:'Ta prévision était juste.'});
+  else if(predOk===false) msgs.push({t:'warn',m:'Ta prévision était différente de ce que montre l’observation : c’est normal de se tromper, c’est ainsi qu’on fait évoluer ses idées. Qu’est-ce qui t’a surpris ?'});
+  else msgs.push({t:'info',m:'Tu ne savais pas : maintenant tu as une observation pour te faire une idée. Les sons musicaux sont souvent périodiques, les bruits ne le sont pas.'});
+  showFb($('#fb1'),msgs);
+});
+
+/* ============ ÉTAPE 2 ============ */
+const st2={sig:{kind:'sin',f:440,amp:1,phase:0.15,noise:0},attempts:0};
+const sc2=new Scope($('#scope2'),{sig:st2.sig,tb:niceTb(1/440),cursors:true,bands:true,c1:1.5,c2:3.5,label:'Oscilloscope : signal sonore périodique à mesurer, avec deux curseurs repérés 1 et 2.'});
+function resetForm2(){
+  $('#T2').value=''; $('#f2').value=''; $('#N2').value='1'; $('#fb2').innerHTML=''; $('#ref2').disabled=true; st2.attempts=0;
+}
+function loadSignal2(sig){
+  st2.sig=sig; sig.noise=$('#noise2').checked?0.07:0;
+  sc2.setSig(sig); sc2.setTb(niceTb(1/sig.f)); sc2.setCursors(1.5,3.5); sc2.freeze();
+  resetForm2();
+}
+function randomPeriodic(){ return {kind:pick(['sin','tri','sq','saw']),f:sig2(logRand(80,3000)),amp:1,phase:Math.random(),noise:0}; }
+function enterStep2(){
+  if(st1.src.sig&&isPeriodic(st1.src.sig)&&st2._from!==st1.src.id){ st2._from=st1.src.id; loadSignal2(Object.assign({},st1.src.sig,{noise:0})); }
+  else if(!st2._init){ st2._init=true; sc2.freeze(); }
+}
+$('#new2').addEventListener('click',()=>loadSignal2(randomPeriodic()));
+$('#noise2').addEventListener('change',()=>{ st2.sig.noise=$('#noise2').checked?0.07:0; sc2.draw(); });
+sc2.freeze();
+const UT={ '1e-6':1e-6,'1e-3':1e-3,'1':1 };
+$('#check2').addEventListener('click',()=>{
+  const delta=sc2.delta();
+  if(delta<sc2.tb*0.2){ showFb($('#fb2'),[{t:'warn',m:'Place d’abord tes deux curseurs sur le signal : ils sont presque confondus.'}]); return; }
+  const Tuser=parseNum($('#T2').value)*Number($('#T2u').value), fuser=parseNum($('#f2').value)*Number($('#f2u').value);
+  const r=evalMeasure({Tuser,fuser,Ttrue:1/st2.sig.f,delta,N:+$('#N2').value});
+  const msgs=r.msgs.slice();
+  if(r.okT&&r.okF) msgs.push({t:'info',m:'Mesure réussie. Remarque : la valeur lue dépend de la précision de ton pointage ; en refaisant la mesure, tu n’obtiendras pas exactement la même valeur.'});
+  showFb($('#fb2'),msgs); st2.attempts++; $('#ref2').disabled=false;
+});
+$('#ref2').addEventListener('click',()=>{
+  const f=st2.sig.f;
+  showFb($('#fb2'),[{t:'info',m:'Valeur de référence : T = '+fmtTime(1/f)+' et f = '+fmtFreq(f)+'. Signal '+SHAPE_NAME[st2.sig.kind]+'.'}]);
+});
+
+/* ============ ÉTAPE 3 ============ */
+const fSlider=$('#fSlider');
+function sliderF(v){ let f=sig3(Math.pow(10,v/1000*5)); if(Math.abs(f-20)/20<0.012) f=20; if(Math.abs(f-20000)/20000<0.012) f=20000; if(Math.abs(f-440)/440<0.006) f=440; return f; }
+const ZONE_LABEL={infra:'Infrason (f < 20 Hz)',audible:'Son audible (de 20 Hz à 20 kHz)',ultra:'Ultrason (f > 20 kHz)'};
+let exploreF=440;
+function updExplore(){
+  const f=sliderF(+fSlider.value); exploreF=f; const z=zoneOf(f);
+  $('#fRead').textContent='f = '+fmtFreq(f); $('#fZone').textContent=fr(ZONE_LABEL[z]); $('#fT').textContent=fmtTime(1/f);
+  $('#zmark').style.left=(+fSlider.value/10)+'%';
+  fSlider.setAttribute('aria-valuetext',fmtFreq(f)+', '+ZONE_LABEL[z].replace(/ \(.*\)/,''));
+  const b=$('#listen3'); if(AudioEng.btn===b) AudioEng.stop();
+  const ok=z==='audible'; b.disabled=!ok; $('#listenMsg3').textContent=ok?'':fr('Ce son n’est pas audible : le simulateur ne le joue pas.');
+}
+fSlider.addEventListener('input',updExplore); updExplore();
+bindListen($('#listen3'),()=>({kind:'sin',f:exploreF,amp:1,phase:0}),$('#listenMsg3'));
+
+const QF=[2,5,8,12,15,18,25,50,100,250,440,1000,2500,8000,15000,19000,22000,30000,40000,60000,100000,200000];
+const QT=[2,5,10,50,100,500,2000,10000,40000,100000];
+const POOL=QF.map(f=>({f,disp:'f = '+fmtFreq(f),isT:false})).concat(QT.map(f=>({f,disp:'T = '+fmtTime(1/f),isT:true})));
+const q3={cur:null,ok:0,total:0,answered:false};
+function newQ3(){
+  let c; do{ c=pick(POOL); }while(q3.cur&&c.f===q3.cur.f&&c.isT===q3.cur.isT);
+  q3.cur=c; q3.answered=false;
+  $('#q3text').textContent=c.isT?fr('Un son a une période '+c.disp+'. Est-il audible ?'):fr('Un son a une fréquence '+c.disp+'. Est-il audible ?');
+  $$('.quiz-btns button').forEach(b=>b.disabled=false);
+  $('#fb3').innerHTML=''; $('#next3').hidden=true; $('#listenQ3').hidden=true;
+  $('#score3').textContent=q3.total?fr('· score : '+q3.ok+' / '+q3.total):'';
+}
+$$('.quiz-btns button').forEach(b=>b.addEventListener('click',()=>{
+  if(q3.answered) return; q3.answered=true; q3.total++;
+  const c=q3.cur, z=zoneOf(c.f), good=b.dataset.zone===z; if(good) q3.ok++;
+  $$('.quiz-btns button').forEach(x=>x.disabled=true);
+  const msgs=[{t:good?'ok':'bad',m:good?'Exact.':'Ce n’est pas la bonne catégorie.'}];
+  let expl=''; if(c.isT) expl+='f = 1 / T = 1 / ('+fmtTime(1/c.f)+') = '+fmtFreq(c.f)+'. ';
+  expl+='Le domaine audible va de 20 Hz à 20 kHz. Ici f = '+fmtFreq(c.f)+(z==='infra'?' est inférieure à 20 Hz : c’est un infrason.':z==='ultra'?' est supérieure à 20 kHz : c’est un ultrason.':' est comprise entre 20 Hz et 20 kHz : le son est audible.');
+  msgs.push({t:'info',m:expl});
+  showFb($('#fb3'),msgs);
+  $('#score3').textContent=fr('· score : '+q3.ok+' / '+q3.total);
+  $('#next3').hidden=false; $('#listenQ3').hidden=(z!=='audible');
+}));
+$('#next3').addEventListener('click',()=>{ AudioEng.stop(); newQ3(); });
+bindListen($('#listenQ3'),()=>({kind:'sin',f:q3.cur.f,amp:1,phase:0}),null);
+newQ3();
+
+/* ============ ÉTAPE 4 ============ */
+const hA={kind:'sin',f:440,amp:1,phase:0.1};
+const hB={kind:'sin',f:440,amp:1,phase:0.1};
+const scHA=new Scope($('#scopeHA'),{sig:hA,tb:1e-3,run:true,group:'haut',label:'Oscilloscope du son A.'});
+const scHB=new Scope($('#scopeHB'),{sig:hB,tb:1e-3,run:true,group:'haut',label:'Oscilloscope du son B.'});
+function updH(){
+  hB.f=sliderLog($('#hFreq').value,100,4000); if(Math.abs(hB.f-440)/440<0.004) hB.f=440; hB.amp=$('#hAmp').value/100;
+  $('#hAf').textContent=fmtFreq(hA.f); $('#hAT').textContent=fmtTime(1/hA.f);
+  $('#hBf').textContent=fmtFreq(hB.f); $('#hBT').textContent=fmtTime(1/hB.f);
+  scHA.draw(); scHB.draw();
+}
+function sliderLog(v,a,b){ return sig3(a*Math.pow(b/a,v/1000)); }
+$('#hFreq').addEventListener('input',()=>{ if(AudioEng.btn===$('#listenHB')) AudioEng.stop(); updH(); });
+$('#hAmp').addEventListener('input',()=>{ if(AudioEng.btn===$('#listenHB')) AudioEng.stop(); updH(); });
+bindListen($('#listenHA'),()=>hA,null); bindListen($('#listenHB'),()=>hB,null);
+updH();
+$('#checkH').addEventListener('click',()=>{
+  const a=$('#hc1').value,b=$('#hc2').value,c=$('#hc3').value;
+  if(!a||!b||!c){ showFb($('#fbH'),[{t:'warn',m:'Complète les trois phrases avant de vérifier.'}]); return; }
+  const msgs=[];
+  msgs.push(a==='grande'?{t:'ok',m:'Oui : plus la fréquence est grande, plus le son est aigu.'}:{t:'bad',m:'Non : un son aigu a une grande fréquence (il vibre plus vite). Compare A et B en montant la fréquence de B.'});
+  msgs.push(b==='petite'?{t:'ok',m:'Oui : T = 1 / f, donc quand f augmente, la période diminue : les motifs sont plus serrés sur l’écran.'}:{t:'bad',m:'Non : comme T = 1 / f, une grande fréquence correspond à une petite période. Regarde la largeur d’un motif quand tu augmentes la fréquence de B.'});
+  msgs.push(c==='nechangepas'?{t:'ok',m:'Oui : l’amplitude change l’intensité du son (plus fort ou plus faible), pas sa hauteur. Ne confonds pas « aigu » et « fort ».'}:{t:'bad',m:'Non : en changeant seulement l’amplitude, la période reste la même, donc la hauteur aussi. Ne confonds pas « aigu » et « fort ».'});
+  const p=val('hp');
+  if(p) msgs.push(p==='petite'?{t:'ok',m:'Ta prévision de départ était juste.'}:{t:'warn',m:'Ta prévision de départ était différente : un son plus aigu a une période plus petite.'});
+  showFb($('#fbH'),msgs);
+});
+
+/* Timbre */
+const tA={kind:'sin',f:440,amp:1,phase:0.1}, tBsig={kind:'sq',f:440,amp:1,phase:0.1};
+['tShapeA','tShapeB'].forEach((id,i)=>{ const s=$('#'+id); ['sin','tri','sq','saw'].forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=SHAPE_NAME[k][0].toUpperCase()+SHAPE_NAME[k].slice(1); s.appendChild(o); }); s.value=i===0?'sin':'sq'; });
+const scTA=new Scope($('#scopeTA'),{sig:tA,tb:1e-3,run:true,group:'timbre',label:'Oscilloscope du son A (timbre).'});
+const scTB=new Scope($('#scopeTB'),{sig:tBsig,tb:1e-3,run:true,group:'timbre',label:'Oscilloscope du son B (timbre).'});
+function updT(){
+  const f=sliderLog($('#tFreq').value,200,1000); tA.f=tBsig.f=f; tA.kind=$('#tShapeA').value; tBsig.kind=$('#tShapeB').value;
+  $('#tf').textContent=fr('f = '+fmtFreq(f)+' · T = '+fmtTime(1/f)); scTA.draw(); scTB.draw();
+  $('#fbT').innerHTML='';
+}
+['tFreq','tShapeA','tShapeB'].forEach(id=>$('#'+id).addEventListener('input',()=>{ if(AudioEng.btn===$('#listenTA')||AudioEng.btn===$('#listenTB')) AudioEng.stop(); updT(); }));
+bindListen($('#listenTA'),()=>tA,null); bindListen($('#listenTB'),()=>tBsig,null);
+const TQ=[['tq1','Les deux signaux ont la même période.'],['tq2','Les deux sons ont la même hauteur.'],['tq3','Les deux signaux ont la même forme.'],['tq4','Les deux sons ont le même timbre.']];
+TQ.forEach(([n,t])=>{ const tr=document.createElement('tr'); tr.innerHTML='<th scope="row" style="font-weight:400">'+t+'</th><td><label><input type="radio" name="'+n+'" value="oui"> Vrai</label><label><input type="radio" name="'+n+'" value="non"> Faux</label></td>'; $('#tQ').appendChild(tr); });
+updT();
+$('#checkT').addEventListener('click',()=>{
+  if(TQ.some(([n])=>!val(n))){ showFb($('#fbT'),[{t:'warn',m:'Réponds aux quatre affirmations avant de vérifier.'}]); return; }
+  const same=tA.kind===tBsig.kind, truth=[true,true,same,same], msgs=[]; let allOk=true;
+  TQ.forEach(([n,t],i)=>{ const ok=((val(n)==='oui')===truth[i]); if(!ok) allOk=false; msgs.push({t:ok?'ok':'bad',m:t.replace(/\.$/,'')+' : '+(truth[i]?'vrai':'faux')+'.'}); });
+  if(allOk) msgs.push({t:'info',m:same?'Même fréquence et même forme : les deux sons sont identiques, tu ne peux pas les distinguer. Choisis deux formes différentes pour entendre le timbre.':'Même fréquence donc même période et même hauteur. Mais les formes des signaux sont différentes : les timbres sont différents. C’est ce qui permet de reconnaître deux instruments qui jouent la même note.'});
+  else msgs.push({t:'info',m:'Indice : la hauteur dépend de la fréquence (donc de la période) ; le timbre dépend de la forme du signal.'});
+  showFb($('#fbT'),msgs);
+});
+
+/* ============ ÉTAPE 5 ============ */
+const st5={sig:null,done:false};
+const sc5=new Scope($('#scope5'),{sig:{kind:'sin',f:440,amp:1,phase:0},tb:1e-3,cursors:true,bands:true,c1:1.5,c2:3.5,label:'Oscilloscope : signal du défi, avec deux curseurs repérés 1 et 2.'});
+function newDefi(){
+  const r=Math.random(); let f;
+  if(r<0.15) f=sig2(logRand(4,15)); else if(r<0.30) f=sig2(logRand(25000,60000)); else f=sig2(logRand(60,6000));
+  st5.sig={kind:pick(['sin','tri','sq','saw']),f,amp:1,phase:Math.random(),noise:Math.random()<0.5?0.06:0};
+  sc5.setSig(st5.sig); sc5.setTb(1e-3); sc5.setCursors(1.5,3.5); sc5.freeze();
+  ['T5','f5'].forEach(i=>$('#'+i).value=''); ['z5','h5','s5','t5'].forEach(i=>$('#'+i).value=''); $('#N5').value='1';
+  $('#fb5').innerHTML=''; $('#corr5').disabled=true;
+}
+$('#new5').addEventListener('click',newDefi);
+newDefi();
+$('#check5').addEventListener('click',()=>{
+  const s=st5.sig, delta=sc5.delta();
+  const Tuser=parseNum($('#T5').value)*Number($('#T5u').value), fuser=parseNum($('#f5').value)*Number($('#f5u').value);
+  const m=evalMeasure({Tuser,fuser,Ttrue:1/s.f,delta:delta<sc5.tb*0.2?0:delta,N:+$('#N5').value});
+  const msgs=m.msgs.slice(); let pts=(m.okT?1:0)+(m.okF?1:0);
+  const z=$('#z5').value,h=$('#h5').value,sh=$('#s5').value,t=$('#t5').value;
+  if(!z||!h||!sh||!t){ msgs.push({t:'warn',m:'Complète aussi les quatre dernières questions.'}); showFb($('#fb5'),msgs); $('#corr5').disabled=false; return; }
+  const zt=zoneOf(s.f); const okz=z===zt; if(okz) pts++;
+  msgs.push({t:okz?'ok':'bad',m:okz?'Domaine de fréquences : correct.':'Domaine de fréquences : le domaine audible va de 20 Hz à 20 kHz. Compare ta fréquence à ces deux valeurs.'});
+  const ht=Math.abs(s.f-440)/440<0.03?'meme':(s.f<440?'grave':'aigu'); const okh=h===ht; if(okh) pts++;
+  msgs.push({t:okh?'ok':'bad',m:okh?'Comparaison avec le diapason : correcte.':'Comparaison avec le diapason : plus la fréquence est grande, plus le son est aigu. Compare ta fréquence à 440 Hz.'});
+  const oks=sh===s.kind; if(oks) pts++;
+  msgs.push({t:oks?'ok':'bad',m:oks?'Forme du signal : correcte.':'Forme du signal : regarde le motif entre tes curseurs : arrondi, en pointes, avec des paliers, ou avec une chute brutale ?'});
+  const tt=s.kind==='sin'?'oui':'non'; const okt=t===tt; if(okt) pts++;
+  msgs.push({t:okt?'ok':'bad',m:okt?'Timbre : correct.':'Timbre : le timbre dépend de la forme du signal. Le diapason donne un signal sinusoïdal.'});
+  msgs.unshift({t:'info',m:'Score : '+pts+' / 6.'});
+  showFb($('#fb5'),msgs); $('#corr5').disabled=false;
+});
+$('#corr5').addEventListener('click',()=>{
+  const s=st5.sig;
+  showFb($('#fb5'),[{t:'info',m:'Correction : signal '+SHAPE_NAME[s.kind]+', T = '+fmtTime(1/s.f)+', f = '+fmtFreq(s.f)+' → '+ZONE_LABEL[zoneOf(s.f)].replace(/ \(.*\)/,'').toLowerCase()+'. Par rapport au diapason (440 Hz) : '+(Math.abs(s.f-440)/440<0.03?'même hauteur':(s.f<440?'plus grave':'plus aigu'))+'. Timbre '+(s.kind==='sin'?'identique à celui du diapason (même forme).':'différent de celui du diapason (forme différente).')}]);
+});
+
+/* ---------- Typographie française dans le texte statique ---------- */
+(function(){
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>{ const p=n.parentNode.nodeName; return (p==='SCRIPT'||p==='STYLE')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT; }});
+  const list=[]; while(w.nextNode()) list.push(w.currentNode);
+  list.forEach(n=>{ const t=fr(n.nodeValue); if(t!==n.nodeValue) n.nodeValue=t; });
+})();
+
+airNote(); goto(1,false);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
