@@ -510,6 +510,14 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     "theme": "mouvement", "niveau": "Seconde", "type": "Exerciseur", "duree": 15,
     "notions": ["vecteur vitesse", "vecteur déplacement", "chronophotographie", "échelle", "mouvement rectiligne uniforme", "trajectoire", "variation du vecteur vitesse"],
     "statut": "dispo", "url": "sims/vecteur-vitesse.html", "date": "2026-11-04", "glyph": "chrono-droite"
+  },
+  {
+    "id": "signaux-sonores-periodiques",
+    "titre": "Signaux sonores périodiques",
+    "resume": "Repère le motif d'un signal sonore, mesure sa période, calcule sa fréquence, décide s'il est audible, puis relie fréquence et hauteur, forme du signal et timbre. Avec le son.",
+    "theme": "ondes", "niveau": "Seconde", "type": "Simulation", "duree": 25,
+    "notions": ["signal périodique", "motif", "période", "fréquence", "sons audibles", "infrasons", "ultrasons", "hauteur", "timbre", "amplitude"],
+    "statut": "dispo", "url": "sims/signaux-periodiques.html", "date": "2026-11-06", "glyph": "signal"
   }
 ]
 </script>
@@ -589,6 +597,10 @@ footer .mono { font-size: 12px; letter-spacing: .06em; }
     } else if (g === "spectrum") {
       s += '<rect x="14" y="28" width="172" height="64" rx="4" fill="#0B1218"/>';
       [[40, "#8B5CF6"], [58, "#3B82F6"], [76, "#22D3EE"], [112, "#84CC16"], [134, "#FACC15"], [160, "#EF4444"]].forEach(function (l) { s += '<rect x="' + l[0] + '" y="28" width="3" height="64" fill="' + l[1] + '"/>'; });
+    } else if (g === "signal") {
+      s += '<line class="s dash" x1="10" y1="60" x2="190" y2="60"/>';
+      s += '<path class="s" d="M14 60C28 12 48 12 62 60S96 108 110 60 144 12 158 60 180 96 188 76"/>';
+      s += '<line class="v" x1="38" y1="104" x2="134" y2="104"/><line class="v" x1="38" y1="98" x2="38" y2="110"/><line class="v" x1="134" y1="98" x2="134" y2="110"/>';
     } else if (g === "beaker") {
       s += '<path class="water" d="M65 56H135V92Q135 103 124 103H76Q65 103 65 92Z" style="opacity:.3"/><path class="s" d="M62 18V92Q62 106 76 106H124Q138 106 138 92V18"/><line class="s" x1="56" y1="18" x2="144" y2="18"/>';
       s += '<circle class="f" cx="82" cy="94" r="4"/><circle class="f" cx="100" cy="97" r="4"/><circle class="f" cx="117" cy="93" r="4"/><circle class="f" cx="96" cy="78" r="3"/>';
