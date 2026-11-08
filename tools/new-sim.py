@@ -32,8 +32,15 @@ THEMES = {
 }
 NIVEAUX = ["Seconde", "Première", "Première spé", "Terminale", "Terminale spé"]
 TYPES = ["Simulation", "Jeu", "Activité"]
-GLYPHS = ["bench", "chrono", "chrono-droite", "refraction", "spectrum", "beaker",
-          "titration", "gas", "circuit", "orbit", "pendulum", "reaction"]
+
+
+def _glyph_names():
+    """Glyphes disponibles : lus dans shared/glyphs.js (add("nom", …))."""
+    src = (ROOT / "shared" / "glyphs.js").read_text(encoding="utf-8")
+    return re.findall(r'\badd\("([a-z-]+)"', src)
+
+
+GLYPHS = _glyph_names()
 CATALOGUE_RE = re.compile(r'(<script type="application/json" id="catalogue-data">)(.*?)(</script>)', re.S)
 
 
@@ -73,7 +80,7 @@ def main() -> int:
     if not a.resume and interactive: a.resume = ask("Résumé (une phrase)")
     if a.duree is None and interactive: a.duree = int(ask("Durée en minutes", "20"))
     if not a.notions and interactive: a.notions = ask("Notions (séparées par des virgules)", "")
-    if not a.glyph and interactive: a.glyph = ask("Vignette", "chrono", GLYPHS)
+    if not a.glyph and interactive: a.glyph = ask("Vignette (voir docs/glyphes.md)", "graph", GLYPHS)
 
     missing = [k for k in ("titre", "theme", "niveau", "resume") if not getattr(a, k)]
     if missing:
@@ -108,7 +115,7 @@ def main() -> int:
         "id": sim_id, "titre": a.titre, "resume": a.resume,
         "theme": a.theme, "niveau": a.niveau, "type": a.type, "duree": a.duree or 20,
         "notions": notions, "statut": "dispo", "url": f"sims/{fichier}.html",
-        "date": datetime.date.today().isoformat(), "glyph": a.glyph or "chrono",
+        "date": datetime.date.today().isoformat(), "glyph": a.glyph or "graph",
     }
 
     # Même mise en forme que les entrées existantes (lisible dans un diff).

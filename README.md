@@ -60,7 +60,7 @@ Le gabarit s'appuie sur `shared/simulabo.css` et `shared/simulabo.js` : même id
 
 - `theme` : `matiere`, `mouvement`, `energie`, `ondes`
 - `statut` : `dispo` (fiche cliquable) ou `prepa` (fiche « en préparation », sans lien)
-- `glyph` (vignette) : `bench`, `chrono`, `chrono-droite`, `refraction`, `spectrum`, `beaker`, `titration`, `gas`, `circuit`, `orbit`, `pendulum`, `reaction`
+- `glyph` (vignette) : un nom défini dans `shared/glyphs.js` (liste et règles : `docs/glyphes.md`). Un glyphe par simulation. Champs facultatifs `image` et `image_dark` pour une illustration à la place du dessin.
 
 ## Contrôle automatique
 
