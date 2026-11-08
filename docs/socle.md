@@ -7,13 +7,14 @@ Le socle garantit que toutes les simulations ont la même identité, la même er
 | `shared/simulabo.css` | Jetons de design (couleurs clair/sombre, typographie système), mise en page, boutons, onglets, curseurs, afficheurs, zone d'observation, tableau de mesures, impression |
 | `shared/simulabo.js` | Briques JavaScript : `Simulabo.slider`, `readout`, `tabs`, `observe`, `canvas`, `loop`, `measureTable`, `defi`, `shareState`, `fmt` |
 | `templates/simulation.html` | Gabarit complet et fonctionnel, qui sert de point de départ |
+| `shared/glyphs.js` | Catalogue des vignettes SVG de l'accueil (un glyphe par simulation, voir `docs/glyphes.md`) |
 | `tools/new-sim.py` | Crée la simulation depuis le gabarit et l'inscrit au catalogue |
 | `tools/check.py` | Contrôle de cohérence (catalogue, fichiers, charte, accessibilité mécanique) |
 | `tools/github-actions-check.yml` | Lance le contrôle à chaque pull request (à installer par le propriétaire du dépôt) |
 
 ## Créer une simulation en 5 étapes
 
-1. **Lancer** `python3 tools/new-sim.py` (mode interactif) ou donner les options : `--titre`, `--theme`, `--niveau`, `--resume`, `--duree`, `--notions`, `--glyph`.
+1. **Lancer** `python3 tools/new-sim.py` (mode interactif) ou donner les options : `--titre`, `--theme`, `--niveau`, `--resume`, `--duree`, `--notions`, `--glyph` (nom défini dans `shared/glyphs.js`, voir `docs/glyphes.md`).
 2. **Ouvrir** `sims/<nom>.html` : le gabarit contient une démonstration (signal sinusoïdal). Garder l'en-tête, la zone d'observation, le pied de page ; remplacer le bloc entre `DÉMO` et `FIN DE LA DÉMO`.
 3. **Composer** l'interface avec les briques (voir ci-dessous) et dessiner la scène dans le canvas.
 4. **Contrôler** : `python3 tools/check.py`. Zéro erreur est la condition de fusion.

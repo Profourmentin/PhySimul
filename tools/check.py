@@ -114,13 +114,22 @@ def parse(path: Path) -> Page:
     return p
 
 
+def glyph_names():
+    """Noms de glyphes déclarés dans shared/glyphs.js (add("nom", …))."""
+    f = ROOT / "shared" / "glyphs.js"
+    if not f.is_file():
+        return set()
+    return set(re.findall(r'\badd\("([a-z-]+)"', f.read_text(encoding="utf-8")))
+
+
 def check_catalogue(rep):
     index = ROOT / "index.html"
     text = index.read_text(encoding="utf-8")
     cat = load_json(text, "catalogue-data", rep, "index.html")
     if cat is None:
         return {}, set()
-    glyphs_ok = set(re.findall(r'g === "([a-z-]+)"', text))
+    glyphs_ok = glyph_names()
+    glyph_users = {}
     ids, urls = set(), set()
     by_id = {}
     for i, e in enumerate(cat):
@@ -131,7 +140,10 @@ def check_catalogue(rep):
         ids.add(e.get("id")); by_id[e.get("id")] = e
         if e.get("theme") not in THEMES: rep.err(where, f"thème inconnu « {e.get('theme')} »")
         if e.get("statut") not in STATUTS: rep.err(where, f"statut inconnu « {e.get('statut')} »")
-        if glyphs_ok and e.get("glyph") not in glyphs_ok: rep.err(where, f"vignette « {e.get('glyph')} » non dessinée dans index.html")
+        if glyphs_ok and e.get("glyph") not in glyphs_ok: rep.err(where, f"vignette « {e.get('glyph')} » non dessinée dans shared/glyphs.js")
+        glyph_users.setdefault(e.get("glyph"), []).append(e.get("id"))
+        for champ in ("image", "image_dark"):
+            if e.get(champ) and not (ROOT / e[champ]).is_file(): rep.err(where, f"{champ} introuvable : {e[champ]}")
         if not isinstance(e.get("notions"), list) or not e.get("notions"):
             rep.warn(where, "aucune notion renseignée (le moteur de recherche s'appuie dessus)")
         if len(e.get("resume", "")) > 260: rep.warn(where, "résumé long (> 260 caractères) : la carte sera tronquée")
@@ -147,6 +159,9 @@ def check_catalogue(rep):
     for f in sorted((ROOT / "sims").glob("*.html")):
         if f"sims/{f.name}" not in urls:
             rep.err(f"sims/{f.name}", "absente du catalogue (index.html)")
+    for g, users in glyph_users.items():
+        if len(users) > 1:
+            rep.warn("catalogue", f"vignette « {g} » partagée par {len(users)} entrées ({', '.join(users)}) : un glyphe par simulation (docs/glyphes.md)")
     return by_id, urls
 
 
