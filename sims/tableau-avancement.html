@@ -1,0 +1,876 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tableau d'avancement · Simulabo PhCh</title>
+<meta name="description" content="Avancement x, réactif limitant, état final : cinq missions avec des réservoirs de billes pour comprendre puis maîtriser le tableau d'avancement.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+/* Couleurs des espèces (propres à cette simulation) : bleu / orange pour les réactifs, vert d'eau / violet pour les produits. L'espèce est toujours aussi nommée en toutes lettres. */
+:root { --sp-a: #1D4ED8; --sp-b: #C2410C; --sp-c: #0F766E; --sp-d: #7E22CE; }
+@media (prefers-color-scheme: dark) { :root { --sp-a: #7DB2FF; --sp-b: #FB9A5B; --sp-c: #38D6C4; --sp-d: #C9A8FF; } }
+
+.wrap, #sim, #sim > * { min-width: 0; }
+#sim { width: 100%; }
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.tab { flex: 1 1 auto; }
+sub, sup { font-size: .7em; line-height: 0; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.stack:empty { display: none; }
+
+.progress { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.mchip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; background: var(--surface); color: var(--muted); }
+.mchip[data-done="true"] { border-color: var(--ok); color: var(--ok); background: var(--ok-bg); font-weight: 600; }
+
+.intro p { max-width: 74ch; }
+.obj { font-size: 16px; }
+.bo { font-size: 14px; color: var(--muted); }
+
+/* Scène : réservoirs de billes */
+.eqline { font: 600 18px/1.4 var(--font-body); margin: 0; }
+.xchip { font: 600 15px var(--font-data); background: var(--lcd-bg); color: var(--lcd-fg); border-radius: 99px; padding: 4px 14px; margin: 0; }
+.tubes { display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 14px 12px 8px; }
+.grp { display: flex; justify-content: center; gap: 8px; flex: 1 1 0; min-width: 0; max-width: 330px; }
+.mid { flex: none; width: 30px; align-self: center; text-align: center; color: var(--muted); font: 600 28px var(--font-head); }
+.tube { flex: 1 1 0; min-width: 0; max-width: 104px; display: flex; flex-direction: column; gap: 6px; text-align: center; --sp: var(--sp-a); }
+.tube[data-sp="1"] { --sp: var(--sp-b); }
+.tube[data-sp="2"] { --sp: var(--sp-c); }
+.tube[data-sp="3"] { --sp: var(--sp-d); }
+.tube.vide { visibility: hidden; }
+.tname { font: 600 18px/1.2 var(--font-head); color: var(--sp); min-height: 1.3em; overflow-wrap: anywhere; }
+.trole { font-size: 12px; line-height: 1.3; color: var(--muted); min-height: 2.6em; }
+.tube[data-state="limitant"] .trole, .tube[data-state="consomme"] .trole { color: var(--sp); font-weight: 600; }
+.vial { border: 2px solid var(--muted); border-top-width: 0; border-radius: 0 0 14px 14px; padding: 4px 4px 6px; background: var(--bg); }
+.tube[data-state="limitant"] .vial, .tube[data-state="consomme"] .vial { border-color: var(--sp); }
+.slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; }
+.bille { aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid transparent; box-sizing: border-box; }
+.bille[data-s="full"] { background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 45%), var(--sp); border-color: var(--sp); }
+.bille[data-s="part"] { border-color: var(--sp); background: linear-gradient(to top, var(--sp) calc(var(--f) * 100%), transparent calc(var(--f) * 100%)); }
+.bille[data-s="ghost"] { border: 2px dashed var(--sp); opacity: .6; }
+.tval { font: 600 21px var(--font-data); color: var(--ink); }
+.tval small { font: 500 12px var(--font-data); color: var(--muted); }
+.tdelta { font: 500 13px var(--font-data); color: var(--muted); min-height: 1.4em; }
+.ctl { padding: 10px 14px 12px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+.lg .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--muted); display: inline-block; }
+.lg .dot.ghost { background: none; border: 2px dashed var(--muted); }
+
+/* Tableau d'avancement */
+.tablewrap { overflow-x: auto; }
+table.av { width: 100%; min-width: 470px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.av th, table.av td { padding: 8px 8px; text-align: center; border-top: 1px solid var(--line); vertical-align: top; }
+table.av thead th { font: 600 16px var(--font-body); background: var(--bg); border-top: 0; color: var(--sp-a); }
+table.av thead th[data-sp="1"] { color: var(--sp-b); }
+table.av thead th[data-sp="2"] { color: var(--sp-c); }
+table.av thead th[data-sp="3"] { color: var(--sp-d); }
+table.av tbody th { text-align: left; font: 600 13px var(--font-body); background: var(--bg); white-space: nowrap; color: var(--ink); }
+table.av tbody th small { display: block; font: 500 12px var(--font-data); color: var(--muted); }
+.av .op { color: var(--muted); font-weight: 500; margin-right: 2px; }
+.av .expr { font: 500 15px var(--font-data); white-space: nowrap; }
+.av .num { display: block; font: 600 15px var(--font-data); color: var(--ink); margin-top: 2px; }
+.av .st { display: block; font-size: 12px; min-height: 1.3em; margin-top: 2px; color: var(--muted); }
+.av .st[data-s="ok"] { color: var(--ok); font-weight: 600; }
+.av .st[data-s="bad"] { color: var(--bad); font-weight: 600; }
+
+/* Champs et questions */
+.nin { min-height: 44px; font: 600 17px var(--font-data); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; }
+.av .nin { width: 64px; text-align: center; padding: 4px 6px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; align-content: start; }
+.field label { font-weight: 600; line-height: 1.4; }
+fieldset.q { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom: 8px; line-height: 1.5; }
+.opts { display: grid; gap: 6px; }
+.opt { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; line-height: 1.4; }
+.opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--info-bg); }
+.stmt { font-size: 16px; line-height: 1.75; max-width: 74ch; }
+.tag { display: inline-block; font: 600 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+.fb ul { margin: 6px 0 0; padding-left: 20px; }
+.fb p + p { margin-top: 6px; }
+.method ol { margin: 8px 0 0; padding-left: 22px; max-width: 74ch; line-height: 1.6; }
+.method li + li { margin-top: 4px; }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="matiere">Constitution et transformations de la matière · Première spé</p>
+    <h1>Tableau d’avancement</h1>
+    <p class="sub">Des réservoirs de billes pour voir ce que fait l’avancement x, puis cinq missions pour établir le tableau, trouver l’avancement maximal et le réactif limitant, et décrire l’état final.</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+    <div class="progress" id="progress"></div>
+
+    <div class="tabs" id="tabs" role="group" aria-label="Choisir une mission">
+      <button class="tab" data-mode="1" type="button">1 · Sens de x</button>
+      <button class="tab" data-mode="2" type="button">2 · Établir le tableau</button>
+      <button class="tab" data-mode="3" type="button">3 · Avancement maximal</button>
+      <button class="tab" data-mode="4" type="button">4 · État final</button>
+      <button class="tab" data-mode="5" type="button">5 · Totale ou non ?</button>
+      <button class="tab" data-mode="a" type="button">Atelier libre</button>
+    </div>
+
+    <section class="card intro" id="intro" aria-labelledby="h-intro"></section>
+
+    <section class="stage" aria-label="Réservoirs de billes : une bille représente une quantité de matière">
+      <div class="stagebar">
+        <p class="eqline" id="eqline"></p>
+        <p class="xchip" id="xchip"></p>
+      </div>
+      <div class="tubes" id="tubes" role="group" aria-label="Quantité de matière de chaque espèce, représentée par des billes"></div>
+      <div class="ctl" id="ctl">
+        <div id="sl-x"></div>
+        <div class="row">
+          <button type="button" class="primary" id="b-play">Faire avancer la réaction</button>
+          <button type="button" id="b-zero">Revenir à x = 0</button>
+          <button type="button" id="b-max"><span>Aller à <i>x</i> = <i>x</i><sub>max</sub></span></button>
+        </div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="obs" id="obs" aria-live="polite" data-tone="info">
+      <h2>Observation</h2>
+      <p data-obs-text></p>
+    </section>
+
+    <div class="stack" id="tache"></div>
+
+    <section class="card" id="tblcard" aria-labelledby="h-tbl">
+      <h2 id="h-tbl">Tableau d’avancement</h2>
+      <div class="tablewrap"><table class="av" id="av"></table></div>
+    </section>
+
+    <div class="stack" id="tache2"></div>
+
+    <details class="method" open>
+      <summary>La méthode en quatre étapes</summary>
+      <ol>
+        <li>Écrire l’équation ajustée et compléter la ligne « état initial » avec les quantités de matière (en mol).</li>
+        <li>Exprimer chaque quantité de matière en cours de réaction : <i>n</i> = <i>n</i><sub>i</sub> − coefficient × <i>x</i> pour un réactif, <i>n</i> = coefficient × <i>x</i> pour un produit.</li>
+        <li>Pour chaque réactif, chercher la valeur de <i>x</i> qui annule sa quantité : <i>x</i> = <i>n</i><sub>i</sub> / coefficient. La plus petite valeur est <i>x</i><sub>max</sub> et le réactif correspondant est le <b>réactif limitant</b>. Si les deux valeurs sont égales, le mélange est <b>stœchiométrique</b>.</li>
+        <li>Remplacer <i>x</i> par <i>x</i><sub>max</sub> (transformation totale) ou par <i>x</i><sub>f</sub> (valeur déduite d’une mesure) pour obtenir l’état final. Contrôle : aucune quantité n’est négative, et <i>x</i> a la même valeur pour toutes les espèces.</li>
+      </ol>
+    </details>
+
+    <details>
+      <summary>Pour aller plus loin</summary>
+      <ul>
+        <li>Une bille représente une quantité de matière (1 mol, parfois 2 ou 5 mol quand il y en a beaucoup), pas une entité réelle : une mole contient environ 6,02 × 10²³ entités.</li>
+        <li><i>x</i> est exprimé en mol et vaut la même chose pour toutes les espèces. <i>x</i><sub>max</sub> est la valeur maximale que permettent les réactifs ; <i>x</i><sub>f</sub> est la valeur réellement atteinte à la fin. La transformation est totale si <i>x</i><sub>f</sub> = <i>x</i><sub>max</sub>, non totale si <i>x</i><sub>f</sub> &lt; <i>x</i><sub>max</sub> (« transformations totale et non totale » figurent au programme de Première). L’étude quantitative de l’équilibre chimique (quotient de réaction, constante d’équilibre) est en Terminale : elle n’est pas traitée ici.</li>
+        <li>Limites du modèle : seules les quantités de matière sont suivies. Les masses, les volumes de gaz, les concentrations et le solvant ne sont pas traités ici ; ils servent à calculer les quantités initiales (<i>n</i> = <i>m</i> / <i>M</i>, <i>n</i> = <i>C</i> × <i>V</i>).</li>
+        <li>Le tableau d’avancement sert ensuite dans d’autres simulations du site : <a href="combustion.html">combustion et énergie de liaison</a>, <a href="oxydoreduction.html">équilibrer une réaction d’oxydoréduction</a>, <a href="titrage.html">titrage colorimétrique</a>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = Simulabo, h = S.h, $ = S.$;
+  var etat = S.shareState({ m: "1", eq: "ch4", a: 1, b: 2, c: 1, d: 2, na: 3, nb: 6 });
+  var init = etat.read();
+
+  /* ====================== Données : équations proposées ====================== */
+  function E(html, txt) { return { h: html, t: txt }; }
+  var NONE = E("", "");
+  var LIB = [
+    { id: "ch4", titre: "Combustion du méthane", co: [1, 2, 1, 2],
+      sp: [E("CH<sub>4</sub>", "CH₄"), E("O<sub>2</sub>", "O₂"), E("CO<sub>2</sub>", "CO₂"), E("H<sub>2</sub>O", "H₂O")] },
+    { id: "h2o", titre: "Synthèse de l’eau", co: [2, 1, 2, 0],
+      sp: [E("H<sub>2</sub>", "H₂"), E("O<sub>2</sub>", "O₂"), E("H<sub>2</sub>O", "H₂O"), NONE] },
+    { id: "nh3", titre: "Synthèse de l’ammoniac", co: [1, 3, 2, 0],
+      sp: [E("N<sub>2</sub>", "N₂"), E("H<sub>2</sub>", "H₂"), E("NH<sub>3</sub>", "NH₃"), NONE] },
+    { id: "zn", titre: "Zinc et ions cuivre(II)", co: [1, 1, 1, 1],
+      sp: [E("Zn", "Zn"), E("Cu<sup>2+</sup>", "Cu²⁺"), E("Zn<sup>2+</sup>", "Zn²⁺"), E("Cu", "Cu")] },
+    { id: "al", titre: "Aluminium et ions hydrogène", co: [2, 6, 2, 3],
+      sp: [E("Al", "Al"), E("H<sup>+</sup>", "H⁺"), E("Al<sup>3+</sup>", "Al³⁺"), E("H<sub>2</sub>", "H₂")] },
+    { id: "c3h8", titre: "Combustion du propane", co: [1, 5, 3, 4],
+      sp: [E("C<sub>3</sub>H<sub>8</sub>", "C₃H₈"), E("O<sub>2</sub>", "O₂"), E("CO<sub>2</sub>", "CO₂"), E("H<sub>2</sub>O", "H₂O")] },
+    { id: "cuoh", titre: "Précipitation de l’hydroxyde de cuivre(II)", co: [1, 2, 1, 0],
+      sp: [E("Cu<sup>2+</sup>", "Cu²⁺"), E("HO<sup>−</sup>", "HO⁻"), E("Cu(OH)<sub>2</sub>", "Cu(OH)₂"), NONE] },
+    { id: "fe", titre: "Oxydation du fer", co: [4, 3, 2, 0],
+      sp: [E("Fe", "Fe"), E("O<sub>2</sub>", "O₂"), E("Fe<sub>2</sub>O<sub>3</sub>", "Fe₂O₃"), NONE] }
+  ];
+  var GEN = { id: "gen", titre: "Équation générique A + B → C + D", co: [1, 1, 1, 1],
+    sp: [E("A", "A"), E("B", "B"), E("C", "C"), E("D", "D")] };
+  var ALL = LIB.concat([GEN]);
+  function byId(id) { for (var k = 0; k < ALL.length; k++) if (ALL[k].id === id) return ALL[k]; return null; }
+
+  /* ====================== Outils ====================== */
+  function nf(v) {                                   // 2,5 · 3 · 0,33 : virgule, zéros inutiles supprimés
+    v = Math.round(v * 100) / 100; if (Math.abs(v) < 1e-9) v = 0;
+    return String(v).replace(".", ",").replace("-", "−");
+  }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function near(a, b, tol) { return isFinite(a) && Math.abs(a - b) <= (tol == null ? 0.011 : tol); }
+  var uidn = 0; function uid(p) { uidn += 1; return p + uidn; }
+
+  /* ====================== État de la scène ====================== */
+  var st = { eq: LIB[0], co: [1, 2, 1, 2], ni: [3, 6], x: 0, showFinal: false };
+  var mode = "1";                 // mission affichée : "1".."5" ou "a" (atelier)
+  var tcfg = { cours: "live", final: "off" };   // ce que montre le tableau
+  var autoObs = true;             // commentaire automatique de la scène
+  var inst = null;                // exercice en cours
+  var anim = null, unit = 1, rows = 4, tubeEls = [];
+  var done = { 1: false, 2: false, 3: false, 4: false, 5: false };
+
+  function act() { return st.co[3] > 0 ? [0, 1, 2, 3] : [0, 1, 2]; }
+  function sph(i) { return st.eq.sp[i].h; }
+  function spt(i) { return st.eq.sp[i].t; }
+  function xinfo() {
+    var xa = st.co[0] > 0 ? st.ni[0] / st.co[0] : Infinity, xb = st.co[1] > 0 ? st.ni[1] / st.co[1] : Infinity;
+    var xm = Math.min(xa, xb); if (!isFinite(xm)) xm = 0;
+    return { xa: xa, xb: xb, xm: xm, lim: Math.abs(xa - xb) < 1e-9 ? -1 : (xa < xb ? 0 : 1) };
+  }
+  function amt(i, x) { return i < 2 ? Math.max(0, st.ni[i] - st.co[i] * x) : st.co[i] * x; }
+  function eqHtml() {
+    function term(i) { return (st.co[i] > 1 ? st.co[i] + "&nbsp;" : "") + sph(i); }
+    var r = term(0) + " + " + term(1) + " → " + term(2);
+    return st.co[3] > 0 ? r + " + " + term(3) : r;
+  }
+  function stateOf(i, info) {                        // état d'un réservoir à l'avancement courant
+    if (i > 1) return "";
+    var gone = st.x > 0 && st.x >= info.xm - 1e-6;
+    if (!gone) return "";
+    if (info.lim === -1) return "consomme";
+    return info.lim === i ? "limitant" : "";
+  }
+
+  /* ====================== Scène : réservoirs ====================== */
+  var tubesHost = $("#tubes");
+  function buildTubes() {
+    var I = xinfo(), maxVal = Math.max(st.ni[0], st.ni[1], st.co[2] * I.xm, st.co[3] * I.xm, 1);
+    unit = 1; [2, 5, 10, 20, 50].forEach(function (u) { if (maxVal / unit > 24) unit = u; });
+    rows = Math.max(4, Math.ceil(maxVal / unit / 3 - 1e-9));
+    tubesHost.textContent = ""; tubeEls = [];
+    var g1 = h("div", { class: "grp" }), g2 = h("div", { class: "grp" });
+    [0, 1, 2, 3].forEach(function (i) {
+      var grp = i < 2 ? g1 : g2;
+      if (i === 3 && st.co[3] === 0) { grp.appendChild(h("div", { class: "tube vide", "aria-hidden": "true" })); return; }
+      var slotsEl = h("div", { class: "slots", "aria-hidden": "true" }), slots = [], r, c;
+      for (r = rows - 1; r >= 0; r--) for (c = 0; c < 3; c++) { var b = h("span", { class: "bille", "data-s": "none" }); slotsEl.appendChild(b); slots[r * 3 + c] = b; }
+      var role = h("div", { class: "trole" }), val = h("div", { class: "tval" }), dl = h("div", { class: "tdelta" });
+      var el = h("div", { class: "tube", "data-sp": i, role: "group" },
+        h("div", { class: "tname", html: sph(i) }), role, h("div", { class: "vial" }, slotsEl), val, dl);
+      grp.appendChild(el);
+      tubeEls[i] = { el: el, slots: slots, role: role, val: val, dl: dl };
+    });
+    tubesHost.appendChild(g1);
+    tubesHost.appendChild(h("div", { class: "mid", "aria-hidden": "true", text: "→" }));
+    tubesHost.appendChild(g2);
+    $("#legend").innerHTML =
+      '<span class="lg"><span class="dot"></span>1 bille = ' + nf(unit) + ' mol</span>' +
+      '<span class="lg"><span class="dot ghost"></span>pointillés : quantité déjà consommée (réactif)' + (st.showFinal ? ' ou restant à former (produit)' : '') + '</span>';
+  }
+  function paintTubes() {
+    var I = xinfo();
+    act().forEach(function (i) {
+      var t = tubeEls[i]; if (!t) return;
+      var n = amt(i, st.x), cnt = n / unit, full = Math.floor(cnt + 1e-6), frac = cnt - full;
+      if (frac < 0.02) frac = 0; else if (frac > 0.98) { full += 1; frac = 0; }
+      var ghostTo = i < 2 ? Math.ceil(st.ni[i] / unit - 1e-6) : (st.showFinal ? Math.ceil(st.co[i] * I.xm / unit - 1e-6) : 0);
+      t.slots.forEach(function (b, k) {
+        var s = k < full ? "full" : (k === full && frac > 0 ? "part" : (k < ghostTo ? "ghost" : "none"));
+        if (b.getAttribute("data-s") !== s) b.setAttribute("data-s", s);
+        if (s === "part") b.style.setProperty("--f", frac.toFixed(3));
+      });
+      var state = stateOf(i, I);
+      t.el.setAttribute("data-state", state);
+      var roleTxt = i < 2 ? "réactif" : "produit";
+      if (state === "limitant") roleTxt = "réactif limitant : entièrement consommé";
+      else if (state === "consomme") roleTxt = "réactif entièrement consommé";
+      else if (i < 2 && st.x > 0 && st.x >= I.xm - 1e-6 && n > 1e-9) roleTxt = "réactif en excès : il en reste";
+      t.role.textContent = roleTxt;
+      t.val.innerHTML = nf(n) + ' <small>mol</small>';
+      t.dl.textContent = st.x > 0 ? (i < 2 ? "−" : "+") + nf(st.co[i] * st.x) + " mol" : "";
+      t.el.setAttribute("aria-label", spt(i) + " : " + nf(n) + " mol, " + roleTxt);
+    });
+  }
+
+  /* ====================== Curseur d'avancement et animation ====================== */
+  var sl = S.slider("#sl-x", { label: "Avancement x", unit: "mol", min: 0, max: 1, value: 0, digits: 2,
+    onInput: function (v) { stopAnim(); setX(v); } });
+  function showCtl(o) {
+    $("#ctl").hidden = !o.on;
+    $("#sl-x").hidden = o.slider === false; $("#b-play").hidden = o.play === false;
+    $("#b-zero").hidden = o.zero === false; $("#b-max").hidden = o.max === false;
+  }
+  function syncSlider() { sl.input.max = String(xinfo().xm); sl.set(Math.min(st.x, xinfo().xm), true); }
+  function stopAnim() { if (anim) { anim.stop(); anim = null; } resetPlayLabel(); }
+  function resetPlayLabel() { $("#b-play").textContent = "Faire avancer la réaction"; }
+  function animateTo(target, secs, cb) {
+    stopAnim();
+    if (S.reducedMotion || Math.abs(target - st.x) < 1e-9) { setX(target); if (cb) cb(); return; }
+    var from = st.x, t = 0;
+    anim = S.loop(function (dt) {
+      t += dt; var k = Math.min(1, t / secs), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setX(from + (target - from) * e);
+      if (k >= 1) { stopAnim(); if (cb) cb(); }
+    });
+    anim.start();
+  }
+  function setX(x) {
+    var xm = xinfo().xm; x = Math.max(0, Math.min(xm, x)); st.x = x;
+    sl.set(x, true);
+    paint();
+  }
+  function paint() {
+    paintTubes();
+    $("#xchip").innerHTML = "x = " + nf(st.x) + " mol";
+    if (tcfg.cours === "live" || tcfg.final === "live") renderTable();
+    if (autoObs) autoObservation();
+  }
+  $("#b-play").addEventListener("click", function () {
+    if (anim) { stopAnim(); return; }
+    var xm = xinfo().xm; if (st.x >= xm - 1e-6) st.x = 0;
+    $("#b-play").textContent = "Mettre en pause";
+    animateTo(xm, 3.2, resetPlayLabel);
+  });
+  $("#b-zero").addEventListener("click", function () { stopAnim(); setX(0); });
+  $("#b-max").addEventListener("click", function () { stopAnim(); setX(xinfo().xm); });
+
+  function autoObservation() {
+    var I = xinfo(), x = st.x, k;
+    if (x <= 1e-9) { S.observe("#obs", "info", "<b>État initial.</b> Les réactifs sont présents, rien n’a encore réagi : x = 0 mol."); return; }
+    var used = [0, 1].map(function (i) { return "<b>" + nf(st.co[i] * x) + " mol</b> de " + sph(i); }).join(" et ");
+    var made = [2, 3].filter(function (i) { return st.co[i] > 0; }).map(function (i) { return "<b>" + nf(st.co[i] * x) + " mol</b> de " + sph(i); }).join(" et ");
+    var txt = "Pour <b>x = " + nf(x) + " mol</b> : " + used + " ont réagi ; il s’est formé " + made + ".";
+    var tone = "info";
+    if (x >= I.xm - 1e-6) {
+      tone = "ok";
+      if (I.lim === -1) txt += " <b>x = x<sub>max</sub></b> : les deux réactifs sont entièrement consommés (mélange stœchiométrique).";
+      else { k = I.lim; txt += " <b>x = x<sub>max</sub></b> : " + sph(k) + " est entièrement consommé, c’est le <b>réactif limitant</b>. Il reste " + nf(amt(1 - k, x)) + " mol de " + sph(1 - k) + " (réactif en excès)."; }
+    }
+    S.observe("#obs", tone, txt);
+  }
+
+  /* ====================== Tableau d'avancement ====================== */
+  var av = $("#av"), onEnter = null;
+  function renderTable() {
+    var I = xinfo(), A = act(), xm = I.xm, fx = tcfg.fx != null ? tcfg.fx : xm;
+    var head = '<caption class="sr-only">Tableau d’avancement : une ligne par état du système, une colonne par espèce chimique</caption><thead><tr><th scope="col"><span class="sr-only">État du système</span></th>';
+    A.forEach(function (i) {
+      head += '<th scope="col" data-sp="' + i + '">' + (i === 2 ? '<span class="op">→</span> ' : (i > 0 ? '<span class="op">+</span> ' : "")) +
+        (st.co[i] > 1 ? st.co[i] + "&nbsp;" : "") + sph(i) + "</th>";
+    });
+    head += "</tr></thead>";
+    var body = '<tr><th scope="row">État initial<small>x = 0</small></th>' +
+      A.map(function (i) { return '<td data-sp="' + i + '">' + (i < 2 ? nf(st.ni[i]) : "0") + "</td>"; }).join("") + "</tr>";
+    if (tcfg.cours !== "off") {
+      body += '<tr><th scope="row">En cours<small>' + (tcfg.cours === "live" ? "x = " + nf(st.x) + " mol" : "avancement <i>x</i>") + "</small></th>" +
+        A.map(function (i) {
+          var c = st.co[i] > 1 ? String(st.co[i]) : "", pre = i < 2 ? nf(st.ni[i]) + " − " : "", expr, extra = "";
+          if (tcfg.cours === "input") {
+            expr = pre + '<input class="nin" type="text" inputmode="numeric" autocomplete="off" data-row="cours" data-i="' + i + '" aria-label="Coefficient qui multiplie x pour ' + spt(i) + ', ligne En cours"><i>x</i>';
+            extra = '<span class="st" data-row="cours" data-i="' + i + '" aria-live="polite"></span>';
+          } else {
+            expr = pre + c + "<i>x</i>";
+            if (tcfg.cours === "live") extra = '<span class="num">(' + nf(amt(i, st.x)) + ")</span>";
+          }
+          return '<td data-sp="' + i + '"><span class="expr">' + expr + "</span>" + extra + "</td>";
+        }).join("") + "</tr>";
+    }
+    if (tcfg.final !== "off") {
+      var lab;
+      if (tcfg.fkey === "f") lab = "État final observé<small><i>x</i><sub>f</sub>" + (tcfg.final === "live" ? " = " + nf(fx) + " mol" : " = ?") + "</small>";
+      else lab = "État final<small>" + (tcfg.final === "live" || tcfg.showXmax ? "<i>x</i><sub>max</sub> = " + nf(xm) + " mol" : "<i>x</i> = <i>x</i><sub>max</sub>") + "</small>";
+      body += '<tr><th scope="row">' + lab + "</th>" + A.map(function (i) {
+        var cell;
+        if (tcfg.final === "live") cell = '<span class="num">' + nf(amt(i, fx)) + "</span>";
+        else if (tcfg.final === "partial") cell = (inst && inst.meas === i) ? '<span class="num">' + nf(inst.measVal) + "</span>" : '<span class="num" aria-label="valeur inconnue">?</span>';
+        else cell = '<input class="nin" type="text" inputmode="decimal" autocomplete="off" data-row="final" data-i="' + i + '" aria-label="Quantité de matière finale de ' + spt(i) + ', en mol"><span class="st" data-row="final" data-i="' + i + '" aria-live="polite"></span>';
+        return '<td data-sp="' + i + '">' + cell + "</td>";
+      }).join("") + "</tr>";
+    }
+    av.innerHTML = head + "<tbody>" + body + "</tbody>";
+  }
+  av.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.matches("input") && onEnter) { e.preventDefault(); onEnter(); } });
+  function readCells(row) {
+    var out = [];
+    S.$$('input[data-row="' + row + '"]', av).forEach(function (inp) { out[Number(inp.getAttribute("data-i"))] = S.parseNum(inp.value); });
+    return out;
+  }
+  function cellStatus(row, i, ok) {
+    var el = $('.st[data-row="' + row + '"][data-i="' + i + '"]', av);
+    if (el) { el.setAttribute("data-s", ok ? "ok" : "bad"); el.textContent = ok ? "✓ juste" : "✗ à revoir"; }
+  }
+
+  /* ====================== Composants de questions ====================== */
+  function fbBox(host) { return h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true }); }
+  function showFb(box, tone, html) { box.hidden = false; box.setAttribute("data-tone", tone); box.innerHTML = html; }
+
+  /* Question à choix unique. o: {legend, options:[{t, ok, why, last}], anyAnswer, after(op), onOk(), onAnswer(op)} */
+  function mcq(host, o) {
+    var name = uid("q"), fs = h("fieldset", { class: "q" }), opts = h("div", { class: "opts" });
+    fs.appendChild(h("legend", { html: o.legend }));
+    var list = shuffle(o.options.filter(function (x) { return !x.last; })).concat(o.options.filter(function (x) { return x.last; }));
+    list.forEach(function (op, k) {
+      var id = name + "-" + k;
+      opts.appendChild(h("label", { class: "opt", for: id }, h("input", { type: "radio", name: name, id: id, value: String(k) }), h("span", { html: op.t })));
+    });
+    fs.appendChild(opts);
+    var fb = fbBox(), btn = h("button", { type: "button", class: "primary", text: "Valider ma réponse" });
+    fs.appendChild(h("div", { class: "row" }, btn)); fs.appendChild(fb);
+    var locked = false;
+    btn.addEventListener("click", function () {
+      if (locked) return;
+      var chosen = fs.querySelector("input:checked");
+      if (!chosen) { showFb(fb, "warn", "<b>À vérifier :</b> choisis une réponse."); return; }
+      var op = list[Number(chosen.value)];
+      if (o.anyAnswer) {
+        locked = true; btn.disabled = true; S.$$("input", fs).forEach(function (i) { i.disabled = true; });
+        showFb(fb, "info", o.after ? o.after(op) : "<b>Prédiction enregistrée.</b>");
+        if (o.onAnswer) o.onAnswer(op);
+      } else if (op.ok) {
+        locked = true; btn.disabled = true; S.$$("input", fs).forEach(function (i) { i.disabled = true; });
+        showFb(fb, "ok", "<b>Bravo.</b> " + op.why);
+        if (o.onOk) o.onOk();
+      } else showFb(fb, "bad", "<b>Pas encore.</b> " + op.why + " Réessaie.");
+    });
+    var card = h("section", { class: "card" }, fs); host.appendChild(card);
+    return card;
+  }
+  function card(host, html) { var c = h("section", { class: "card", html: html }); host.appendChild(c); return c; }
+  function actionRow(host, buttons) { var r = h("div", { class: "row" }); buttons.forEach(function (b) { r.appendChild(b); }); host.appendChild(r); return r; }
+
+  /* ====================== Génération d'exercices ====================== */
+  /* mode : "A" ou "B" (réactif limitant), "stoich", "trap" (le réactif limitant n'est PAS celui dont on a le moins de moles), "any" */
+  function genInstance(o) {
+    for (var tries = 0; tries < 400; tries++) {
+      var eq = pick(LIB), co = eq.co, xm = pick(o.xms || [1, 2, 3, 4]);
+      var mode = o.mode === "any" ? pick(["A", "B", "stoich", "trap", "trap"]) : o.mode, ni, lim = -1, trap = false, e;
+      if (mode === "stoich") ni = [co[0] * xm, co[1] * xm];
+      else {
+        if (mode === "trap") {
+          if (co[0] === co[1]) continue;
+          lim = co[0] > co[1] ? 0 : 1; var diff = Math.abs(co[0] - co[1]) * xm;
+          if (diff < 2) continue;
+          e = 1 + Math.floor(Math.random() * Math.min(3, diff - 1)); trap = true;
+        } else { lim = mode === "A" ? 0 : 1; e = 1 + Math.floor(Math.random() * 3); }
+        var other = 1 - lim; ni = [0, 0];
+        ni[lim] = co[lim] * xm; ni[other] = co[other] * xm + e;
+      }
+      if (Math.max(ni[0], ni[1]) > 10) continue;
+      return { eq: eq, co: co.slice(), ni: ni, xm: xm, lim: lim, trap: trap };
+    }
+    return { eq: LIB[0], co: LIB[0].co.slice(), ni: [3, 4], xm: 2, lim: 1, trap: true };
+  }
+  function loadScene(eq, co, ni) {
+    st.eq = eq; st.co = co.slice(); st.ni = ni.slice(); st.x = 0; st.showFinal = false;
+    $("#eqline").innerHTML = eqHtml();
+    buildTubes(); syncSlider(); paint(); renderTable();
+  }
+  function stmtHtml() {
+    var ini = "n<sub>i</sub>(" + sph(0) + ") = <b>" + nf(st.ni[0]) + " mol</b> et n<sub>i</sub>(" + sph(1) + ") = <b>" + nf(st.ni[1]) + " mol</b>";
+    return "<b>Équation :</b> " + eqHtml() + ".<br><b>État initial :</b> " + ini + " ; aucun produit au départ.";
+  }
+  function markDone(m) {
+    done[m] = true; var c = $("#chip-" + m);
+    if (c) { c.setAttribute("data-done", "true"); c.textContent = "Mission " + m + " : réussie ✓"; }
+  }
+  function nextBox(host, m) {
+    var next = String(Number(m) + 1);
+    var btns = [h("button", { type: "button", text: "Nouvel exemple", onclick: function () { enter(m); } })];
+    if (Number(m) < 5) btns.push(h("button", { type: "button", class: "primary", text: "Mission " + next + " →", onclick: function () { tabsApi.select(next); } }));
+    actionRow(host, btns);
+  }
+
+  /* ====================== Fiches des missions ====================== */
+  var INFO = {
+    "1": { t: "Mission 1 · Donner du sens à x",
+      obj: "Comprendre ce que mesure l’avancement x et décrire l’évolution des quantités de matière.",
+      bo: "Programme : « Décrire qualitativement l’évolution des quantités de matière des espèces chimiques lors d’une transformation ».",
+      how: "Déplace le curseur et observe les billes. <b>Avant</b> d’observer, réponds à la question de prédiction ci-dessous." },
+    "2": { t: "Mission 2 · Établir le tableau d’avancement",
+      obj: "Écrire la ligne « en cours » du tableau à partir de l’équation de la réaction.",
+      bo: "Programme : « Établir le tableau d’avancement d’une transformation chimique à partir de l’équation de la réaction ».",
+      how: "Chaque exemple est tiré au hasard : tu peux t’entraîner autant que tu veux." },
+    "3": { t: "Mission 3 · Trouver l’avancement maximal et le réactif limitant",
+      obj: "Déterminer x<sub>max</sub> et identifier le réactif limitant, y compris quand ce n’est pas celui dont il y a le moins de moles.",
+      bo: "Programme, notions : « Avancement final, avancement maximal » ; « Mélanges stœchiométriques ».",
+      how: "Prédis d’abord, regarde ensuite la réaction se faire, puis calcule." },
+    "4": { t: "Mission 4 · Décrire l’état final",
+      obj: "Déterminer la composition du système dans l’état final, pour une transformation considérée comme totale.",
+      bo: "Programme : « Déterminer la composition du système dans l’état final en fonction de sa composition initiale pour une transformation considérée comme totale ».",
+      how: "Trouve x<sub>max</sub>, puis complète la ligne « état final ». Un coup de pouce est disponible." },
+    "5": { t: "Mission 5 · La transformation est-elle totale ?",
+      obj: "Déterminer l’avancement final x<sub>f</sub> à partir d’une mesure et le comparer à x<sub>max</sub>.",
+      bo: "Programme : « Déterminer l’avancement final d’une réaction à partir de la description de l’état final et comparer à l’avancement maximal ».",
+      how: "On te donne une mesure faite en fin de transformation : à toi d’en déduire x<sub>f</sub>, puis de conclure." },
+    "a": { t: "Atelier libre",
+      obj: "Explorer sans consigne : choisir une équation, régler les quantités initiales, faire avancer x et relire le tableau.",
+      bo: "Les relevés peuvent être exportés en CSV pour le tableur ; le lien de la page conserve tes réglages.",
+      how: "Essaie un mélange stœchiométrique, puis un mélange où le réactif limitant n’est pas celui qui a le moins de moles." }
+  };
+  function setIntro(m) {
+    var i = INFO[m];
+    $("#intro").innerHTML = '<h2 id="h-intro">' + i.t + '</h2><p class="obj"><b>Objectif.</b> ' + i.obj + '</p><p class="bo">' + i.bo + '</p><p class="help">' + i.how + "</p>";
+  }
+
+  /* ====================== Mission 1 ====================== */
+  function m1() {
+    var eq = pick(LIB.filter(function (e) { var mx = Math.max.apply(null, e.co); return mx >= 2 && mx <= 3; }));
+    loadScene(eq, eq.co, [eq.co[0] * 3, eq.co[1] * 3]);
+    tcfg = { cours: "live", final: "off" }; renderTable(); autoObs = true; paint();
+    showCtl({ on: true, max: false });
+    var T = $("#tache"), T2 = $("#tache2"), flags = { q1: false, q2: false, q3: false };
+    function check() { if (flags.q1 && flags.q2 && flags.q3) { markDone("1"); S.observe("#obs", "ok", "<b>Mission 1 réussie.</b> x est l’avancement : le même pour toutes les espèces, en mol. Chaque quantité varie de <i>coefficient × x</i>."); autoObs = false; } }
+
+    var s = pick(act().filter(function (i) { return st.co[i] >= 2; })), react = s < 2, c = st.co[s];
+    card(T, '<span class="tag">Prédire</span><p class="stmt">Équation : ' + eqHtml() + ". Au départ, x = 0. La réaction avance jusqu’à <b>x = 1 mol</b>.</p>");
+    mcq(T, {
+      legend: "Que devient la quantité de matière de " + sph(s) + " ?",
+      options: [
+        { t: (react ? "Elle diminue" : "Elle augmente") + " de <b>" + c + " mol</b>.", ok: true,
+          why: sph(s) + " a pour coefficient " + c + " : pour x = 1 mol, sa quantité " + (react ? "diminue" : "augmente") + " de " + c + " × 1 = " + c + " mol. Le curseur se place sur x = 1 mol pour que tu le voies." },
+        { t: (react ? "Elle diminue" : "Elle augmente") + " de <b>1 mol</b>, comme x.",
+          why: "x vaut 1 mol, mais " + sph(s) + " a pour coefficient " + c + " dans l’équation : sa quantité varie de coefficient × x = " + c + " mol." },
+        { t: (react ? "Elle augmente" : "Elle diminue") + " de <b>" + c + " mol</b>.",
+          why: react ? "Un réactif est consommé : sa quantité diminue." : "Un produit se forme : sa quantité augmente." },
+        { t: "Elle ne change pas.", why: "La réaction a lieu : les réactifs diminuent et les produits augmentent." }
+      ],
+      onOk: function () { flags.q1 = true; animateTo(1, 1.4); check(); }
+    });
+    mcq(T, {
+      legend: "Le curseur indique <b>x = 2 mol</b>. Que cela signifie-t-il pour " + eqHtml() + " ?",
+      options: [
+        { t: "La réaction a eu lieu « 2 fois » à l’échelle de la mole : chaque espèce a varié de son coefficient × 2 mol.", ok: true,
+          why: "Pour x = 2 mol : " + sph(0) + " varie de " + st.co[0] + " × 2 = " + nf(st.co[0] * 2) + " mol et " + sph(1) + " de " + st.co[1] + " × 2 = " + nf(st.co[1] * 2) + " mol." },
+        { t: "2 mol de chaque réactif ont été consommées.",
+          why: "Non : x multiplie le coefficient de chaque espèce. Ici " + sph(0) + " varie de " + nf(st.co[0] * 2) + " mol et " + sph(1) + " de " + nf(st.co[1] * 2) + " mol." },
+        { t: "Il reste 2 mol de chaque réactif.", why: "Non : x mesure ce qui a réagi, pas ce qui reste. Ce qui reste se calcule : n<sub>i</sub> − coefficient × x." },
+        { t: "x est la quantité de matière du réactif limitant.", why: "Non : x est commun à toutes les espèces, il n’est lié à aucune en particulier." }
+      ],
+      onOk: function () { flags.q2 = true; check(); }
+    });
+    var t = pick([0, 1]), xv = pick([1.5, 2, 2.5]), ans = st.ni[t] - st.co[t] * xv;
+    S.defi(T, {
+      question: '<span class="tag">Calculer</span><br>Pour <b>x = ' + nf(xv) + ' mol</b>, quelle quantité de matière de ' + sph(t) + ' reste-t-il ? (Tu peux placer le curseur sur cette valeur pour vérifier.)',
+      unit: "mol", answer: ans, tolerance: { abs: 0.011 },
+      hint: "n = n<sub>i</sub> − coefficient × x. Le coefficient de " + sph(t) + " est " + st.co[t] + ".",
+      explain: "n(" + sph(t) + ") = " + nf(st.ni[t]) + " − " + st.co[t] + " × " + nf(xv) + " = " + nf(ans) + " mol.",
+      onResult: function (ok) { if (ok) { flags.q3 = true; check(); } }
+    });
+    nextBox(T2, "1");
+  }
+
+  /* ====================== Mission 2 ====================== */
+  function m2() {
+    inst = genInstance({ mode: "any", xms: [1, 2, 3] });
+    loadScene(inst.eq, inst.co, inst.ni);
+    tcfg = { cours: "input", final: "off" }; renderTable(); autoObs = false;
+    showCtl({ on: false });
+    S.observe("#obs", "info", "Complète la ligne « En cours » du tableau : le coefficient qui multiplie <i>x</i> pour chaque espèce.");
+    var T = $("#tache"), T2 = $("#tache2");
+    card(T, '<span class="tag">À toi de jouer</span><p class="stmt">' + stmtHtml() + '</p><p class="help">Dans la ligne « En cours », un réactif s’écrit <i>n</i><sub>i</sub> − coefficient × <i>x</i> et un produit s’écrit coefficient × <i>x</i>. Écris, dans chaque case, le coefficient qui multiplie <i>x</i> (<b>1</b> quand aucun nombre n’est écrit devant l’espèce dans l’équation).</p>');
+    var fb = fbBox(), btn = h("button", { type: "button", class: "primary", text: "Vérifier la ligne" });
+    function check() {
+      var v = readCells("cours"), msgs = [], allOk = true;
+      act().forEach(function (i) {
+        var e = st.co[i], x = v[i], ok = x === e;
+        if (!ok) { allOk = false; }
+        cellStatus("cours", i, ok);
+        if (ok) return;
+        var other = act().filter(function (j) { return j !== i && st.co[j] === x; });
+        if (isNaN(x)) msgs.push("<b>" + sph(i) + " :</b> écris un nombre entier (1 si x est seul).");
+        else if (x === 1 && e !== 1) msgs.push("<b>" + sph(i) + " :</b> son coefficient dans l’équation est " + e + " : c’est lui qui multiplie x, pas 1.");
+        else if (other.length) msgs.push("<b>" + sph(i) + " :</b> " + x + " est le coefficient de " + sph(other[0]) + ". Relis celui qui est écrit devant " + sph(i) + " dans l’équation.");
+        else msgs.push("<b>" + sph(i) + " :</b> regarde le nombre écrit devant " + sph(i) + " dans l’équation : c’est lui qui multiplie x.");
+      });
+      if (allOk) {
+        showFb(fb, "ok", "<b>Bravo.</b> Le tableau est juste. Il devient maintenant vivant : déplace le curseur et vérifie que les billes suivent les expressions du tableau.");
+        tcfg = { cours: "live", final: "off" }; autoObs = true; showCtl({ on: true, max: false }); setX(Math.min(1, xinfo().xm)); renderTable();
+        markDone("2"); btn.disabled = true;
+      } else showFb(fb, "bad", "<b>Pas encore.</b><ul><li>" + msgs.join("</li><li>") + "</li></ul>");
+    }
+    btn.addEventListener("click", check); onEnter = check;
+    T2.appendChild(h("div", { class: "row" }, btn)); T2.appendChild(fb);
+    nextBox(T2, "2");
+  }
+
+  /* ====================== Mission 3 ====================== */
+  function m3() {
+    inst = genInstance({ mode: "any" });
+    loadScene(inst.eq, inst.co, inst.ni);
+    tcfg = { cours: "sym", final: "off" }; renderTable(); autoObs = false;
+    showCtl({ on: false });
+    S.observe("#obs", "info", "Prédis d’abord quel réactif sera entièrement consommé en premier.");
+    var I = xinfo(), T = $("#tache"), T2 = $("#tache2"), pred = null;
+    card(T, '<span class="tag">Situation</span><p class="stmt">' + stmtHtml() + '</p><p class="help">On laisse la réaction se faire jusqu’à ce qu’elle s’arrête.</p>');
+    var runCard = h("section", { class: "card", hidden: true }), calcCard = h("section", { class: "card", hidden: true });
+
+    mcq(T, {
+      legend: "<span class=\"tag\">Prédire</span><br>Quel réactif sera entièrement consommé en premier ?",
+      anyAnswer: true,
+      options: [
+        { t: sph(0), v: 0 }, { t: sph(1), v: 1 }, { t: "Les deux en même temps", v: -1, last: true }
+      ],
+      after: function () { return "<b>Prédiction enregistrée.</b> Lance la réaction pour la vérifier."; },
+      onAnswer: function (op) { pred = op.v; runCard.hidden = false; $("#run").focus(); }
+    });
+    T.appendChild(runCard); T.appendChild(calcCard);
+
+    runCard.innerHTML = '<span class="tag">Observer</span><div class="row"><button type="button" class="primary" id="run">Lancer la réaction</button></div><div class="fb" id="run-fb" role="status" aria-live="polite" hidden></div>';
+    $("#run", runCard).addEventListener("click", function () {
+      var b = this; b.disabled = true;
+      animateTo(I.xm, 3, function () {
+        var rb = $("#run-fb", runCard), L = I.lim, ok = pred === L, txt;
+        if (L === -1) txt = "Les deux réactifs sont entièrement consommés en même temps : le mélange est <b>stœchiométrique</b>.";
+        else txt = sph(L) + " est entièrement consommé : c’est lui qui arrête la réaction. Il reste " + nf(amt(1 - L, I.xm)) + " mol de " + sph(1 - L) + ".";
+        if (inst.trap) txt += " <b>Attention :</b> " + sph(1 - L) + " est présent en moins grande quantité que " + sph(L) + ", et pourtant ce n’est pas lui qui est limitant. Ce qui compte, ce n’est pas le nombre de moles, mais le rapport <i>n</i><sub>i</sub> / coefficient.";
+        showFb(rb, ok ? "ok" : "warn", (ok ? "<b>Bien vu.</b> " : "<b>Ce n’est pas ce que tu avais prévu.</b> ") + txt);
+        S.observe("#obs", ok ? "ok" : "warn", "La réaction s’arrête quand un réactif est épuisé : x ne peut pas aller plus loin.");
+        calcCard.hidden = false;
+      });
+    });
+
+    var A = sph(0), B = sph(1);
+    calcCard.innerHTML = '<span class="tag">Calculer</span><p class="help">Pour chaque réactif, cherche la valeur de <i>x</i> qui annulerait sa quantité de matière : <i>n</i><sub>i</sub> − coefficient × <i>x</i> = 0.</p>' +
+      '<div class="fields">' +
+      '<div class="field"><label for="f-xa">Si ' + A + ' était épuisé : <i>x</i> = </label><input class="nin" id="f-xa" type="text" inputmode="decimal" autocomplete="off"></div>' +
+      '<div class="field"><label for="f-xb">Si ' + B + ' était épuisé : <i>x</i> = </label><input class="nin" id="f-xb" type="text" inputmode="decimal" autocomplete="off"></div>' +
+      '<div class="field"><label for="f-xm"><i>x</i><sub>max</sub> = </label><input class="nin" id="f-xm" type="text" inputmode="decimal" autocomplete="off"></div>' +
+      '<div class="field"><label for="f-lim">Réactif limitant</label><select class="nin" id="f-lim"><option value="">— choisir —</option><option value="0">' + spt(0) + '</option><option value="1">' + spt(1) + '</option><option value="s">Aucun : mélange stœchiométrique</option></select></div>' +
+      '</div><div class="row"><button type="button" class="primary" id="calc-ok">Vérifier</button></div><div class="fb" id="calc-fb" role="status" aria-live="polite" hidden></div>';
+    var cfb = $("#calc-fb", calcCard);
+    function calc() {
+      var xa = S.parseNum($("#f-xa", calcCard).value), xb = S.parseNum($("#f-xb", calcCard).value), xm = S.parseNum($("#f-xm", calcCard).value), lim = $("#f-lim", calcCard).value;
+      var msgs = [], okA = near(xa, I.xa), okB = near(xb, I.xb), okM = near(xm, I.xm), wantLim = I.lim === -1 ? "s" : String(I.lim), okL = lim === wantLim;
+      [[0, xa, okA, I.xa], [1, xb, okB, I.xb]].forEach(function (r) {
+        var i = r[0], v = r[1];
+        if (r[2]) return;
+        if (isNaN(v)) msgs.push("<b>Si " + sph(i) + " est épuisé :</b> entre un nombre.");
+        else if (near(v, st.ni[i]) && st.co[i] !== 1) msgs.push("<b>Si " + sph(i) + " est épuisé :</b> tu as oublié de diviser par le coefficient " + st.co[i] + ". De " + nf(st.ni[i]) + " − " + st.co[i] + "<i>x</i> = 0, on tire <i>x</i> = " + nf(st.ni[i]) + " / " + st.co[i] + ".");
+        else msgs.push("<b>Si " + sph(i) + " est épuisé :</b> résous " + nf(st.ni[i]) + " − " + st.co[i] + "<i>x</i> = 0, donc <i>x</i> = " + nf(st.ni[i]) + " / " + st.co[i] + ".");
+      });
+      if (!okM) {
+        if (isNaN(xm)) msgs.push("<b>x<sub>max</sub> :</b> entre un nombre.");
+        else if (okA && okB && near(xm, Math.max(I.xa, I.xb)) && !near(I.xa, I.xb)) msgs.push("<b>x<sub>max</sub> :</b> tu as gardé la plus grande des deux valeurs. Mais x ne peut pas dépasser la plus petite, sinon la quantité de l’autre réactif deviendrait négative.");
+        else msgs.push("<b>x<sub>max</sub> :</b> c’est la <b>plus petite</b> des deux valeurs trouvées pour x.");
+      }
+      if (!okL) msgs.push("<b>Réactif limitant :</b> c’est le réactif qui donne la plus petite valeur de x" + (lim === "" ? " (fais un choix)." : "."));
+      if (okA && okB && okM && okL) {
+        var L = I.lim;
+        showFb(cfb, "ok", "<b>Bravo.</b> x<sub>max</sub> = <b>" + nf(I.xm) + " mol</b>. " + (L === -1 ? "Les deux réactifs sont épuisés : mélange stœchiométrique." : sph(L) + " est le réactif limitant ; il reste " + nf(amt(1 - L, I.xm)) + " mol de " + sph(1 - L) + "."));
+        S.observe("#obs", "ok", "<b>Mission 3 réussie.</b> x<sub>max</sub> = " + nf(I.xm) + " mol : c’est la plus petite des valeurs <i>n</i><sub>i</sub> / coefficient.");
+        markDone("3"); this.disabled = true;
+      } else showFb(cfb, "bad", "<b>Pas encore.</b><ul><li>" + msgs.join("</li><li>") + "</li></ul>");
+    }
+    $("#calc-ok", calcCard).addEventListener("click", calc);
+    nextBox(T2, "3");
+  }
+
+  /* ====================== Mission 4 ====================== */
+  function m4() {
+    inst = genInstance({ mode: "any" });
+    loadScene(inst.eq, inst.co, inst.ni);
+    tcfg = { cours: "sym", final: "input", showXmax: false }; renderTable(); autoObs = false;
+    showCtl({ on: false });
+    S.observe("#obs", "info", "Détermine x<sub>max</sub>, puis complète la ligne « État final » du tableau.");
+    var I = xinfo(), T = $("#tache"), T2 = $("#tache2");
+    card(T, '<span class="tag">À toi de jouer</span><p class="stmt">' + stmtHtml() + '<br>La transformation est <b>totale</b> : elle s’arrête quand un réactif est épuisé.</p><p class="help">Complète la ligne « État final » : quantité de matière de chaque espèce, en mol.</p>');
+    var help = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+    var bHelp = h("button", { type: "button", html: "<span>Un coup de pouce : donner <i>x</i><sub>max</sub></span>", onclick: function () {
+      tcfg.showXmax = true; renderTable();
+      showFb(help, "warn", "<b>Coup de pouce :</b> x<sub>max</sub> = " + nf(I.xm) + " mol" + (I.lim === -1 ? " (les deux réactifs sont épuisés)." : " ; le réactif limitant est " + sph(I.lim) + "."));
+    } });
+    var fb = fbBox(), btn = h("button", { type: "button", class: "primary", text: "Vérifier l’état final" });
+    function check() {
+      var v = readCells("final"), msgs = [], allOk = true, cand = [];
+      [I.xa, I.xb].forEach(function (c) { if (!near(c, I.xm)) cand.push(c); });
+      act().forEach(function (i) {
+        var e = amt(i, I.xm), x = v[i], ok = near(x, e);
+        cellStatus("final", i, ok);
+        if (ok) return; allOk = false;
+        if (isNaN(x)) { msgs.push("<b>" + sph(i) + " :</b> entre un nombre."); return; }
+        var wrongXm = cand.filter(function (c) { return near(x, amt(i, c)); });
+        if (i < 2) {
+          if (I.lim === i && near(x, st.ni[i])) msgs.push("<b>" + sph(i) + " :</b> c’est le réactif limitant : il est entièrement consommé, donc sa quantité finale est nulle.");
+          else if (near(x, st.ni[i] - I.xm) && st.co[i] !== 1) msgs.push("<b>" + sph(i) + " :</b> tu as retiré x<sub>max</sub> sans le multiplier par le coefficient " + st.co[i] + " : <i>n</i><sub>f</sub> = " + nf(st.ni[i]) + " − " + st.co[i] + " × " + nf(I.xm) + ".");
+          else if (wrongXm.length) msgs.push("<b>" + sph(i) + " :</b> tu as utilisé x = " + nf(wrongXm[0]) + " mol, mais x<sub>max</sub> est la plus petite valeur de <i>n</i><sub>i</sub> / coefficient parmi les réactifs.");
+          else msgs.push("<b>" + sph(i) + " :</b> <i>n</i><sub>f</sub> = <i>n</i><sub>i</sub> − coefficient × x<sub>max</sub>.");
+        } else {
+          if (near(x, I.xm) && st.co[i] !== 1) msgs.push("<b>" + sph(i) + " :</b> tu as oublié le coefficient " + st.co[i] + " : <i>n</i><sub>f</sub> = " + st.co[i] + " × x<sub>max</sub>.");
+          else if (wrongXm.length) msgs.push("<b>" + sph(i) + " :</b> tu as utilisé x = " + nf(wrongXm[0]) + " mol, mais x<sub>max</sub> est la plus petite valeur de <i>n</i><sub>i</sub> / coefficient parmi les réactifs.");
+          else msgs.push("<b>" + sph(i) + " :</b> <i>n</i><sub>f</sub> = coefficient × x<sub>max</sub>.");
+        }
+      });
+      if (allOk) {
+        showFb(fb, "ok", "<b>Bravo.</b> L’état final est juste. Regarde les billes : elles rejoignent ta ligne du tableau.");
+        tcfg = { cours: "sym", final: "live" }; st.showFinal = true; buildTubes(); renderTable();
+        animateTo(I.xm, 2.2, function () {
+          var rest = I.lim === -1 ? "Les deux réactifs sont épuisés." : "Il reste " + nf(amt(1 - I.lim, I.xm)) + " mol de " + sph(1 - I.lim) + " (réactif en excès).";
+          S.observe("#obs", "ok", "<b>Mission 4 réussie.</b> À x<sub>max</sub> = " + nf(I.xm) + " mol : " + rest);
+        });
+        markDone("4"); btn.disabled = true; bHelp.disabled = true;
+      } else showFb(fb, "bad", "<b>Pas encore.</b><ul><li>" + msgs.join("</li><li>") + "</li></ul>");
+    }
+    btn.addEventListener("click", check); onEnter = check;
+    T2.appendChild(h("div", { class: "row" }, btn, bHelp)); T2.appendChild(help); T2.appendChild(fb);
+    nextBox(T2, "4");
+  }
+
+  /* ====================== Mission 5 ====================== */
+  function m5() {
+    inst = genInstance({ mode: "any", xms: [2, 3, 4] });
+    var total = Math.random() < 0.5;
+    inst.xf = total ? inst.xm : Math.round(inst.xm * pick([0.5, 0.6, 0.7, 0.75, 0.8, 0.9]) * 10) / 10;
+    loadScene(inst.eq, inst.co, inst.ni);
+    var I = xinfo(); inst.xm = I.xm;
+    inst.meas = pick(act()); inst.measVal = amt(inst.meas, inst.xf);
+    tcfg = { cours: "off", final: "partial", fkey: "f" }; renderTable(); autoObs = false;
+    showCtl({ on: false });
+    S.observe("#obs", "info", "Déduis x<sub>f</sub> de la mesure, calcule x<sub>max</sub>, puis compare.");
+    var T = $("#tache"), T2 = $("#tache2"), s = inst.meas;
+    card(T, '<span class="tag">Situation</span><p class="stmt">' + stmtHtml() + '<br>À la fin de la transformation, on mesure <i>n</i><sub>f</sub>(' + sph(s) + ') = <b>' + nf(inst.measVal) + ' mol</b>.</p>');
+    card(T,
+      '<span class="tag">Calculer puis conclure</span>' +
+      '<div class="fields">' +
+      '<div class="field"><label for="g-xf"><i>x</i><sub>f</sub> (déduit de la mesure) = </label><input class="nin" id="g-xf" type="text" inputmode="decimal" autocomplete="off"></div>' +
+      '<div class="field"><label for="g-xm"><i>x</i><sub>max</sub> = </label><input class="nin" id="g-xm" type="text" inputmode="decimal" autocomplete="off"></div>' +
+      '<div class="field"><label for="g-c">La transformation est…</label><select class="nin" id="g-c"><option value="">— choisir —</option><option value="t">totale</option><option value="n">non totale</option></select></div>' +
+      '</div><div class="row"><button type="button" class="primary" id="g-ok">Vérifier</button></div><div class="fb" id="g-fb" role="status" aria-live="polite" hidden></div>');
+    var fb = $("#g-fb");
+    function check() {
+      var xf = S.parseNum($("#g-xf").value), xm = S.parseNum($("#g-xm").value), c = $("#g-c").value, msgs = [];
+      var okF = near(xf, inst.xf, 0.02), okM = near(xm, I.xm), wantC = near(inst.xf, I.xm, 0.005) ? "t" : "n", okC = c === wantC;
+      if (!okF) {
+        if (isNaN(xf)) msgs.push("<b>x<sub>f</sub> :</b> entre un nombre.");
+        else if (s > 1 && near(xf, inst.measVal) && st.co[s] !== 1) msgs.push("<b>x<sub>f</sub> :</b> tu as repris la quantité de matière. Pour un produit, <i>n</i><sub>f</sub> = coefficient × x<sub>f</sub> : divise par " + st.co[s] + ".");
+        else if (s < 2 && near(xf, st.ni[s] - inst.measVal) && st.co[s] !== 1) msgs.push("<b>x<sub>f</sub> :</b> la quantité consommée de " + sph(s) + " vaut " + nf(st.ni[s] - inst.measVal) + " mol, et elle est égale à coefficient × x<sub>f</sub> : divise par " + st.co[s] + ".");
+        else msgs.push("<b>x<sub>f</sub> :</b> " + (s > 1 ? "<i>n</i><sub>f</sub> = coefficient × x<sub>f</sub>, donc x<sub>f</sub> = <i>n</i><sub>f</sub> / coefficient." : "<i>n</i><sub>f</sub> = <i>n</i><sub>i</sub> − coefficient × x<sub>f</sub>, donc x<sub>f</sub> = (<i>n</i><sub>i</sub> − <i>n</i><sub>f</sub>) / coefficient."));
+      }
+      if (!okM) msgs.push("<b>x<sub>max</sub> :</b> " + (isNaN(xm) ? "entre un nombre." : "c’est la plus petite des valeurs <i>n</i><sub>i</sub> / coefficient des deux réactifs (mission 3)."));
+      if (!okC) {
+        var mine = (!isNaN(xf) && !isNaN(xm)) ? (near(xf, xm, 0.005) ? "t" : "n") : null;
+        msgs.push("<b>Conclusion :</b> " + (c === "" ? "fais un choix. " : "") + (mine && c === mine && !(okF && okM) ? "ta conclusion est cohérente avec tes valeurs, mais celles-ci sont à revoir. " : "") + "la transformation est totale si x<sub>f</sub> = x<sub>max</sub>, non totale si x<sub>f</sub> &lt; x<sub>max</sub>.");
+      }
+      if (okF && okM && okC) {
+        showFb(fb, "ok", "<b>Bravo.</b> x<sub>f</sub> = " + nf(inst.xf) + " mol et x<sub>max</sub> = " + nf(I.xm) + " mol : la transformation est <b>" + (wantC === "t" ? "totale" : "non totale") + "</b>.");
+        tcfg = { cours: "off", final: "live", fkey: "f", fx: inst.xf }; st.showFinal = true; buildTubes(); renderTable();
+        animateTo(inst.xf, 2.2, function () {
+          var L = I.lim, txt;
+          if (wantC === "t") txt = "<b>Mission 5 réussie.</b> x<sub>f</sub> = x<sub>max</sub> : le réactif limitant est entièrement consommé, la transformation est totale.";
+          else {
+            var lr = L === -1 ? 0 : L;
+            txt = "<b>Mission 5 réussie.</b> x<sub>f</sub> &lt; x<sub>max</sub> : la transformation s’arrête avant l’épuisement du réactif limitant (il reste " + nf(amt(lr, inst.xf)) + " mol de " + sph(lr) + "). Les billes en pointillés montrent ce qu’une transformation totale aurait encore fourni.";
+          }
+          S.observe("#obs", "ok", txt);
+        });
+        markDone("5"); this.disabled = true;
+      } else showFb(fb, "bad", "<b>Pas encore.</b><ul><li>" + msgs.join("</li><li>") + "</li></ul>");
+    }
+    $("#g-ok").addEventListener("click", check);
+    ["g-xf", "g-xm"].forEach(function (id) { $("#" + id).addEventListener("keydown", function (e) { if (e.key === "Enter") check.call($("#g-ok")); }); });
+    nextBox(T2, "5");
+  }
+
+  /* ====================== Atelier libre ====================== */
+  var mt = null, mtHost = null;
+  function atelier() {
+    var eq = LIB[0], co = eq.co, ni = [3, 6];
+    if (init.m === "a" && !atelier.seeded) {          // première ouverture par un lien partagé : on reprend les réglages du lien
+      eq = byId(init.eq) || LIB[0];
+      co = eq.id === "gen" ? [init.a, init.b, init.c, init.d] : eq.co;
+      ni = [init.na, init.nb];
+    }
+    atelier.seeded = true;
+    loadScene(eq, co, ni);
+    tcfg = { cours: "live", final: "live" }; autoObs = true; showCtl({ on: true });
+    var T = $("#tache"), T2 = $("#tache2");
+    var opts = ALL.map(function (e) { return '<option value="' + e.id + '"' + (e.id === st.eq.id ? " selected" : "") + ">" + e.titre + "</option>"; }).join("");
+    card(T, '<h2>Réglages</h2><div class="fields">' +
+      '<div class="field"><label for="a-eq">Équation</label><select class="nin" id="a-eq">' + opts + '</select></div>' +
+      '<div class="field"><label for="a-na" id="l-na"></label><input class="nin" id="a-na" type="number" min="0" max="12" step="0.5"></div>' +
+      '<div class="field"><label for="a-nb" id="l-nb"></label><input class="nin" id="a-nb" type="number" min="0" max="12" step="0.5"></div></div>' +
+      '<div class="fields" id="a-coefs" hidden>' +
+      ["a", "b", "c", "d"].map(function (k, i) { return '<div class="field"><label for="a-' + k + '">Coefficient ' + k + ' (' + ["A", "B", "C", "D"][i] + (i === 3 ? ", 0 = absent" : "") + ')</label><input class="nin" id="a-' + k + '" type="number" min="' + (i === 3 ? 0 : 1) + '" max="6" step="1"></div>'; }).join("") + "</div>" +
+      '<div class="row"><button type="button" id="p-st">Mélange stœchiométrique</button><button type="button" id="p-a">A limitant</button><button type="button" id="p-b">B limitant</button>' +
+      '<button type="button" class="sw" role="switch" aria-checked="' + (st.showFinal ? "true" : "false") + '" id="sw-fin"><span class="track"><span class="knob"></span></span>Montrer l’état final sur les billes</button></div>' +
+      '<div class="row"><button type="button" id="a-link">Copier le lien de cette situation</button><span class="status" id="a-st" aria-live="polite"></span></div>');
+    mtHost = h("div"); T2.appendChild(mtHost);
+    function labels() {
+      $("#l-na").innerHTML = "Quantité initiale de " + sph(0) + " (mol)";
+      $("#l-nb").innerHTML = "Quantité initiale de " + sph(1) + " (mol)";
+      $("#p-a").innerHTML = "<span>" + sph(0) + " limitant</span>"; $("#p-b").innerHTML = "<span>" + sph(1) + " limitant</span>";
+      $("#a-coefs").hidden = st.eq.id !== "gen";
+    }
+    function fill() {
+      $("#a-na").value = st.ni[0]; $("#a-nb").value = st.ni[1];
+      ["a", "b", "c", "d"].forEach(function (k, i) { $("#a-" + k).value = st.co[i]; });
+    }
+    function buildMeasure() {
+      mtHost.textContent = "";
+      var cols = [{ key: "x", label: "x", unit: "mol", digits: 2 }];
+      act().forEach(function (i) { cols.push({ key: "n" + i, label: "n(" + spt(i) + ")", unit: "mol", digits: 2 }); });
+      mt = S.measureTable(mtHost, { caption: "États relevés", columns: cols, filename: "tableau-avancement", max: 20, empty: "Aucun état relevé : place x où tu veux, puis clique sur « Relever cet état »." });
+      var b = h("button", { type: "button", class: "primary", text: "Relever cet état", style: "margin-top:8px", onclick: function () {
+        var r = { x: st.x }; act().forEach(function (i) { r["n" + i] = amt(i, st.x); }); mt.add(r);
+      } });
+      mtHost.insertBefore(b, mtHost.firstChild);
+    }
+    function apply(rebuild) {
+      st.ni = [Math.max(0, S.parseNum($("#a-na").value) || 0), Math.max(0, S.parseNum($("#a-nb").value) || 0)];
+      if (st.eq.id === "gen") st.co = ["a", "b", "c", "d"].map(function (k, i) { var v = Math.round(S.parseNum($("#a-" + k).value)); if (!(v >= (i === 3 ? 0 : 1))) v = i === 3 ? 0 : 1; return Math.min(6, v); });
+      st.x = Math.min(st.x, xinfo().xm);
+      $("#eqline").innerHTML = eqHtml(); labels(); buildTubes(); syncSlider(); paint(); renderTable();
+      if (rebuild) buildMeasure();
+      etat.write({ m: "a", eq: st.eq.id, a: st.co[0], b: st.co[1], c: st.co[2], d: st.co[3], na: st.ni[0], nb: st.ni[1] });
+    }
+    $("#a-eq").addEventListener("change", function () {
+      var e = byId(this.value); st.eq = e; st.co = e.co.slice(); st.ni = [e.co[0] * 2, e.co[1] * 3]; fill(); apply(true);
+    });
+    ["a-na", "a-nb", "a-a", "a-b", "a-c", "a-d"].forEach(function (id) { $("#" + id).addEventListener("input", function () { stopAnim(); apply(id === "a-d"); }); });
+    function preset(kind) {
+      var a = st.co[0], b = st.co[1], m = Math.max(a, b), k1 = m <= 4 ? 2 : 1, k2 = k1 + 1;
+      st.ni = kind === "s" ? [a * k1, b * k1] : (kind === "a" ? [a * k1, b * k2] : [a * k2, b * k1]);
+      fill(); stopAnim(); apply(false);
+    }
+    $("#p-st").addEventListener("click", function () { preset("s"); });
+    $("#p-a").addEventListener("click", function () { preset("a"); });
+    $("#p-b").addEventListener("click", function () { preset("b"); });
+    $("#sw-fin").addEventListener("switch", function (e) { st.showFinal = e.detail.checked; buildTubes(); paintTubes(); });
+    $("#a-link").addEventListener("click", function () {
+      var s = $("#a-st");
+      try { navigator.clipboard.writeText(etat.link()).then(function () { s.textContent = "Lien copié."; }, function () { s.textContent = "Copie impossible : copie l’adresse de la page."; }); }
+      catch (e) { s.textContent = "Copie impossible : copie l’adresse de la page."; }
+    });
+    fill(); labels(); buildMeasure(); apply(false);
+    S.observe("#obs", "info", "Fais avancer x avec le curseur ou le bouton, et compare les billes, le tableau et les valeurs.");
+  }
+
+  /* ====================== Navigation entre missions ====================== */
+  function enter(m) {
+    stopAnim(); onEnter = null; inst = null;
+    $("#tache").textContent = ""; $("#tache2").textContent = "";
+    setIntro(m);
+    mode = m; tcfg = { cours: "live", final: "off" }; autoObs = true;
+    if (m === "a") atelier(); else ({ "1": m1, "2": m2, "3": m3, "4": m4, "5": m5 })[m]();
+    if (m !== "a") etat.write({ m: m });
+  }
+
+  var chips = $("#progress");
+  chips.appendChild(h("span", { class: "sr-only", text: "Avancement des missions :" }));
+  ["1", "2", "3", "4", "5"].forEach(function (m) { chips.appendChild(h("span", { class: "mchip", id: "chip-" + m, "data-done": "false", text: "Mission " + m + " : à faire" })); });
+
+  var tabsApi = S.tabs("#tabs", enter, ("12345a").indexOf(init.m) >= 0 ? init.m : "1");
+})();
+</script>
+</body>
+</html>
