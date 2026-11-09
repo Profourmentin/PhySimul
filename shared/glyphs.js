@@ -238,6 +238,18 @@
       s += '<line class="v" x1="22" y1="102" x2="38" y2="72"/>';
       return s;
   });
+  /* Équation de réaction : balance à deux plateaux, mêmes atomes de chaque côté (conservation des éléments). */
+  add("balance", function () {
+    var s = "";
+    s += '<line class="s" x1="100" y1="34" x2="100" y2="104"/><line class="s" x1="76" y1="106" x2="124" y2="106"/>';
+    s += '<line class="s" x1="30" y1="36" x2="170" y2="36"/><circle class="f" cx="100" cy="36" r="4.2"/>';
+    s += '<path class="s" d="M30 36L9 82M30 36L51 82M170 36L149 82M170 36L191 82"/>';
+    s += '<path class="water s" d="M7 82H53Q51 95 30 95Q9 95 7 82Z"/><path class="water s" d="M147 82H193Q191 95 170 95Q149 95 147 82Z"/>';
+    s += '<circle class="f" cx="19" cy="75.5" r="6.2"/><circle class="f" cx="31" cy="75.5" r="6.2"/><circle class="f" cx="43" cy="75.5" r="6.2"/><circle class="f" cx="25" cy="64" r="6.2"/><circle class="f" cx="37" cy="64" r="6.2"/>';
+    s += '<circle class="f" cx="159" cy="75.5" r="6.2"/><circle class="f" cx="171" cy="75.5" r="6.2"/><circle class="f" cx="183" cy="75.5" r="6.2"/><circle class="f" cx="165" cy="64" r="6.2"/><circle class="f" cx="177" cy="64" r="6.2"/>';
+    return s;
+  });
+
   /* Générique : bécher et particules. */
   add("beaker", function () {
       var s = "";
