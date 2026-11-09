@@ -228,6 +228,24 @@
       return s;
   });
 
+  /* Tableau d'avancement : réservoirs de billes (1 bille = 1 mol). Les réactifs se vident (billes en pointillé = consommées), les produits se remplissent. */
+  add("avancement", function () {
+    var s = "", i, row, col;
+    function tube(x0) { return '<path class="s" d="M' + x0 + ' 22V102H' + (x0 + 30) + 'V22"/>'; }
+    function billes(x0, plein, fantome) {
+      var out = "";
+      for (i = 0; i < plein + fantome; i++) {
+        row = Math.floor(i / 2); col = i % 2;
+        out += '<circle class="' + (i < plein ? "f" : "s dash") + '" cx="' + pt(x0 + 9.5 + col * 11) + '" cy="' + pt(95 - row * 12) + '" r="5"/>';
+      }
+      return out;
+    }
+    s += tube(12) + tube(50) + tube(122) + tube(160);
+    s += billes(12, 2, 4) + billes(50, 4, 2) + billes(122, 4, 0) + billes(160, 2, 2);
+    s += '<line class="v" x1="92" y1="62" x2="112" y2="62"/><path class="v" d="M106 55L113 62L106 69"/>';
+    return s;
+  });
+
   /* ---------- Noms génériques (anciens noms, à éviter pour une nouvelle simulation) ---------- */
   /* Générique : chronophotographie d'un lancer. */
   add("chrono", function () {

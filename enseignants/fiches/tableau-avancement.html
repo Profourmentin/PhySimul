@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fiche enseignant : Tableau d'avancement · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/tableau-avancement.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Constitution et transformations de la matière · Première spécialité</p>
+    <h1>Tableau d'avancement : de l'avancement x à l'état final</h1>
+    <p class="lead">L'élève manipule l'avancement x sur des réservoirs de billes (1 bille = une quantité de matière), puis construit lui-même le tableau d'avancement, cherche l'avancement maximal et le réactif limitant, décrit l'état final et décide si la transformation est totale. À la fin, il sait écrire et exploiter un tableau d'avancement sans le recopier d'un modèle.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale, spécialité physique-chimie</li>
+      <li>Thème : Constitution et transformations de la matière</li>
+      <li>environ 45 min pour les cinq missions (à confirmer en classe)</li>
+      <li>Matériel : ordinateur ou tablette, papier pour poser les calculs</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/tableau-avancement.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Programme de physique-chimie de la spécialité, classe de Première (BO spécial n° 1 du 22 janvier 2019), thème « Constitution et transformations de la matière », rubrique « Suivi et modélisation de l'évolution d'un système chimique ». Les formulations ci-dessous sont celles de l'annexe du programme.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Notion : « Évolution des quantités de matière lors d'une transformation »</td><td>Mission 1 et réservoirs de billes de toutes les missions</td></tr>
+            <tr><td>Notion : « État initial, notion d'avancement (mol), tableau d'avancement, état final »</td><td>Missions 2 et 4 ; tableau affiché sous la scène dans toutes les missions</td></tr>
+            <tr><td>Notions : « Avancement final, avancement maximal » ; « Mélanges stœchiométriques » ; « Transformations totale et non totale »</td><td>Missions 3 et 5 (mélange stœchiométrique tiré au hasard dans les missions 2 à 5)</td></tr>
+            <tr><td>Capacité : « Décrire qualitativement l'évolution des quantités de matière des espèces chimiques lors d'une transformation »</td><td>Mission 1, questions de prédiction et d'interprétation</td></tr>
+            <tr><td>Capacité : « Établir le tableau d'avancement d'une transformation chimique à partir de l'équation de la réaction »</td><td>Mission 2 (ligne « en cours »), mission 4 (ligne « état final »)</td></tr>
+            <tr><td>Capacité : « Déterminer la composition du système dans l'état final en fonction de sa composition initiale pour une transformation considérée comme totale »</td><td>Missions 3 et 4</td></tr>
+            <tr><td>Capacité : « Déterminer l'avancement final d'une réaction à partir de la description de l'état final et comparer à l'avancement maximal »</td><td>Mission 5</td></tr>
+            <tr><td>Notion « réactif limitant » : utilisée comme vocabulaire courant du tableau d'avancement. <span class="verify">À vérifier : elle n'apparaît pas comme notion propre dans cette rubrique</span></td><td>Mission 3 (titre et retours)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Compétences mobilisées : s'approprier (lire l'équation et les quantités initiales), analyser et raisonner (prévoir le réactif limitant), réaliser (calculer x<sub>max</sub> et les quantités finales), valider (vérifier qu'aucune quantité n'est négative et que x est le même pour toutes les espèces), communiquer (conclure : transformation totale ou non).</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Démarche proposée : Prédire, Observer, Calculer, Conclure. Les missions sont indépendantes mais pensées pour être faites dans l'ordre (2 suppose d'avoir compris 1, 4 suppose 3). Durée estimée : 45 minutes pour les cinq, à confirmer en classe. Chaque exercice est tiré au hasard : le bouton « Nouvel exemple » en fournit autant que nécessaire.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>Mission 1 · Sens de x (8 min)</td><td>Hypothèse puis observation</td><td>Prédit comment varie une espèce quand x passe à 1 mol, regarde les billes réagir, interprète « x = 2 mol », puis calcule la quantité restante pour une valeur de x donnée.</td><td>Une phrase : chaque quantité varie de « coefficient × x »</td></tr>
+            <tr><td>Mission 2 · Établir le tableau (8 min)</td><td>Modélisation</td><td>Complète dans le tableau, pour chaque espèce, le coefficient qui multiplie x. Une fois la ligne juste, le tableau « s'anime » : le curseur fait varier billes et valeurs ensemble.</td><td>Ligne « en cours » : n<sub>i</sub> − coefficient × x pour un réactif, coefficient × x pour un produit</td></tr>
+            <tr><td>Mission 3 · Avancement maximal (10 min)</td><td>Hypothèse, observation, calcul</td><td>Prédit quel réactif sera épuisé en premier, lance la réaction pour vérifier, puis calcule x pour lequel chaque réactif s'annule, x<sub>max</sub> et le réactif limitant.</td><td>Deux valeurs n<sub>i</sub> / coefficient, la plus petite retenue, le réactif limitant nommé</td></tr>
+            <tr><td>Mission 4 · État final (8 min)</td><td>Raisonnement</td><td>Complète la ligne « état final » (transformation totale). Un coup de pouce donne x<sub>max</sub> à qui bloque, après quoi les billes rejoignent la ligne du tableau.</td><td>Composition finale en mol, vérifiée sur les billes</td></tr>
+            <tr><td>Mission 5 · Totale ou non ? (8 min)</td><td>Raisonnement et transfert</td><td>À partir d'une quantité finale mesurée, déduit x<sub>f</sub>, calcule x<sub>max</sub> et conclut. Les billes en pointillés montrent ce qu'une transformation totale aurait encore formé.</td><td>x<sub>f</sub>, x<sub>max</sub> et la phrase « x<sub>f</sub> = x<sub>max</sub> : totale » ou « x<sub>f</sub> &lt; x<sub>max</sub> : non totale »</td></tr>
+            <tr><td>Atelier libre (facultatif, 10 min)</td><td>Exploration</td><td>Choisit une équation, règle les quantités initiales (ou un préréglage stœchiométrique, A limitant, B limitant), relève des états dans un tableau exportable en CSV.</td><td>Tableau d'états relevés ; lien de la situation à partager</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>La page ne note pas et ne garde rien : les pastilles « Mission réussie » du haut de page disparaissent au rechargement. L'élève n'est jamais bloqué : il peut valider autant de fois qu'il veut et demander un nouvel exemple.</p>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <p>Exemple fil rouge, qui correspond à l'atelier libre à l'ouverture : CH₄ + 2 O₂ → CO₂ + 2 H₂O avec n<sub>i</sub>(CH₄) = 3 mol et n<sub>i</sub>(O₂) = 5 mol.</p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>Mission 1, prédiction</td><td>Pour x = 1 mol, une espèce de coefficient c varie de <b>c mol</b> (diminue pour un réactif, augmente pour un produit)</td><td>Erreur fréquente : « elle varie de 1 mol, comme x ». La page explique que x multiplie le coefficient</td></tr>
+                <tr><td>Mission 1, « x = 2 mol »</td><td>Chaque espèce a varié de coefficient × 2 mol</td><td>Distracteurs : « 2 mol de chaque réactif consommées », « il reste 2 mol », « x est la quantité du réactif limitant »</td></tr>
+                <tr><td>Mission 1, calcul</td><td>Les quantités initiales valent 3 × coefficient (par exemple 3 mol de CH₄ et 6 mol de O₂ pour la combustion du méthane). Pour x = 2 mol : n(O₂) = 6 − 2 × 2 = 2 mol</td><td>La valeur de x est tirée parmi 1,5 ; 2 ; 2,5 mol. Tolérance : 0,01 mol</td></tr>
+                <tr><td>Mission 2</td><td>Ligne « en cours » : coefficients 1, 2, 1, 2 pour CH₄, O₂, CO₂, H₂O, soit 3 − x ; 5 − 2x ; x ; 2x</td><td>Les cases se remplissent avec le coefficient seul (1 quand rien n'est écrit devant l'espèce)</td></tr>
+                <tr><td>Mission 3</td><td>x<sub>max</sub>(CH₄) = 3 / 1 = 3 mol ; x<sub>max</sub>(O₂) = 5 / 2 = 2,5 mol. Donc <b>x<sub>max</sub> = 2,5 mol et O₂ est le réactif limitant</b></td><td>Cas piège voulu : O₂ (5 mol) est plus abondant que CH₄ (3 mol) en moles, et pourtant c'est lui qui est épuisé</td></tr>
+                <tr><td>Mission 4</td><td>État final : n(CH₄) = 3 − 2,5 = 0,5 mol ; n(O₂) = 0 ; n(CO₂) = 2,5 mol ; n(H₂O) = 5 mol</td><td>Le réactif limitant a une quantité finale nulle ; l'autre réactif est en excès</td></tr>
+                <tr><td>Mission 4, mélange stœchiométrique</td><td>Si n<sub>i</sub>(CH₄) = 2 mol et n<sub>i</sub>(O₂) = 4 mol : x<sub>max</sub> = 2 mol pour les deux, les deux réactifs sont épuisés</td><td>Dans la liste déroulante de la mission 3, l'option « Aucun : mélange stœchiométrique » est alors la bonne</td></tr>
+                <tr><td>Mission 5 (exemple)</td><td>Zn + Cu²⁺ → Zn²⁺ + Cu, n<sub>i</sub>(Zn) = 3 mol, n<sub>i</sub>(Cu²⁺) = 4 mol, on mesure n<sub>f</sub>(Zn²⁺) = 2,4 mol : x<sub>f</sub> = 2,4 / 1 = 2,4 mol ; x<sub>max</sub> = 3 mol ; x<sub>f</sub> &lt; x<sub>max</sub>, la transformation est <b>non totale</b></td><td>Selon l'espèce mesurée : produit, x<sub>f</sub> = n<sub>f</sub> / coefficient ; réactif, x<sub>f</sub> = (n<sub>i</sub> − n<sub>f</sub>) / coefficient. Tolérance sur x<sub>f</sub> : 0,02 mol</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Les exercices des missions 2 à 5 sont tirés au hasard parmi huit équations (combustion du méthane et du propane, synthèse de l'eau et de l'ammoniac, Zn et Cu²⁺, Al et H⁺, précipitation de Cu(OH)₂, oxydation du fer), avec x<sub>max</sub> entier (1 à 4 mol) et des quantités initiales de 10 mol au plus : les valeurs ci-dessus sont des exemples. La page accepte les nombres écrits avec une virgule ou un point.</p>
+          <p style="margin-top:12px">Contre-vérification faite pour la fiche : un jeu d'essais automatisé a joué la page 224 fois (dont 52 erreurs typiques volontaires) en calculant les bonnes réponses avec les formules ci-dessus ; la page les a toujours acceptées et a toujours refusé les erreurs. L'exemple fil rouge a aussi été relu à la main.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <p>Ces obstacles sont classiques en Première ; la colonne de droite reprend ce que la page affiche réellement quand l'élève se trompe, pour que vous sachiez à quoi il a déjà été confronté.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Oublier le coefficient stœchiométrique dans la ligne « en cours »</td><td>Écrire 5 − x au lieu de 5 − 2x pour O₂</td><td>Mission 2 : « son coefficient dans l'équation est 2 : c'est lui qui multiplie x, pas 1 ». Si le nombre saisi est celui d'une autre espèce, la page le dit</td></tr>
+            <tr><td>Confondre x et la quantité de matière d'une espèce</td><td>« x = 2 mol, donc 2 mol de chaque réactif ont réagi » ou « x est la quantité du réactif limitant »</td><td>Mission 1 : question d'interprétation avec ces distracteurs, chacun avec son explication ; les billes de chaque réservoir varient de coefficient × x</td></tr>
+            <tr><td>Croire que le réactif limitant est celui dont il y a le moins de moles</td><td>Comparer 3 mol de CH₄ à 5 mol de O₂ et en conclure que CH₄ est limitant</td><td>Mission 3 : la prédiction précède le calcul, la réaction se déroule sous les yeux de l'élève. Une part importante des exercices tirés sont des cas piège ; le retour précise « ce qui compte, ce n'est pas le nombre de moles, mais le rapport n<sub>i</sub> / coefficient »</td></tr>
+            <tr><td>Oublier de diviser par le coefficient pour trouver x</td><td>Prendre x = n<sub>i</sub> au lieu de x = n<sub>i</sub> / coefficient</td><td>Mission 3 : « tu as oublié de diviser par le coefficient », avec l'équation n<sub>i</sub> − coefficient × x = 0 résolue</td></tr>
+            <tr><td>Retenir la plus grande valeur de x</td><td>Garder 3 mol au lieu de 2,5 mol dans l'exemple</td><td>Mission 3 : « x ne peut pas dépasser la plus petite, sinon la quantité de l'autre réactif deviendrait négative ». Le curseur des missions est lui aussi borné à x<sub>max</sub></td></tr>
+            <tr><td>Se tromper dans l'état final</td><td>Écrire n<sub>f</sub> = n<sub>i</sub> − x<sub>max</sub> sans coefficient, ou n<sub>f</sub> = x<sub>max</sub> pour un produit de coefficient 2, ou garder n<sub>i</sub> pour le réactif limitant</td><td>Mission 4 : un message par case, qui nomme l'erreur (coefficient oublié, réactif limitant à annuler, mauvaise valeur de x utilisée). Un coup de pouce donne x<sub>max</sub> sur demande</td></tr>
+            <tr><td>Confondre x<sub>f</sub> et x<sub>max</sub>, ou ne pas savoir déduire x<sub>f</sub> d'une mesure</td><td>Reprendre la quantité de matière mesurée comme valeur de x ; pour un réactif, oublier de passer par la quantité consommée</td><td>Mission 5 : « tu as repris la quantité de matière… divise par le coefficient », puis rappel de la règle de conclusion (x<sub>f</sub> = x<sub>max</sub> : totale ; x<sub>f</sub> &lt; x<sub>max</sub> : non totale)</td></tr>
+            <tr><td>Donner du sens à une bille</td><td>« Une bille, c'est une molécule »</td><td>Légende « 1 bille = … mol », et note du bloc « Pour aller plus loin » : une bille représente une quantité de matière, pas une entité. À reprendre à l'oral si besoin</td></tr>
+            <tr><td>Partir des masses ou des concentrations</td><td>Utiliser directement des grammes ou des mol/L dans le tableau</td><td>Non traité : les quantités initiales sont données en mol. À travailler en amont ou en aval (voir Prolongements)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>La page est un fichier HTML autonome : pas de compte, aucune donnée envoyée, aucune ressource externe (polices hébergées sur le site), usage hors ligne possible. Elle repose sur le socle Simulabo : thème clair et sombre, cibles tactiles d'au moins 44 px, retours annoncés aux lecteurs d'écran (zones « aria-live »), animations remplacées par l'état final quand le système demande de réduire les animations.</p>
+      <p>Choix de conception pour les élèves en difficulté :</p>
+      <ul class="plain">
+        <li>L'information ne repose jamais sur la couleur seule : chaque espèce est nommée en toutes lettres au-dessus de son réservoir et dans l'en-tête du tableau ; le réactif limitant est annoncé par un texte (« réactif limitant : entièrement consommé »), pas seulement par une bordure colorée.</li>
+        <li>Consignes courtes, une seule tâche à la fois, retours qui disent quoi corriger sans donner la réponse, aucune limite de temps ni de nombre d'essais.</li>
+        <li>Les billes donnent une représentation concrète de la quantité de matière ; le tableau, lui, ne change pas de forme d'une mission à l'autre, ce qui aide à le mémoriser comme outil.</li>
+        <li>Champs numériques qui acceptent la virgule ; validation possible avec la touche Entrée dans les missions 2, 4 et 5 (mission 3, par le bouton « Vérifier »).</li>
+      </ul>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> pas de test avec un lecteur d'écran (les formules avec indices et exposants, comme CH₄ ou Cu²⁺, peuvent être lues de façon peu naturelle), pas de parcours complet au clavier vérifié à la main, pas d'essai avec des élèves. Le contrôle automatique du site ne vérifie que la structure de la page.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li><b>Introduction du tableau :</b> mission 1 en classe entière, projetée, avec prédiction à main levée avant de bouger le curseur ; missions 2 à 4 en binôme.</li>
+        <li><b>Entraînement autonome :</b> en classe ou à la maison, missions 2 à 5 avec « Nouvel exemple » ; l'élève note sur papier deux ou trois tableaux complets et les compare à ceux de la page.</li>
+        <li><b>Différenciation :</b> élèves en aisance, directement mission 3 puis 5 et l'atelier (équation générique avec coefficients choisis) ; élèves en difficulté, missions 1 et 2 répétées jusqu'à ce que « coefficient × x » soit automatique avant de calculer x<sub>max</sub>.</li>
+        <li><b>Évaluation formative :</b> l'atelier permet d'envoyer par lien une situation précise (par exemple un mélange stœchiométrique) à résoudre sur papier.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>Seules les quantités de matière sont suivies : ni masses, ni volumes de gaz, ni concentrations, ni solvant. Elles servent à calculer les quantités initiales (n = m / M, n = C × V), non traité ici.</li>
+        <li>Les cas « non totale » de la mission 5 sont des situations numériques tirées sur les mêmes équations, y compris des réactions qui, dans la réalité, sont quasi totales (combustion, Zn et Cu²⁺). La page ne décrit pas de transformation réelle limitée : à préciser aux élèves pour qu'ils ne retiennent pas qu'une combustion peut s'arrêter à mi-chemin.</li>
+        <li>Le modèle ne dit pas pourquoi une transformation est non totale (équilibre, vitesse très faible) : l'étude de l'équilibre chimique (quotient de réaction, constante d'équilibre) relève de la Terminale.</li>
+        <li>Deux réactifs et deux produits au plus, coefficients entiers, un seul réactif limitant à la fois ; l'avancement est traité comme continu, alors que les billes pleines et partielles ne représentent des entités réelles qu'à l'échelle de la mole.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Relier à des expériences : combustion du méthane et simulation « <a href="../../sims/combustion.html">Combustion et énergie de liaison</a> », équilibrage avec « <a href="../../sims/oxydoreduction.html">Oxydoréduction</a> », suivi d'un titrage avec « <a href="../../sims/titrage.html">Titrage colorimétrique</a> » (changement de réactif limitant à l'équivalence).</li>
+        <li>Exercice papier : partir de masses et de volumes, calculer les quantités initiales, puis refaire un tableau complet et le comparer à la page.</li>
+        <li>Avec un tableur : l'export CSV de l'atelier permet de tracer n(espèce) = f(x) et de retrouver les droites de pentes ± coefficient.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> les formulations du programme ont été relevées le 09/11/2026 sur l'annexe du BO par lecture automatisée du PDF ; à comparer une dernière fois au texte officiel. Le classement de la notion « réactif limitant » dans la rubrique n'est pas confirmé.</p>
+      <ul class="plain">
+        <li><a href="https://www.education.gouv.fr/bo/19/Special1/MENE1901635A.htm">Bulletin officiel spécial n° 1 du 22 janvier 2019 : programme de l'enseignement de spécialité de physique-chimie de la classe de Première, ministère de l'Éducation nationale</a></li>
+        <li><a href="https://cache.media.education.gouv.fr/file/SP1-MEN-22-1-2019/43/2/spe635_annexe_1063432.pdf">Annexe du programme de physique-chimie de Première (PDF), ministère de l'Éducation nationale</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 09/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
