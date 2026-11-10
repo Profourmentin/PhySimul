@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Équilibrer une équation, réactif limitant · Fiche enseignant · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/equation-reactif-limitant.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Physique-chimie · Seconde</p>
+    <h1>Équilibrer une équation, réactif limitant</h1>
+    <p class="lead">L'élève ajuste des équations de réaction en suivant le bilan atome par atome, fait réagir des quantités de matière qu'il choisit pour voir quel réactif disparaît en premier, puis prédit le réactif limitant dans des situations tirées au hasard, dont certaines où « le moins abondant » n'est pas le limitant. À la fin, il doit savoir ajuster une équation simple et comparer des quotients n ÷ nombre stœchiométrique.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Seconde, voie générale et technologique</li>
+      <li>Constitution et transformations de la matière · Transformation chimique</li>
+      <li>25 min en tout, trois activités séparables (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette, papier et crayon</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/equation-reactif-limitant.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Programme de physique-chimie de Seconde générale et technologique, thème « Constitution et transformations de la matière », partie « Modélisation des transformations de la matière et transfert d'énergie », rubrique « Transformation chimique » (BO spécial n° 1 du 22 janvier 2019, annexe).</p>
+      <p class="note"><b>À vérifier dans le BO :</b> les formulations ci-dessous viennent d'une lecture assistée de l'annexe, qui les a reformulées : ce ne sont pas des citations littérales. Les comparer au texte officiel avant diffusion.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Modélisation d'une transformation par une réaction chimique ; écriture symbolique d'une réaction <span class="verify">À vérifier dans le BO</span></td><td>Activité 1 : équation écrite avec les formules et les états physiques (s), (l), (g), (aq).</td></tr>
+            <tr><td>Ajuster l'équation de réaction, grâce aux lois de conservation (éléments chimiques, charge électrique) <span class="verify">À vérifier dans le BO</span></td><td>Activité 1 : le bilan atome par atome (et la ligne « charge électrique » pour les ions) donne le retour immédiat.</td></tr>
+            <tr><td>Stœchiométrie, réactif limitant <span class="verify">À vérifier dans le BO</span></td><td>Activités 2 et 3 : la réaction « a lieu » un nombre de fois ; le réactif limitant est celui qui s'épuise en premier.</td></tr>
+            <tr><td>Identifier le réactif limitant à partir des quantités de matière des réactifs et de l'équation <span class="verify">À vérifier dans le BO</span></td><td>Activité 3 (prédiction, puis vérification) ; la méthode des quotients n ÷ nombre stœchiométrique est proposée en indice.</td></tr>
+            <tr><td>Capacité mathématique : utiliser la proportionnalité <span class="verify">À vérifier dans le BO</span></td><td>Quotients n ÷ nombre stœchiométrique ; calcul de la quantité de produit formé (question finale de l'activité 3).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>Ce que la page ne travaille pas</b> (pour ne pas la croire plus large qu'elle n'est) :</p>
+      <ul class="plain">
+        <li>établir l'équation à partir de données expérimentales (espèces qui disparaissent et apparaissent) : les formules sont données, l'élève n'en choisit que les nombres stœchiométriques ;</li>
+        <li>la notion d'espèce spectatrice ;</li>
+        <li>déterminer le réactif limitant à partir des espèces présentes dans l'état final : la page va dans l'autre sens (de l'état initial vers l'état final) ;</li>
+        <li>le passage par les masses (masse molaire) : toutes les quantités sont données en moles ;</li>
+        <li>les transformations endothermiques et exothermiques.</li>
+      </ul>
+      <p><b>Prérequis :</b> notion de quantité de matière et de mole ; lecture d'une formule chimique (indices) ; distinction entre atome, ion, molécule.</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Démarche proposée : <b>Prédire</b> (sur papier, avant de cliquer), <b>Observer</b> (la page), <b>Expliquer</b> (la règle des quotients), <b>Transférer</b> (situations nouvelles). Durées indicatives, à confirmer en classe. Les trois activités sont indépendantes : on peut ne faire que la première (cours sur l'ajustement) ou seulement les deux dernières.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>0. Amorce (3 min, facultative)</td><td>Analogie</td><td>Sur papier : « une recette demande 2 tranches de pain et 1 tranche de jambon ; avec 6 tranches de pain et 4 de jambon, combien de sandwichs, et que reste-t-il ? » (suggestion, à adapter).</td><td>Nombre de sandwichs et reste, avec la justification.</td></tr>
+            <tr><td>1. Ajuster (≈ 8 min)</td><td>Prédiction, puis vérification</td><td>Activité 1, niveau « Pas à pas » : écrit les nombres sur papier <b>avant</b> de les régler, valide, lit le bilan. Peut masquer le bilan automatique pour compter seul. Monte ensuite d'un niveau (« Plus long », « Avec des ions »).</td><td>Une équation ajustée recopiée, avec le décompte des atomes de chaque élément.</td></tr>
+            <tr><td>2. Faire réagir (≈ 8 min)</td><td>Observation guidée</td><td>Activité 2, réaction 2 H₂ + O₂ → 2 H₂O : prédit quel réactif sera épuisé avec 6 mol de H₂ et 4 mol de O₂, fait réagir un pas à la fois, observe ce qui reste, puis change les quantités (par exemple 4 mol de H₂ et 2 mol de O₂).</td><td>Tableau « n initiale, n finale » recopié pour deux jeux de quantités ; phrase « le réactif limitant est… ».</td></tr>
+            <tr><td>3. Prédire le limitant (≈ 10 min)</td><td>Prédiction, vérification, explication</td><td>Activité 3 : au moins quatre situations. Prédit, valide, fait réagir, lit la correction. Utilise l'indice 1 (méthode) puis, si besoin, l'indice 2 (quotients affichés).</td><td>La règle rédigée à la main : « on divise chaque n par son nombre stœchiométrique ; le plus petit quotient désigne le limitant ; s'ils sont égaux, le mélange est stœchiométrique ».</td></tr>
+            <tr><td>4. Transfert (facultatif)</td><td>Calcul</td><td>Répond à la question finale de l'activité 3 (quantité de produit formé), en écrivant le calcul.</td><td>n(produit) = nombre stœchiométrique × nombre de fois que la réaction a eu lieu.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <h3>Activité 1 : équations ajustées (nombres les plus petits possibles)</h3>
+          <p>L'équation proposée est tirée au hasard dans le niveau choisi. Un lien comme <code>sims/equation-reactif-limitant.html#mode=eq&amp;eq=c4h10</code> impose une équation précise (identifiants entre parenthèses).</p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Niveau</th><th scope="col">Équation ajustée</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>Pas à pas</td><td>2 H<sub>2</sub>(g) + O<sub>2</sub>(g) → 2 H<sub>2</sub>O(l) (<code>eau</code>)</td><td>Bonne entrée : un seul « va-et-vient » entre H et O.</td></tr>
+                <tr><td>Pas à pas</td><td>2 Mg(s) + O<sub>2</sub>(g) → 2 MgO(s) (<code>mg</code>)</td><td>O<sub>2</sub> impose un nombre pair d'atomes de O de chaque côté.</td></tr>
+                <tr><td>Pas à pas</td><td>N<sub>2</sub>(g) + 3 H<sub>2</sub>(g) → 2 NH<sub>3</sub>(g) (<code>nh3</code>)</td><td>On fixe d'abord N, puis H.</td></tr>
+                <tr><td>Pas à pas</td><td>CH<sub>4</sub>(g) + 2 O<sub>2</sub>(g) → CO<sub>2</sub>(g) + 2 H<sub>2</sub>O(l) (<code>ch4</code>)</td><td>Combustion du méthane : H avant O.</td></tr>
+                <tr><td>Plus long</td><td>4 Fe(s) + 3 O<sub>2</sub>(g) → 2 Fe<sub>2</sub>O<sub>3</sub>(s) (<code>fe</code>)</td><td>Ppcm de 2 et 3 pour O.</td></tr>
+                <tr><td>Plus long</td><td>4 Al(s) + 3 O<sub>2</sub>(g) → 2 Al<sub>2</sub>O<sub>3</sub>(s) (<code>al</code>)</td><td>Même structure que la précédente.</td></tr>
+                <tr><td>Plus long</td><td>C<sub>3</sub>H<sub>8</sub>(g) + 5 O<sub>2</sub>(g) → 3 CO<sub>2</sub>(g) + 4 H<sub>2</sub>O(l) (<code>c3h8</code>)</td><td>C, puis H, puis O en dernier.</td></tr>
+                <tr><td>Plus long</td><td>2 C<sub>2</sub>H<sub>6</sub>(g) + 7 O<sub>2</sub>(g) → 4 CO<sub>2</sub>(g) + 6 H<sub>2</sub>O(l) (<code>c2h6</code>)</td><td>O impair (7 O<sub>2</sub>) : il faut doubler le nombre devant C<sub>2</sub>H<sub>6</sub>.</td></tr>
+                <tr><td>Plus long</td><td>2 C<sub>4</sub>H<sub>10</sub>(g) + 13 O<sub>2</sub>(g) → 8 CO<sub>2</sub>(g) + 10 H<sub>2</sub>O(l) (<code>c4h10</code>)</td><td>Cas difficile, même raisonnement que le précédent.</td></tr>
+                <tr><td>Avec des ions</td><td>Zn(s) + 2 H<sup>+</sup>(aq) → Zn<sup>2+</sup>(aq) + H<sub>2</sub>(g) (<code>zn</code>)</td><td>Corrosion d'un métal par un acide. Atomes <b>et</b> charge : +2 de chaque côté.</td></tr>
+                <tr><td>Avec des ions</td><td>Cu<sup>2+</sup>(aq) + 2 HO<sup>−</sup>(aq) → Cu(OH)<sub>2</sub>(s) (<code>cuoh2</code>)</td><td>Le nombre devant Cu(OH)<sub>2</sub> multiplie tout ce qui est dans la formule, parenthèses comprises.</td></tr>
+                <tr><td>Avec des ions</td><td>Fe<sup>3+</sup>(aq) + 3 HO<sup>−</sup>(aq) → Fe(OH)<sub>3</sub>(s) (<code>feoh3</code>)</td><td>Charge : 3 − 3 = 0.</td></tr>
+                <tr><td>Avec des ions</td><td>2 Al(s) + 6 H<sup>+</sup>(aq) → 2 Al<sup>3+</sup>(aq) + 3 H<sub>2</sub>(g) (<code>alh</code>)</td><td>Charge : +6 de chaque côté.</td></tr>
+                <tr><td>Avec des ions</td><td>Ag<sup>+</sup>(aq) + Cl<sup>−</sup>(aq) → AgCl(s) (<code>agcl</code>)</td><td>Tous les nombres valent 1 (non écrits) : l'élève doit pouvoir répondre « rien à changer ».</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Activité 2 : exemples de situations (réglages possibles par lien)</h3>
+          <p>Lien type : <code>sims/equation-reactif-limitant.html#mode=react&amp;rx=eau&amp;a=6&amp;b=4</code> (<code>rx</code> : identifiant de la réaction ; <code>a</code> et <code>b</code> : quantités de matière initiales des deux réactifs, de 0 à 10 mol).</p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Situation</th><th scope="col">Quotients n ÷ nombre stœchiométrique</th><th scope="col">État final</th></tr></thead>
+              <tbody>
+                <tr><td>2 H<sub>2</sub> + O<sub>2</sub> → 2 H<sub>2</sub>O ; 6 mol de H<sub>2</sub>, 4 mol de O<sub>2</sub></td><td>H<sub>2</sub> : 6 ÷ 2 = 3 ; O<sub>2</sub> : 4 ÷ 1 = 4</td><td>H<sub>2</sub> limitant ; la réaction a eu lieu 3 fois ; il reste 1 mol de O<sub>2</sub> ; 6 mol de H<sub>2</sub>O formées. <b>Piège :</b> O<sub>2</sub> est le moins abondant (4 &lt; 6) sans être le limitant.</td></tr>
+                <tr><td>Même réaction ; 4 mol de H<sub>2</sub>, 2 mol de O<sub>2</sub></td><td>2 et 2</td><td>Mélange stœchiométrique : les deux réactifs disparaissent ensemble ; 4 mol de H<sub>2</sub>O.</td></tr>
+                <tr><td>CH<sub>4</sub> + 2 O<sub>2</sub> → CO<sub>2</sub> + 2 H<sub>2</sub>O ; 3 mol de CH<sub>4</sub>, 4 mol de O<sub>2</sub></td><td>CH<sub>4</sub> : 3 ; O<sub>2</sub> : 4 ÷ 2 = 2</td><td>O<sub>2</sub> limitant ; la réaction a eu lieu 2 fois ; il reste 1 mol de CH<sub>4</sub> ; 2 mol de CO<sub>2</sub> et 4 mol de H<sub>2</sub>O.</td></tr>
+                <tr><td>N<sub>2</sub> + 3 H<sub>2</sub> → 2 NH<sub>3</sub> ; 2 mol de N<sub>2</sub>, 4 mol de H<sub>2</sub></td><td>N<sub>2</sub> : 2 ; H<sub>2</sub> : 4 ÷ 3 ≈ 1,33</td><td>H<sub>2</sub> limitant ; la réaction a eu lieu 1,33 fois (fraction de mole) ; il reste 0,67 mol de N<sub>2</sub> ; 2,67 mol de NH<sub>3</sub>.</td></tr>
+                <tr><td>2 Mg + O<sub>2</sub> → 2 MgO ; 3 mol de Mg, 2 mol de O<sub>2</sub></td><td>Mg : 3 ÷ 2 = 1,5 ; O<sub>2</sub> : 2</td><td>Mg limitant ; il reste 0,5 mol de O<sub>2</sub> ; 3 mol de MgO.</td></tr>
+                <tr><td>Une quantité réglée à 0 mol</td><td>Quotient nul</td><td>Aucune transformation : la page l'indique (« il n'y a pas de… »).</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Activité 3 : prédiction et question finale</h3>
+          <p>La situation est tirée au hasard (environ la moitié sont des « pièges » où le réactif le moins abondant n'est pas le limitant, avec de temps en temps un mélange stœchiométrique). La réponse attendue se déduit toujours du plus petit quotient n ÷ nombre stœchiométrique. La question finale demande la quantité de produit formé : n(produit) = nombre stœchiométrique du produit × (quantité du limitant ÷ son nombre stœchiométrique). La page accepte la virgule ou le point, à 2 % près.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <p class="note">La liste repose sur la pratique courante d'enseignement, sans référence citée.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Modifier les indices au lieu des nombres stœchiométriques</td><td>« Pour avoir 2 O, j'écris H<sub>2</sub>O<sub>2</sub> » (autre espèce chimique).</td><td>Les formules ne sont pas modifiables : seuls les boutons − et + changent les nombres. La consigne et le message d'erreur rappellent la règle.</td></tr>
+            <tr><td>Équilibrer un seul élément, oublier la charge</td><td>« Les atomes sont bons, c'est fini » pour Zn + 2 H<sup>+</sup> → Zn<sup>2+</sup> + H<sub>2</sub>.</td><td>Le bilan a une ligne par élément et une ligne « charge électrique » pour les ions ; la validation nomme l'élément ou la charge non conservés.</td></tr>
+            <tr><td>Équation équilibrée mais pas simplifiée</td><td>4 H<sub>2</sub> + 2 O<sub>2</sub> → 4 H<sub>2</sub>O.</td><td>Message d'alerte (« équilibrée, mais pas encore simplifiée ») avec le diviseur commun ; l'équation n'est pas comptée comme réussie.</td></tr>
+            <tr><td>Nombre devant une formule à parenthèses</td><td>Compter un seul HO dans 2 Cu(OH)<sub>2</sub>.</td><td>Les icônes montrent chaque entité répétée autant de fois que le nombre stœchiométrique ; le bilan donne le total par élément.</td></tr>
+            <tr><td>Réactif limitant = « celui dont il y a le moins »</td><td>Choisir O<sub>2</sub> avec 6 mol de H<sub>2</sub> et 4 mol de O<sub>2</sub>.</td><td>Les situations pièges sont fréquentes dans l'activité 3 ; si l'élève tombe dedans, le message le nomme et rappelle qu'on compare n ÷ nombre stœchiométrique, pas les quantités brutes.</td></tr>
+            <tr><td>Croire que les deux réactifs sont toujours entièrement consommés</td><td>« À la fin il ne reste rien. »</td><td>L'état final affiche le réactif en excès et la quantité restante ; le mélange stœchiométrique est présenté comme un cas particulier.</td></tr>
+            <tr><td>Prendre les nombres stœchiométriques pour les quantités du mélange</td><td>« 2 H<sub>2</sub> + O<sub>2</sub> signifie que j'ai 2 mol de H<sub>2</sub> et 1 mol de O<sub>2</sub> ».</td><td>Dans l'activité 2, les quantités initiales se règlent indépendamment de l'équation : on voit que les deux notions sont distinctes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>La page est un fichier HTML autonome : pas de compte, aucune donnée envoyée, aucune ressource externe.</p>
+      <p>Choix déjà intégrés :</p>
+      <ul class="plain">
+        <li>Les onglets, les boutons − et +, les curseurs, les interrupteurs et les choix de prédiction ont un nom accessible. Les boutons − et + précisent l'espèce concernée. Le focus est visible et les cibles tactiles font au moins 44 px (socle commun du site).</li>
+        <li>L'information ne passe jamais par la couleur seule : chaque disque porte le symbole de l'élément, le bilan écrit « oui » ou « non » avec une marque ✓ ou ✗, le réactif limitant est nommé dans un texte.</li>
+        <li>Les quantités de matière sont écrites (« n(H<sub>2</sub>) = 3 mol » et tableau HTML avec en-têtes) : les icônes sont décoratives et ne sont pas indispensables pour lire les résultats. Le statut du bilan et la zone « Observation » sont annoncés aux lecteurs d'écran.</li>
+        <li>Thème clair ou sombre selon le réglage de l'appareil. Si l'appareil demande de réduire les animations, « Faire réagir jusqu'au bout » va directement à l'état final.</li>
+        <li>Un lien « ← Catalogue des simulations » est présent en haut de page. Aucun débordement horizontal de la page à 390 px ; le tableau des quantités défile à l'intérieur de son cadre sur un petit écran.</li>
+        <li>L'élève peut masquer le bilan automatique de l'activité 1 pour compter lui-même.</li>
+      </ul>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> pas d'audit RGAA, pas de test avec un lecteur d'écran réel, pas de parcours complet testé à la main au clavier, pas de test avec des élèves. Les contrôles faits sont des tests automatiques dans un navigateur (l'ajustement des 14 équations, 63 jeux de quantités dans le réacteur, 14 situations aléatoires de l'activité 3) et une vérification visuelle en clair, en sombre et à 390 px.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme : l'un propose les nombres sur papier, l'autre les règle et lit le bilan, puis ils inversent.</li>
+        <li>En classe entière : projeter l'activité 2 avec 6 mol de H<sub>2</sub> et 4 mol de O<sub>2</sub>, faire voter le réactif limitant avant de cliquer sur « Faire réagir une fois ».</li>
+        <li>Différenciation : niveau « Pas à pas » avec bilan visible pour démarrer ; niveau « Avec des ions » avec bilan masqué pour aller plus loin.</li>
+        <li>Évaluation formative : activité 3 en autonomie avec le compteur « prédictions justes ».</li>
+      </ul>
+      <p class="note"><b>Deux points d'attention :</b> (1) dans l'activité 2, l'interrupteur « Montrer la méthode » affiche la colonne des quotients : le laisser désactivé au début, sinon l'élève lit la réponse sans raisonner. (2) À la fin de l'activité 3, la colonne « n actuelle » du tableau contient déjà la quantité de produit formé : la question finale peut se faire par simple lecture. Demander à l'élève d'écrire le calcul n(produit) = nombre stœchiométrique × nombre de fois que la réaction a eu lieu.</p>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>La transformation est <b>totale</b> : elle s'arrête quand un réactif est épuisé.</li>
+        <li>Les assemblages d'atomes sont des schémas : la forme réelle des entités n'est pas respectée (par exemple, CH<sub>4</sub> est dessiné à plat). Les solides et les ions sont dessinés comme des entités isolées, sans réseau cristallin ni solvatation.</li>
+        <li>Chaque icône représente 1 mol et non une molécule. Le rapport entre les entités individuelles et la mole n'est pas travaillé ici : à expliciter à l'oral si besoin.</li>
+        <li>Les curseurs de l'activité 2 ne prennent que des nombres entiers de moles, de 0 à 10. Les fractions de mole n'apparaissent qu'à l'état final (par exemple 0,67 mol).</li>
+        <li>L'eau est notée (l) dans toutes les équations, y compris les combustions où l'on trouve aussi (g) selon les manuels. <span class="verify">À adapter à votre usage</span></li>
+        <li>La formule Fe<sub>2</sub>O<sub>3</sub> simplifie la corrosion réelle du fer (oxydes et hydroxydes variés).</li>
+        <li>Le « nombre de fois que la réaction a eu lieu » est la grandeur que la classe de Première appelle <b>avancement</b> x ; elle n'est pas nommée ici.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Passer par les masses : donner des masses de réactifs, les convertir en quantités de matière avec les masses molaires, puis chercher le réactif limitant.</li>
+        <li>Expérience réelle avec une transformation visible (par exemple un métal et un acide en quantités variables, avec mesure du volume de gaz) puis comparaison avec la simulation.</li>
+        <li>Réactions du programme non présentes dans la page : action d'un acide sur le calcaire, acide chlorhydrique et hydroxyde de sodium. À ajuster sur papier avec la méthode de l'activité 1.</li>
+        <li>En Première : avancement et tableau d'avancement, qui formalisent le déroulement de l'activité 2.</li>
+        <li>Évaluation courte : donner une équation à ajuster, puis deux quantités initiales, et demander le réactif limitant avec la justification.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> les capacités viennent d'une lecture assistée de l'annexe du BO faite le 10/11/2026 (extraction qui reformule, sans citation littérale). Le programme n'a pas été relu mot à mot. Les ressources d'accompagnement Éduscol n'ont pas été consultées : à consulter pour les points de vigilance officiels sur les conceptions des élèves. La liste des difficultés fréquentes repose sur la pratique courante d'enseignement, sans référence citée.</p>
+      <ul class="plain">
+        <li><a href="https://cache.media.education.gouv.fr/file/SP1-MEN-22-1-2019/98/9/spe634_annexe_1062989.pdf">Ministère de l'Éducation nationale, programme de physique-chimie de la classe de seconde générale et technologique (BO spécial n° 1 du 22 janvier 2019, annexe)</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 10/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
