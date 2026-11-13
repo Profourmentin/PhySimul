@@ -246,6 +246,19 @@
     return s;
   });
 
+  /* Champs : deux plaques (cuve), équipotentielles pointillées, lignes de champ de la plaque + vers la plaque −, sonde. */
+  add("champ", function () {
+    var s = "";
+    s += '<rect class="f" x="20" y="14" width="8" height="92" rx="2"/><rect class="f" x="172" y="14" width="8" height="92" rx="2"/>';
+    s += '<rect class="water" x="28" y="14" width="144" height="92" style="opacity:.35"/>';
+    [64, 100, 136].forEach(function (x) { s += '<line class="s dash" x1="' + x + '" y1="14" x2="' + x + '" y2="106"/>'; });
+    [34, 60, 86].forEach(function (y) {
+      s += '<line class="v" style="stroke-width:2" x1="166" y1="' + y + '" x2="40" y2="' + y + '"/><path class="v" style="stroke-width:2" d="M49 ' + (y - 6) + 'L39 ' + y + 'L49 ' + (y + 6) + '"/>';
+    });
+    s += '<line class="s" x1="100" y1="60" x2="100" y2="108"/><circle class="f" cx="100" cy="60" r="4"/>';
+    return s;
+  });
+
   /* ---------- Noms génériques (anciens noms, à éviter pour une nouvelle simulation) ---------- */
   /* Générique : chronophotographie d'un lancer. */
   add("chrono", function () {

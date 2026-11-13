@@ -1,0 +1,1652 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cartographier un champ : de la cuve à la pesanteur · Simulabo PhCh</title>
+<meta name="description" content="Cuve virtuelle : sonde, équipotentielles, lignes de champ et E = U/d pour un condensateur plan, puis la même méthode pour le champ de pesanteur, de la salle de classe à la planète.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+/* Couleurs propres à la simulation : liquide, cuivre, potentiel (équipotentielles), ciel, sol, ions.
+   Le potentiel est toujours aussi nommé en toutes lettres (V, J/kg) : la couleur ne porte jamais seule l'information. */
+:root { --liq: #D3E8F3; --cu: #B8733A; --cu-ink: #FFFFFF; --pot: #B0237A; --sky: #E3EFF9; --ground: #8A7763; --grid: rgba(20,34,44,.10); --grid2: rgba(20,34,44,.24); --ion: #C2410C; }
+@media (prefers-color-scheme: dark) { :root { --liq: #153047; --cu: #D08A4E; --cu-ink: #1A1006; --pot: #F27DC0; --sky: #14283A; --ground: #5C5044; --grid: rgba(228,236,240,.10); --grid2: rgba(228,236,240,.26); --ion: #FB9A5B; } }
+
+.wrap, #sim, #sim > * { min-width: 0; }
+#sim { width: 100%; }
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.tab { flex: 1 1 auto; }
+.tabs .sep { flex-basis: 100%; height: 0; }
+.tabs .grp { flex-basis: 100%; font: 500 12px var(--font-data); letter-spacing: .08em; color: var(--muted); padding: 4px 8px 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+.progress { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.mchip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; background: var(--surface); color: var(--muted); }
+.mchip[data-done="true"] { border-color: var(--ok); color: var(--ok); background: var(--ok-bg); font-weight: 600; }
+
+.intro p { max-width: 74ch; }
+.obj { font-size: 16px; }
+.bo { font-size: 14px; color: var(--muted); }
+
+/* Scène */
+.stagebar { gap: 10px 14px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.toolbar .lab { font: 500 12px var(--font-data); letter-spacing: .06em; color: var(--muted); margin-right: 2px; }
+.toolbar button.pill { min-height: 38px; padding: 6px 14px; }
+.cv canvas { cursor: crosshair; touch-action: none; }
+.cv canvas:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.ctl { padding: 10px 14px 12px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.ctlsl { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 18px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chips .lab { font-weight: 600; margin-right: 4px; }
+.legend .lg i.sq { width: 12px; height: 12px; border-radius: 50%; }
+.legend .lg i.eq { background: var(--pot); }
+.legend .lg i.fl { background: var(--c-force); }
+.hintline { font-size: 14px; color: var(--muted); }
+
+/* Liste « À faire » */
+ul.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ul.tasks li { display: grid; grid-template-columns: 24px 1fr; gap: 6px; align-items: start; line-height: 1.4; }
+ul.tasks .mk { font-weight: 700; text-align: center; color: var(--muted); }
+ul.tasks li[data-s="done"] .mk { color: var(--ok); }
+ul.tasks li[data-s="done"] .tx { color: var(--muted); }
+ul.tasks li[data-s="now"] .mk { color: var(--accent); }
+ul.tasks li[data-s="now"] .tx { font-weight: 600; }
+ul.tasks li[data-s="next"] { opacity: .65; }
+
+/* Étapes */
+.step h2 { gap: 10px; }
+.step h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 600 15px var(--font-body); flex: none; }
+.step h2 .ok { margin-left: auto; font: 600 13px var(--font-body); color: var(--ok); }
+.step[data-done="true"] h2 .num { background: var(--ok); color: #fff; }
+.sbody { display: grid; gap: 14px; }
+.sbody p { max-width: 74ch; }
+.sbody .stmt { font-size: 16px; line-height: 1.7; }
+.tag { display: inline-block; font: 600 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.sbody h3 { font-size: 16px; }
+.sub-block { border-top: 1px dashed var(--line); padding-top: 12px; display: grid; gap: 10px; }
+
+/* Champs et questions */
+.nin { min-height: 44px; font: 600 17px var(--font-data); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 9em; max-width: 100%; }
+select.nin { width: auto; font: 600 15px var(--font-body); padding-right: 6px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; align-content: start; }
+.field label { font-weight: 600; line-height: 1.4; }
+fieldset.q { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom: 8px; line-height: 1.5; }
+.opts { display: grid; gap: 6px; }
+.opt { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; line-height: 1.4; }
+.opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--info-bg); }
+.srow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; line-height: 1.9; }
+.fb ul { margin: 6px 0 0; padding-left: 20px; }
+.fb p + p { margin-top: 6px; }
+.calc { display: grid; gap: 10px; }
+.calcline { font: 500 16px/1.7 var(--font-data); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.calcline b { color: var(--accent); font-weight: 600; }
+.mini { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+.mini canvas { display: block; width: 100%; height: auto; }
+.pre { font-family: var(--font-data); font-size: 14px; }
+.note { font-size: 14px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.rng { display: grid; gap: 6px; }
+.rng label { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.rng label b { color: var(--accent); font-family: var(--font-data); font-weight: 600; }
+.rng input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="mouvement">Mouvement et interactions · Première spé</p>
+    <h1>Cartographier un champ : de la cuve à la pesanteur</h1>
+    <p class="sub">Une cuve virtuelle où c’est toi qui places la sonde, repères les équipotentielles, traces les lignes de champ et calcules E = U/d. Tu refais ensuite la même carte pour le champ de pesanteur, puis tu zoomes de la salle de classe jusqu’à la planète.</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+    <div class="progress" id="progress" aria-label="Avancement des missions"></div>
+
+    <div class="tabs" id="tabs" role="group" aria-label="Choisir une mission">
+      <span class="grp" aria-hidden="true">PARTIE A · LA CUVE (TP)</span>
+      <button class="tab" data-mode="M1" type="button">1 · Potentiel</button>
+      <button class="tab" data-mode="M2" type="button">2 · Équipotentielles</button>
+      <button class="tab" data-mode="M3" type="button">3 · Lignes de champ</button>
+      <button class="tab" data-mode="M4" type="button">4 · Valeur de E</button>
+      <button class="tab" data-mode="M5" type="button">5 · Autres électrodes</button>
+      <span class="sep"></span>
+      <span class="grp" aria-hidden="true">PARTIE B · LE PARALLÈLE AVEC LA PESANTEUR</span>
+      <button class="tab" data-mode="M6" type="button">6 · Même méthode</button>
+      <button class="tab" data-mode="M7" type="button">7 · Zoom sur la Terre</button>
+      <button class="tab" data-mode="A" type="button">Atelier libre</button>
+    </div>
+
+    <section class="card intro" id="intro" aria-labelledby="h-intro"></section>
+
+    <section class="stage" id="stage-cuve" aria-label="Scène de la cuve">
+      <div class="stagebar">
+        <div class="toolbar" id="tools" role="group" aria-label="Outil actif"></div>
+        <div class="toolbar" id="cfgbar" role="group" aria-label="Configuration des électrodes" hidden></div>
+      </div>
+      <div class="cv">
+        <canvas id="cv" tabindex="0" role="img" aria-label="Cuve rectangulaire vue de dessus, avec deux plaques de cuivre et un quadrillage. Une sonde se déplace à la souris, au doigt, avec les curseurs ou avec les flèches du clavier ; la tension lue est affichée dans les afficheurs."></canvas>
+      </div>
+      <div class="ctl">
+        <div class="ctlsl" id="sl-pos"></div>
+        <div id="actions" class="stack" style="gap:10px"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="stage" id="stage-terre" aria-label="Vue en coupe de la Terre" hidden>
+      <div class="cv">
+        <canvas id="cv2" role="img" aria-label="Coupe de la Terre : le sol, des flèches qui représentent le champ de pesanteur, deux points A et B et un objet. Le curseur « largeur de la vue » règle l'échelle, de dix mètres à trente mille kilomètres."></canvas>
+      </div>
+      <div class="ctl">
+        <div class="ctlsl" id="sl-terre"></div>
+      </div>
+      <div class="legend" id="legend2"></div>
+    </section>
+
+    <div class="panel">
+      <section class="card" aria-labelledby="h-lcd">
+        <h2 id="h-lcd">Afficheurs</h2>
+        <div class="readouts" id="lcds"></div>
+      </section>
+      <section class="card" aria-labelledby="h-tasks">
+        <h2 id="h-tasks">À faire</h2>
+        <ul class="tasks" id="tasks"></ul>
+      </section>
+    </div>
+
+    <section class="obs" id="obs" aria-live="polite" data-tone="info">
+      <h2>Observation</h2>
+      <p data-obs-text>Choisis une mission, puis déplace la sonde.</p>
+    </section>
+
+    <div class="stack" id="steps"></div>
+
+    <details>
+      <summary>Limites du modèle (à lire une fois)</summary>
+      <ul>
+        <li>La cuve est un montage <b>analogique</b> : la cuve conduit un faible courant ; le potentiel y obéit aux mêmes équations que dans le vide entre des armatures. La simulation ne représente pas les phénomènes d’électrolyse aux électrodes.</li>
+        <li>La cuve est un modèle à <b>deux dimensions</b> : une « pointe » y est en réalité un fil vertical, donc le champ décroît en 1/r et non en 1/r². Les formes des lignes sont fidèles, pas la loi de décroissance.</li>
+        <li>Les mesures de tension ont une incertitude de quelques centièmes de volt, comme avec un vrai voltmètre : E est « sensiblement » constant, pas rigoureusement.</li>
+        <li>Les ions de la mission 3 dérivent <b>le long des lignes de champ</b> parce que l’électrolyte les freine. Dans le vide, la trajectoire d’une particule dépend aussi de sa vitesse initiale : une ligne de champ n’est pas une trajectoire.</li>
+        <li>Pour la pesanteur, g est le champ de gravitation de la Terre (on néglige sa rotation). Le « potentiel » E<sub>pp</sub>/m est une aide pour l’analogie avec la cuve : il n’est pas introduit comme tel au programme.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+"use strict";
+var S = Simulabo, fmt = S.fmt, clamp = S.clamp, $ = S.$, h = S.h;
+var G0 = 9.81, DW = 20, DH = 12, K = 40, OX = 100, OY = 44, PL = 0.6, CW = 1000, CH = 600, MINSEP = 2;
+var RAD = Math.PI / 180;
+var FONT = '"IBM Plex Sans", system-ui, sans-serif';
+
+/* ============================================================
+   1. Outils mathématiques
+   ============================================================ */
+function px(x) { return OX + x * K; }
+function py(y) { return OY + (DH - y) * K; }
+function angDiff(a, b) { var d = (a - b) % 360; if (d > 180) d -= 360; if (d <= -180) d += 360; return d; }
+function hash(x, y, s) { var n = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return (n - Math.floor(n)) * 2 - 1; }
+function r2(x) { return Math.round(x * 100) / 100; }
+function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+
+/* ============================================================
+   2. Les « mondes » : un potentiel V(x, y) et son gradient
+      E = −grad V ; la sonde lit V (+ un petit bruit de mesure).
+   ============================================================ */
+function solveGrid(w) {
+  var nx = 160, ny = 96, hh = DW / nx, n1 = nx + 1, N = n1 * (ny + 1);
+  var V = new Float64Array(N), Fx = new Uint8Array(N), i, j, k;
+  for (j = 0; j <= ny; j++) for (i = 0; i <= nx; i++) {
+    k = j * n1 + i;
+    var x = i * hh, y = j * hh, fv = null;
+    for (var q = 0; q < w.elec.length; q++) {
+      var e = w.elec[q];
+      if (e.t === "left" && i === 0) fv = e.V;
+      else if (e.t === "right" && i === nx) fv = e.V;
+      else if (e.t === "disc" && Math.hypot(x - e.cx, y - e.cy) <= e.r) fv = e.V;
+      else if (e.t === "ring" && Math.abs(Math.hypot(x - e.cx, y - e.cy) - e.R) <= e.w / 2) fv = e.V;
+    }
+    if (fv !== null) { V[k] = fv; Fx[k] = 1; } else V[k] = w.Vmax / 2;
+  }
+  var om = 1.92;
+  for (var it = 0; it < 4000; it++) {
+    var md = 0;
+    for (j = 0; j <= ny; j++) for (i = 0; i <= nx; i++) {
+      k = j * n1 + i; if (Fx[k]) continue;
+      var l = i > 0 ? V[k - 1] : V[k + 1], r = i < nx ? V[k + 1] : V[k - 1];
+      var dn = j > 0 ? V[k - n1] : V[k + n1], up = j < ny ? V[k + n1] : V[k - n1];
+      var dv = ((l + r + dn + up) / 4 - V[k]) * om; V[k] += dv; if (Math.abs(dv) > md) md = Math.abs(dv);
+    }
+    if (md < 1e-6) break;
+  }
+  var Gx = new Float64Array(N), Gy = new Float64Array(N);
+  for (j = 0; j <= ny; j++) for (i = 0; i <= nx; i++) {
+    k = j * n1 + i;
+    var i0 = Math.max(i - 1, 0), i1 = Math.min(i + 1, nx), j0 = Math.max(j - 1, 0), j1 = Math.min(j + 1, ny);
+    Gx[k] = (V[j * n1 + i1] - V[j * n1 + i0]) / ((i1 - i0) * hh);
+    Gy[k] = (V[j1 * n1 + i] - V[j0 * n1 + i]) / ((j1 - j0) * hh);
+  }
+  function bil(A, x, y) {
+    x = clamp(x, 0, DW) / hh; y = clamp(y, 0, DH) / hh;
+    var a = Math.min(Math.floor(x), nx - 1), b = Math.min(Math.floor(y), ny - 1), fx = x - a, fy = y - b, p = b * n1 + a;
+    return (A[p] * (1 - fx) + A[p + 1] * fx) * (1 - fy) + (A[p + n1] * (1 - fx) + A[p + n1 + 1] * fx) * fy;
+  }
+  return { V: function (x, y) { return bil(V, x, y); }, G: function (x, y) { return [bil(Gx, x, y), bil(Gy, x, y)]; } };
+}
+
+function finish(w) {
+  w.flip = false; w.seed = w.seed || 3;
+  w.V = function (x, y) { var v = w._V(x, y); return w.flip ? w.Vmax - v : v; };
+  w.G = function (x, y) { var g = w._G(x, y); return w.flip ? [-g[0], -g[1]] : g; };
+  w.E = function (x, y) { var g = w.G(x, y); return [-g[0], -g[1]]; };
+  w.Emag = function (x, y) { var g = w.G(x, y); return Math.hypot(g[0], g[1]) * w.escale; };
+  var p = w.plates || {};
+  w.box = { x0: p.l ? -PL : 0, x1: p.r ? DW + PL : DW, y0: p.b ? -PL : 0, y1: DH };
+  return w;
+}
+function gridWorld(id, nom, elec, plates, plV, AB) {
+  var w = { id: id, nom: nom, cuve: 1, unit: "cm", vu: "V", Vmax: 6, escale: 100, vs: 0.1, levels: [1, 2, 3, 4, 5], tol: 0.05, noise: 0.02,
+    plates: plates, plV: plV, elec: elec, AB: AB };
+  w._V = function (x, y) {
+    if (x > DW && w.plV.r != null) return w.plV.r;
+    if (!w._g) w._g = solveGrid(w);
+    return w._g.V(x, y);
+  };
+  w._G = function (x, y) {
+    if (x > DW && w.plV.r != null) return [0, 0];
+    if (!w._g) w._g = solveGrid(w);
+    return w._g.G(x, y);
+  };
+  return finish(w);
+}
+var WORLDS = {
+  plaques: finish({ id: "plaques", nom: "Plaques parallèles", cuve: 1, unit: "cm", vu: "V", Vmax: 6, escale: 100, vs: 0.1, levels: [1, 2, 3, 4, 5], tol: 0.05, noise: 0.02,
+    plates: { l: 1, r: 1 }, elec: [{ t: "left", V: 0 }, { t: "right", V: 6 }],
+    _V: function (x) { return clamp(6 * x / DW, 0, 6); }, _G: function (x) { return (x < 0 || x > DW) ? [0, 0] : [6 / DW, 0]; } }),
+  pesanteur: finish({ id: "pesanteur", nom: "Pesanteur près du sol", cuve: 0, unit: "m", vu: "J/kg", Vmax: G0 * DH, escale: 1, vs: 0.4, levels: [20, 40, 60, 80, 100], tol: 1, noise: 0.15,
+    plates: { b: 1 }, elec: [],
+    _V: function (x, y) { return G0 * clamp(y, 0, DH); }, _G: function (x, y) { return y < 0 ? [0, 0] : [0, G0]; } }),
+  pointe: gridWorld("pointe", "Pointe et plaque", [{ t: "disc", cx: 5, cy: 6, r: 0.45, V: 6 }, { t: "right", V: 0 }], { r: 1 }, { r: 0 }, { A: [7, 6], B: [15, 10] }),
+  deux: gridWorld("deux", "Deux pointes", [{ t: "disc", cx: 6, cy: 6, r: 0.45, V: 6 }, { t: "disc", cx: 14, cy: 6, r: 0.45, V: 0 }], {}, {}, { A: [8, 6], B: [10, 10.5] }),
+  anneau: gridWorld("anneau", "Anneau", [{ t: "disc", cx: 10, cy: 6, r: 0.5, V: 6 }, { t: "ring", cx: 10, cy: 6, R: 5.5, w: 0.3, V: 0 }], {}, {}, { A: [8, 6], B: [14.3, 6] })
+};
+var CFGS = ["pointe", "deux", "anneau"];
+
+function reading(w, x, y) { return w.V(x, y) + w.noise * hash(Math.round(x * 20), Math.round(y * 20), w.seed); }
+/* distance à la plaque de référence (V = 0) : cuve à plaques, ou sol */
+function refDist(w, x, y) { return w.id === "plaques" ? (w.flip ? DW - x : x) : (w.id === "pesanteur" ? y : NaN); }
+function eDir(w, x, y) { var e = w.E(x, y); return Math.atan2(e[1], e[0]) / RAD; }
+function inDom(x, y) { return x >= 0 && x <= DW && y >= 0 && y <= DH; }
+
+/* Projection d'un point sur la ligne V = L (itérations de Newton) */
+function projectToLevel(w, x, y, L, n) {
+  for (var i = 0; i < (n || 8); i++) {
+    var v = w.V(x, y) - L, g = w.G(x, y), gg = g[0] * g[0] + g[1] * g[1];
+    if (gg < 1e-9) break;
+    x -= v * g[0] / gg; y -= v * g[1] / gg;
+    if (Math.abs(v) < 1e-6) break;
+  }
+  return [x, y];
+}
+/* Ligne équipotentielle complète passant près de « seed » */
+function traceLevel(w, L, seed) {
+  var p0 = projectToLevel(w, seed[0], seed[1], L, 14), closed = false, sp = 0.15;
+  if (!inDom(p0[0], p0[1])) return null;
+  function march(dir) {
+    var pts = [], x = p0[0], y = p0[1];
+    for (var n = 0; n < 1400; n++) {
+      var g = w.G(x, y), m = Math.hypot(g[0], g[1]); if (m < 1e-7) break;
+      var tx = -g[1] / m * dir, ty = g[0] / m * dir;
+      g = w.G(x + tx * sp / 2, y + ty * sp / 2); m = Math.hypot(g[0], g[1]); if (m < 1e-7) break;
+      tx = -g[1] / m * dir; ty = g[0] / m * dir;
+      x += tx * sp; y += ty * sp;
+      var q = projectToLevel(w, x, y, L, 3); x = q[0]; y = q[1];
+      if (x < 0 || x > DW || y < 0 || y > DH) { pts.push([clamp(x, 0, DW), clamp(y, 0, DH)]); break; }
+      pts.push([x, y]);
+      if (n > 20 && Math.hypot(x - p0[0], y - p0[1]) < sp * 1.3) { closed = true; break; }
+    }
+    return pts;
+  }
+  var a = march(1);
+  if (closed) { a.push(p0); return [p0].concat(a); }
+  var b = march(-1);
+  return b.reverse().concat([p0], a);
+}
+/* Point de la cuve où V est le plus proche de L (amorce pour traceLevel) */
+function seedFor(w, L) {
+  var best = null, bd = 1e9;
+  for (var y = 0.5; y < DH; y += 0.5) for (var x = 0.5; x < DW; x += 0.5) {
+    var d = Math.abs(w.V(x, y) - L);
+    if (d < bd - 1e-9 || (Math.abs(d - bd) < 1e-9 && Math.abs(y - DH / 2) < Math.abs(best[1] - DH / 2))) { bd = d; best = [x, y]; }
+  }
+  return best;
+}
+var refCache = {};
+function refLine(w, L) {
+  var key = w.id + (w.flip ? "f" : "n") + L;
+  if (!(key in refCache)) { var s = seedFor(w, L); refCache[key] = s ? traceLevel(w, L, s) : null; }
+  return refCache[key];
+}
+/* Ligne de champ : de la région de potentiel élevé vers le potentiel bas */
+function traceField(w, seed, onlyForward) {
+  var eps = w.Vmax * 0.012, hs = 0.1;
+  function go(dir) {
+    var pts = [], x = seed[0], y = seed[1];
+    for (var n = 0; n < 1600; n++) {
+      var e = w.E(x, y), m = Math.hypot(e[0], e[1]); if (m < 1e-6) break;
+      var dx = e[0] / m * dir, dy = e[1] / m * dir;
+      var e2 = w.E(x + dx * hs / 2, y + dy * hs / 2), m2 = Math.hypot(e2[0], e2[1]); if (m2 < 1e-6) break;
+      x += e2[0] / m2 * dir * hs; y += e2[1] / m2 * dir * hs;
+      if (x < 0 || x > DW || y < 0 || y > DH) { pts.push([clamp(x, 0, DW), clamp(y, 0, DH)]); break; }
+      pts.push([x, y]);
+      var v = w.V(x, y);
+      if ((dir > 0 && v <= eps) || (dir < 0 && v >= w.Vmax - eps)) break;
+    }
+    return pts;
+  }
+  var e0 = w.E(seed[0], seed[1]);
+  if (Math.hypot(e0[0], e0[1]) < 1e-6) return null;
+  var f = go(1);
+  if (onlyForward) return [seed].concat(f);
+  return go(-1).reverse().concat([seed], f);
+}
+
+/* ============================================================
+   3. État
+   ============================================================ */
+var st = {
+  x: 3.3, y: 6, target: 3, lock: false, heat: false, gridArrows: false, showAB: false, refLines: false, tangent: false,
+  tool: "probe", guess: 90, flip: false, cfg: "pointe",
+  flags: {}, pred: {}, data: {}, tk: {}, relev: [],
+  stroke: null, paint: null, drag: null, ions: [], balls: [], force: null,
+  moves: { x: [], y: [] }
+};
+var cur = null, M = {};
+function wid() { return cur && cur.world === "cfg" ? st.cfg : (cur && cur.world !== "any" ? cur.world : st.cfg); }
+function world() { return WORLDS[wid()]; }
+function D(id) { id = id || wid(); return st.data[id] || (st.data[id] = { marks: [], lines: {}, flines: [], vecs: [], arrows: [], ionsDone: 0, ballsDone: [], calc: [], preds: 0 }); }
+function F(id) { return !!st.flags[id]; }
+function obs(tone, html) { S.observe("#obs", tone, html); }
+function unitV(w) { return w.vu; }
+function vtxt(w, v, d) { return fmt(v, d == null ? 2 : d) + " " + w.vu; }
+
+/* ============================================================
+   4. Dessin
+   ============================================================ */
+function pal() {
+  var v = S.cssVar;
+  return { ink: v("--ink"), muted: v("--muted"), line: v("--line"), surface: v("--surface"), bg: v("--bg"), liq: v("--liq"), cu: v("--cu"), cuInk: v("--cu-ink"), pot: v("--pot"), sky: v("--sky"),
+    ground: v("--ground"), grid: v("--grid"), grid2: v("--grid2"), force: v("--c-force"), accent: v("--accent"), ion: v("--ion"), ok: v("--ok"), lcdBg: v("--lcd-bg"), lcdFg: v("--lcd-fg") };
+}
+function ln(ctx, x0, y0, x1, y1) { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); }
+function circ(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); }
+function rr(ctx, x, y, w, hh, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + hh, r); ctx.arcTo(x + w, y + hh, x, y + hh, r); ctx.arcTo(x, y + hh, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function poly(ctx, pts) { ctx.beginPath(); pts.forEach(function (p, i) { if (i) ctx.lineTo(px(p[0]), py(p[1])); else ctx.moveTo(px(p[0]), py(p[1])); }); ctx.stroke(); }
+function txt(ctx, s, x, y, font, col, al) { ctx.font = font; ctx.fillStyle = col; ctx.textAlign = al || "left"; ctx.fillText(s, x, y); }
+function arrowPx(ctx, x0, y0, x1, y1, col, lw, hd) {
+  var a = Math.atan2(y1 - y0, x1 - x0), hl = hd || 15;
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = lw || 3; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - Math.cos(a) * hl * 0.6, y1 - Math.sin(a) * hl * 0.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - hl * Math.cos(a - 0.42), y1 - hl * Math.sin(a - 0.42)); ctx.lineTo(x1 - hl * Math.cos(a + 0.42), y1 - hl * Math.sin(a + 0.42)); ctx.closePath(); ctx.fill();
+}
+/* Flèche en coordonnées du monde : départ (x, y), direction angle (degrés, axe y vers le haut), longueur en unités du monde */
+function arrowW(ctx, x, y, angDeg, len, col, lw, hd) {
+  var a = angDeg * RAD; arrowPx(ctx, px(x), py(y), px(x + len * Math.cos(a)), py(y + len * Math.sin(a)), col, lw, hd);
+}
+/* Lettre vectorielle : E ou F avec la flèche au-dessus (notation du programme) */
+function vlab(ctx, s, X, Y, col) {
+  ctx.font = "italic 600 21px " + FONT; ctx.textAlign = "center"; ctx.fillStyle = col; ctx.fillText(s, X, Y);
+  var m = ctx.measureText(s).width / 2 + 1; ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.lineCap = "round";
+  ln(ctx, X - m, Y - 20, X + m, Y - 20); ctx.beginPath(); ctx.moveTo(X + m - 5, Y - 24); ctx.lineTo(X + m, Y - 20); ctx.lineTo(X + m - 5, Y - 16); ctx.stroke();
+}
+function heatCanvas(w) {
+  var key = w.id + (w.flip ? "f" : "n");
+  if (heatCanvas.c && heatCanvas.k === key) return heatCanvas.c;
+  var cv = document.createElement("canvas"); cv.width = 100; cv.height = 60;
+  var cx = cv.getContext("2d"), im = cx.createImageData(100, 60);
+  for (var j = 0; j < 60; j++) for (var i = 0; i < 100; i++) {
+    var t = clamp(w.V((i + 0.5) / 100 * DW, DH - (j + 0.5) / 60 * DH) / w.Vmax, 0, 1), o = (j * 100 + i) * 4;
+    im.data[o] = 60 + 170 * t; im.data[o + 1] = 130 - 20 * t; im.data[o + 2] = 205 - 160 * t; im.data[o + 3] = 105;
+  }
+  cx.putImageData(im, 0, 0); heatCanvas.c = cv; heatCanvas.k = key; return cv;
+}
+
+function draw(ctx) {
+  var w = world(), d = D(), c = pal(), pl = w.plates || {}, i, j;
+  /* fond, teinte de potentiel, quadrillage */
+  ctx.fillStyle = w.cuve ? c.liq : c.sky; ctx.fillRect(OX, OY, DW * K, DH * K);
+  if (st.heat) { ctx.imageSmoothingEnabled = true; ctx.drawImage(heatCanvas(w), OX, OY, DW * K, DH * K); }
+  ctx.lineWidth = 1;
+  for (i = 0; i <= DW; i++) { ctx.strokeStyle = i % 5 ? c.grid : c.grid2; ln(ctx, px(i), OY, px(i), py(0)); }
+  for (j = 0; j <= DH; j++) { ctx.strokeStyle = j % 5 ? c.grid : c.grid2; ln(ctx, OX, py(j), px(DW), py(j)); }
+  ctx.strokeStyle = c.ink; ctx.lineWidth = 2; ctx.strokeRect(OX, OY, DW * K, DH * K);
+  /* graduations */
+  var by = py(0) + (pl.b ? PL * K : 0) + 24, lx = OX - (pl.l ? PL * K : 0) - 9;
+  for (i = 0; i <= DW; i += 5) txt(ctx, String(i), px(i), by, "500 17px " + FONT, c.muted, "center");
+  for (j = 0; j <= DH; j += 5) txt(ctx, String(j), lx, py(j) + 6, "500 17px " + FONT, c.muted, "right");
+  txt(ctx, "x (" + w.unit + ")", OX + DW * K / 2, by + 24, "500 17px " + FONT, c.muted, "center");
+  ctx.save(); ctx.translate(22, OY + DH * K / 2); ctx.rotate(-Math.PI / 2); txt(ctx, (w.cuve ? "y" : "z") + " (" + w.unit + ")", 0, 0, "500 17px " + FONT, c.muted, "center"); ctx.restore();
+  drawElectrodes(ctx, w, c, pl);
+  /* équipotentielles */
+  w.levels.forEach(function (L) {
+    var pts = d.lines[L], ref = false;
+    if (!pts && st.refLines) { pts = refLine(w, L); ref = true; }
+    if (!pts || pts.length < 2) return;
+    ctx.strokeStyle = c.pot; ctx.lineWidth = ref ? 2.2 : 3.6; ctx.setLineDash(ref ? [9, 7] : []); ctx.lineJoin = "round"; poly(ctx, pts); ctx.setLineDash([]);
+    var top = pts[0]; pts.forEach(function (p) { if (p[1] > top[1]) top = p; });
+    var s = fmt(L, 0) + " " + w.vu, tw = s.length * 9.2 + 12, X = clamp(px(top[0]) - tw / 2, OX + 4, OX + DW * K - tw - 4), Y = Math.max(py(top[1]) + 6, OY + 6);
+    ctx.fillStyle = c.surface; rr(ctx, X, Y, tw, 24, 6); ctx.fill(); ctx.strokeStyle = c.pot; ctx.lineWidth = 1.5; ctx.stroke();
+    txt(ctx, s, X + tw / 2, Y + 17, "600 15px " + FONT, c.pot, "center");
+  });
+  /* lignes de champ */
+  ctx.lineJoin = "round";
+  d.flines.forEach(function (f) { drawFline(ctx, f.pts, c.force, 3.2); });
+  /* flèches de champ en grille */
+  if (st.gridArrows) {
+    var ref = w.id === "pesanteur" ? G0 : 30;
+    for (i = 1.5; i < DW; i += 1.5) for (j = 1.5; j < DH; j += 1.5) {
+      var e = w.E(i, j), m = Math.hypot(e[0], e[1]); if (m * w.escale < ref * 0.02) continue;
+      var L = clamp(m * w.escale / ref, 0.25, 2.4) * 0.8;
+      arrowPx(ctx, px(i), py(j), px(i) + e[0] / m * L * K, py(j) - e[1] / m * L * K, c.force, 2.2, 10);
+    }
+  }
+  /* trajectoires d'ions / billes */
+  st.ions.concat(st.balls).forEach(function (o) { drawMover(ctx, o, c, w); });
+  /* points marqués */
+  d.marks.forEach(function (m) {
+    circ(ctx, px(m.x), py(m.y), 7); ctx.fillStyle = c.pot; ctx.fill(); ctx.strokeStyle = c.surface; ctx.lineWidth = 2.5; ctx.stroke();
+    txt(ctx, fmt(m.t, 0), px(m.x) + 11, py(m.y) - 8, "600 14px " + FONT, c.pot, "left");
+  });
+  /* vecteurs E / g placés */
+  d.vecs.forEach(function (v) {
+    var a = eDir(w, v.x, v.y), len = w.Emag(v.x, v.y) * w.vs;
+    arrowW(ctx, v.x, v.y, a, len, c.force, 4, 16); circ(ctx, px(v.x), py(v.y), 4.5); ctx.fillStyle = c.force; ctx.fill();
+    vlab(ctx, w.cuve ? "E" : "g", px(v.x + len * Math.cos(a * RAD) / 2) + 2, py(v.y + len * Math.sin(a * RAD) / 2) - (Math.sin(a * RAD) > 0.5 ? -26 : 18), c.force);
+  });
+  /* flèches validées (mission 3) */
+  d.arrows.forEach(function (a) { arrowW(ctx, a.x, a.y, a.a, 2.2, c.force, 3.4, 14); txt(ctx, "✓", px(a.x) - 4, py(a.y) + 22, "700 18px " + FONT, c.ok, "center"); });
+  /* force d'essai */
+  if (st.force) drawForce(ctx, c, w);
+  /* points A et B */
+  if (st.showAB && w.AB) ["A", "B"].forEach(function (k) {
+    var p = w.AB[k], X = px(p[0]), Y = py(p[1]);
+    ctx.save(); ctx.translate(X, Y); ctx.rotate(Math.PI / 4); ctx.fillStyle = c.surface; ctx.strokeStyle = c.ink; ctx.lineWidth = 2.5; ctx.fillRect(-9, -9, 18, 18); ctx.strokeRect(-9, -9, 18, 18); ctx.restore();
+    txt(ctx, k, X + 15, Y - 12, "700 20px " + FONT, c.ink, "left");
+  });
+  /* tracé à main levée */
+  if (st.stroke && st.stroke.length > 1) { ctx.strokeStyle = c.ink; ctx.globalAlpha = 0.75; ctx.lineWidth = 3.2; ctx.setLineDash([2, 5]); poly(ctx, st.stroke); ctx.setLineDash([]); ctx.globalAlpha = 1; }
+  if (st.paint && st.paint.length > 1) { ctx.strokeStyle = c.pot; ctx.globalAlpha = 0.8; ctx.lineWidth = 3.6; poly(ctx, st.paint); ctx.globalAlpha = 1; }
+  /* aide : tangente à l'équipotentielle */
+  if (st.tangent) {
+    var ea = eDir(w, st.x, st.y); ctx.strokeStyle = c.pot; ctx.lineWidth = 2.5; ctx.setLineDash([6, 5]);
+    var ta = (ea + 90) * RAD; ln(ctx, px(st.x - 2.6 * Math.cos(ta)), py(st.y - 2.6 * Math.sin(ta)), px(st.x + 2.6 * Math.cos(ta)), py(st.y + 2.6 * Math.sin(ta))); ctx.setLineDash([]);
+  }
+  /* flèche de champ à orienter (proposition de l'élève) */
+  if (st.tool === "arrow") {
+    var gx = st.x + 3 * Math.cos(st.guess * RAD), gy = st.y + 3 * Math.sin(st.guess * RAD);
+    arrowW(ctx, st.x, st.y, st.guess, 3, c.accent, 5, 18);
+    circ(ctx, px(gx), py(gy), 11); ctx.fillStyle = c.surface; ctx.fill(); ctx.strokeStyle = c.accent; ctx.lineWidth = 3; ctx.stroke();
+  }
+  drawProbe(ctx, c, w);
+}
+function drawElectrodes(ctx, w, c, pl) {
+  function sign(v) { var ev = w.flip ? w.Vmax - v : v; return ev > w.Vmax / 2 ? "+" : "−"; }
+  if (pl.l || pl.r) {
+    var topLab = function (side, v, ref) {
+      var s = sign(v) + (ref ? " (référence, COM) 0 V" : " " + fmt(w.flip ? w.Vmax - v : v, 0) + " V");
+      txt(ctx, s, side === "l" ? OX - PL * K : OX + DW * K + PL * K, OY - 16, "600 16px " + FONT, c.ink, side === "l" ? "left" : "right");
+    };
+    [["l", -PL], ["r", DW]].forEach(function (p) {
+      if (!pl[p[0]]) return;
+      var e = w.elec.filter(function (q) { return q.t === (p[0] === "l" ? "left" : "right"); })[0];
+      ctx.fillStyle = c.cu; ctx.fillRect(px(p[1]), OY, PL * K, DH * K); ctx.strokeStyle = c.ink; ctx.lineWidth = 1.5; ctx.strokeRect(px(p[1]), OY, PL * K, DH * K);
+      txt(ctx, sign(e.V), px(p[1]) + PL * K / 2, OY + DH * K / 2 + 9, "700 28px " + FONT, c.cuInk, "center");
+      var ev = w.flip ? w.Vmax - e.V : e.V; topLab(p[0], e.V, ev === 0);
+    });
+  }
+  if (pl.b) {
+    ctx.fillStyle = c.ground; ctx.fillRect(OX, py(0), DW * K, PL * K); ctx.strokeStyle = c.ink; ctx.lineWidth = 1.5; ctx.strokeRect(OX, py(0), DW * K, PL * K);
+    ctx.strokeStyle = c.surface; ctx.lineWidth = 1.5; for (var x = OX - 6; x < OX + DW * K; x += 14) ln(ctx, x + 12, py(0) + 2, x, py(0) + PL * K - 2);
+    txt(ctx, "sol : référence, E_pp = 0", OX + DW * K - 4, OY - 16, "600 16px " + FONT, c.ink, "right");
+  }
+  w.elec.forEach(function (e) {
+    if (e.t === "disc") {
+      circ(ctx, px(e.cx), py(e.cy), e.r * K + 3); ctx.fillStyle = c.cu; ctx.fill(); ctx.strokeStyle = c.ink; ctx.lineWidth = 1.5; ctx.stroke();
+      txt(ctx, sign(e.V), px(e.cx), py(e.cy) + 7, "700 20px " + FONT, c.cuInk, "center");
+    } else if (e.t === "ring") {
+      circ(ctx, px(e.cx), py(e.cy), e.R * K); ctx.strokeStyle = c.cu; ctx.lineWidth = e.w * K + 2; ctx.stroke();
+      txt(ctx, sign(e.V) + " anneau", px(e.cx), py(e.cy + e.R) + 26, "600 16px " + FONT, c.ink, "center");
+    }
+  });
+}
+function drawFline(ctx, pts, col, lw) {
+  if (!pts || pts.length < 2) return;
+  ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineCap = "round"; poly(ctx, pts);
+  /* flèches régulières le long de la ligne (sens : du potentiel élevé au potentiel bas) */
+  var tot = 0, i, segs = [];
+  for (i = 1; i < pts.length; i++) { var l = dist(pts[i - 1], pts[i]); segs.push(l); tot += l; }
+  var n = Math.max(1, Math.round(tot / 6)), t, acc;
+  for (var k = 0; k < n; k++) {
+    t = tot * (k + 0.5) / n; acc = 0;
+    for (i = 0; i < segs.length; i++) { if (acc + segs[i] >= t) break; acc += segs[i]; }
+    i = Math.min(i, segs.length - 1);
+    var p = pts[i], q = pts[i + 1], f = segs[i] ? (t - acc) / segs[i] : 0, X = p[0] + (q[0] - p[0]) * f, Y = p[1] + (q[1] - p[1]) * f;
+    var a = Math.atan2(-(q[1] - p[1]), q[0] - p[0]), x0 = px(X), y0 = py(Y);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0 + 11 * Math.cos(a), y0 + 11 * Math.sin(a));
+    ctx.lineTo(x0 - 8 * Math.cos(a - 0.7), y0 - 8 * Math.sin(a - 0.7)); ctx.lineTo(x0 - 8 * Math.cos(a + 0.7), y0 - 8 * Math.sin(a + 0.7)); ctx.closePath(); ctx.fill();
+  }
+}
+function drawMover(ctx, o, c, w) {
+  var tr = o.trace || [];
+  if (tr.length > 1) { ctx.strokeStyle = c.ion; ctx.lineWidth = 2.4; ctx.setLineDash([5, 5]); poly(ctx, tr); ctx.setLineDash([]); }
+  var p = o.pos; if (!p) return;
+  circ(ctx, px(p[0]), py(p[1]), o.kind === "ion" ? 9 : 12); ctx.fillStyle = c.ion; ctx.fill(); ctx.strokeStyle = c.surface; ctx.lineWidth = 2.5; ctx.stroke();
+  if (o.kind === "ion") txt(ctx, "+", px(p[0]), py(p[1]) + 5.5, "700 17px " + FONT, c.surface, "center");
+}
+function drawForce(ctx, c, w) {
+  var f = st.force, len = f.len;
+  arrowW(ctx, f.x, f.y, f.ang, len, c.ink, 6, 20);
+  circ(ctx, px(f.x), py(f.y), 6); ctx.fillStyle = c.ink; ctx.fill();
+  var mx = f.x + len * Math.cos(f.ang * RAD) / 2, my = f.y + len * Math.sin(f.ang * RAD) / 2;
+  vlab(ctx, "F", px(mx), py(my) + (Math.sin(f.ang * RAD) > 0.5 ? 34 : -10), c.ink);
+  txt(ctx, f.text, px(mx), py(my) + (Math.sin(f.ang * RAD) > 0.5 ? 58 : 26), "600 15px " + FONT, c.ink, "center");
+}
+function drawProbe(ctx, c, w) {
+  var X = px(st.x), Y = py(st.y), U = reading(w, st.x, st.y);
+  ctx.lineCap = "round";
+  if (w.cuve) {
+    ctx.strokeStyle = c.surface; ctx.lineWidth = 10; ln(ctx, X, Y - 7, X, Y - 74); ctx.strokeStyle = c.ink; ctx.lineWidth = 5.5; ln(ctx, X, Y - 7, X, Y - 74);
+    circ(ctx, X, Y - 78, 8); ctx.fillStyle = c.ink; ctx.fill(); ctx.strokeStyle = c.surface; ctx.lineWidth = 2; ctx.stroke();
+    circ(ctx, X, Y, 7); ctx.strokeStyle = c.surface; ctx.lineWidth = 5; ctx.stroke(); ctx.strokeStyle = c.ink; ctx.lineWidth = 2.5; ctx.stroke();
+  } else {
+    circ(ctx, X, Y, 12); ctx.fillStyle = c.ink; ctx.fill(); ctx.strokeStyle = c.surface; ctx.lineWidth = 3; ctx.stroke();
+    circ(ctx, X - 4, Y - 4, 3.5); ctx.fillStyle = c.surface; ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+  }
+  var s = (w.cuve ? "U = " : "E_pp/m = ") + fmt(U, w.cuve ? 2 : 1) + " " + w.vu;
+  ctx.font = "600 17px " + FONT; var tw = ctx.measureText(s).width + 18, bx = clamp(X + 16, 4, CW - tw - 4), by = Math.max(Y - (w.cuve ? 100 : 54), 6);
+  ctx.fillStyle = c.lcdBg; rr(ctx, bx, by, tw, 28, 7); ctx.fill(); txt(ctx, s, bx + 9, by + 20, "600 17px " + FONT, c.lcdFg, "left");
+}
+
+/* ============================================================
+   5. Sonde, curseurs, afficheurs
+   ============================================================ */
+var scene, sx, sy, L = {}, probeHooks = [];
+function moveProbe(x, y, aid) {
+  var w = world(), b = w.box;
+  if (aid && st.lock && inDom(x, y)) { var q = projectToLevel(w, x, y, st.target, 10); if (isFinite(q[0]) && inDom(q[0], q[1])) { x = q[0]; y = q[1]; } }
+  st.x = clamp(x, b.x0, b.x1); st.y = clamp(y, b.y0, b.y1);
+  st.moves.x.push(st.x); st.moves.y.push(st.y); if (st.moves.x.length > 400) { st.moves.x.shift(); st.moves.y.shift(); }
+  if (sx) { sx.set(st.x, true); sy.set(st.y, true); }
+  updateLCD(); probeHooks.forEach(function (f) { f(); }); scene.redraw();
+}
+function buildPosSliders() {
+  var w = world(), host = $("#sl-pos"), b = w.box; host.textContent = "";
+  sx = S.slider(host, { label: "Position x de la " + (w.cuve ? "sonde" : "bille"), unit: w.unit, min: b.x0, max: b.x1, step: 0.05, value: clamp(st.x, b.x0, b.x1), digits: 2, onInput: function (v) { moveProbe(v, st.y, false); } });
+  sy = S.slider(host, { label: (w.cuve ? "Position y de la sonde" : "Altitude z de la bille"), unit: w.unit, min: b.y0, max: b.y1, step: 0.05, value: clamp(st.y, b.y0, b.y1), digits: 2, onInput: function (v) { moveProbe(st.x, v, false); } });
+}
+var LCD = {
+  U: function (w) { return { label: w.cuve ? "Tension U (sonde – référence)" : "E_pp / m (m = 1 kg)", unit: w.vu, digits: 2 }; },
+  X: function (w) { return { label: w.id === "plaques" ? "Distance à la plaque de gauche" : "Abscisse x", unit: w.unit, digits: 2 }; },
+  Y: function (w) { return { label: w.cuve ? "Ordonnée y" : "Altitude z", unit: w.unit, digits: 2 }; },
+  T: function (w) { return { label: "Valeur cherchée", unit: w.vu, digits: 0 }; },
+  E: function (w) { return { label: w.cuve ? "Champ |E| local" : "Champ |g| local", unit: w.cuve ? "V/m" : "N/kg", digits: w.cuve ? 0 : 2 }; }
+};
+function buildLCDs(list) {
+  var host = $("#lcds"), w = world(); host.textContent = ""; L = {};
+  list.forEach(function (k) { L[k] = S.readout(host, LCD[k](w)); });
+  updateLCD();
+}
+function updateLCD() {
+  var w = world();
+  if (L.U) L.U.set(reading(w, st.x, st.y));
+  if (L.X) L.X.set(w.id === "plaques" ? refDist(w, st.x, st.y) : st.x);
+  if (L.Y) L.Y.set(st.y);
+  if (L.T) L.T.set(st.target);
+  if (L.E) L.E.set(w.Emag(st.x, st.y) * (1 + w.noise * 0.5 * hash(Math.round(st.x * 20), Math.round(st.y * 20), 9)));
+}
+
+/* ============================================================
+   6. Outils du pointeur
+   ============================================================ */
+var TOOLS = { probe: "Sonde", arrow: "Flèche de champ", draw: "Ligne à main levée", ion: "Ion Cu²⁺", fline: "Ligne de champ (clic)", ball: "Lâcher une bille" };
+function buildTools(list) {
+  var host = $("#tools"); host.textContent = "";
+  if (list.length < 2) { host.hidden = true; st.tool = list[0] || "probe"; return; }
+  host.hidden = false; host.appendChild(h("span", { class: "lab", text: "OUTIL" }));
+  list.forEach(function (t) {
+    var b = h("button", { type: "button", class: "pill", "data-tool": t, "aria-pressed": "false", text: TOOLS[t].replace("Cu²⁺", "Cu²⁺") });
+    b.addEventListener("click", function () { setTool(t); });
+    host.appendChild(b);
+  });
+  if (list.indexOf(st.tool) < 0) st.tool = list[0];
+  setTool(st.tool);
+}
+function setTool(t) {
+  st.tool = t; st.stroke = null;
+  Array.prototype.forEach.call($("#tools").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-tool") === t)); });
+  var tips = { probe: "Glisse sur la cuve pour déplacer la sonde.", arrow: "Place la sonde, puis fais tourner la poignée pour orienter la flèche.", draw: "Trace une ligne de champ en glissant (de + vers −).", ion: "Clique dans la cuve pour lâcher un ion Cu²⁺.", fline: "Clique dans la cuve : la ligne de champ qui passe par ce point apparaît.", ball: "Clique dans la scène pour lâcher une bille de ce point." };
+  var l = $("#legend-tip"); if (l) l.textContent = tips[t] || "";
+  scene.redraw(); if (cur && cur.onTool) cur.onTool(t);
+}
+function toW(ev) { var p = scene.toLocal(ev); return [(p.x - OX) / K, DH - (p.y - OY) / K]; }
+
+function onDown(ev) {
+  if (ev.button > 0) return;
+  ev.preventDefault(); var cv = ev.currentTarget; try { cv.setPointerCapture(ev.pointerId); } catch (e) {} cv.focus({ preventScroll: true });
+  var p = toW(ev), t = st.tool;
+  st.drag = { mode: t, start: p };
+  if (t === "arrow") {
+    var gx = st.x + 3 * Math.cos(st.guess * RAD), gy = st.y + 3 * Math.sin(st.guess * RAD);
+    if (Math.hypot(p[0] - gx, p[1] - gy) < 0.9) { st.drag.mode = "rot"; return; }
+    st.drag.mode = "probe";
+  }
+  if (t === "probe" || st.drag.mode === "probe") { moveProbe(p[0], p[1], true); if (st.lock && inDom(p[0], p[1])) st.paint = [[st.x, st.y]]; }
+  else if (t === "draw") { st.stroke = [p]; scene.redraw(); }
+  else if (t === "ion") { releaseIon(p); }
+  else if (t === "fline") { addFieldLine(p); }
+  else if (t === "ball") { dropBall(p); }
+}
+function onMove(ev) {
+  var dr = st.drag; if (!dr) return; var p = toW(ev);
+  if (dr.mode === "probe") { moveProbe(p[0], p[1], true); if (st.paint) st.paint.push([st.x, st.y]); }
+  else if (dr.mode === "rot") { setGuess(Math.atan2(p[1] - st.y, p[0] - st.x) / RAD); }
+  else if (dr.mode === "draw" && st.stroke) { var l = st.stroke[st.stroke.length - 1]; if (Math.hypot(p[0] - l[0], p[1] - l[1]) > 0.12) { st.stroke.push([clamp(p[0], 0, DW), clamp(p[1], 0, DH)]); scene.redraw(); } }
+}
+function onUp() {
+  var dr = st.drag; st.drag = null; if (!dr) return;
+  if (dr.mode === "probe" && st.paint) { var pt = st.paint; st.paint = null; finishPaint(pt); }
+  else if (dr.mode === "draw" && st.stroke) { var s = st.stroke; st.stroke = null; if (s.length > 4) evalStroke(s); scene.redraw(); }
+}
+function setGuess(a) {
+  st.guess = Math.round(((a % 360) + 360) % 360 / 5) * 5 % 360; if (cur && cur.onGuess) cur.onGuess(); scene.redraw();
+}
+function onKey(ev) {
+  var step = ev.shiftKey ? 1 : 0.25, k = ev.key;
+  if (k === "ArrowLeft") moveProbe(st.x - step, st.y, false);
+  else if (k === "ArrowRight") moveProbe(st.x + step, st.y, false);
+  else if (k === "ArrowUp") moveProbe(st.x, st.y + step, false);
+  else if (k === "ArrowDown") moveProbe(st.x, st.y - step, false);
+  else if ((k === "Enter" || k === " ") && cur && cur.primary) { cur.primary(); }
+  else if (k === "r" && st.tool === "arrow") setGuess(st.guess + 5);
+  else if (k === "e" && st.tool === "arrow") setGuess(st.guess - 5);
+  else return;
+  ev.preventDefault();
+}
+
+/* Peinture d'une équipotentielle avec l'aide (verrou) : un glissé trace le chemin, un simple clic trace la ligne entière */
+function finishPaint(pt) {
+  var w = world(), d = D(), t = st.target, len = 0;
+  for (var i = 1; i < pt.length; i++) len += dist(pt[i - 1], pt[i]);
+  if (len < 1.5) { var l = traceLevel(w, t, [st.x, st.y]); if (l) { d.lines[t] = l; d.aid = (d.aid || 0) + 1; obs("ok", "Ligne de <b>" + vtxt(w, t, 0) + "</b> tracée d’un clic grâce à l’aide : tous les points de cette ligne ont le même potentiel."); } }
+  else { d.lines[t] = pt; d.aid = (d.aid || 0) + 1; obs("ok", "Ligne de <b>" + vtxt(w, t, 0) + "</b> tracée en glissant la sonde le long de l’équipotentielle."); }
+  refresh();
+}
+
+/* Ligne à main levée : on compare, tronçon par tronçon, la direction tracée à la direction réelle du champ */
+function evalStroke(raw) {
+  var w = world(), d = D(), pts = [raw[0]], i;
+  for (i = 1; i < raw.length; i++) if (dist(pts[pts.length - 1], raw[i]) >= 0.4) pts.push(raw[i]);
+  var len = 0; for (i = 1; i < pts.length; i++) len += dist(pts[i - 1], pts[i]);
+  if (pts.length < 4 || len < 5) { obs("warn", "Trait trop court : trace la ligne de champ d’un bout à l’autre de la cuve."); return; }
+  var devs = [], worst = 0, wp = pts[0], sumSigned = 0;
+  for (i = 3; i < pts.length; i += 1) {
+    var a = pts[i - 3], b = pts[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, e = w.E(mx, my);
+    if (Math.hypot(e[0], e[1]) < 1e-6) continue;
+    var dv = angDiff(Math.atan2(b[1] - a[1], b[0] - a[0]) / RAD, Math.atan2(e[1], e[0]) / RAD);
+    devs.push(Math.abs(dv)); sumSigned += Math.cos(dv * RAD); if (Math.abs(dv) > worst) { worst = Math.abs(dv); wp = [mx, my]; }
+  }
+  if (!devs.length) { obs("warn", "Il n’y a pas de champ à cet endroit : trace entre les plaques."); return; }
+  var mean = devs.reduce(function (s, v) { return s + v; }, 0) / devs.length;
+  if (mean > 150 || sumSigned < 0 && mean > 100) { obs("bad", "Ta ligne est <b>à l’envers</b> : une ligne de champ est orientée. Elle va de la plaque <b>+</b> (potentiel élevé) vers la plaque <b>−</b> (potentiel bas). Trace-la dans ce sens."); return; }
+  if (mean > 14 && worst > 30) { obs("bad", "Ta ligne s’écarte de la direction du champ (écart moyen " + fmt(mean, 0) + "°, jusqu’à " + fmt(worst, 0) + "° vers x = " + fmt(wp[0], 1) + "). Rappel : en chaque point elle doit être <b>perpendiculaire</b> à l’équipotentielle qui passe par ce point. Active « Montre la tangente » ou regarde les équipotentielles pointillées."); return; }
+  var start = pts[0], dup = d.flines.some(function (f) { return f.how === "main" && dist(f.seed, start) < 2.4; });
+  if (dup) { obs("warn", "Tu as déjà une ligne de champ ici : pars d’une hauteur différente (au moins 2,5 " + w.unit + " d’écart)."); return; }
+  var line = traceField(w, start); if (!line) { obs("warn", "Pas de champ en ce point."); return; }
+  d.flines.push({ pts: line, seed: start, how: "main" });
+  obs("ok", "<b>Bien tracé.</b> Écart moyen avec la direction du champ : " + fmt(mean, 0) + "°. Ta ligne est remplacée par la ligne exacte (flèche = sens de E).");
+  refresh();
+}
+
+/* Lignes de champ au clic, ions et billes */
+function addFieldLine(p) {
+  var w = world(), d = D(); if (!inDom(p[0], p[1])) return;
+  var l = traceField(w, p); if (!l) { obs("warn", "Le champ est nul ici : essaie ailleurs."); return; }
+  d.flines.push({ pts: l, seed: p, how: "clic" }); d.fcl = (d.fcl || 0) + 1; refresh();
+}
+var anim = null;
+function startAnim() { if (!anim) anim = S.loop(stepAnim); anim.start(); }
+function stepAnim(dt) {
+  var w = world(), d = D(), busy = false;
+  st.ions.forEach(function (o) {
+    if (o.done) return; busy = true;
+    o.s += dt * 9;                                  /* dérive de 9 unités par seconde le long de la ligne de champ */
+    var tot = o.len, s = Math.min(o.s, tot), i = 0, acc = 0;
+    while (i < o.segs.length - 1 && acc + o.segs[i] < s) { acc += o.segs[i]; i++; }
+    var a = o.pts[i], b = o.pts[Math.min(i + 1, o.pts.length - 1)], f = o.segs[i] ? (s - acc) / o.segs[i] : 0;
+    o.pos = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; o.trace = o.pts.slice(0, i + 1).concat([o.pos]);
+    if (o.s >= tot) { o.done = true; D(o.wid).ionsDone = (D(o.wid).ionsDone || 0) + 1; refreshSoon(); }
+  });
+  st.balls.forEach(function (o) {
+    if (o.done) return; busy = true; o.t += dt;
+    var y = o.y0 - 0.5 * G0 * o.t * o.t;
+    if (y <= 0) { y = 0; o.done = true; D(o.wid).ballsDone.push(o.x0); refreshSoon(); }
+    o.pos = [o.x0, y]; o.trace = [[o.x0, o.y0], o.pos];
+  });
+  scene.redraw(); if (!busy) anim.stop();
+}
+var rsT = 0; function refreshSoon() { clearTimeout(rsT); rsT = setTimeout(refresh, 30); }
+function releaseIon(p) {
+  var w = world(); if (!inDom(p[0], p[1])) return;
+  var pts = traceField(w, p, true); if (!pts || pts.length < 2) { obs("warn", "Pas de champ ici : l’ion ne bouge pas."); return; }
+  var segs = [], len = 0; for (var i = 1; i < pts.length; i++) { var l = dist(pts[i - 1], pts[i]); segs.push(l); len += l; }
+  var o = { kind: "ion", pts: pts, segs: segs, len: len, s: 0, pos: pts[0], trace: [pts[0]], done: false, wid: w.id };
+  if (S.reducedMotion) { o.s = len; }
+  st.ions.push(o); if (st.ions.length > 8) st.ions.shift(); startAnim(); stepAnim(0);
+}
+function dropBall(p) {
+  var w = world(); if (!inDom(p[0], p[1]) || p[1] < 0.6) { obs("warn", "Choisis un point au-dessus du sol (z > 0)."); return; }
+  var o = { kind: "ball", x0: clamp(p[0], 0.2, DW - 0.2), y0: p[1], t: 0, pos: [p[0], p[1]], trace: [], done: false, wid: w.id };
+  if (S.reducedMotion) o.t = 99;
+  st.balls.push(o); if (st.balls.length > 8) st.balls.shift(); startAnim(); stepAnim(0);
+}
+
+/* ============================================================
+   7. Briques d'interface : questions, listes déroulantes, valeur numérique
+   ============================================================ */
+function fbShow(fb, tone, html) { fb.hidden = false; fb.setAttribute("data-tone", tone); fb.innerHTML = html; }
+function question(host, q) {
+  var fs = h("fieldset", { class: "q" }), fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true }), opts = h("div", { class: "opts" }), inputs = [];
+  fs.appendChild(h("legend", { html: q.legend }));
+  q.options.forEach(function (o, i) {
+    var inp = h("input", { type: "radio", name: "q-" + q.id, value: i }); inputs.push(inp);
+    inp.addEventListener("change", function () { pick(i, true); });
+    opts.appendChild(h("label", { class: "opt" }, inp, h("span", { html: o.t })));
+  });
+  function pick(i, user) {
+    var o = q.options[i];
+    if (q.predict) { st.pred[q.id] = i; st.flags[q.id] = true; fbShow(fb, "info", o.fb || "Prédiction notée. Teste-la maintenant."); if (user) { if (q.onPick) q.onPick(i); refresh(); } return; }
+    if (o.ok) { st.flags[q.id] = true; fbShow(fb, "ok", "<b>Oui.</b> " + (o.fb || q.explain || "")); if (user) { if (q.onOk) q.onOk(i); refresh(); } }
+    else { fbShow(fb, "bad", "<b>Pas tout à fait.</b> " + (o.fb || "")); }
+  }
+  fs.appendChild(opts); host.appendChild(fs); host.appendChild(fb);
+  if (q.predict ? st.pred[q.id] != null : F(q.id)) {
+    var idx = q.predict ? st.pred[q.id] : q.options.reduce(function (a, o, i) { return o.ok ? i : a; }, 0);
+    inputs[idx].checked = true; pick(idx, false);
+  }
+  return { fs: fs };
+}
+function selects(host, sp) {
+  var sel = [], fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+  sp.rows.forEach(function (r, i) {
+    var p = h("p", { class: "srow" }), s = h("select", { class: "nin", "aria-label": r.aria || ("Choix " + (i + 1)) });
+    s.appendChild(h("option", { value: "", text: "— choisir —" }));
+    r.opts.forEach(function (o, k) { s.appendChild(h("option", { value: k, text: o })); });
+    sel.push(s); p.appendChild(h("span", { html: r.pre })); p.appendChild(s); if (r.post) p.appendChild(h("span", { html: r.post }));
+    if (r.pre2) { var s2 = h("select", { class: "nin", "aria-label": r.aria2 || "Second choix" }); s2.appendChild(h("option", { value: "", text: "— choisir —" })); r.opts2.forEach(function (o, k) { s2.appendChild(h("option", { value: k, text: o })); }); sel.push(s2); p.appendChild(h("span", { html: r.pre2 })); p.appendChild(s2); if (r.post2) p.appendChild(h("span", { html: r.post2 })); }
+    host.appendChild(p);
+  });
+  var btn = h("button", { type: "button", class: "primary", text: "Vérifier" }); host.appendChild(h("div", { class: "row" }, btn)); host.appendChild(fb);
+  var flat = []; sp.rows.forEach(function (r, i) { flat.push({ ok: r.ok, fb: r.fb }); if (r.pre2) flat.push({ ok: r.ok2, fb: r.fb2 }); });
+  function fill() { flat.forEach(function (f, i) { sel[i].value = String(f.ok); }); }
+  btn.addEventListener("click", function () {
+    var empty = sel.some(function (s) { return s.value === ""; });
+    if (empty) { fbShow(fb, "warn", "<b>À compléter :</b> choisis une réponse dans chaque liste."); return; }
+    var bad = []; flat.forEach(function (f, i) { if (Number(sel[i].value) !== f.ok) bad.push(f.fb); });
+    if (!bad.length) { st.flags[sp.id] = true; fbShow(fb, "ok", "<b>Bravo.</b> " + (sp.explain || "")); refresh(); }
+    else fbShow(fb, "bad", "<b>Pas encore.</b> À revoir :<ul>" + bad.map(function (b) { return "<li>" + b + "</li>"; }).join("") + "</ul>");
+  });
+  if (F(sp.id)) { fill(); fbShow(fb, "ok", "<b>Bravo.</b> " + (sp.explain || "")); }
+}
+function numQ(host, q) {
+  var id = "n-" + q.id, inp = h("input", { type: "text", inputmode: "decimal", id: id, autocomplete: "off", class: "nin" });
+  var fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true }), tries = 0;
+  var bOk = h("button", { type: "button", class: "primary", text: "Vérifier" }), bH = q.hint ? h("button", { type: "button", class: "small", text: "Un indice" }) : null;
+  host.appendChild(h("div", { class: "field" }, h("label", { for: id, html: q.label }), h("div", { class: "row" }, inp, q.unit ? h("span", { html: q.unit }) : null, bOk, bH)));
+  host.appendChild(fb);
+  function check() {
+    var v = S.parseNum(inp.value);
+    if (isNaN(v)) { fbShow(fb, "warn", "<b>À vérifier :</b> écris un nombre (la virgule est acceptée)."); return; }
+    tries++; var ok = q.abs != null ? Math.abs(v - q.answer) <= q.abs : Math.abs(v - q.answer) <= Math.abs(q.answer) * (q.tol == null ? 0.05 : q.tol);
+    if (ok) { st.flags[q.id] = true; fbShow(fb, "ok", "<b>Bravo.</b> " + (q.explain || "")); refresh(); }
+    else { var o = q.orient ? q.orient(v) : (v > q.answer ? "Ta valeur est trop grande." : "Ta valeur est trop petite."); fbShow(fb, "bad", "<b>Pas encore.</b> " + o + (tries >= 2 && q.explain ? " " + q.explain : "")); }
+  }
+  bOk.addEventListener("click", check); inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(); });
+  if (bH) bH.addEventListener("click", function () { fbShow(fb, "warn", "<b>Indice :</b> " + q.hint); });
+  if (F(q.id)) { inp.value = fmt(q.answer, 1); fbShow(fb, "ok", "<b>Bravo.</b> " + (q.explain || "")); }
+  return { input: inp };
+}
+function legendSet(items) {
+  var host = $("#legend"); host.textContent = "";
+  items.forEach(function (it) { host.appendChild(h("span", { class: "lg", style: "color:" + it[0] }, h("i", { class: it[2] || "" }), it[1])); });
+  host.appendChild(h("span", { class: "hintline", id: "legend-tip" }));
+}
+
+/* ============================================================
+   8. Cadre des missions : étapes, liste « À faire », progression
+   ============================================================ */
+var BOREF = "Programme : Première spécialité, Mouvement et interactions, « Interactions fondamentales et notion de champ » (BO spécial n° 1 du 22 janvier 2019).";
+function mdone(id) {
+  var m = M[id], tk = {}; if (!m.steps.length) return false; m.derive && m.derive(tk);
+  return m.steps.every(function (s) { return s.tasks.every(function (t) { return tk[t[0]]; }); });
+}
+function refresh() {
+  if (!cur) return;
+  var tk = {}; if (cur.derive) cur.derive(tk); st.tk = tk;
+  var first = -1;
+  cur.steps.forEach(function (s, i) { s.done = s.tasks.every(function (t) { return tk[t[0]]; }); if (first < 0 && !s.done) first = i; });
+  cur.steps.forEach(function (s, i) {
+    if (!s.el) return;
+    s.el.hidden = first >= 0 && i > first; s.el.setAttribute("data-done", String(s.done)); s.el.querySelector(".ok").hidden = !s.done;
+  });
+  var ul = $("#tasks"); ul.textContent = "";
+  if (!cur.steps.length) ul.appendChild(h("li", { "data-s": "next" }, h("span", { class: "mk", "aria-hidden": "true", text: "·" }), h("span", { class: "tx", text: "Atelier libre : aucune tâche imposée. Explore, compare, tends des pièges à ton voisin." })));
+  cur.steps.forEach(function (s, i) {
+    s.tasks.forEach(function (t) {
+      var state = tk[t[0]] ? "done" : (i === first ? "now" : "next");
+      ul.appendChild(h("li", { "data-s": state }, h("span", { class: "mk", "aria-hidden": "true", text: state === "done" ? "✓" : (state === "now" ? "→" : "○") }), h("span", { class: "tx" }, t[1], h("span", { class: "sr-only", text: state === "done" ? " (fait)" : " (à faire)" }))));
+    });
+  });
+  var pg = $("#progress"); pg.textContent = "";
+  ["M1", "M2", "M3", "M4", "M5", "M6", "M7"].forEach(function (id) {
+    var d = mdone(id); pg.appendChild(h("span", { class: "mchip", "data-done": String(d) }, (d ? "✓ " : "") + "Mission " + id.slice(1)));
+  });
+  if (cur.onRefresh) cur.onRefresh();
+  if (scene && !cur.earth) scene.redraw();
+  if (cur.steps.length && first < 0 && !F("fin-" + cur.id)) { st.flags["fin-" + cur.id] = true; obs("ok", cur.finish || "<b>Mission terminée.</b>"); }
+}
+function stepCard(s, i) {
+  var sec = h("section", { class: "card step", "data-step": s.id, "aria-labelledby": "h-" + s.id });
+  sec.innerHTML = '<h2 id="h-' + s.id + '"><span class="num">' + (i + 1) + "</span><span>" + s.title + '</span><span class="ok" hidden>✓ terminé</span></h2><div class="sbody"></div>';
+  s.el = sec; s.body = sec.querySelector(".sbody"); return sec;
+}
+function enter(mid) {
+  cur = M[mid]; st.mid = mid;
+  st.stroke = null; st.paint = null; st.force = null; st.tangent = false; st.drag = null; st.ions = []; st.balls = [];
+  st.refLines = !!cur.refLines; st.showAB = !!cur.showAB; st.gridArrows = false; st.heat = false; st.lock = !!cur.lockOn;
+  Object.keys(WORLDS).forEach(function (k) { WORLDS[k].flip = false; }); st.flip = false;
+  probeHooks = []; sx = sy = null;
+  if (cur.cfg) st.cfg = cur.cfg;
+  $("#stage-cuve").hidden = !!cur.earth; $("#stage-terre").hidden = !cur.earth;
+  $("#intro").innerHTML = '<h2 id="h-intro">' + cur.title + '</h2><p class="obj"><b>Objectif.</b> ' + cur.obj + '</p><p class="bo">' + BOREF + (cur.bo ? " " + cur.bo : "") + '</p><p class="help">' + cur.how + "</p>";
+  var host = $("#steps"); host.textContent = "";
+  cur.steps.forEach(function (s, i) { host.appendChild(stepCard(s, i)); });
+  if (cur.earth) { cur.setup(); }
+  else {
+    var w = world(), start = cur.start || (w.cuve ? [3.4, 6] : [6, 3]);
+    st.x = start[0]; st.y = start[1]; if (w.levels.indexOf(st.target) < 0) st.target = w.levels[2];
+    buildPosSliders(); buildLCDs(cur.lcd); buildCfgBar(); buildTools(toolsFor(cur, w)); legendSet(cur.legend ? cur.legend(w) : []);
+    $("#actions").textContent = ""; if (cur.ui) cur.ui($("#actions"));
+    setTool(st.tool);
+  }
+  cur.steps.forEach(function (s) { s.render(s.body); });
+  if (cur.after) cur.after();
+  refresh();
+  obs("info", cur.hello || "Commence par la première étape.");
+  scene && scene.redraw();
+}
+function toolsFor(m, w) {
+  var t = m.tools.slice(); if (m.id === "A") t = w.cuve ? ["probe", "arrow", "draw", "ion", "fline"] : ["probe", "arrow", "draw", "fline", "ball"];
+  return t;
+}
+function buildCfgBar() {
+  var bar = $("#cfgbar"); bar.textContent = "";
+  if (!cur.cfgs) { bar.hidden = true; return; }
+  bar.hidden = false; bar.appendChild(h("span", { class: "lab", text: "ÉLECTRODES" }));
+  cur.cfgs.forEach(function (id) {
+    var b = h("button", { type: "button", class: "pill", "data-cfg": id, "aria-pressed": String(st.cfg === id), text: WORLDS[id].nom });
+    b.addEventListener("click", function () { setCfg(id); }); bar.appendChild(b);
+  });
+}
+function setCfg(id) {
+  st.cfg = id; st.ions = []; st.balls = []; st.force = null; st.stroke = null;
+  var w = world(); w.flip = st.flip && cur.id === "A";
+  Array.prototype.forEach.call($("#cfgbar").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-cfg") === id)); });
+  st.x = clamp(st.x, w.box.x0, w.box.x1); st.y = clamp(st.y, w.box.y0, w.box.y1);
+  if (w.levels.indexOf(st.target) < 0) st.target = w.levels[2];
+  buildPosSliders(); buildLCDs(cur.lcd); buildTools(toolsFor(cur, w)); legendSet(cur.legend ? cur.legend(w) : []);
+  if (cur.ui) { $("#actions").textContent = ""; cur.ui($("#actions")); }
+  if (cur.onCfg) cur.onCfg(id);
+  refresh();
+}
+
+/* ---------- Commandes communes : valeurs cherchées, aide, marquage ---------- */
+function chipsTarget(host) {
+  var w = world(), box = h("div", { class: "chips", role: "group", "aria-label": "Valeur du potentiel à repérer" });
+  box.appendChild(h("span", { class: "lab", text: w.cuve ? "Tension à repérer :" : "E_pp/m à repérer :" }));
+  w.levels.forEach(function (L) {
+    var b = h("button", { type: "button", class: "pill", "data-t": L, "aria-pressed": String(st.target === L), text: fmt(L, 0) + " " + w.vu });
+    b.addEventListener("click", function () { setTarget(L); }); box.appendChild(b);
+  });
+  host.appendChild(box);
+}
+function setTarget(L) {
+  st.target = L; Array.prototype.forEach.call(document.querySelectorAll("#actions .chips button"), function (b) { b.setAttribute("aria-pressed", String(Number(b.getAttribute("data-t")) === L)); });
+  updateLCD(); if (cur.onRefresh) cur.onRefresh(); scene.redraw();
+}
+function aidAvailable() { return !!(cur.aidAlways || D("plaques").manualLine); }
+function aidSwitch(host) {
+  var b = h("button", { type: "button", class: "sw", role: "switch", "aria-checked": String(st.lock), id: "aid" }, h("span", { class: "track" }, h("span", { class: "knob" })), "Aide : suivre l’équipotentielle");
+  var note = h("p", { class: "hintline", id: "aidnote" });
+  b.addEventListener("switch", function (e) { st.lock = e.detail.checked; refreshAid(); });
+  host.appendChild(h("div", { class: "row" }, b)); host.appendChild(note); refreshAid();
+}
+function refreshAid() {
+  var b = $("#aid"); if (!b) return; var ok = aidAvailable();
+  b.disabled = !ok; if (!ok) { b.setAttribute("aria-checked", "false"); st.lock = false; }
+  var n = $("#aidnote");
+  n.textContent = !ok ? "Cette aide se débloque quand tu as tracé une première équipotentielle à la main (4 points) : on automatise après avoir compris la méthode."
+    : (st.lock ? "Aide active : glisse la sonde, elle reste sur la ligne choisie, ou clique une fois pour tracer toute la ligne d’un coup." : "Tu peux activer l’aide pour tracer plus vite.");
+}
+function hintDir(w, U, t) {
+  var low = U < t;
+  if (w.id === "pesanteur") return low ? "monte (E<sub>pp</sub>/m augmente avec l’altitude)" : "descends (E<sub>pp</sub>/m diminue quand on se rapproche du sol)";
+  return low ? "rapproche-toi de la plaque (ou de l’électrode) <b>+</b>" : "rapproche-toi de la plaque (ou de l’électrode) <b>−</b>, la référence";
+}
+function addMark(x, y, pred) {
+  var w = world(), d = D(), t = st.target, U = reading(w, x, y);
+  d.marks.push({ t: t, x: x, y: y, U: U, pred: !!pred });
+  if (cur.table) cur.table.add({ t: t, x: x, y: y, U: U });
+  if (pred) d.preds = (d.preds || 0) + 1;
+}
+function markPoint() {
+  var w = world(), d = D(), t = st.target, U = reading(w, st.x, st.y);
+  if (Math.abs(U - t) > w.tol) {
+    obs("warn", "Ici <b>U = " + vtxt(w, U) + "</b>, ce n’est pas " + vtxt(w, t, 0) + " (à ± " + fmt(w.tol, w.cuve ? 2 : 0) + " près). " + (U < t ? "C’est plus faible : " : "C’est plus fort : ") + hintDir(w, U, t) + ".");
+    return;
+  }
+  if (d.marks.some(function (m) { return m.t === t && dist([m.x, m.y], [st.x, st.y]) < MINSEP; })) { obs("warn", "Ce point est trop proche d’un point déjà marqué : choisis-en un plus éloigné (au moins " + MINSEP + " " + w.unit + ")."); return; }
+  addMark(st.x, st.y, false);
+  var n = d.marks.filter(function (m) { return m.t === t; }).length;
+  obs("ok", "Point <b>" + n + "</b> à " + vtxt(w, t, 0) + " enregistré (U = " + vtxt(w, U) + ")." + (n < 4 ? " Il en faut " + (4 - n) + " de plus, bien espacés, avant de relier." : " Tu peux maintenant tracer la ligne."));
+  refresh();
+}
+function traceFromMarks() {
+  var w = world(), d = D(), t = st.target, ms = d.marks.filter(function (m) { return m.t === t; });
+  if (ms.length < 4) { obs("warn", "Il faut au moins 4 points espacés pour tracer la ligne de " + vtxt(w, t, 0) + " (tu en as " + ms.length + ")."); return; }
+  var vert = w.id === "plaques", n = ms.length, su = 0, sv = 0, suu = 0, suv = 0;
+  ms.forEach(function (m) { var u = vert ? m.y : m.x, v = vert ? m.x : m.y; su += u; sv += v; suu += u * u; suv += u * v; });
+  var b = (n * suv - su * sv) / (n * suu - su * su), a = (sv - b * su) / n, e = vert ? DH : DW;
+  d.lines[t] = vert ? [[clamp(a, 0, DW), 0], [clamp(a + b * e, 0, DW), DH]] : [[0, clamp(a, 0, DH)], [DW, clamp(a + b * e, 0, DH)]];
+  d.manualLine = true;
+  obs("ok", "Ligne de <b>" + vtxt(w, t, 0) + "</b> tracée à partir de tes " + n + " points. Elle est inclinée de <b>" + fmt(Math.abs(Math.atan(b)) / RAD, 1) + "°</b> par rapport " + (vert ? "aux plaques" : "à l’horizontale") + " : à l’incertitude de mesure près, " + (vert ? "parallèle aux plaques." : "horizontale."));
+  refresh();
+}
+function predBlock(host) {
+  var box = h("div", { class: "sub-block", id: "predbox", hidden: true }); host.appendChild(box); return box;
+}
+function updatePred() {
+  var box = $("#predbox"); if (!box) return;
+  var w = world(), d = D(), t = st.target, ms = d.marks.filter(function (m) { return m.t === t; });
+  var need = (d.preds || 0) < 1;
+  if (!need && (ms.length < 2 || d.lines[t])) { box.hidden = true; return; }
+  var key = w.id + t + ms.length + (d.lines[t] ? "L" : "") + (need ? "n" : "");
+  if (box.getAttribute("data-k") === key) { box.hidden = false; return; }
+  box.setAttribute("data-k", key); box.hidden = false;
+  var vert = w.id === "plaques", best = vert ? 6 : 10, bd = -1, c;
+  if (ms.length < 2 && ms.some(function (m) { return Math.abs((vert ? m.y : m.x) - best) < MINSEP + 0.5; })) best = vert ? 2.5 : 4;
+  if (ms.length >= 2) for (c = 1; c <= 11; c += 0.5) { var md = Math.min.apply(null, ms.map(function (m) { return Math.abs(c - (vert ? m.y : m.x)); })); if (md > bd) { bd = md; best = vert ? c : Math.min(c, 19); } }
+  var tx = vert ? "À <b>y = " + fmt(best, 1) + " cm</b>, quelle abscisse <b>x</b> prédis-tu pour lire " + vtxt(w, t, 0) + " ?" : "À <b>x = " + fmt(best, 1) + " m</b>, quelle altitude <b>z</b> prédis-tu pour lire " + vtxt(w, t, 0) + " ?";
+  box.innerHTML = '<h3>Prédis, puis teste</h3><p>' + (ms.length >= 2 ? "Tu as déjà " + ms.length + " points. Plutôt que de chercher au hasard, utilise ce que tu as vu. " : "Plutôt que de chercher au hasard, utilise ce que tu as compris de la carte. ") + tx + '</p><div class="row"><input class="nin" id="pin" inputmode="decimal" autocomplete="off" aria-label="Valeur prédite"><span>' + w.unit + '</span><button type="button" class="primary" id="ptest">Tester ma prédiction</button></div>';
+  $("#ptest", box).addEventListener("click", function () {
+    var v = S.parseNum($("#pin", box).value); if (isNaN(v)) { obs("warn", "Écris d’abord une valeur numérique."); return; }
+    var X = vert ? v : best, Y = vert ? best : v;
+    moveProbe(X, Y, false); var U = reading(w, st.x, st.y);
+    if (Math.abs(U - t) <= w.tol) {
+      if (d.marks.some(function (m) { return m.t === t && dist([m.x, m.y], [st.x, st.y]) < MINSEP; })) { obs("warn", "Prédiction juste, mais ce point est trop proche d’un autre : essaie un autre endroit."); return; }
+      addMark(st.x, st.y, true); obs("ok", "<b>Prédiction juste :</b> on lit " + vtxt(w, U) + ", point enregistré. Tu as compris où se trouve la ligne."); refresh();
+    } else obs("bad", "On lit <b>" + vtxt(w, U) + "</b> à cet endroit, pas " + vtxt(w, t, 0) + ". " + (U < t ? "C’est plus faible : " : "C’est plus fort : ") + hintDir(w, U, t) + ", puis réessaie en te servant de tes points précédents.");
+  });
+}
+
+/* ---------- Calcul de E = U/d (ou de g) ---------- */
+function calcPanel(host, o) {
+  var w = world(), id = w.id, cm = w.cuve, d = D(id);
+  host.innerHTML = '<div class="calc"><p class="calcline" id="cl" aria-live="off"></p><div class="field"><label for="cin">' + o.label + '</label><div class="row"><input class="nin" id="cin" inputmode="decimal" autocomplete="off"><span>' + o.unit + '</span><button type="button" class="primary" id="cok">Vérifier et enregistrer</button></div></div><div class="fb" id="cfb" hidden></div><div id="ctbl"></div><div class="mini" id="gbox" hidden><canvas id="gcv" role="img" aria-label="' + o.garia + '"></canvas></div></div>';
+  var fb = $("#cfb", host), tbl = S.measureTable($("#ctbl", host), { caption: o.caption, columns: o.cols, filename: o.file, max: 12 });
+  d.calc.forEach(function (r) { tbl.add(r); });
+  var g = S.canvas($("#gcv", host), { width: 600, height: 340, draw: function (ctx, W, H) { drawGraph(ctx, W, H, w, d.calc, o); } });
+  cur.graph = g; $("#gbox", host).hidden = d.calc.length < 2;
+  function live() {
+    var U = r2(reading(w, st.x, st.y)), dd = r2(refDist(w, st.x, st.y));
+    $("#cl", host).innerHTML = o.liveHtml(U, dd);
+  }
+  probeHooks.push(live); live();
+  $("#cok", host).addEventListener("click", function () {
+    var U = r2(reading(w, st.x, st.y)), dd = r2(refDist(w, st.x, st.y)), v = S.parseNum($("#cin", host).value);
+    if (dd < o.dmin || dd > (cm ? DW - o.dmin : DH - 0.5)) { fbShow(fb, "warn", "<b>À revoir :</b> place la " + (cm ? "sonde entre les plaques, pas sur une plaque" : "bille entre 1 et 11 m d’altitude") + " (sinon U/d n’a pas de sens)."); return; }
+    if (isNaN(v)) { fbShow(fb, "warn", "<b>À vérifier :</b> écris le résultat de ton calcul (la virgule est acceptée)."); return; }
+    if (d.calc.some(function (r) { return Math.abs(r.d - dd) < 3; })) { fbShow(fb, "warn", "<b>Change de position :</b> choisis un point à au moins 3 " + w.unit + " de tes autres points, pour tester si la valeur change."); return; }
+    var exp = U / (dd * (cm ? 0.01 : 1)), ratio = v / exp;
+    if (Math.abs(ratio - 1) > 0.03) {
+      var msg = (ratio > 0.005 && ratio < 0.02 && cm) ? "Tu sembles avoir utilisé d en <b>centimètres</b> : convertis-la en mètres (1 cm = 0,01 m) pour obtenir des V·m⁻¹."
+        : (ratio > 50 && cm) ? "Ton résultat est 100 fois trop grand : d doit être divisée par 100 pour passer des cm aux m, donc E = U / d_m." : (v > exp ? "Ta valeur est trop grande : refais U ÷ d avec les valeurs affichées." : "Ta valeur est trop petite : refais U ÷ d avec les valeurs affichées.");
+      fbShow(fb, "bad", "<b>Pas encore.</b> " + msg); return;
+    }
+    var row = o.row(dd, U, exp); d.calc.push(row); tbl.add(row); d.vecs.push({ x: st.x, y: st.y }); $("#gbox", host).hidden = d.calc.length < 2; g.redraw();
+    fbShow(fb, "ok", "<b>Bravo.</b> " + o.okText(exp, d.calc.length)); $("#cin", host).value = ""; refresh();
+  });
+}
+function drawGraph(ctx, W, H, w, rows, o) {
+  var c = pal(), l = 64, b = 50, t = 18, r = 22, xm = DW, ym = w.Vmax, X = function (v) { return l + v / xm * (W - l - r); }, Y = function (v) { return H - b - v / ym * (H - b - t); };
+  ctx.fillStyle = c.surface; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = c.line; ctx.lineWidth = 1; ctx.font = "500 14px " + FONT; ctx.fillStyle = c.muted;
+  var i, ystep = w.cuve ? 1 : 20;
+  for (i = 0; i <= xm; i += 5) { ln(ctx, X(i), t, X(i), H - b); ctx.textAlign = "center"; ctx.fillText(String(i), X(i), H - b + 18); }
+  for (i = 0; i <= ym + 0.01; i += ystep) { ln(ctx, l, Y(i), W - r, Y(i)); ctx.textAlign = "right"; ctx.fillText(String(i), l - 8, Y(i) + 5); }
+  ctx.strokeStyle = c.ink; ctx.lineWidth = 2; ln(ctx, l, t, l, H - b); ln(ctx, l, H - b, W - r, H - b);
+  ctx.textAlign = "center"; ctx.font = "600 15px " + FONT; ctx.fillStyle = c.ink; ctx.fillText(o.xlab, l + (W - l - r) / 2, H - 10);
+  ctx.save(); ctx.translate(16, t + (H - b - t) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(o.ylab, 0, 0); ctx.restore();
+  var n = rows.length;
+  if (n >= 2) {
+    var sx_ = 0, sy_ = 0, sxx = 0, sxy = 0; rows.forEach(function (p) { sx_ += p.d; sy_ += p.U; sxx += p.d * p.d; sxy += p.d * p.U; });
+    var den = n * sxx - sx_ * sx_;
+    if (Math.abs(den) > 1e-9) {
+      var bb = (n * sxy - sx_ * sy_) / den, aa = (sy_ - bb * sx_) / n;
+      ctx.strokeStyle = c.force; ctx.lineWidth = 3; ln(ctx, X(0), Y(aa), X(xm), Y(aa + bb * xm));
+      var slope = bb * (w.cuve ? 100 : 1);
+      ctx.fillStyle = c.force; ctx.textAlign = "left"; ctx.font = "600 16px " + FONT; ctx.fillText("pente ≈ " + fmt(slope, w.cuve ? 1 : 2) + " " + (w.cuve ? "V·m⁻¹" : "N·kg⁻¹"), l + 16, t + 26);
+    }
+  }
+  rows.forEach(function (p) { circ(ctx, X(p.d), Y(p.U), 7); ctx.fillStyle = c.pot; ctx.fill(); ctx.strokeStyle = c.surface; ctx.lineWidth = 2; ctx.stroke(); });
+}
+
+/* ---------- Force d'essai : F = qE ou F = m g ---------- */
+function forcePanel(host, kind) {
+  var isQ = kind === "q", w = world();
+  var min = isQ ? -4 : 0.5, max = isQ ? 4 : 5, def = isQ ? 2 : 2, step = 0.5;
+  host.innerHTML = '<div class="rng"><label for="frg">' + (isQ ? "Charge d’essai q" : "Masse d’essai m") + ' <span><b id="fout"></b> ' + (isQ ? "nC" : "kg") + '</span></label><input id="frg" type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + def + '"></div><div class="row"><button type="button" class="primary" id="fput">' + (isQ ? "Placer la charge à la position de la sonde" : "Placer la masse à la position de la bille") + '</button></div>';
+  var rg = $("#frg", host), out = $("#fout", host);
+  function upd(user) {
+    var q = Number(rg.value); out.textContent = fmt(q, 1); rg.setAttribute("aria-valuetext", fmt(q, 1) + (isQ ? " nanocoulombs" : " kilogrammes"));
+    if (isQ && user && q !== 0) { st.flags[q > 0 ? "m4-seen+" : "m4-seen-"] = true; }
+    if (st.force) place(false);
+    if (user) refresh();
+  }
+  function place(announce) {
+    var w = world(), a = eDir(w, st.x, st.y), E = w.Emag(st.x, st.y), q = Number(rg.value);
+    if (isQ) {
+      var Fv = q * E, ang = q >= 0 ? a : a + 180;
+      st.force = { x: st.x, y: st.y, ang: ang, len: clamp(Math.abs(Fv) / 20, 0.001, 7), text: q === 0 ? "F = 0 (q = 0)" : "F = " + fmt(Math.abs(Fv), 0) + " nN" };
+      if (q === 0) st.force.len = 0.001;
+    } else {
+      var Fm = q * G0; st.force = { x: st.x, y: st.y, ang: a, len: clamp(Fm / 10, 0.1, 7), text: "P = m·g = " + fmt(Fm, 1) + " N" };
+    }
+    scene.redraw();
+  }
+  rg.addEventListener("input", function () { upd(true); });
+  $("#fput", host).addEventListener("click", function () { place(true); if (!isQ) st.flags["m6-seen-m"] = true; refresh(); });
+  upd(false);
+}
+
+/* ============================================================
+   9. PARTIE A : la cuve
+   ============================================================ */
+var LEG_CUVE = function () { return [["var(--cu)", "Plaque de cuivre", "sq"], ["var(--pot)", "Équipotentielle / point de même tension", "sq"], ["var(--c-force)", "Ligne de champ, vecteur E", "sq"]]; };
+function spread(a) { for (var i = 0; i < a.length; i++) for (var j = i + 1; j < a.length; j++) if (Math.abs(a[i].y - a[j].y) >= 3) return true; return false; }
+function vertMove() {
+  var X = st.moves.x, Y = st.moves.y;
+  for (var i = 0; i < X.length; i++) {
+    var lo = Y[i], hi = Y[i];
+    for (var j = i; j < X.length && Math.abs(X[j] - X[i]) <= 0.5; j++) { if (Y[j] < lo) lo = Y[j]; if (Y[j] > hi) hi = Y[j]; }
+    if (hi - lo >= 6) return true;
+  }
+  return false;
+}
+
+/* ---------- Mission 1 ---------- */
+M.M1 = {
+  id: "M1", world: "plaques", lcd: ["U", "X", "Y"], tools: ["probe"], start: [2.5, 6], legend: LEG_CUVE,
+  title: "Mission 1 · Lire un potentiel avec la sonde",
+  obj: "Comprendre que la sonde mesure, en chaque point de la cuve, un <b>potentiel électrique</b> repéré par rapport à la plaque de référence.",
+  how: "Déplace la sonde en glissant sur la cuve, avec les curseurs ou avec les flèches du clavier. La plaque de gauche est reliée à la borne − du générateur et à la borne COM du voltmètre : c’est la <b>référence</b> (0 V). La plaque de droite est reliée à la borne + (générateur de 6 V).",
+  hello: "Place la sonde sur la plaque de gauche, lis la tension, puis presse « Relever la tension ».",
+  finish: "<b>Mission 1 terminée.</b> Le potentiel ne dépend que de la distance à la plaque de référence : tous les points à la même distance ont le même potentiel. C’est ce que tu vas cartographier à la mission 2.",
+  primary: function () { relever(); },
+  ui: function (host) {
+    var b = h("button", { type: "button", class: "primary", text: "Relever la tension" }); b.addEventListener("click", relever);
+    host.appendChild(h("div", { class: "row" }, b, h("span", { class: "hintline", text: "Raccourci : touche Entrée quand la cuve a le focus." })));
+  },
+  steps: [
+    { id: "m1a", title: "Relève la tension sur chaque plaque",
+      tasks: [["m1-pl-l", "Relever U sur la plaque de gauche, à deux hauteurs différentes"], ["m1-pl-r", "Relever U sur la plaque de droite, à deux hauteurs différentes"], ["m1-q-plates", "Dire si les plaques sont des surfaces équipotentielles"]],
+      render: function (b) {
+        b.innerHTML = '<p>La sonde mesure, entre le point où tu la poses et la plaque de référence, une tension : c’est le <b>potentiel électrique</b> du point. Pose-la sur la plaque de gauche, relève U, monte-la de quelques centimètres et relève encore. Fais de même sur la plaque de droite.</p><div id="m1-tbl"></div><div id="m1-q"></div>';
+        var t = S.measureTable($("#m1-tbl", b), { caption: "Relevés sur les plaques et dans la cuve", columns: [{ key: "x", label: "x", unit: "cm", digits: 2 }, { key: "y", label: "y", unit: "cm", digits: 2 }, { key: "U", label: "U", unit: "V", digits: 2 }], filename: "releves-potentiel", max: 30 });
+        st.relev.forEach(function (r) { t.add(r); }); M.M1.table = t;
+        question($("#m1-q", b), { id: "m1-q-plates", legend: "Ces plaques sont-elles des <b>surfaces équipotentielles</b> (même potentiel en tous leurs points) ?",
+          options: [{ t: "Oui : sur chaque plaque la tension est la même en tout point (0 V à gauche, 6 V à droite).", ok: true, fb: "Les plaques de cuivre sont conductrices : leur potentiel est le même partout. Ce sont des surfaces équipotentielles, et c’est la première équipotentielle que tu viens de cartographier." },
+            { t: "Non : la tension change quand on monte le long d’une plaque.", fb: "Regarde tes relevés : à deux hauteurs différentes sur la même plaque, les valeurs sont-elles différentes (au-delà de quelques 0,01 V d’incertitude) ?" }] });
+      } },
+    { id: "m1b", title: "Prédis la tension au milieu de la cuve",
+      tasks: [["m1-pred", "Prédire U au milieu de la cuve, puis comparer avec la mesure"]],
+      render: function (b) {
+        b.innerHTML = '<p>La plaque de gauche est à 0 V, celle de droite à 6 V. <b>Avant de mesurer</b> : quelle tension la sonde indiquera-t-elle au milieu de la cuve (x = 10 cm, y = 6 cm) ?</p><div class="row"><input class="nin" id="m1-p" inputmode="decimal" autocomplete="off" aria-label="Tension prédite en volts"><span>V</span><button type="button" class="primary" id="m1-pb">Placer la sonde au milieu et comparer</button></div><div class="fb" id="m1-pf" hidden></div>';
+        var fb = $("#m1-pf", b);
+        if (F("m1-pred")) fbShow(fb, "ok", "<b>Bien vu.</b> Au milieu, la tension est la moitié de 6 V : elle varie régulièrement entre les deux plaques.");
+        $("#m1-pb", b).addEventListener("click", function () {
+          var v = S.parseNum($("#m1-p", b).value); if (isNaN(v)) { fbShow(fb, "warn", "<b>À vérifier :</b> écris un nombre en volts."); return; }
+          moveProbe(10, 6, false); var w = world(), U = reading(w, 10, 6);
+          if (Math.abs(v - U) <= 0.4) { st.flags["m1-pred"] = true; fbShow(fb, "ok", "<b>Bien vu.</b> Tu avais prédit " + fmt(v, 2) + " V, la sonde indique " + fmt(U, 2) + " V : au milieu, la tension est la moitié de 6 V. Elle varie régulièrement entre les deux plaques."); refresh(); }
+          else fbShow(fb, "bad", "<b>Pas encore.</b> Tu avais prédit " + fmt(v, 2) + " V, la sonde indique " + fmt(U, 2) + " V. Entre 0 V à gauche et 6 V à droite, comment la tension évolue-t-elle quand on avance ? Pose la sonde à x = 5 cm puis à x = 15 cm pour t’en convaincre, et refais ta prédiction.");
+        });
+      } },
+    { id: "m1c", title: "Monte et descends la sonde : U change-t-il ?",
+      tasks: [["m1-y-pick", "Prédire l’effet d’un déplacement vertical"], ["m1-y-test", "Tester : monter la sonde d’au moins 6 cm sans changer x"], ["m1-q-dep", "Dire de quoi dépend la tension"]],
+      render: function (b) {
+        b.innerHTML = '<div id="m1-y"></div><p id="m1-yt" class="note">Teste ta prédiction : avec le curseur « Position y », monte la sonde d’au moins 6 cm, sans toucher au curseur x.</p><div id="m1-d"></div>';
+        question($("#m1-y", b), { id: "m1-y-pick", predict: true, legend: "<b>Prédis.</b> Si je monte la sonde de bas en haut en gardant la même distance à la plaque de gauche, la tension U…",
+          options: [{ t: "augmente", fb: "Prédiction notée : U augmente. Teste-la avec le curseur y." }, { t: "diminue", fb: "Prédiction notée : U diminue. Teste-la avec le curseur y." }, { t: "reste à peu près la même", fb: "Prédiction notée : U reste la même. Teste-la avec le curseur y." }],
+          onPick: function () { st.moves = { x: [], y: [] }; } });
+        question($("#m1-d", b), { id: "m1-q-dep", legend: "D’après tes mesures, la tension (le potentiel) en un point de la cuve dépend…",
+          options: [{ t: "seulement de la distance à la plaque de référence (x)", ok: true, fb: "Les points qui ont le même x ont le même potentiel : ils sont sur une même ligne verticale, parallèle aux plaques. Ces lignes s’appellent des <b>équipotentielles</b>." },
+            { t: "seulement de la hauteur y", fb: "Monte la sonde sans changer x : U a-t-il changé ? Puis déplace-la en x à y constant." }, { t: "de x et de y à la fois", fb: "Teste : à x constant, U change-t-il avec y ? (compare les valeurs, en tenant compte des quelques 0,01 V d’incertitude)." }] });
+      } }
+  ],
+  after: function () {
+    probeHooks.push(function () {
+      if (cur.id !== "M1" || !F("m1-y-pick") || F("m1-y-test") || !vertMove()) return;
+      st.flags["m1-y-test"] = true; var p = st.pred["m1-y-pick"];
+      obs(p === 2 ? "ok" : "warn", (p === 2 ? "<b>Prédiction juste :</b> " : "<b>Prédiction à corriger :</b> ") + "en montant la sonde à x constant, U reste pratiquement la même (les écarts de quelques 0,01 V sont l’incertitude de mesure). Le potentiel ne dépend pas de y.");
+      refresh();
+    });
+  },
+  derive: function (tk) {
+    var Lp = st.relev.filter(function (r) { return r.x <= 0.15; }), Rp = st.relev.filter(function (r) { return r.x >= DW - 0.15; });
+    tk["m1-pl-l"] = spread(Lp); tk["m1-pl-r"] = spread(Rp);
+    ["m1-q-plates", "m1-pred", "m1-y-pick", "m1-y-test", "m1-q-dep"].forEach(function (k) { tk[k] = F(k); });
+  }
+};
+function relever() {
+  var w = world(), U = reading(w, st.x, st.y), row = { x: st.x, y: st.y, U: U }; st.relev.push(row); if (M.M1.table) M.M1.table.add(row);
+  var where = st.x <= 0.15 ? "sur la plaque de gauche" : (st.x >= DW - 0.15 ? "sur la plaque de droite" : "dans l’électrolyte");
+  obs("info", "Relevé " + st.relev.length + " : <b>U = " + vtxt(w, U) + "</b> " + where + " (x = " + fmt(st.x, 2) + " cm, y = " + fmt(st.y, 2) + " cm).");
+  refresh();
+}
+
+/* ---------- Mission 2 ---------- */
+M.M2 = {
+  id: "M2", world: "plaques", lcd: ["U", "T", "X", "Y"], tools: ["probe"], start: [3.4, 6], legend: LEG_CUVE,
+  title: "Mission 2 · Cartographier les équipotentielles",
+  obj: "Repérer les points de même potentiel et les relier : c’est comme tracer les lignes de niveau d’une carte de randonnée (le potentiel joue le rôle de l’altitude).",
+  how: "Choisis une tension à repérer (puces). Déplace la sonde jusqu’à lire cette valeur, puis « Marquer ce point ». Il faut au moins 4 points bien espacés avant de relier. Dès que tu as 2 points, tu peux <b>prédire</b> où sera le suivant.",
+  hello: "Commence par 1 V : quelle plaque faut-il approcher pour que U diminue ou augmente ?",
+  finish: "<b>Mission 2 terminée.</b> Les équipotentielles sont des droites parallèles aux plaques, régulièrement espacées. Mission 3 : comment les lignes de champ sont-elles placées par rapport à elles ?",
+  primary: function () { markPoint(); },
+  ui: function (host) {
+    chipsTarget(host);
+    var bm = h("button", { type: "button", class: "primary", id: "bmark", text: "Marquer ce point" }), bt = h("button", { type: "button", id: "btrace" });
+    bm.addEventListener("click", markPoint); bt.addEventListener("click", traceFromMarks);
+    host.appendChild(h("div", { class: "row" }, bm, bt)); aidSwitch(host); predBlock(host);
+  },
+  onRefresh: function () {
+    var w = world(), d = D(), t = st.target, n = d.marks.filter(function (m) { return m.t === t; }).length, bt = $("#btrace");
+    if (bt) { bt.textContent = "Relier les points : tracer la ligne de " + fmt(t, 0) + " " + w.vu + " (" + n + " point" + (n > 1 ? "s" : "") + ")"; bt.disabled = n < 4 || !!d.lines[t]; }
+    refreshAid(); updatePred();
+  },
+  steps: [
+    { id: "m2a", title: "Trouve les points de même tension",
+      tasks: [[1, 2, 3, 4, 5].map(function (L) { return ["m2-" + L, "Équipotentielle de " + L + " V tracée (4 points puis « relier »)"]; })].reduce(function (a, b) { return a.concat(b); }, []).concat([["m2-pred", "Réussir une prédiction (point trouvé sans tâtonner)"]]),
+      render: function (b) {
+        b.innerHTML = '<p>Comme dans le TP : relever les coordonnées (x ; y) de plusieurs points pour chaque tension. Tes points s’inscrivent dans le tableau (exportable en CSV pour un tableur).</p><div id="m2-tbl"></div>';
+        var d = D("plaques"), t = S.measureTable($("#m2-tbl", b), { caption: "Points relevés pour chaque équipotentielle", columns: [{ key: "t", label: "Cible", unit: "V", digits: 0 }, { key: "x", label: "x", unit: "cm", digits: 2 }, { key: "y", label: "y", unit: "cm", digits: 2 }, { key: "U", label: "U", unit: "V", digits: 2 }], filename: "equipotentielles", max: 40 });
+        d.marks.forEach(function (m) { t.add(m); }); M.M2.table = t;
+      } },
+    { id: "m2b", title: "Que remarques-tu sur ta carte ?",
+      tasks: [["m2-q-shape", "Décrire la forme des équipotentielles"], ["m2-q-space", "Comparer l’écart entre deux équipotentielles voisines"], ["m2-d", "Mesurer l’écart entre la ligne de 2 V et celle de 3 V"]],
+      render: function (b) {
+        b.innerHTML = '<div id="m2-q1"></div><div id="m2-q2"></div><div id="m2-q3"></div>';
+        question($("#m2-q1", b), { id: "m2-q-shape", legend: "Quelle est la forme des équipotentielles, et comment sont-elles placées par rapport aux plaques ?",
+          options: [{ t: "Des droites parallèles aux plaques", ok: true, fb: "Tous les points à la même distance de la plaque de référence ont le même potentiel : l’équipotentielle est parallèle aux plaques (qui sont elles-mêmes des équipotentielles)." },
+            { t: "Des droites perpendiculaires aux plaques", fb: "Regarde ta carte : ta ligne de 3 V coupe-t-elle les plaques à angle droit ou est-elle parallèle à elles ?" }, { t: "Des courbes quelconques", fb: "Tes points sont alignés (aux incertitudes près) : quelle forme obtiens-tu en les reliant ?" }] });
+        question($("#m2-q2", b), { id: "m2-q-space", legend: "Entre deux équipotentielles voisines (1 V d’écart), la distance est…",
+          options: [{ t: "la même partout", ok: true, fb: "Le potentiel varie de façon régulière avec la distance : 1 V d’écart correspond toujours à la même distance. On le retrouvera avec la valeur du champ E." },
+            { t: "plus petite près de la plaque +", fb: "Compare la distance entre 1 V et 2 V avec celle entre 4 V et 5 V sur ta carte." }, { t: "plus petite près de la plaque −", fb: "Compare la distance entre 1 V et 2 V avec celle entre 4 V et 5 V sur ta carte." }] });
+        numQ($("#m2-q3", b), { id: "m2-d", label: "Lis sur la cuve (quadrillage) la distance entre la ligne de 2 V et la ligne de 3 V :", unit: "cm", answer: 3.33, abs: 0.4,
+          hint: "Lis l’abscisse x de chaque ligne sur la graduation, puis fais la différence.", explain: "2 V se trouvent à x ≈ 6,7 cm et 3 V à x ≈ 10 cm : écart ≈ 3,3 cm. C’est aussi 20 cm ÷ 6 V." });
+      } }
+  ],
+  derive: function (tk) {
+    var d = D("plaques"); [1, 2, 3, 4, 5].forEach(function (L) { tk["m2-" + L] = !!d.lines[L]; });
+    tk["m2-pred"] = (d.preds || 0) >= 1; ["m2-q-shape", "m2-q-space", "m2-d"].forEach(function (k) { tk[k] = F(k); });
+  }
+};
+
+/* ---------- Mission 3 ---------- */
+function validateArrow() {
+  var w = world(), d = D(), truth = eDir(w, st.x, st.y), dev = angDiff(st.guess, truth);
+  if (st.x < 0.5 || st.x > DW - 0.5) { obs("warn", "Place la sonde <b>entre</b> les plaques pour orienter le champ."); return; }
+  if (Math.abs(dev) <= 10) {
+    if (d.arrows.some(function (a) { return dist([a.x, a.y], [st.x, st.y]) < 3; })) { obs("warn", "Bonne flèche, mais tu en as déjà une ici : déplace la sonde d’au moins 3 cm pour en valider une nouvelle."); return; }
+    d.arrows.push({ x: st.x, y: st.y, a: truth });
+    obs("ok", "<b>Flèche juste.</b> Elle est perpendiculaire à l’équipotentielle et dirigée vers les potentiels décroissants (de la plaque + vers la plaque −)." + (d.arrows.length < 3 ? " Recommence ailleurs : " + (3 - d.arrows.length) + " de plus." : " Compare tes flèches : que remarques-tu ?"));
+    refresh();
+  } else if (Math.abs(Math.abs(dev) - 180) <= 10) obs("bad", "La <b>direction</b> est bonne, mais le <b>sens</b> est inversé : le champ pointe vers les potentiels <b>décroissants</b>, c’est-à-dire de la plaque + (6 V) vers la plaque − (0 V). Retourne la flèche.");
+  else { var a = Math.abs(angDiff(st.guess, truth + 90)); if (a > 90) a = 180 - a; obs("bad", "Ta flèche coupe l’équipotentielle sous un angle de <b>" + fmt(a, 0) + "°</b>. Une ligne de champ doit la couper à <b>90°</b>. Active l’aide « tangente » pour voir l’équipotentielle en ce point."); }
+}
+M.M3 = {
+  id: "M3", world: "plaques", lcd: ["U", "X", "Y"], tools: ["arrow", "draw", "ion"], start: [10, 6], refLines: true,
+  legend: function () { return [["var(--pot)", "Équipotentielle (pointillée : carte de référence)", "sq"], ["var(--c-force)", "Ligne de champ / flèche de E", "sq"], ["var(--ion)", "Ion Cu²⁺ et sa trace", "sq"]]; },
+  title: "Mission 3 · Tracer les lignes de champ",
+  obj: "Construire les lignes de champ à partir des équipotentielles : elles leur sont <b>perpendiculaires</b> et orientées vers les potentiels <b>décroissants</b>.",
+  how: "Doc. 2 : les lignes de champ sont partout perpendiculaires aux équipotentielles et vont de la plaque chargée positivement vers la plaque chargée négativement. Les lignes magenta pointillées sont les équipotentielles (les tiennes si tu les as tracées, sinon la carte de référence).",
+  hello: "Oriente d’abord la flèche du champ en un point : la poignée ronde se saisit à la souris, ou utilise le curseur de direction.",
+  finish: "<b>Mission 3 terminée.</b> Entre deux plaques, les lignes de champ sont des droites parallèles et régulièrement espacées. Mission 4 : quelle est la valeur du champ ?",
+  primary: function () { if (st.tool === "arrow") validateArrow(); },
+  ui: function (host) {
+    var box = h("div", { class: "stack", id: "arrbox", style: "gap:10px" });
+    box.innerHTML = '<div class="rng"><label for="ang">Direction de la flèche (0° = vers la droite, 90° = vers le haut) <span><b id="angout">90</b> °</span></label><input id="ang" type="range" min="0" max="355" step="5" value="90"></div><div class="row"><button type="button" id="aflip">Retourner la flèche (+180°)</button><button type="button" class="primary" id="aok">Valider ma flèche</button><button type="button" class="pill" id="atan" aria-pressed="false">Aide : montrer la tangente à l’équipotentielle</button></div>';
+    host.appendChild(box);
+    $("#ang", box).addEventListener("input", function (e) { setGuess(Number(e.target.value)); });
+    $("#aflip", box).addEventListener("click", function () { setGuess(st.guess + 180); });
+    $("#aok", box).addEventListener("click", validateArrow);
+    $("#atan", box).addEventListener("click", function (e) { st.tangent = !st.tangent; e.currentTarget.setAttribute("aria-pressed", String(st.tangent)); scene.redraw(); });
+    host.appendChild(h("p", { class: "hintline", id: "toolhelp" }));
+  },
+  onTool: function (t) {
+    var box = $("#arrbox"); if (box) box.hidden = t !== "arrow"; if (t !== "arrow") st.tangent = false;
+    var th = $("#toolhelp"); if (th) th.textContent = t === "draw" ? "Glisse de la plaque de droite (+) vers la plaque de gauche (−), en partant d’une hauteur différente à chaque fois." : (t === "ion" ? "Clique dans la cuve : un ion Cu²⁺ est lâché à cet endroit et dérive dans l’électrolyte." : "");
+  },
+  onGuess: function () { var a = $("#ang"); if (a) { a.value = st.guess; $("#angout").textContent = st.guess; } },
+  onRefresh: function () {
+    if (st.tk["m3-arrows"] && !F("m3-auto-draw")) { st.flags["m3-auto-draw"] = true; setTool("draw"); obs("info", "Bien : tes flèches sont toutes parallèles. L’outil « Ligne à main levée » est activé : trace maintenant des lignes de champ entières."); }
+    if (st.tk["m3-lines"] && !F("m3-auto-ion")) { st.flags["m3-auto-ion"] = true; setTool("ion"); obs("info", "L’outil « Ion Cu²⁺ » est activé : vérifie tes lignes avec de vraies particules."); }
+  },
+  steps: [
+    { id: "m3a", title: "Oriente la flèche du champ E en trois points",
+      tasks: [["m3-arrows", "Valider une flèche juste en 3 points éloignés (≥ 3 cm)"]],
+      render: function (b) { b.innerHTML = '<p>Au point où se trouve la sonde, <b>E</b> est un vecteur : il a une direction et un sens. Fais tourner la poignée ronde (ou le curseur de direction) pour qu’elle soit <b>perpendiculaire à l’équipotentielle</b> et orientée dans le bon sens, puis « Valider ma flèche ». Déplace ensuite la sonde et recommence en 3 points différents.</p>'; } },
+    { id: "m3b", title: "Trace des lignes de champ à main levée",
+      tasks: [["m3-lines", "Tracer 3 lignes de champ acceptées, parties de hauteurs différentes"]],
+      render: function (b) { b.innerHTML = '<p>Avec l’outil « Ligne à main levée », trace en glissant une ligne de champ <b>de la plaque + vers la plaque −</b>. Le simulateur compare ta ligne à la direction réelle du champ tronçon par tronçon : il te dit où elle s’écarte, et la remplace par la ligne exacte quand elle est bonne.</p><div class="row"><button type="button" id="m3-gotodraw">Activer l’outil « Ligne à main levée »</button></div>'; $("#m3-gotodraw", b).addEventListener("click", function () { setTool("draw"); }); } },
+    { id: "m3c", title: "Vérifie avec des ions Cu²⁺",
+      tasks: [["m3-ions", "Lâcher 2 ions Cu²⁺ et observer leur trajet"], ["m3-q-ion", "Comparer la trace des ions avec les lignes de champ"]],
+      render: function (b) {
+        b.innerHTML = '<p>La solution contient des ions Cu²⁺ (positifs). Lâche-en deux à des endroits différents et regarde leur trajet.</p><div id="m3-qi"></div><p class="note"><b>Attention :</b> ici les ions suivent les lignes de champ parce que l’électrolyte les freine. <b>Dans le vide, une particule chargée ne suit pas une ligne de champ</b> : sa trajectoire dépend aussi de sa vitesse initiale.</p>';
+        question($("#m3-qi", b), { id: "m3-q-ion", legend: "La trace d’un ion Cu²⁺ dans la cuve est…",
+          options: [{ t: "une ligne de champ (perpendiculaire aux équipotentielles)", ok: true, fb: "Les ions positifs dérivent dans le sens du champ, vers la plaque − : leur trace dessine la ligne de champ. C’est un moyen de la visualiser." },
+            { t: "une équipotentielle", fb: "Une équipotentielle est une ligne où la tension ne change pas. L’ion, lui, avance vers la plaque −, donc vers des potentiels de plus en plus bas." }, { t: "une ligne quelconque", fb: "Compare la trace de deux ions partis de hauteurs différentes : sont-ils parallèles ? Et par rapport aux équipotentielles ?" }] });
+      } },
+    { id: "m3d", title: "Ce qu’il faut retenir",
+      tasks: [["m3-sum", "Compléter le bilan sur les lignes de champ"]],
+      render: function (b) {
+        selects(b, { id: "m3-sum", explain: "Une ligne de champ est perpendiculaire aux équipotentielles et orientée vers les potentiels décroissants ; entre deux plaques parallèles, elles sont parallèles et régulièrement espacées.",
+          rows: [{ pre: "Une ligne de champ est", opts: ["perpendiculaire", "parallèle"], ok: 0, post: "aux équipotentielles.", fb: "Tes flèches coupaient les équipotentielles à 90°." },
+            { pre: "Elle est orientée vers les potentiels", opts: ["décroissants", "croissants"], ok: 0, post: ", donc de la plaque + vers la plaque −.", fb: "Le champ pointe vers les potentiels décroissants (de 6 V vers 0 V)." },
+            { pre: "Entre les deux plaques, les lignes de champ sont", opts: ["parallèles et régulièrement espacées", "convergentes", "divergentes"], ok: 0, post: ".", fb: "Regarde tes lignes à main levée et celles des ions : elles ne se rapprochent ni ne s’écartent." }] });
+      } }
+  ],
+  derive: function (tk) {
+    var d = D("plaques"); tk["m3-arrows"] = d.arrows.length >= 3; tk["m3-lines"] = d.flines.filter(function (f) { return f.how === "main"; }).length >= 3;
+    tk["m3-ions"] = (d.ionsDone || 0) >= 2; ["m3-q-ion", "m3-sum"].forEach(function (k) { tk[k] = F(k); });
+  }
+};
+
+/* ---------- Mission 4 ---------- */
+M.M4 = {
+  id: "M4", world: "plaques", lcd: ["U", "X", "Y"], tools: ["probe"], start: [5, 6], legend: LEG_CUVE,
+  title: "Mission 4 · Calculer la valeur du champ : E = U / d",
+  obj: "Calculer l’intensité de <span class=\"vec\">E</span> à partir des tensions mesurées, et caractériser le champ entre les armatures.",
+  how: "Doc. 2 : E = U / d, avec U la tension mesurée (V) et d la distance (m) qui sépare la sonde de la plaque de référence. Place la sonde, lis U et d sur les afficheurs, calcule E, puis recommence ailleurs.",
+  hello: "Place la sonde entre les plaques et calcule E. Attention aux unités : d doit être en mètres.",
+  finish: "<b>Mission 4 terminée.</b> Entre deux plaques parallèles, E est le même en tout point : c’est un <b>champ uniforme</b>. Mission 5 : et si les électrodes changent de forme ?",
+  steps: [
+    { id: "m4a", title: "Calcule E en trois points",
+      tasks: [["m4-pts", "Calculer E en 3 points éloignés (≥ 3 cm)"], ["m4-q-slope", "Interpréter la pente de la droite U = f(d)"]],
+      render: function (b) {
+        b.innerHTML = '<p>Pour chaque position, relève U et d (afficheurs), calcule E en V·m⁻¹ et enregistre : un vecteur <span class="vec">E</span> se dessine dans la cuve (1 cm ↔ 10 V·m⁻¹), et le point s’ajoute au graphe U = f(d).</p><div id="m4-calc"></div><div id="m4-s"></div>';
+        calcPanel($("#m4-calc", b), { label: "Ton résultat E = U / d :", unit: "V·m⁻¹", dmin: 1.5, caption: "Calculs de E", file: "champ-condensateur-plan",
+          cols: [{ key: "d", label: "d", unit: "cm", digits: 2 }, { key: "U", label: "U", unit: "V", digits: 2 }, { key: "E", label: "E", unit: "V/m", digits: 1 }],
+          garia: "Graphe de la tension U en fonction de la distance d : les points s'alignent sur une droite passant par l'origine.", xlab: "d (cm)", ylab: "U (V)",
+          liveHtml: function (U, d) { return "U = <b>" + fmt(U, 2) + " V</b> · d = <b>" + fmt(d, 2) + " cm</b> = <b>" + fmt(d / 100, 4) + " m</b>"; },
+          row: function (d, U, E) { return { d: d, U: U, E: E }; },
+          okText: function (E, n) { return "E ≈ " + fmt(E, 1) + " V·m⁻¹ en ce point." + (n < 3 ? " Change de position (au moins 3 cm) et recommence." : " Que remarques-tu sur les valeurs obtenues ?"); } });
+        question($("#m4-s", b), { id: "m4-q-slope", legend: "Les points du graphe U = f(d) sont alignés sur une droite passant par l’origine. Que représente sa <b>pente</b> (en V·m⁻¹) ?",
+          options: [{ t: "la valeur E du champ", ok: true, fb: "U = E × d : U est proportionnelle à d, et le coefficient de proportionnalité est E. C’est la même idée que la pente d’un terrain (variation d’altitude par mètre)." },
+            { t: "la tension du générateur", fb: "La tension du générateur (6 V) est la valeur de U à l’autre plaque. La pente est un rapport U/d : quelle unité a-t-elle ?" }, { t: "la distance entre les plaques", fb: "La pente a pour unité V·m⁻¹ : une distance se mesure en m. Quelle grandeur se mesure en V·m⁻¹ ?" }] });
+      } },
+    { id: "m4b", title: "Décris le champ entre les plaques",
+      tasks: [["m4-sel", "Caractériser valeur, direction, sens et nom du champ"]],
+      render: function (b) {
+        b.innerHTML = "<p>Regarde les vecteurs que tu as dessinés dans la cuve.</p>";
+        selects(b, { id: "m4-sel", explain: "Valeur constante, direction perpendiculaire aux plaques, sens de la plaque + vers la plaque − : le champ est uniforme.",
+          rows: [{ pre: "La valeur de E est", opts: ["constante", "plus grande près de la plaque +", "plus grande près de la plaque −"], ok: 0, post: ".", fb: "Tes valeurs de E sont voisines en tous les points (à l’incertitude près)." },
+            { pre: "Sa direction est", opts: ["perpendiculaire aux plaques", "parallèle aux plaques"], ok: 0, post: ".", fb: "Tes vecteurs coupent les plaques à angle droit." },
+            { pre: "Son sens va", opts: ["de la plaque + vers la plaque −", "de la plaque − vers la plaque +"], ok: 0, post: ".", fb: "Le champ pointe vers les potentiels décroissants." },
+            { pre: "Un tel champ est dit", opts: ["uniforme", "radial", "nul"], ok: 0, post: ".", fb: "Même valeur, même direction, même sens en tout point : le champ est uniforme." }] });
+      } },
+    { id: "m4c", title: "Teste une charge d’essai",
+      tasks: [["m4-force-seen", "Observer la force pour une charge positive puis négative"], ["m4-q-force", "Relier le sens de la force au signe de la charge"]],
+      render: function (b) {
+        b.innerHTML = '<p>Le champ <span class="vec">E</span> existe même s’il n’y a rien dedans : il décrit ce que ressentirait une charge placée là. Une charge <b>q</b> y subit la force <span class="vec">F</span> = q·<span class="vec">E</span>. Place une charge d’essai à la position de la sonde et change son signe (q en nC, E en V·m⁻¹ : F en nN).</p><div id="m4-f"></div><div id="m4-fq"></div>';
+        forcePanel($("#m4-f", b), "q");
+        selects($("#m4-fq", b), { id: "m4-q-force", explain: "F = q·E : la force est dans le sens de E pour une charge positive, en sens contraire pour une charge négative.",
+          rows: [{ pre: "Si q > 0, la force <span class=\"vec\">F</span> est", opts: ["de même sens que E", "de sens opposé à E"], ok: 0, fb: "Pour q > 0, F = q·E est un multiple positif de E." },
+            { pre: "Si q < 0, la force <span class=\"vec\">F</span> est", opts: ["de même sens que E", "de sens opposé à E"], ok: 1, fb: "Pour q < 0, F = q·E est un multiple négatif de E : sens opposé." }] });
+      } }
+  ],
+  derive: function (tk) {
+    var d = D("plaques"); tk["m4-pts"] = d.calc.length >= 3; tk["m4-q-slope"] = F("m4-q-slope"); tk["m4-sel"] = F("m4-sel");
+    tk["m4-force-seen"] = F("m4-seen+") && F("m4-seen-"); tk["m4-q-force"] = F("m4-q-force");
+  }
+};
+
+/* ---------- Mission 5 : autres électrodes ---------- */
+var M5TXT = {
+  pointe: { nom: "Pointe et plaque", desc: "Une pointe reliée à la borne + (6 V) et la plaque de droite reliée à la borne − (0 V, référence).", un: "Les lignes de champ partent de la pointe en rayonnant puis convergent vers la plaque : la direction et la valeur de E changent d’un point à l’autre." },
+  deux: { nom: "Deux pointes", desc: "Deux pointes : l’une à + 6 V, l’autre à la référence 0 V (comme deux charges de signes opposés).", un: "Les lignes de champ vont de la pointe + à la pointe − en s’incurvant : E change de valeur, de direction et de sens apparent selon le point." },
+  anneau: { nom: "Anneau", desc: "Une pointe centrale à + 6 V et un anneau métallique à la référence 0 V.", un: "Les lignes de champ sont radiales (comme le champ d’un objet ponctuel vu de loin) et E diminue quand on s’éloigne de la pointe. On retrouvera cette forme avec la Terre, à la mission 7." }
+};
+function m5Done(c) { return Object.keys(D(c).lines).length >= 3 && F("m5-" + c + "-pred") && F("m5-" + c + "-ab") && F("m5-" + c + "-un"); }
+function renderM5() {
+  var host = $("#m5-body"); if (!host) return; var c = st.cfg, T = M5TXT[c], w = WORLDS[c]; host.textContent = "";
+  var top = h("div", { class: "sbody" }); host.appendChild(top);
+  top.appendChild(h("h3", { text: "Configuration affichée : " + T.nom }));
+  top.appendChild(h("p", { html: T.desc + " Change de configuration avec les boutons « Électrodes » au-dessus de la cuve ; il faut réussir les trois." }));
+  var q1 = h("div"), q2 = h("div"), q3 = h("div"), cnt = h("p", { class: "calcline", id: "m5-cnt" }), ab = h("div", { class: "row" });
+  top.appendChild(q1);
+  question(q1, { id: "m5-" + c + "-pred", predict: true, legend: "<b>Prédis.</b> Avec ces électrodes, les équipotentielles seront…",
+    options: [{ t: "des droites parallèles, comme avec deux plaques", fb: "Prédiction notée. Trace les équipotentielles avec l’aide pour la vérifier." }, { t: "des courbes qui épousent la forme des électrodes", fb: "Prédiction notée. Trace les équipotentielles avec l’aide pour la vérifier." }] });
+  top.appendChild(h("p", { html: "<b>Trace au moins 3 équipotentielles</b> : choisis une tension (puces), garde l’aide active, puis <b>clique</b> dans la cuve (ou glisse la sonde) ; l’outil « Ligne de champ (clic) » trace les lignes de champ." }));
+  top.appendChild(cnt);
+  var bA = h("button", { type: "button", text: "Placer la sonde en A" }), bB = h("button", { type: "button", text: "Placer la sonde en B" });
+  bA.addEventListener("click", function () { moveProbe(w.AB.A[0], w.AB.A[1], false); obs("info", "Sonde en A : lis |E| sur l’afficheur."); });
+  bB.addEventListener("click", function () { moveProbe(w.AB.B[0], w.AB.B[1], false); obs("info", "Sonde en B : lis |E| sur l’afficheur."); });
+  ab.appendChild(bA); ab.appendChild(bB); top.appendChild(ab); top.appendChild(q2);
+  question(q2, { id: "m5-" + c + "-ab", legend: "Compare les points A et B (afficheur |E|). Où le champ est-il le plus intense ?",
+    options: [{ t: "En A, là où les équipotentielles sont plus serrées", ok: true, fb: "Entre deux équipotentielles voisines (même écart de tension), plus elles sont proches, plus la tension varie vite : E = ΔV/Δd est plus grand. Comme les courbes de niveau serrées d’une carte indiquent une pente forte." },
+      { t: "En B", fb: "Compare les valeurs de |E| en plaçant la sonde en A puis en B, et regarde l’écartement des équipotentielles autour de chaque point." }, { t: "Pareil en A et en B", fb: "Les afficheurs |E| donnent-ils la même valeur en A et en B ? Regarde aussi l’espacement des équipotentielles." }] });
+  top.appendChild(q3);
+  question(q3, { id: "m5-" + c + "-un", legend: "Ce champ est-il <b>uniforme</b> ?",
+    options: [{ t: "Oui : même valeur, même direction, même sens en tout point", fb: "" }, { t: "Non : la valeur et la direction de E changent d’un point à l’autre", ok: true, fb: T.un }].map(function (o, i) { return i === 0 ? { t: o.t, fb: "Regarde les lignes de champ : sont-elles parallèles ? Et la valeur de |E| en A et en B est-elle la même ?" } : o; }) });
+  updM5();
+}
+function updM5() { var e = $("#m5-cnt"); if (e) e.innerHTML = "Équipotentielles tracées pour cette configuration : <b>" + Object.keys(D(st.cfg).lines).length + " / 3</b> au moins"; }
+M.M5 = {
+  id: "M5", world: "cfg", cfg: "pointe", cfgs: CFGS, showAB: true, lockOn: true, aidAlways: true, lcd: ["U", "E"], tools: ["probe", "fline"], start: [10, 3],
+  legend: function () { return [["var(--cu)", "Électrode", "sq"], ["var(--pot)", "Équipotentielle", "sq"], ["var(--c-force)", "Ligne de champ", "sq"]]; },
+  title: "Mission 5 · Et si les électrodes changent de forme ?",
+  obj: "Reconnaître qu’un champ n’est pas toujours uniforme, et relier l’écartement des équipotentielles à la valeur du champ.",
+  how: "Trois nouvelles configurations d’électrodes. L’aide de la mission 2 est active : un clic trace l’équipotentielle entière de la tension choisie. Les points A et B servent à comparer la valeur de |E|.",
+  hello: "Avant de tracer, prédis la forme des équipotentielles pour cette configuration.",
+  finish: "<b>Mission 5 terminée.</b> Un champ est uniforme seulement dans des cas particuliers (deux plaques parallèles). Dans les autres, la valeur et la direction de E varient, et les équipotentielles sont serrées là où E est grand.",
+  ui: function (host) {
+    chipsTarget(host); aidSwitch(host);
+    var b = h("button", { type: "button", text: "Effacer mes lignes de cette configuration" });
+    b.addEventListener("click", function () { var d = D(); d.lines = {}; d.flines = []; refresh(); }); host.appendChild(h("div", { class: "row" }, b));
+  },
+  onRefresh: function () { refreshAid(); updM5(); },
+  onCfg: function () { renderM5(); },
+  steps: [
+    { id: "m5a", title: "Explore les trois configurations", tasks: CFGS.map(function (c) { return ["m5-" + c, M5TXT[c].nom + " : prédiction, 3 équipotentielles, comparaison A/B, uniformité"]; }),
+      render: function (b) { b.innerHTML = '<div id="m5-body"></div>'; renderM5(); } },
+    { id: "m5b", title: "Conclus", tasks: [["m5-sum", "Dire quand un champ est uniforme"]],
+      render: function (b) {
+        question(b, { id: "m5-sum", legend: "D’après tes quatre cartes (deux plaques + trois configurations), un champ électrostatique est <b>uniforme</b> quand…",
+          options: [{ t: "ses lignes de champ sont parallèles et régulièrement espacées (équipotentielles parallèles et équidistantes)", ok: true, fb: "Valeur, direction et sens identiques en tout point : c’est le cas entre deux armatures planes parallèles (en dehors des bords)." },
+            { t: "il y a une charge au centre", fb: "Une charge ponctuelle crée un champ radial dont la valeur diminue avec la distance : pas uniforme." }, { t: "les électrodes sont proches", fb: "Regarde la configuration « Deux pointes » : les électrodes sont proches, et le champ n’est pourtant pas uniforme." }] });
+      } }
+  ],
+  derive: function (tk) { CFGS.forEach(function (c) { tk["m5-" + c] = m5Done(c); }); tk["m5-sum"] = F("m5-sum"); }
+};
+
+/* ---------- Atelier libre ---------- */
+function swBtn(label, on, onChange, disabled) {
+  var b = h("button", { type: "button", class: "sw", role: "switch", "aria-checked": String(!!on) }, h("span", { class: "track" }, h("span", { class: "knob" })), label);
+  if (disabled) b.disabled = true; b.addEventListener("switch", function (e) { onChange(e.detail.checked); }); return b;
+}
+function autoMap() {
+  var w = world(), d = D(); w.levels.forEach(function (L) { var l = refLine(w, L); if (l) d.lines[L] = l; });
+  obs("ok", "Carte complète des équipotentielles : une ligne par valeur, tracée par le simulateur. Compare avec ce que tu aurais obtenu à la main."); scene.redraw();
+}
+function autoFlines() {
+  var w = world(), d = D(), seeds = [], i;
+  if (w.id === "plaques") for (i = 1; i <= 11; i++) seeds.push([w.flip ? 1 : 19, i]);
+  else if (w.id === "pesanteur") for (i = 1; i < 20; i += 2) seeds.push([i, 11.5]);
+  else {
+    var hi = w.elec.filter(function (e) { return e.t === "disc" && (w.flip ? e.V === 0 : e.V === 6); })[0];
+    if (hi) for (i = 0; i < 16; i++) { var a = i * 2 * Math.PI / 16; seeds.push([hi.cx + (hi.r + 0.5) * Math.cos(a), hi.cy + (hi.r + 0.5) * Math.sin(a)]); }
+    else for (i = 1; i <= 11; i += 1.5) seeds.push([19.2, i]);
+  }
+  d.flines = []; seeds.forEach(function (s) { var l = traceField(w, s); if (l) d.flines.push({ pts: l, seed: s, how: "auto" }); });
+  obs("ok", "Lignes de champ tracées. Elles sont perpendiculaires aux équipotentielles et plus serrées là où le champ est plus intense."); scene.redraw();
+}
+M.A = {
+  id: "A", world: "any", cfg: "plaques", cfgs: ["plaques", "pointe", "deux", "anneau", "pesanteur"], lcd: ["U", "E", "X", "Y"], tools: [], steps: [], aidAlways: true, start: [4, 6],
+  legend: function (w) { return w.cuve ? LEG_CUVE() : [["var(--ground)", "Sol", "sq"], ["var(--pot)", "Ligne de niveau (E_pp/m constant)", "sq"], ["var(--c-force)", "Ligne de champ / vecteur g", "sq"]]; },
+  title: "Atelier libre · Teste, compare, tends des pièges",
+  obj: "Utiliser tous les outils sans consigne : changer les électrodes, inverser le générateur, comparer la cuve et la pesanteur.",
+  how: "Choisis un monde (électrodes ou pesanteur), puis trace équipotentielles et lignes de champ à ta façon. Défis possibles : prévoir l’effet d’une inversion de polarité ; trouver un endroit où |E| vaut presque 0 ; reconnaître la cuve « Anneau » dans la mission 7.",
+  hello: "Choisis des électrodes, une tension (puces) et clique dans la cuve avec l’aide active.",
+  ui: function (host) {
+    chipsTarget(host); aidSwitch(host);
+    var w = world(), row = h("div", { class: "row" });
+    row.appendChild(swBtn("Inverser le générateur", st.flip, function (c) { st.flip = c; w.flip = c; st.data[w.id] = null; Object.keys(refCache).forEach(function (k) { delete refCache[k]; }); updateLCD(); scene.redraw(); obs("info", c ? "Générateur inversé : la plaque ou l’électrode qui était à 6 V est maintenant la référence. Que devient le sens du champ ?" : "Branchement d’origine."); }, !w.cuve));
+    row.appendChild(swBtn("Teinte du potentiel", st.heat, function (c) { st.heat = c; scene.redraw(); }));
+    row.appendChild(swBtn("Flèches du champ en grille", st.gridArrows, function (c) { st.gridArrows = c; scene.redraw(); }));
+    host.appendChild(row);
+    var r2_ = h("div", { class: "row" }), b1 = h("button", { type: "button", text: "Carte complète (équipotentielles)" }), b2 = h("button", { type: "button", text: "Lignes de champ automatiques" }), b3 = h("button", { type: "button", text: "Tout effacer" });
+    b1.addEventListener("click", autoMap); b2.addEventListener("click", autoFlines);
+    b3.addEventListener("click", function () { st.data[world().id] = null; st.ions = []; st.balls = []; st.force = null; scene.redraw(); });
+    r2_.appendChild(b1); r2_.appendChild(b2); r2_.appendChild(b3); host.appendChild(r2_);
+  },
+  onRefresh: function () { refreshAid(); },
+  derive: function () {}
+};
+
+/* ============================================================
+   10. PARTIE B : le parallèle avec la pesanteur
+   ============================================================ */
+var LEG_G = function () { return [["var(--ground)", "Sol (référence)", "sq"], ["var(--pot)", "Ligne de niveau : E_pp/m constant", "sq"], ["var(--c-force)", "Ligne de champ, vecteur g", "sq"], ["var(--ion)", "Bille lâchée", "sq"]]; };
+M.M6 = {
+  id: "M6", world: "pesanteur", lcd: ["U", "T", "Y"], tools: ["probe", "ball"], start: [6, 3], aidAlways: true, legend: LEG_G,
+  title: "Mission 6 · La même méthode pour le champ de pesanteur",
+  obj: "Refaire pour la pesanteur ce que tu as fait pour la cuve, et repérer les <b>analogies</b> : potentiel ↔ énergie potentielle par kilogramme, champ E ↔ champ g, charge q ↔ masse m.",
+  how: "Ta sonde est maintenant une bille de <b>1 kg</b>. L’afficheur donne son énergie potentielle de pesanteur par kilogramme, E<sub>pp</sub>/m = g·z (en J·kg⁻¹), repérée par rapport au sol : c’est l’analogue de la tension U. C’est impossible à cartographier en classe ; ici, tout est possible.",
+  hello: "Choisis une valeur de E_pp/m, puis repère les points où la bille l’atteint : à quelle hauteur ?",
+  finish: "<b>Mission 6 terminée.</b> Mêmes outils, même carte : lignes de niveau horizontales (équipotentielles), lignes de champ verticales vers le bas, champ g uniforme près du sol. À la mission 7, tu vas voir jusqu’où cette « uniformité » est vraie.",
+  primary: function () { markPoint(); },
+  ui: function (host) {
+    chipsTarget(host);
+    var bm = h("button", { type: "button", class: "primary", id: "bmark", text: "Marquer ce point" }), bt = h("button", { type: "button", id: "btrace" });
+    bm.addEventListener("click", markPoint); bt.addEventListener("click", traceFromMarks);
+    host.appendChild(h("div", { class: "row" }, bm, bt)); aidSwitch(host); predBlock(host);
+  },
+  onRefresh: function () {
+    M.M2.onRefresh();
+    if (st.tk["m6-q-fl"] && !F("m6-tool-probe")) { st.flags["m6-tool-probe"] = true; if (st.tool !== "probe") setTool("probe"); }
+    if (st.tk["m6-lines"] && st.lock && !F("m6-aid-off")) { st.flags["m6-aid-off"] = true; st.lock = false; var a = $("#aid"); if (a) a.setAttribute("aria-checked", "false"); refreshAid(); obs("info", "Aide désactivée : la bille est de nouveau libre de se placer où tu veux (utile pour calculer g à plusieurs altitudes). Tu peux la réactiver à tout moment."); }
+  },
+  onTool: function (t) { var th = $("#legend-tip");  if (th && t === "ball") th.textContent = "Clique dans la scène : une bille est lâchée sans vitesse de ce point."; },
+  steps: [
+    { id: "m6a", title: "Cartographie les lignes de niveau",
+      tasks: [["m6-lines", "Tracer au moins 3 lignes de niveau (points ou aide)"], ["m6-q-lev", "Décrire les lignes de niveau"]],
+      render: function (b) {
+        b.innerHTML = '<p>Comme à la mission 2 : repère des points de même E<sub>pp</sub>/m (puces), marque-les puis relie-les. Tu peux utiliser l’aide tout de suite : tu connais la méthode.</p><div id="m6-q1"></div>';
+        question($("#m6-q1", b), { id: "m6-q-lev", legend: "Les lignes de niveau (E<sub>pp</sub>/m constant) sont…",
+          options: [{ t: "des droites horizontales (altitude constante)", ok: true, fb: "E_pp/m = g·z ne dépend que de l’altitude z : deux points à la même altitude ont la même valeur. Ce sont les <b>équipotentielles</b> du champ de pesanteur, comme les lignes de niveau d’une carte." },
+            { t: "des droites verticales", fb: "Monte la bille : E_pp/m change-t-il ? Déplace-la horizontalement : change-t-il ?" }, { t: "des droites obliques", fb: "Regarde tes points : ont-ils tous la même hauteur ?" }] });
+      } },
+    { id: "m6b", title: "Lâche des billes : où sont les lignes de champ ?",
+      tasks: [["m6-pred-ball", "Prédire où une bille lâchée touchera le sol"], ["m6-balls", "Lâcher 3 billes de points éloignés (≥ 3 m)"], ["m6-q-fl", "Décrire les lignes de champ de pesanteur"]],
+      render: function (b) {
+        b.innerHTML = '<div id="m6-p"></div><div class="row"><button type="button" id="m6-go">Activer l’outil « Lâcher une bille »</button></div><div id="m6-q2"></div>';
+        $("#m6-go", b).addEventListener("click", function () { setTool("ball"); });
+        question($("#m6-p", b), { id: "m6-pred-ball", predict: true, legend: "<b>Prédis.</b> Une bille est lâchée <b>sans vitesse</b> d’un point de la scène. Elle touchera le sol…",
+          options: [{ t: "à la verticale de son point de départ", fb: "Prédiction notée : verticale. Lâche une bille pour vérifier." }, { t: "plus loin, vers la droite", fb: "Prédiction notée : vers la droite. Lâche une bille pour vérifier." }, { t: "plus loin, vers la gauche", fb: "Prédiction notée : vers la gauche. Lâche une bille pour vérifier." }] });
+        question($("#m6-q2", b), { id: "m6-q-fl", legend: "Les lignes de champ de pesanteur (trajets des billes lâchées sans vitesse) sont…",
+          options: [{ t: "des droites verticales dirigées vers le bas, perpendiculaires aux lignes de niveau", ok: true, fb: "Comme dans la cuve : lignes de champ perpendiculaires aux équipotentielles, orientées vers les potentiels décroissants (ici vers le sol). Attention : ici, la bille tombe le long de la ligne parce qu’elle part sans vitesse." },
+            { t: "des droites horizontales", fb: "La bille s’écarte-t-elle de la verticale pendant la chute ?" }, { t: "des droites verticales dirigées vers le haut", fb: "Vers où tombe la bille ? Le champ est orienté dans le sens de la force exercée sur une masse." }] });
+      } },
+    { id: "m6c", title: "Calcule g comme tu as calculé E",
+      tasks: [["m6-pts", "Calculer g en 3 points éloignés (≥ 3 m)"], ["m6-q-g", "Interpréter le résultat"]],
+      render: function (b) {
+        b.innerHTML = '<p>Pour la cuve : E = U / d. Ici : <b>g = (E<sub>pp</sub>/m) / z</b>, avec z l’altitude de la bille (m). L’unité J·kg⁻¹·m⁻¹ est équivalente à N·kg⁻¹. Place la bille, lis E<sub>pp</sub>/m et z, calcule g.</p><div id="m6-calc"></div><div id="m6-q3"></div>';
+        calcPanel($("#m6-calc", b), { label: "Ton résultat g = (E<sub>pp</sub>/m) / z :", unit: "N·kg⁻¹", dmin: 1, caption: "Calculs de g", file: "champ-pesanteur",
+          cols: [{ key: "d", label: "z", unit: "m", digits: 2 }, { key: "U", label: "E_pp/m", unit: "J/kg", digits: 1 }, { key: "E", label: "g", unit: "N/kg", digits: 2 }],
+          garia: "Graphe de E_pp/m en fonction de l'altitude z : les points s'alignent sur une droite passant par l'origine.", xlab: "z (m)", ylab: "E_pp/m (J/kg)",
+          liveHtml: function (U, d) { return "E<sub>pp</sub>/m = <b>" + fmt(U, 2) + " J/kg</b> · z = <b>" + fmt(d, 2) + " m</b>"; },
+          row: function (d, U, E) { return { d: d, U: U, E: E }; },
+          okText: function (E, n) { return "g ≈ " + fmt(E, 2) + " N·kg⁻¹ en ce point." + (n < 3 ? " Change d’altitude (au moins 3 m) et recommence." : " Compare avec ce que tu as trouvé pour E dans la cuve."); } });
+        question($("#m6-q3", b), { id: "m6-q-g", legend: "Près du sol, le champ de pesanteur <span class=\"vec\">g</span> est…",
+          options: [{ t: "uniforme : même valeur (≈ 9,8 N·kg⁻¹), même direction (verticale), même sens (vers le bas)", ok: true, fb: "Comme E entre deux plaques : la pente du graphe E_pp/m = f(z) est g, constante. Le sol joue le rôle de la plaque de référence." },
+            { t: "plus grand en altitude", fb: "Compare tes trois valeurs de g calculées à des altitudes différentes." }, { t: "nul loin du sol", fb: "Tes calculs donnent la même valeur à 2 m et à 10 m d’altitude." }] });
+      } },
+    { id: "m6d", title: "Teste une masse d’essai",
+      tasks: [["m6-seen", "Placer une masse d’essai et la faire varier"], ["m6-q-f", "Comparer avec la charge d’essai de la mission 4"]],
+      render: function (b) {
+        b.innerHTML = '<p>Une masse <b>m</b> placée dans le champ de pesanteur subit la force <span class="vec">P</span> = m·<span class="vec">g</span> (son poids). Compare avec la charge d’essai de la mission 4 (q pouvait être positive ou négative).</p><div id="m6-f"></div><div id="m6-fq"></div>';
+        forcePanel($("#m6-f", b), "m");
+        question($("#m6-fq", b), { id: "m6-q-f", legend: "Une masse est toujours positive. La force de gravitation exercée sur une masse placée dans le champ <span class=\"vec\">g</span> est donc…",
+          options: [{ t: "toujours dans le sens de g (attractive) : contrairement à une charge, une masse ne change jamais le sens de la force", ok: true, fb: "C’est une différence essentielle : la force électrostatique peut être attractive ou répulsive (signe de q), la force de gravitation est toujours attractive." },
+            { t: "dans le sens de g ou en sens opposé, selon la valeur de m", fb: "m est toujours positive : quel est le signe de F = m·g ?" }, { t: "nulle si m est petite", fb: "F = m·g est petite si m est petite, mais jamais de sens opposé à g." }] });
+      } },
+    { id: "m6e", title: "Table des correspondances cuve ↔ pesanteur",
+      tasks: [["m6-map", "Compléter la table des correspondances"]],
+      render: function (b) {
+        b.innerHTML = "<p>Associe chaque grandeur de la cuve à son analogue pour la pesanteur.</p>";
+        selects(b, { id: "m6-map", explain: "La cuve et la pesanteur se décrivent avec les mêmes outils : potentiel ↔ E_pp/m, champ E ↔ champ g, charge ↔ masse, équipotentielles ↔ lignes de niveau, F = qE ↔ P = mg.",
+          rows: [{ pre: "Tension / potentiel V (en V) ↔", opts: ["E_pp/m (en J·kg⁻¹)", "masse m (en kg)", "altitude z (en m)"], ok: 0, fb: "Le potentiel V est l’analogue de l’énergie potentielle par unité de « charge » : E_pp/m = g·z." },
+            { pre: "Champ <span class=\"vec\">E</span> (en V·m⁻¹) ↔", opts: ["poids P (en N)", "champ <span class=\"vec\">g</span> (en N·kg⁻¹)", "vitesse v"], ok: 1, fb: "E est la force par unité de charge, g la force par unité de masse." },
+            { pre: "Charge q (en C) ↔", opts: ["vitesse v", "altitude z", "masse m (en kg)"], ok: 2, fb: "Une charge « sent » E, une masse « sent » g." },
+            { pre: "Plaque de référence (0 V) ↔", opts: ["le ciel", "le sol (z = 0)", "la bille"], ok: 1, fb: "Le sol est la référence des énergies potentielles de pesanteur." },
+            { pre: "Équipotentielles ↔", opts: ["lignes de niveau (altitude constante)", "lignes de champ", "trajectoires des billes"], ok: 0, fb: "Les équipotentielles sont les lignes où la grandeur ne change pas : altitude constante." },
+            { pre: "Force <span class=\"vec\">F</span> = q·<span class=\"vec\">E</span> ↔", opts: ["tension U = E·d", "poids <span class=\"vec\">P</span> = m·<span class=\"vec\">g</span>", "énergie potentielle"], ok: 1, fb: "F = qE pour une charge, P = mg pour une masse." }] });
+      } }
+  ],
+  derive: function (tk) {
+    var d = D("pesanteur"), xs = d.ballsDone.slice(), ok = false, i, j, n = 0, sel = [];
+    for (i = 0; i < xs.length; i++) { var good = true; for (j = 0; j < sel.length; j++) if (Math.abs(sel[j] - xs[i]) < 3) good = false; if (good) sel.push(xs[i]); }
+    tk["m6-lines"] = Object.keys(d.lines).length >= 3; tk["m6-balls"] = sel.length >= 3; tk["m6-pts"] = d.calc.length >= 3; tk["m6-seen"] = F("m6-seen-m");
+    ["m6-q-lev", "m6-pred-ball", "m6-q-fl", "m6-q-g", "m6-q-f", "m6-map"].forEach(function (k) { tk[k] = F(k); });
+  }
+};
+
+/* ---------- Mission 7 : de la salle de classe à la planète ---------- */
+var GM = G0 * 6.371e6 * 6.371e6, RT = 6.371e6, scene2 = null, E2 = { t: 0, f: 0 }, L2 = {};
+function grp(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+function fmtLen(m) { return m < 1000 ? fmt(m, m < 100 ? 1 : 0) + " m" : (m < 1e5 ? fmt(m / 1000, 1) : grp(m / 1000)) + " km"; }
+function eView() { var Wv = Math.pow(10, 1 + E2.t / 100 * 6.5), Hv = 430 / (1000 / Wv); return { Wv: Wv, Hv: Hv, h: E2.f / 100 * 0.9 * Hv }; }
+function drawEarth(ctx, W, H) {
+  if (!cur || !cur.earth) return;
+  var c = pal(), v = eView(), s = W / v.Wv, y0 = 430, Rp = RT * s, i, j;
+  ctx.fillStyle = c.sky; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = c.ground;
+  if (Rp < 3000) { circ(ctx, W / 2, y0 + Rp, Rp); ctx.fill(); ctx.strokeStyle = c.ink; ctx.lineWidth = 2; ctx.stroke(); }
+  else {
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (i = 0; i <= W; i += 5) { var X = (i - W / 2) / s, hs = -X * X / (RT + Math.sqrt(Math.max(RT * RT - X * X, 0))); ctx.lineTo(i, y0 - hs * s); }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  }
+  var cy = y0 + Rp; if (cy < H + 5) { circ(ctx, W / 2, cy, 6); ctx.fillStyle = c.ink; ctx.fill(); txt(ctx, "centre de la Terre", W / 2 + 12, cy + 5, "500 16px " + FONT, c.ink, "left"); }
+  /* champ g en grille */
+  for (i = 0; i < 9; i++) for (j = 0; j < 4; j++) {
+    var xp = 70 + i * 107, yp = 60 + j * 88, Xw = (xp - W / 2) / s, Yw = (y0 - yp) / s, r = Math.hypot(Xw, Yw + RT);
+    if (r < RT) continue;
+    var gg = GM / (r * r), L = Math.max(8, 44 * gg / G0);
+    arrowPx(ctx, xp, yp, xp + (-Xw / r) * L, yp + ((Yw + RT) / r) * L, c.force, 2.6, 11);
+  }
+  /* points A et B, objet */
+  var xa = Math.min(v.Wv / 4, 0.8 * RT), pts = [-xa, xa];
+  ["A", "B"].forEach(function (k, n) {
+    var X = pts[n], hs = -X * X / (RT + Math.sqrt(RT * RT - X * X)), xp = W / 2 + X * s, yp = y0 - hs * s, r = RT, dx = -X / r, dy = Math.sqrt(1 - dx * dx);
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); ln(ctx, xp, yp, xp + dx * 900, yp + dy * 900); ctx.setLineDash([]);
+    arrowPx(ctx, xp, yp, xp + dx * 70, yp + dy * 70, c.ink, 4, 16); circ(ctx, xp, yp, 7); ctx.fillStyle = c.surface; ctx.fill(); ctx.strokeStyle = c.ink; ctx.lineWidth = 2.5; ctx.stroke();
+    txt(ctx, k, xp - 6, yp - 14, "700 22px " + FONT, c.ink, "center");
+  });
+  var gh = GM / Math.pow(RT + v.h, 2), op = y0 - v.h * s;
+  circ(ctx, W / 2, op, 12); ctx.fillStyle = c.ion; ctx.fill(); ctx.strokeStyle = c.surface; ctx.lineWidth = 3; ctx.stroke();
+  arrowPx(ctx, W / 2, op + 12, W / 2, op + 12 + 70 * gh / G0, c.ion, 4, 15); txt(ctx, "objet", W / 2 + 20, op + 5, "600 17px " + FONT, c.ion, "left");
+  txt(ctx, "Vue : " + fmtLen(v.Wv) + " de large", 16, 28, "600 19px " + FONT, c.ink, "left");
+}
+function updEarth() {
+  var v = eView(), xa = Math.min(v.Wv / 4, 0.8 * RT), th = 2 * Math.asin(xa / RT) / RAD, gh = GM / Math.pow(RT + v.h, 2);
+  L2.w.set(fmtLen(v.Wv)); L2.a.set(th); L2.h.set(fmtLen(v.h)); L2.g.set(gh); L2.p.set(gh / G0 * 100);
+  $("#e-sc-out").textContent = fmtLen(v.Wv); $("#e-ob-out").textContent = fmtLen(v.h);
+  if (v.Wv > 2e7) st.flags["m7-big"] = true;
+  scene2.redraw(); refreshSoon();
+}
+M.M7 = {
+  id: "M7", earth: true, lcd: [], tools: [], steps: [],
+  title: "Mission 7 · De la salle de classe à la planète",
+  obj: "Voir que le champ de pesanteur est <b>localement uniforme</b> mais, à grande échelle, <b>radial</b> (dirigé vers le centre de la Terre) et décroissant : la même idée que pour les électrodes de la mission 5.",
+  how: "Le curseur « Largeur de la vue » règle l’échelle, de 10 m à 30 000 km. Les flèches rouges représentent le champ g (direction et valeur). Les verticales aux points A et B se prolongent en pointillés. Le second curseur déplace l’objet en altitude.",
+  hello: "Prédis d’abord, puis explore avec le curseur d’échelle.",
+  finish: "<b>Mission 7 terminée.</b> Un champ uniforme n’est qu’une approximation locale : la cuve à plaques et le sol vu de près en sont des exemples ; l’anneau et la planète vue de loin montrent le champ radial.",
+  setup: function () {
+    var host = $("#sl-terre"); host.innerHTML = '<div class="rng"><label for="e-sc">Largeur de la vue <span><b id="e-sc-out"></b></span></label><input id="e-sc" type="range" min="0" max="100" step="0.5" value="' + E2.t + '"></div><div class="rng"><label for="e-ob">Hauteur de l’objet dans la vue <span><b id="e-ob-out"></b></span></label><input id="e-ob" type="range" min="0" max="100" step="1" value="' + E2.f + '"></div>';
+    var lh = $("#lcds"); lh.textContent = "";
+    L2 = { w: S.readout(lh, { label: "Largeur de la vue", unit: "" }), a: S.readout(lh, { label: "Angle entre les verticales en A et B", unit: "°", digits: 2 }), h: S.readout(lh, { label: "Altitude h de l’objet", unit: "" }), g: S.readout(lh, { label: "Champ g à l’objet", unit: "N/kg", digits: 3 }), p: S.readout(lh, { label: "g / g₀ (g₀ = 9,81 N/kg)", unit: "%", digits: 2 }) };
+    $("#e-sc").addEventListener("input", function (e) { E2.t = Number(e.target.value); updEarth(); });
+    $("#e-ob").addEventListener("input", function (e) { E2.f = Number(e.target.value); updEarth(); });
+    if (!scene2) scene2 = S.canvas("#cv2", { width: 1000, height: 560, draw: drawEarth });
+    var lg = $("#legend2"); lg.textContent = ""; [["var(--c-force)", "Champ g (direction et valeur)", "sq"], ["var(--ink)", "Points A et B (verticales en pointillés)", "sq"], ["var(--ion)", "Objet et son poids", "sq"]].forEach(function (it) { lg.appendChild(h("span", { class: "lg", style: "color:" + it[0] }, h("i", { class: it[2] }), it[1])); });
+    updEarth();
+  },
+  steps: [
+    { id: "m7a", title: "Prédis", tasks: [["m7-p1", "Prédire l’allure des lignes de champ à l’échelle d’une salle de classe"], ["m7-p2", "Prédire l’allure à l’échelle de la planète"]],
+      render: function (b) {
+        b.innerHTML = '<div id="m7-p1"></div><div id="m7-p2"></div>';
+        question($("#m7-p1", b), { id: "m7-p1", predict: true, legend: "<b>Prédis.</b> À l’échelle d’une salle de classe (10 m), les lignes de champ de pesanteur sont…", options: [{ t: "parallèles", fb: "Prédiction notée. Vérifie avec la vue de 10 m." }, { t: "convergentes vers un point", fb: "Prédiction notée. Vérifie avec la vue de 10 m." }] });
+        question($("#m7-p2", b), { id: "m7-p2", predict: true, legend: "<b>Prédis.</b> À l’échelle de la planète (30 000 km), elles sont…", options: [{ t: "parallèles", fb: "Prédiction notée. Vérifie avec la vue de 30 000 km." }, { t: "convergentes vers le centre de la Terre", fb: "Prédiction notée. Vérifie avec la vue de 30 000 km." }] });
+      } },
+    { id: "m7b", title: "Explore les échelles", tasks: [["m7-big", "Régler une vue de plus de 20 000 km de large"], ["m7-angle", "Trouver la largeur de vue pour laquelle les verticales en A et B font 1°"], ["m7-q-lines", "Conclure sur le parallélisme des lignes de champ"]],
+      render: function (b) {
+        b.innerHTML = '<p>Fais varier la largeur de la vue : les flèches sont-elles parallèles, de même longueur ? Où les verticales en A et B se rejoignent-elles ?</p><div id="m7-n"></div><div id="m7-q"></div>';
+        numQ($("#m7-n", b), { id: "m7-angle", label: "Quelle <b>largeur de vue</b> (en km) donne un angle de <b>1°</b> entre les verticales en A et en B ?", unit: "km", answer: 222, tol: 0.25,
+          hint: "Règle la vue autour de 100 à 500 km et lis l’afficheur d’angle ; affine jusqu’à 1,00°.", explain: "A et B sont à ± L/4 du centre : l’angle vaut environ L / (2 R) (en radians) ; pour 1° (0,0175 rad) et R = 6 371 km, L ≈ 222 km." });
+        question($("#m7-q", b), { id: "m7-q-lines", legend: "Les lignes de champ de pesanteur sont-elles parallèles ?",
+          options: [{ t: "Oui sur une petite zone (quelques dizaines de km), mais à l’échelle de la planète elles convergent vers le centre de la Terre", ok: true, fb: "Un champ peut être considéré comme uniforme <b>localement</b>, sur une zone petite devant la taille de la source. À grande échelle, il est radial." },
+            { t: "Oui, toujours", fb: "Mets une vue de 30 000 km : les verticales en A et B se rejoignent-elles ?" }, { t: "Non, jamais", fb: "Mets une vue de 10 m : l’angle entre les verticales en A et B est-il mesurable ?" }] });
+      } },
+    { id: "m7c", title: "Jusqu’où g reste-t-il constant ?", tasks: [["m7-1pct", "Trouver l’altitude où g a diminué de 1 %"], ["m7-q-uni", "Conclure pour une salle de classe"]],
+      render: function (b) {
+        b.innerHTML = '<p>Avec le second curseur, monte l’objet. L’afficheur « g / g₀ » donne la valeur relative de g.</p><div id="m7-n2"></div><div id="m7-q2"></div>';
+        numQ($("#m7-n2", b), { id: "m7-1pct", label: "À quelle altitude (en km) g a-t-il diminué de <b>1 %</b> ? (g / g₀ = 99 %)", unit: "km", answer: 32, tol: 0.2,
+          hint: "Choisis une largeur de vue d’environ 100 km, puis monte l’objet jusqu’à lire 99 %.", explain: "g(h) = g₀ · R² / (R + h)² : pour 0,99, h ≈ 0,5 % de R ≈ 32 km." });
+        question($("#m7-q2", b), { id: "m7-q-uni", legend: "Dans une salle de classe (quelques mètres d’altitude), on peut prendre g constant parce que…",
+          options: [{ t: "la variation de g sur quelques mètres est minuscule devant g : le champ y est uniforme à très bonne approximation", ok: true, fb: "Pour que g baisse de 1 %, il faut monter de plus de 30 km. Sur 10 m, la variation est d’environ 3 millionièmes." },
+            { t: "g est nul à l’intérieur d’une salle", fb: "g n’est pas nul : un objet lâché tombe. Compare avec g à 30 km d’altitude." }, { t: "g ne dépend jamais de l’altitude", fb: "Tu viens de voir que g diminue avec l’altitude (de 1 % à environ 30 km)." }] });
+      } },
+    { id: "m7d", title: "Bilan : interaction électrostatique et gravitationnelle", tasks: [["m7-sum", "Compléter le bilan sur les analogies et les différences"]],
+      render: function (b) {
+        b.innerHTML = "<p>Tu as manipulé deux champs. Résume ce qu’ils ont en commun et ce qui les distingue.</p>";
+        selects(b, { id: "m7-sum", explain: "Même forme mathématique (loi en 1/d², champ radial pour un objet ponctuel, uniforme localement), mais la charge peut avoir deux signes alors que la masse n’en a qu’un : la force de gravitation est toujours attractive.",
+          rows: [{ pre: "La force électrostatique dépend de", opts: ["la charge électrique", "la masse"], ok: 0, pre2: "et la force gravitationnelle de", opts2: ["la charge électrique", "la masse"], ok2: 1, post2: ".", fb: "Force électrostatique : charges. Gravitation : masses.", fb2: "La gravitation s’exerce entre masses." },
+            { pre: "Entre deux objets, la force électrostatique est", opts: ["toujours attractive", "attractive ou répulsive"], ok: 1, pre2: "et la force gravitationnelle est", opts2: ["toujours attractive", "attractive ou répulsive"], ok2: 0, post2: ".", fb: "Les charges ont deux signes : attraction ou répulsion.", fb2: "La masse est toujours positive : la gravitation est toujours attractive." },
+            { pre: "Pour les deux, la valeur de la force varie avec la distance d", opts: ["en 1/d²", "proportionnellement à d", "de façon indépendante de d"], ok: 0, fb: "Loi de Coulomb et loi de gravitation universelle : en inverse du carré de la distance." },
+            { pre: "Vu de loin, le champ d’un objet ponctuel est", opts: ["uniforme", "radial (lignes de champ dirigées vers l’objet ou depuis lui)"], ok: 1, pre2: "et très près du sol ou entre deux plaques il est", opts2: ["localement uniforme", "radial"], ok2: 0, post2: ".", fb: "Mission 5 (anneau) et mission 7 (Terre vue de loin).", fb2: "Mission 4 (plaques) et mission 7 (vue de 10 m)." }] });
+      } }
+  ],
+  derive: function (tk) { ["m7-p1", "m7-p2", "m7-big", "m7-angle", "m7-q-lines", "m7-1pct", "m7-q-uni", "m7-sum"].forEach(function (k) { tk[k] = F(k); }); }
+};
+
+/* ============================================================
+   11. Démarrage
+   ============================================================ */
+scene = S.canvas("#cv", { width: CW, height: CH, draw: function (ctx) { if (cur && !cur.earth) draw(ctx); } });
+var cvEl = $("#cv");
+cvEl.addEventListener("pointerdown", onDown); cvEl.addEventListener("pointermove", onMove);
+cvEl.addEventListener("pointerup", onUp); cvEl.addEventListener("pointercancel", onUp); cvEl.addEventListener("keydown", onKey);
+S.tabs("#tabs", enter, "M1");
+})();
+</script>
+</body>
+</html>
