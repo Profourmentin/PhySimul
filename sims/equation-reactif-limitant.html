@@ -1,0 +1,873 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Équilibrer une équation, réactif limitant · Simulabo PhCh</title>
+<meta name="description" content="Ajuste une équation atome par atome, puis fais réagir des quantités de matière choisies pour découvrir quel réactif limite la transformation.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+.wrap, #sim, #sim > * { min-width: 0; }
+#m-eq, #m-rx { width: 100%; }
+#m-eq > *, #m-rx > * { min-width: 0; }
+#sim { width: 100%; }
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.tab { flex: 1 1 auto; }
+sub, sup { font-size: .7em; line-height: 0; }
+.st { font-size: .62em; font-weight: 500; color: var(--muted); margin-left: 1px; }
+
+/* Couleurs des éléments : propres à cette simulation, définies en clair et en sombre.
+   La lettre du symbole est toujours écrite dans le disque : la couleur n'est jamais seule à porter l'information. */
+:root {
+  --el-H: #F2F5F7;  --el-H-ink: #14222C;
+  --el-C: #4A5560;  --el-C-ink: #FFFFFF;
+  --el-O: #C23B31;  --el-O-ink: #FFFFFF;
+  --el-N: #2F6FD0;  --el-N-ink: #FFFFFF;
+  --el-Cl: #1F7A47; --el-Cl-ink: #FFFFFF;
+  --el-Mg: #6B4FBF; --el-Mg-ink: #FFFFFF;
+  --el-Al: #8896A0; --el-Al-ink: #14222C;
+  --el-Fe: #A5532A; --el-Fe-ink: #FFFFFF;
+  --el-Zn: #4F6D7E; --el-Zn-ink: #FFFFFF;
+  --el-Cu: #A8651F; --el-Cu-ink: #FFFFFF;
+  --el-Ag: #C5CFD6; --el-Ag-ink: #14222C;
+  --el-X: #6F7C86;  --el-X-ink: #FFFFFF;
+  --atom-stroke: rgba(20, 34, 44, .45);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --el-H: #E4ECF0;  --el-H-ink: #0D1419;
+    --el-C: #66727D;  --el-C-ink: #FFFFFF;
+    --el-O: #C8453B;  --el-O-ink: #FFFFFF;
+    --el-N: #3B7BDD;  --el-N-ink: #FFFFFF;
+    --el-Cl: #23884F; --el-Cl-ink: #FFFFFF;
+    --el-Mg: #7A5DD0; --el-Mg-ink: #FFFFFF;
+    --el-Al: #A3B0BA; --el-Al-ink: #0D1419;
+    --el-Fe: #B5602F; --el-Fe-ink: #FFFFFF;
+    --el-Zn: #5E7F91; --el-Zn-ink: #FFFFFF;
+    --el-Cu: #B7722B; --el-Cu-ink: #FFFFFF;
+    --el-Ag: #D3DCE2; --el-Ag-ink: #0D1419;
+    --el-X: #7F8C96;  --el-X-ink: #FFFFFF;
+    --atom-stroke: rgba(228, 236, 240, .6);
+  }
+}
+.atm { stroke: var(--atom-stroke); stroke-width: 1; }
+.alt { font: 700 10px var(--font-head); text-anchor: middle; }
+.alt.two { font-size: 8.5px; }
+.ghost { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 2.5; }
+.badge-bg { fill: var(--surface); stroke: var(--ink); stroke-width: 1; }
+.badge-tx { font: 700 8px var(--font-data); text-anchor: middle; fill: var(--ink); }
+svg.mol { display: block; overflow: visible; }
+
+.progress { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; background: var(--surface); color: var(--muted); }
+.chip b { font-family: var(--font-data); color: var(--ink); }
+
+.eqline { font: 600 clamp(20px, 4.4vw, 28px)/1.5 var(--font-head); letter-spacing: .01em; }
+.eqline .arr { margin: 0 .35em; color: var(--accent); }
+.eqline .c { font-family: var(--font-data); color: var(--accent); margin-right: .2em; }
+
+/* --- Ajuster --- */
+.eqrow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; padding: 14px; }
+.op { align-self: center; font: 600 26px var(--font-head); color: var(--muted); }
+.blk { flex: 1 1 150px; min-width: 140px; max-width: 100%; border: 2px solid var(--line); border-radius: var(--radius); padding: 10px; background: var(--bg); display: grid; gap: 8px; align-content: start; }
+.blk-h { display: grid; gap: 2px; text-align: center; }
+.blk-h b { font: 600 22px var(--font-head); }
+.blk-h .nom { font-size: 12px; color: var(--muted); }
+.stepper { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.stepper button { width: 44px; padding: 0; font-size: 22px; }
+.stepper output { font: 600 24px var(--font-data); min-width: 1.5em; text-align: center; }
+.toks { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: flex-start; min-height: 40px; }
+.tok { display: block; }
+.tok.pop { animation: pop .4s ease-out; }
+@keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.legend .lg { color: var(--ink); }
+.legend .lg svg { width: 20px; height: 20px; flex: none; }
+.legend .lg i { display: none; }
+
+table.mesures td.cell-ok { color: var(--ok); font-weight: 600; }
+table.mesures td.cell-bad { color: var(--bad); font-weight: 600; }
+table.mesures td.txt { text-align: left; white-space: normal; }
+
+.opts { display: grid; gap: 6px; }
+.opt { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; font-size: 17px; }
+.opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 10px; }
+legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom: 6px; }
+select { min-height: 44px; font: 600 16px var(--font-body); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); max-width: 100%; }
+.field-row { display: grid; gap: 6px; }
+.field-row label { font-weight: 600; }
+
+/* --- Réacteur --- */
+.rx-cols { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 14px; }
+@media (min-width: 720px) { .rx-cols { grid-template-columns: 1fr 1fr; } }
+.rx-cols h3 { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.trays { display: grid; gap: 10px; }
+.tray { border: 2px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--bg); display: grid; gap: 8px; }
+.tray[data-lim="true"] { border-color: var(--warn); background: var(--warn-bg); }
+.tray-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.tray-h b { font: 600 20px var(--font-head); }
+.tray-h .nom { font-size: 12px; color: var(--muted); }
+.tray .amt { font: 600 15px var(--font-data); }
+.tray .tag { font-size: 13px; font-weight: 700; color: var(--warn); }
+.tray .toks { justify-content: flex-start; min-height: 44px; }
+.tray .toks .none { color: var(--muted); font-size: 13px; align-self: center; }
+.rx-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.rx-bar .lcd { min-width: 230px; }
+.rx-ctrl { padding: 12px 14px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px; }
+.qline { font-size: 17px; line-height: 1.6; }
+
+button[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.score { font: 600 15px var(--font-data); }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="matiere">Constitution et transformations de la matière · Seconde</p>
+    <h1>Équilibrer une équation, réactif limitant</h1>
+    <p class="sub">Ajuste une équation atome par atome, puis fais réagir des quantités de matière choisies pour découvrir quel réactif limite la transformation.</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+
+    <div class="tabs" id="tabs" role="group" aria-label="Choisir une activité">
+      <button class="tab" data-mode="eq" type="button">1 · Ajuster l’équation</button>
+      <button class="tab" data-mode="react" type="button">2 · Faire réagir</button>
+      <button class="tab" data-mode="limit" type="button">3 · Réactif limitant</button>
+    </div>
+
+    <div class="progress">
+      <span class="chip" id="chip-eq">Équations ajustées : <b id="n-eq">0</b></span>
+      <span class="chip" id="chip-limit" hidden>Prédictions justes : <b id="n-ok">0</b> sur <b id="n-try">0</b></span>
+    </div>
+
+    <!-- ================= 1 · AJUSTER ================= -->
+    <div id="m-eq" class="wrap" style="gap:16px">
+      <section class="card" aria-labelledby="h-eq">
+        <h2 id="h-eq">Ajuster une équation de réaction</h2>
+        <p class="help">Une transformation chimique conserve les <b>éléments</b> : il y a autant d’atomes de chaque élément avant et après. Pour l’ajuster, on choisit les <b>nombres stœchiométriques</b> écrits devant les formules. On ne modifie <b>jamais</b> les formules elles-mêmes (leurs indices). Le nombre 1 ne s’écrit pas.</p>
+        <p class="help"><b>Avant de cliquer</b>, prédis dans ta tête ou sur ton cahier les nombres à placer, puis vérifie avec le bilan.</p>
+        <div class="row">
+          <div class="tabs" id="lvls" role="group" aria-label="Niveau de difficulté">
+            <button class="tab" data-mode="1" type="button">Pas à pas</button>
+            <button class="tab" data-mode="2" type="button">Plus long</button>
+            <button class="tab" data-mode="3" type="button">Avec des ions</button>
+          </div>
+          <button type="button" id="eq-new">Autre équation</button>
+        </div>
+      </section>
+
+      <section class="stage" aria-label="Représentation des entités chimiques avant et après la transformation">
+        <div class="rx-bar"><p class="eqline" id="eq-line"></p></div>
+        <div class="eqrow" id="eq-blocks"></div>
+        <div class="legend" id="eq-legend"></div>
+        <div class="legend" style="border-top:0;padding-top:0"><span>Chaque disque est un atome (la lettre donne l’élément). L’assemblage des atomes est simplifié : il ne montre pas la vraie forme de l’entité.</span></div>
+      </section>
+
+      <section class="card" aria-labelledby="h-bil">
+        <h2 id="h-bil">Bilan atome par atome</h2>
+        <div class="tablewrap">
+          <table class="mesures" id="bil">
+            <caption class="sr-only">Nombre d’atomes de chaque élément avant et après la transformation</caption>
+            <thead><tr><th scope="col">Élément</th><th scope="col">Avant</th><th scope="col">Après</th><th scope="col">Conservé ?</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="status" id="bil-status" aria-live="polite"></p>
+        <div class="row">
+          <button type="button" class="sw" role="switch" aria-checked="true" id="sw-auto"><span class="track"><span class="knob"></span></span>Bilan automatique</button>
+          <button type="button" class="primary" id="eq-check">Valider mon équation</button>
+          <button type="button" id="eq-hint">Un indice</button>
+          <button type="button" id="eq-reset">Tout remettre à 1</button>
+          <button type="button" class="primary" id="eq-next" hidden>Équation suivante</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= 2 et 3 · RÉACTEUR ================= -->
+    <div id="m-rx" class="wrap" style="gap:16px" hidden>
+
+      <section class="card" id="c-react" aria-labelledby="h-react" hidden>
+        <h2 id="h-react">Choisir la réaction et les quantités de matière</h2>
+        <p class="help"><b>Prédis d’abord</b> : quel réactif sera entièrement consommé en premier ? Puis fais réagir pour vérifier.</p>
+        <div class="field-row">
+          <label for="rx-select">Transformation étudiée</label>
+          <select id="rx-select"></select>
+        </div>
+        <div id="rx-sliders" class="card" style="padding:0;border:0;background:none"></div>
+        <div class="row">
+          <button type="button" class="sw" role="switch" aria-checked="false" id="sw-ratio"><span class="track"><span class="knob"></span></span>Montrer la méthode : n / nombre stœchiométrique</button>
+        </div>
+      </section>
+
+      <section class="card" id="c-limit" aria-labelledby="h-limit" hidden>
+        <h2 id="h-limit">Quel est le réactif limitant ?</h2>
+        <p class="help">Un <b>réactif limitant</b> est celui qui est entièrement consommé en premier : il arrête la transformation. Les quantités de matière initiales sont données dans le réacteur. Attention aux nombres stœchiométriques de l’équation.</p>
+        <fieldset id="pred">
+          <legend>Prédis : quel réactif sera entièrement consommé en premier ?</legend>
+          <div class="opts" id="pred-opts"></div>
+        </fieldset>
+        <div class="row">
+          <button type="button" class="primary" id="pred-ok">Valider ma prédiction</button>
+          <button type="button" id="lim-hint">Un indice</button>
+          <button type="button" id="lim-new">Nouvelle situation</button>
+        </div>
+      </section>
+
+      <section class="stage" id="rx-stage" aria-label="Réacteur : réactifs et produits">
+        <div class="rx-bar">
+          <p class="eqline" id="rx-eq"></p>
+          <div id="rx-lcd"></div>
+        </div>
+        <div class="rx-cols">
+          <div><h3>Réactifs</h3><div class="trays" id="rx-react"></div></div>
+          <div><h3>Produits</h3><div class="trays" id="rx-prod"></div></div>
+        </div>
+        <div class="legend"><span>Chaque icône représente <b>1 mol</b> de l’entité ; une icône en pointillés remplie en partie représente une fraction de mole.</span></div>
+        <div class="rx-ctrl">
+          <button type="button" class="primary" id="rx-step">Faire réagir une fois</button>
+          <button type="button" id="rx-run">Faire réagir jusqu’au bout</button>
+          <button type="button" id="rx-reset">Revenir à l’état initial</button>
+        </div>
+      </section>
+
+      <div class="tablewrap">
+        <table class="mesures" id="rx-table">
+          <caption>Quantités de matière (en mol)</caption>
+          <thead><tr id="rx-thead"></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="defi"></div>
+    </div>
+
+    <section class="obs" id="obs" aria-live="polite" data-tone="info">
+      <h2>Observation</h2>
+      <p data-obs-text>Choisis une activité pour commencer.</p>
+    </section>
+
+    <details>
+      <summary>Pour aller plus loin</summary>
+      <ul>
+        <li><b>Programme de Seconde</b> (Constitution et transformations de la matière, « Transformation chimique »), formulations proches du BO : établir l’équation de réaction associée à une transformation et l’ajuster ; identifier le réactif limitant à partir des quantités de matière des réactifs et de l’équation de réaction.</li>
+        <li><b>Conservation</b> : l’ajustement exprime la conservation des éléments chimiques et, pour les équations avec des ions, de la charge électrique.</li>
+        <li><b>Méthode du réactif limitant</b> : pour chaque réactif, on divise sa quantité de matière initiale par son nombre stœchiométrique. Le plus petit quotient désigne le réactif limitant ; il indique aussi combien de fois la réaction peut avoir lieu. Si les quotients sont égaux, le mélange est <b>stœchiométrique</b> : les réactifs disparaissent ensemble.</li>
+        <li><b>Erreur fréquente</b> : comparer directement les quantités de matière (« il y en a moins, donc c’est le limitant »). La simulation 3 propose des situations où cette règle est fausse.</li>
+        <li><b>Limites du modèle</b> : la transformation est supposée <b>totale</b> (elle s’arrête quand un réactif est épuisé). Les formes des assemblages d’atomes sont schématiques. Les quantités de matière sont des nombres entiers de moles dans les réglages.</li>
+        <li><b>En Première</b>, ce déroulement (« la réaction a eu lieu x fois ») est formalisé par l’avancement et le tableau d’avancement.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = Simulabo, h = S.h, $ = S.$, fmt = S.fmt;
+
+  /* =====================================================================
+     1. Chimie : espèces, équations, bilans
+     ===================================================================== */
+  var NOMS_EL = { H: "hydrogène", C: "carbone", O: "oxygène", N: "azote", Cl: "chlore", Mg: "magnésium", Al: "aluminium", Fe: "fer", Zn: "zinc", Cu: "cuivre", Ag: "argent" };
+
+  /* "Cu(OH)2" -> { Cu: 1, O: 2, H: 2 } */
+  function parseFormula(f) {
+    var i = 0;
+    function num() { var s = ""; while (i < f.length && /[0-9]/.test(f.charAt(i))) s += f.charAt(i++); return s ? parseInt(s, 10) : 1; }
+    function group() {
+      var comp = {};
+      function add(k, v) { comp[k] = (comp[k] || 0) + v; }
+      while (i < f.length && f.charAt(i) !== ")") {
+        if (f.charAt(i) === "(") {
+          i++; var g = group(); i++; var m = num();
+          Object.keys(g).forEach(function (k) { add(k, g[k] * m); });
+        } else {
+          var el = f.charAt(i++);
+          if (i < f.length && /[a-z]/.test(f.charAt(i))) el += f.charAt(i++);
+          add(el, num());
+        }
+      }
+      return comp;
+    }
+    return group();
+  }
+  function sp(f, st, q, nom) { return { f: f, st: st, q: q || 0, nom: nom, comp: parseFormula(f) }; }
+
+  function sub(f) { return f.replace(/(\d+)/g, "<sub>$1</sub>"); }
+  function chargeHTML(q) { return q ? "<sup>" + (Math.abs(q) > 1 ? Math.abs(q) : "") + (q > 0 ? "+" : "−") + "</sup>" : ""; }
+  function spHTML(s, withState) { return sub(s.f) + chargeHTML(s.q) + (withState ? '<span class="st">(' + s.st + ")</span>" : ""); }
+  function plain(s) { return s.f + (s.q ? (Math.abs(s.q) > 1 ? Math.abs(s.q) : "") + (s.q > 0 ? "+" : "−") : ""); }
+  var SUB = "₀₁₂₃₄₅₆₇₈₉";
+  function uni(s) {
+    var q = Math.abs(s.q);
+    return s.f.replace(/\d/g, function (d) { return SUB.charAt(+d); }) + (s.q ? (q > 1 ? "²³".charAt(q - 2) : "") + (s.q > 0 ? "⁺" : "⁻") : "");
+  }
+
+  var SP = {
+    H2: sp("H2", "g", 0, "dihydrogène"), O2: sp("O2", "g", 0, "dioxygène"), H2O: sp("H2O", "l", 0, "eau"),
+    Mg: sp("Mg", "s", 0, "magnésium"), MgO: sp("MgO", "s", 0, "oxyde de magnésium"),
+    N2: sp("N2", "g", 0, "diazote"), NH3: sp("NH3", "g", 0, "ammoniac"),
+    CH4: sp("CH4", "g", 0, "méthane"), CO2: sp("CO2", "g", 0, "dioxyde de carbone"),
+    Fe: sp("Fe", "s", 0, "fer"), Fe2O3: sp("Fe2O3", "s", 0, "oxyde de fer(III)"),
+    Al: sp("Al", "s", 0, "aluminium"), Al2O3: sp("Al2O3", "s", 0, "oxyde d’aluminium"),
+    C3H8: sp("C3H8", "g", 0, "propane"), C2H6: sp("C2H6", "g", 0, "éthane"), C4H10: sp("C4H10", "g", 0, "butane"),
+    Zn: sp("Zn", "s", 0, "zinc"), Hp: sp("H", "aq", 1, "ion hydrogène"), Zn2: sp("Zn", "aq", 2, "ion zinc"),
+    Cu2: sp("Cu", "aq", 2, "ion cuivre(II)"), HO: sp("HO", "aq", -1, "ion hydroxyde"), CuOH2: sp("Cu(OH)2", "s", 0, "hydroxyde de cuivre(II)"),
+    Fe3: sp("Fe", "aq", 3, "ion fer(III)"), FeOH3: sp("Fe(OH)3", "s", 0, "hydroxyde de fer(III)"),
+    Al3: sp("Al", "aq", 3, "ion aluminium"), Ag: sp("Ag", "aq", 1, "ion argent"), Cl: sp("Cl", "aq", -1, "ion chlorure"), AgCl: sp("AgCl", "s", 0, "chlorure d’argent")
+  };
+
+  /* E(identifiant, niveau, [[nombre, espèce], …] réactifs, produits, utilisable dans le réacteur) */
+  function E(id, niv, R, P, lim) {
+    function mk(p) { return { nu: p[0], sp: p[1] }; }
+    var o = { id: id, niv: niv, R: R.map(mk), P: P.map(mk), lim: !!lim };
+    o.all = o.R.concat(o.P);
+    return o;
+  }
+  var EQS = [
+    E("eau", 1, [[2, SP.H2], [1, SP.O2]], [[2, SP.H2O]], true),
+    E("mg", 1, [[2, SP.Mg], [1, SP.O2]], [[2, SP.MgO]], true),
+    E("nh3", 1, [[1, SP.N2], [3, SP.H2]], [[2, SP.NH3]], true),
+    E("ch4", 1, [[1, SP.CH4], [2, SP.O2]], [[1, SP.CO2], [2, SP.H2O]], true),
+    E("fe", 2, [[4, SP.Fe], [3, SP.O2]], [[2, SP.Fe2O3]], true),
+    E("al", 2, [[4, SP.Al], [3, SP.O2]], [[2, SP.Al2O3]], true),
+    E("c3h8", 2, [[1, SP.C3H8], [5, SP.O2]], [[3, SP.CO2], [4, SP.H2O]]),
+    E("c2h6", 2, [[2, SP.C2H6], [7, SP.O2]], [[4, SP.CO2], [6, SP.H2O]]),
+    E("c4h10", 2, [[2, SP.C4H10], [13, SP.O2]], [[8, SP.CO2], [10, SP.H2O]]),
+    E("zn", 3, [[1, SP.Zn], [2, SP.Hp]], [[1, SP.Zn2], [1, SP.H2]], true),
+    E("cuoh2", 3, [[1, SP.Cu2], [2, SP.HO]], [[1, SP.CuOH2]], true),
+    E("feoh3", 3, [[1, SP.Fe3], [3, SP.HO]], [[1, SP.FeOH3]]),
+    E("alh", 3, [[2, SP.Al], [6, SP.Hp]], [[2, SP.Al3], [3, SP.H2]]),
+    E("agcl", 3, [[1, SP.Ag], [1, SP.Cl]], [[1, SP.AgCl]], true)
+  ];
+  function eqById(id) { for (var i = 0; i < EQS.length; i++) if (EQS[i].id === id) return EQS[i]; return null; }
+  function sol(eq) { return eq.all.map(function (s) { return s.nu; }); }
+
+  function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+  function gcdAll(arr) { return arr.reduce(gcd, 0); }
+
+  /* Bilan par élément (et par charge) pour des nombres stœchiométriques donnés */
+  function bilan(eq, coefs) {
+    var els = [], L = {}, Rr = {}, qL = 0, qR = 0, nR = eq.R.length;
+    eq.all.forEach(function (s, i) {
+      var side = i < nR ? L : Rr;
+      Object.keys(s.sp.comp).forEach(function (k) {
+        if (els.indexOf(k) < 0) els.push(k);
+        side[k] = (side[k] || 0) + coefs[i] * s.sp.comp[k];
+      });
+      if (i < nR) qL += coefs[i] * s.sp.q; else qR += coefs[i] * s.sp.q;
+    });
+    return { els: els, L: L, R: Rr, qL: qL, qR: qR, hasCharge: eq.all.some(function (s) { return s.sp.q !== 0; }) };
+  }
+  function bilanOK(b) {
+    return b.els.every(function (k) { return (b.L[k] || 0) === (b.R[k] || 0); }) && b.qL === b.qR;
+  }
+  function signed(v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v); }
+
+  /* Texte d'une équation : coefficients écrits (1 omis) */
+  function eqHTML(eq, coefs, opts) {
+    opts = opts || {};
+    function side(list, off) {
+      return list.map(function (s, i) {
+        var c = coefs[off + i];
+        return (c === 1 ? "" : '<span class="c">' + c + "</span>") + spHTML(s.sp, true);
+      }).join(" + ");
+    }
+    return side(eq.R, 0) + '<span class="arr">→</span>' + side(eq.P, eq.R.length);
+  }
+  function eqPlain(eq) {
+    function side(list) { return list.map(function (s) { return (s.nu === 1 ? "" : s.nu + " ") + uni(s.sp); }).join(" + "); }
+    return side(eq.R) + " → " + side(eq.P);
+  }
+
+  /* =====================================================================
+     2. Dessin des entités (disques avec symbole), assemblages simplifiés
+     ===================================================================== */
+  var R = 10, K = 1.25, gid = 0;
+  function rad(d) { return d * Math.PI / 180; }
+
+  function layoutOf(spc) {
+    var els = [], keys = Object.keys(spc.comp), pts = [];
+    keys.forEach(function (k) { for (var i = 0; i < spc.comp[k]; i++) els.push(k); });
+    var n = els.length;
+    if (n === 1) pts.push({ el: els[0], x: 0, y: 0 });
+    else if (n === 2) { pts.push({ el: els[0], x: -R * .85, y: 0 }); pts.push({ el: els[1], x: R * .85, y: 0 }); }
+    else {
+      var centre = null;
+      if (keys.length === 2 && n <= 5) keys.forEach(function (k) { if (spc.comp[k] === 1) centre = k; });
+      if (centre) {
+        var lig = els.filter(function (e) { return e !== centre; }), k2 = lig.length, d = R * 1.75;
+        var angs = k2 === 2 ? (spc.f === "CO2" ? [Math.PI, 0] : [rad(38), rad(142)])
+                            : lig.map(function (_, i) { return -Math.PI / 2 + i * 2 * Math.PI / k2; });
+        pts.push({ el: centre, x: 0, y: 0 });
+        lig.forEach(function (e, i) { pts.push({ el: e, x: d * Math.cos(angs[i]), y: d * Math.sin(angs[i]) }); });
+      } else {
+        var cols = Math.ceil(Math.sqrt(n)), step = R * 1.8, rows = Math.ceil(n / cols);
+        els.forEach(function (e, i) {
+          var row = Math.floor(i / cols), len = Math.min(cols, n - row * cols), col = i % cols;
+          pts.push({ el: e, x: (col - (len - 1) / 2) * step, y: (row - (rows - 1) / 2) * step * .92 });
+        });
+      }
+    }
+    return pts;
+  }
+  function atomsStr(pts) {
+    return pts.map(function (p) {
+      var known = NOMS_EL[p.el] ? p.el : "X";
+      return '<circle class="atm" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + R + '" style="fill:var(--el-' + known + ')"/>' +
+             '<text class="alt' + (p.el.length > 1 ? " two" : "") + '" x="' + p.x.toFixed(1) + '" y="' + p.y.toFixed(1) + '" dy=".35em" style="fill:var(--el-' + known + '-ink)">' + p.el + "</text>";
+    }).join("");
+  }
+  var molCache = {};
+  /* frac : 0 ou 1 = entité entière ; entre 0 et 1 = fraction de mole (remplissage partiel) */
+  function molSVG(spc, frac) {
+    var key = spc.f + "|" + spc.q + "|" + (frac ? frac.toFixed(2) : "1");
+    if (molCache[key]) return molCache[key];
+    var pts = layoutOf(spc), minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+    pts.forEach(function (p) { minx = Math.min(minx, p.x); maxx = Math.max(maxx, p.x); miny = Math.min(miny, p.y); maxy = Math.max(maxy, p.y); });
+    var pad = 2, left = minx - R, right = maxx + R, top = miny - R, bottom = maxy + R;
+    var bxp = maxx + R, byp = miny - R * .85;           // badge de charge, décalé hors du disque
+    if (spc.q) { right = Math.max(right, bxp + 7.5); top = Math.min(top, byp - 7.5); }
+    var vx = left - pad, vy = top - pad, vw = right - left + 2 * pad, vh = bottom - top + 2 * pad;
+    var inner;
+    if (frac && frac > 0 && frac < 1) {
+      var id = "cp" + (++gid);
+      inner = '<g class="ghost-g">' + pts.map(function (p) { return '<circle class="ghost" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + R + '"/>'; }).join("") + "</g>" +
+              '<clipPath id="' + id + '"><rect x="' + vx.toFixed(1) + '" y="' + vy.toFixed(1) + '" width="' + (vw * frac).toFixed(1) + '" height="' + vh.toFixed(1) + '"/></clipPath>' +
+              '<g clip-path="url(#' + id + ')">' + atomsStr(pts) + "</g>";
+    } else inner = atomsStr(pts);
+    if (spc.q) {
+      var q = Math.abs(spc.q);
+      inner += '<circle class="badge-bg" cx="' + bxp.toFixed(1) + '" cy="' + byp.toFixed(1) + '" r="6.5"/><text class="badge-tx" x="' + bxp.toFixed(1) + '" y="' + byp.toFixed(1) + '" dy=".35em">' + (q > 1 ? q : "") + (spc.q > 0 ? "+" : "−") + "</text>";
+    }
+    var svg = '<svg class="mol" viewBox="' + [vx, vy, vw, vh].map(function (v) { return v.toFixed(1); }).join(" ") + '" width="' + (vw * K).toFixed(0) + '" height="' + (vh * K).toFixed(0) + '" aria-hidden="true" focusable="false">' + inner + "</svg>";
+    if (!frac || frac >= 1) molCache[key] = svg;
+    return svg;
+  }
+  function tokHTML(spc, n, frac, popFrom) {
+    var out = "";
+    for (var i = 0; i < n; i++) out += '<span class="tok' + (popFrom != null && i >= popFrom ? " pop" : "") + '">' + molSVG(spc) + "</span>";
+    if (frac) out += '<span class="tok">' + molSVG(spc, frac) + "</span>";
+    return out;
+  }
+
+  /* =====================================================================
+     3. État général et partage par lien
+     ===================================================================== */
+  var etat = S.shareState({ mode: "eq", eq: "", rx: "eau", a: 6, b: 4, niv: 1 });
+  var init = etat.read();
+  var share = { mode: init.mode, eq: init.eq, rx: init.rx, a: init.a, b: init.b, niv: init.niv };
+  function writeShare() { etat.write(share); }
+  var mode = "eq";
+
+  /* =====================================================================
+     4. Activité 1 : ajuster l'équation
+     ===================================================================== */
+  var A = { eq: null, coefs: [], niv: Math.min(3, Math.max(1, Math.round(init.niv) || 1)), hint: 0, solved: 0, solvedCur: false, auto: true, last: null };
+
+  function pickEq(forced) {
+    var pool = EQS.filter(function (e) { return e.niv === A.niv; });
+    var e = forced || null;
+    if (!e) {
+      var cand = pool.filter(function (x) { return !A.last || x.id !== A.last.id; });
+      e = cand[Math.floor(Math.random() * cand.length)];
+    }
+    A.last = A.eq = e; A.coefs = e.all.map(function () { return 1; });
+    A.hint = 0; A.solvedCur = false;
+    share.eq = e.id; share.niv = e.niv; writeShare();
+    buildBlocks(); updateEq();
+    $("#eq-next").hidden = true;
+    S.observe("#obs", "info", "Équation à ajuster. <b>Prédis d’abord</b> les nombres à placer devant chaque formule, puis règle-les et vérifie avec le bilan.");
+  }
+
+  function buildBlocks() {
+    var box = $("#eq-blocks"), nR = A.eq.R.length;
+    box.textContent = "";
+    A.eq.all.forEach(function (s, i) {
+      if (i === nR) box.appendChild(h("div", { class: "op", html: '<span aria-hidden="true">→</span><span class="sr-only">donne</span>' }));
+      else if (i > 0) box.appendChild(h("div", { class: "op", html: '<span aria-hidden="true">+</span><span class="sr-only">plus</span>' }));
+      var out = h("output", { id: "co-" + i });
+      var minus = h("button", { type: "button", "aria-label": "Diminuer le nombre stœchiométrique de " + plain(s.sp), text: "−" });
+      var plus = h("button", { type: "button", "aria-label": "Augmenter le nombre stœchiométrique de " + plain(s.sp), text: "+" });
+      minus.addEventListener("click", function () { setCoef(i, A.coefs[i] - 1); });
+      plus.addEventListener("click", function () { setCoef(i, A.coefs[i] + 1); });
+      box.appendChild(h("div", { class: "blk" },
+        h("div", { class: "blk-h" }, h("b", { html: spHTML(s.sp, true) }), h("span", { class: "nom", text: s.sp.nom })),
+        h("div", { class: "stepper", role: "group", "aria-label": "Nombre stœchiométrique de " + s.sp.nom + " (" + plain(s.sp) + ")" }, minus, out, plus),
+        h("div", { class: "toks", id: "tk-" + i, "aria-hidden": "true" })));
+    });
+    // Légende des éléments présents
+    var leg = $("#eq-legend"); leg.textContent = "";
+    bilan(A.eq, A.coefs).els.forEach(function (el) {
+      var one = { f: el, q: 0, comp: {} }; one.comp[el] = 1;
+      leg.appendChild(h("span", { class: "lg", html: molSVG(one) + " " + el + " : " + (NOMS_EL[el] || el) }));
+    });
+    // Corps du tableau de bilan
+    var tb = $("#bil tbody"); tb.textContent = "";
+    var b = bilan(A.eq, A.coefs);
+    b.els.forEach(function (el) { tb.appendChild(h("tr", { id: "r-" + el }, h("td", { text: el + " (" + (NOMS_EL[el] || "") + ")" }), h("td"), h("td"), h("td"))); });
+    if (b.hasCharge) tb.appendChild(h("tr", { id: "r-q" }, h("td", { text: "Charge électrique" }), h("td"), h("td"), h("td")));
+  }
+
+  function setCoef(i, v) {
+    v = Math.max(1, Math.min(14, v));
+    if (v === A.coefs[i]) return;
+    A.coefs[i] = v; updateEq();
+  }
+
+  function updateEq() {
+    var eq = A.eq, c = A.coefs;
+    $("#eq-line").innerHTML = eqHTML(eq, c);
+    eq.all.forEach(function (s, i) {
+      $("#co-" + i).textContent = c[i];
+      $("#tk-" + i).innerHTML = tokHTML(s.sp, c[i], 0);
+    });
+    var b = bilan(eq, c), bad = [];
+    b.els.forEach(function (el) {
+      var l = b.L[el] || 0, r = b.R[el] || 0, tr = $("#r-" + el), td = tr.children;
+      var ok = l === r;
+      if (!ok) bad.push(el);
+      td[1].textContent = A.auto ? l : "?"; td[2].textContent = A.auto ? r : "?";
+      td[3].textContent = A.auto ? (ok ? "✓ oui" : "✗ non") : "–";
+      td[3].className = A.auto ? (ok ? "cell-ok" : "cell-bad") : "";
+    });
+    if (b.hasCharge) {
+      var tq = $("#r-q").children, okq = b.qL === b.qR;
+      if (!okq) bad.push("charge");
+      tq[1].textContent = A.auto ? signed(b.qL) : "?"; tq[2].textContent = A.auto ? signed(b.qR) : "?";
+      tq[3].textContent = A.auto ? (okq ? "✓ oui" : "✗ non") : "–";
+      tq[3].className = A.auto ? (okq ? "cell-ok" : "cell-bad") : "";
+    }
+    $("#bil-status").textContent = !A.auto ? "Bilan automatique masqué : compte toi-même, puis valide ton équation."
+      : bad.length ? "À ajuster : " + bad.join(", ") + "."
+      : "Tous les éléments" + (b.hasCharge ? " et la charge" : "") + " sont conservés.";
+  }
+
+  function validateEq() {
+    var eq = A.eq, c = A.coefs, b = bilan(eq, c), bad = [];
+    b.els.forEach(function (el) {
+      if ((b.L[el] || 0) !== (b.R[el] || 0)) bad.push("<b>" + el + "</b> : " + (b.L[el] || 0) + " avant, " + (b.R[el] || 0) + " après");
+    });
+    if (b.hasCharge && b.qL !== b.qR) bad.push("la <b>charge</b> : " + signed(b.qL) + " avant, " + signed(b.qR) + " après");
+    if (bad.length) {
+      S.observe("#obs", "bad", "<b>Pas encore ajustée.</b> Non conservé : " + bad.join(" ; ") + ". Rappel : on change les nombres devant les formules, jamais les indices.");
+      return;
+    }
+    var g = gcdAll(c);
+    if (g > 1) {
+      S.observe("#obs", "warn", "<b>Équilibrée, mais pas encore simplifiée.</b> Tous les nombres sont divisibles par " + g + " : on écrit les <b>plus petits nombres entiers</b> possibles. Divise-les par " + g + ".");
+      return;
+    }
+    S.observe("#obs", "ok", "<b>Équation ajustée.</b> " + eqHTML(eq, c) + "<br>Pour chaque élément, il y a autant d’atomes avant qu’après" + (b.hasCharge ? ", et la charge électrique totale est la même des deux côtés" : "") + " : les éléments chimiques se conservent.");
+    if (!A.solvedCur) { A.solvedCur = true; A.solved += 1; $("#n-eq").textContent = A.solved; }
+    $("#eq-next").hidden = false;
+    $("#eq-next").focus();
+  }
+
+  function hintEq() {
+    var eq = A.eq, c = A.coefs, b = bilan(eq, c), s = sol(eq);
+    A.hint += 1;
+    var firstBad = null;
+    b.els.forEach(function (el) { if (!firstBad && (b.L[el] || 0) !== (b.R[el] || 0)) firstBad = el; });
+    if (bilanOK(b) && gcdAll(c) === 1) { S.observe("#obs", "ok", "<b>Indice :</b> tout est déjà conservé, tu peux valider ton équation."); return; }
+    if (A.hint === 1) {
+      if (firstBad) S.observe("#obs", "warn", "<b>Indice :</b> compte les atomes de <b>" + firstBad + "</b> de chaque côté : " + (b.L[firstBad] || 0) + " avant, " + (b.R[firstBad] || 0) + " après. Quel nombre faut-il modifier pour les égaliser ? Commence par un élément qui n’apparaît que dans une formule de chaque côté.");
+      else if (b.qL !== b.qR) S.observe("#obs", "warn", "<b>Indice :</b> les atomes sont conservés mais pas la charge : " + signed(b.qL) + " avant, " + signed(b.qR) + " après. Les ions portent une charge : multiplie-la par le nombre stœchiométrique.");
+      else S.observe("#obs", "warn", "<b>Indice :</b> les nombres ont un diviseur commun : simplifie.");
+      return;
+    }
+    for (var i = 0; i < s.length; i++) if (c[i] !== s[i]) {
+      S.observe("#obs", "warn", "<b>Indice :</b> essaie le nombre <b>" + s[i] + "</b> devant " + spHTML(eq.all[i].sp, true) + ", puis regarde l’effet sur le bilan.");
+      return;
+    }
+  }
+
+  /* =====================================================================
+     5. Réacteur (activités 2 et 3)
+     ===================================================================== */
+  var X = { eq: null, n0: [], x: 0, xmax: 0, timer: null, prevFull: [], showRatio: false, onEnd: null, locked: false };
+
+  function amt(v) { return Math.abs(v - Math.round(v)) < 0.005 ? fmt(Math.round(v), 0) : fmt(v, 2); }
+  function done() { return X.x >= X.xmax - 1e-9; }
+  function computeXmax() {
+    var m = Infinity;
+    X.eq.R.forEach(function (r, i) { m = Math.min(m, X.n0[i] / r.nu); });
+    X.xmax = m;
+  }
+  function limIdx() {
+    var out = [];
+    X.eq.R.forEach(function (r, i) { if (Math.abs(X.n0[i] / r.nu - X.xmax) < 1e-9) out.push(i); });
+    return out;
+  }
+  function amounts() {
+    return X.eq.all.map(function (s, i) { return i < X.eq.R.length ? X.n0[i] - s.nu * X.x : s.nu * X.x; });
+  }
+
+  var lcd = S.readout("#rx-lcd", { label: "La réaction a eu lieu", unit: "fois", digits: 2 });
+
+  function rxSetup(eq, n0) {
+    rxStop();
+    X.eq = eq; X.n0 = n0.slice(); X.x = 0; computeXmax();
+    X.prevFull = amounts().map(function (v) { return Math.floor(v + 1e-9); });
+    $("#rx-eq").innerHTML = eqHTML(eq, sol(eq));
+    rxRender(false);
+  }
+
+  function rxRender(withPop) {
+    var eq = X.eq, am = amounts(), nR = eq.R.length, fin = done(), lims = limIdx();
+    var showTags = fin && X.xmax > 0;
+    function tray(s, i) {
+      var v = am[i]; if (Math.abs(v) < 1e-9) v = 0;
+      var full = Math.floor(v + 1e-9), frac = v - full;
+      if (frac < 1e-6) frac = 0; if (frac > 1 - 1e-6) { full += 1; frac = 0; }
+      var isLim = i < nR && showTags && lims.indexOf(i) >= 0;
+      var popFrom = withPop && i >= nR ? X.prevFull[i] : null;
+      var toks = (full || frac) ? tokHTML(s.sp, full, frac, popFrom) : '<span class="none">aucune entité</span>';
+      X.prevFull[i] = full;
+      var tag = "";
+      if (showTags && i < nR) tag = isLim ? '<p class="tag">Réactif limitant : entièrement consommé</p>' : (v > 1e-9 ? '<p class="tag" style="color:var(--muted);font-weight:600">Réactif en excès</p>' : "");
+      return '<div class="tray" data-lim="' + isLim + '"><div class="tray-h"><b>' + spHTML(s.sp, true) + '</b><span class="nom">' + s.sp.nom + '</span></div><div class="toks" aria-hidden="true">' + toks + '</div><p class="amt">n(' + spHTML(s.sp, false) + ") = " + amt(v) + " mol</p>" + tag + "</div>";
+    }
+    $("#rx-react").innerHTML = eq.R.map(function (s, i) { return tray(s, i); }).join("");
+    $("#rx-prod").innerHTML = eq.P.map(function (s, i) { return tray(s, nR + i); }).join("");
+    lcd.set(amt(X.x));
+
+    // Tableau
+    var showR = X.showRatio || fin;
+    var head = ["Espèce", "Nombre stœchiométrique", "n initiale (mol)", "n actuelle (mol)"];
+    if (showR) head.push("n initiale ÷ nombre stœchiométrique");
+    if (fin) head.push("Bilan");
+    $("#rx-thead").innerHTML = head.map(function (t) { return '<th scope="col">' + t + "</th>"; }).join("");
+    var rows = eq.all.map(function (s, i) {
+      var isR = i < nR, v = am[i]; if (Math.abs(v) < 1e-9) v = 0;
+      var cells = ['<td class="txt">' + spHTML(s.sp, true) + "</td>", "<td>" + s.nu + "</td>", "<td>" + (isR ? amt(X.n0[i]) : "0") + "</td>", "<td>" + amt(v) + "</td>"];
+      if (showR) cells.push("<td>" + (isR ? amt(X.n0[i] / s.nu) : "–") + "</td>");
+      if (fin) cells.push('<td class="txt">' + (isR ? (X.xmax === 0 && X.n0[i] === 0 ? "absent : rien ne peut se produire" : (lims.indexOf(i) >= 0 ? "<b>limitant</b> : consommé" : "en excès : il en reste " + amt(v) + " mol")) : (X.xmax > 0 ? "formé" : "–")) + "</td>");
+      return "<tr>" + cells.join("") + "</tr>";
+    });
+    $("#rx-table tbody").innerHTML = rows.join("");
+
+    // Boutons
+    var lock = X.locked;
+    setDis("#rx-step", lock || fin); setDis("#rx-run", lock || fin && !X.timer);
+    $("#rx-run").textContent = X.timer ? "Mettre en pause" : "Faire réagir jusqu’au bout";
+    setDis("#rx-reset", false);
+  }
+  function setDis(sel, v) { var b = $(sel); b.setAttribute("aria-disabled", String(!!v)); b.disabled = false; if (v) b.setAttribute("tabindex", "-1"); else b.removeAttribute("tabindex"); }
+  function isDis(sel) { return $(sel).getAttribute("aria-disabled") === "true"; }
+
+  function rxStep() {
+    if (X.locked || done()) return;
+    X.x = Math.min(Math.floor(X.x + 1e-9) + 1, X.xmax);
+    if (X.xmax - X.x < 1e-9) X.x = X.xmax;
+    if (done()) rxStop();
+    rxRender(true);
+    if (done()) { if (X.onEnd) X.onEnd(); else defaultEnd(); }
+  }
+  function rxStop() { if (X.timer) { clearInterval(X.timer); X.timer = null; } }
+  function rxRun() {
+    if (X.locked) return;
+    if (X.timer) { rxStop(); rxRender(false); return; }
+    if (done()) return;
+    if (S.reducedMotion) { X.x = X.xmax; rxRender(false); if (X.onEnd) X.onEnd(); else defaultEnd(); return; }
+    X.timer = setInterval(rxStep, 850);
+    rxStep();
+    if (!done()) rxRender(false);
+  }
+  function rxReset() {
+    rxStop(); X.x = 0;
+    X.prevFull = amounts().map(function (v) { return Math.floor(v + 1e-9); });
+    rxRender(false);
+    if (mode === "react") S.observe("#obs", "info", "État initial. Prédis quel réactif sera épuisé en premier, puis fais réagir pour vérifier.");
+    if (mode === "limit") limitAfterReset();
+  }
+
+  /* Texte de résultat commun */
+  function outcomeHTML() {
+    var eq = X.eq, lims = limIdx(), nR = eq.R.length;
+    if (X.xmax === 0) {
+      var absent = eq.R.filter(function (r, i) { return X.n0[i] === 0; }).map(function (r) { return spHTML(r.sp, false); }).join(", ");
+      return "<b>Aucune transformation :</b> il n’y a pas de " + absent + ". Sans l’un des réactifs, la réaction ne peut pas avoir lieu.";
+    }
+    var calc = eq.R.map(function (r, i) { return "n(" + spHTML(r.sp, false) + ")" + (r.nu === 1 ? "" : " ÷ " + r.nu) + " = " + amt(X.n0[i] / r.nu); }).join(" ; ");
+    var prod = eq.P.map(function (p) { return amt(p.nu * X.xmax) + " mol de " + spHTML(p.sp, false); }).join(" et ");
+    if (lims.length === nR) {
+      return "<b>Mélange stœchiométrique :</b> " + calc + ". Les quotients sont égaux : tous les réactifs sont entièrement consommés en même temps. La réaction a eu lieu " + amt(X.xmax) + " fois ; il se forme " + prod + ".";
+    }
+    var L = eq.R[lims[0]].sp, rest = eq.R.map(function (r, i) { return lims.indexOf(i) < 0 ? "il reste " + amt(X.n0[i] - r.nu * X.xmax) + " mol de " + spHTML(r.sp, false) + " (en excès)" : null; }).filter(Boolean).join(", ");
+    return "<b>" + spHTML(L, false) + " est le réactif limitant</b> : " + calc + ". Le plus petit quotient est celui de " + spHTML(L, false) + " : la réaction a eu lieu " + amt(X.xmax) + " fois, puis " + spHTML(L, false) + " a disparu. À l’état final, " + rest + " ; il s’est formé " + prod + ".";
+  }
+  function defaultEnd() { S.observe("#obs", "ok", outcomeHTML()); }
+
+  /* ---------- Activité 2 : faire réagir ---------- */
+  var B = { eq: null, n: [6, 4], sliders: [] };
+  var rxOptions = EQS.filter(function (e) { return e.lim; });
+  var sel = $("#rx-select");
+  rxOptions.forEach(function (e) { sel.appendChild(h("option", { value: e.id, text: eqPlain(e) })); });
+
+  function buildExplorer(eq, n) {
+    B.eq = eq; B.n = n.slice();
+    var host = $("#rx-sliders"); host.textContent = ""; B.sliders = [];
+    eq.R.forEach(function (r, i) {
+      var sl = S.slider(host, { label: "n(" + plain(r.sp) + ") initiale", unit: "mol", min: 0, max: 10, step: 1, value: B.n[i], digits: 0, bounds: true,
+        onInput: function (v) { B.n[i] = v; if (i === 0) share.a = v; else share.b = v; share.rx = eq.id; writeShare(); explorerChange(); } });
+      sl.el.querySelector("label span").innerHTML = "n(" + spHTML(r.sp, false) + ") initiale";
+      B.sliders.push(sl);
+    });
+    share.rx = eq.id; share.a = B.n[0]; share.b = B.n[1]; writeShare();
+    sel.value = eq.id;
+    rxSetup(eq, B.n);
+  }
+  function explorerChange() {
+    rxSetup(B.eq, B.n);
+    if (done()) defaultEnd();
+    else S.observe("#obs", "info", "Quantités modifiées. <b>Prédis</b> quel réactif sera épuisé en premier, puis fais réagir pour vérifier.");
+  }
+  sel.addEventListener("change", function () { var e = eqById(sel.value); buildExplorer(e, [Math.min(6, 10), Math.min(4, 10)]); S.observe("#obs", "info", "Nouvelle transformation. Règle les quantités de matière, <b>prédis</b>, puis fais réagir."); });
+  $("#sw-ratio").addEventListener("switch", function (e) { X.showRatio = e.detail.checked; rxRender(false); });
+
+  /* ---------- Activité 3 : prédire le réactif limitant ---------- */
+  var C = { sit: null, phase: "predict", hint: 0, ok: 0, tries: 0, choice: null, last: null };
+  var limEqs = EQS.filter(function (e) { return e.lim; });
+  function rint(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+
+  function genSituation() {
+    var type = ["piege", "piege", "normal", "stoech"][rint(0, 3)];
+    for (var t = 0; t < 400; t++) {
+      var eq = limEqs[rint(0, limEqs.length - 1)], n;
+      if (C.last && eq.id === C.last.eq.id && t < 200) continue;
+      if (type === "stoech") { var k = rint(1, 4); n = eq.R.map(function (r) { return r.nu * k; }); if (Math.max.apply(null, n) > 9) continue; }
+      else n = eq.R.map(function () { return rint(1, 9); });
+      var q = eq.R.map(function (r, i) { return n[i] / r.nu; }), m = Math.min.apply(null, q);
+      var idx = []; q.forEach(function (v, i) { if (Math.abs(v - m) < 1e-9) idx.push(i); });
+      var minN = Math.min.apply(null, n);
+      if (type === "stoech") { if (idx.length === eq.R.length) return { eq: eq, n0: n }; continue; }
+      if (idx.length !== 1) continue;
+      var trap = n[idx[0]] > minN;               // le plus petit n n'est pas le limitant
+      if (type === "piege" && trap) return { eq: eq, n0: n };
+      if (type === "normal" && !trap && n[0] !== n[1]) return { eq: eq, n0: n };
+    }
+    return { eq: eq, n0: n };
+  }
+
+  function newSituation() {
+    C.sit = genSituation(); C.last = C.sit; C.phase = "predict"; C.hint = 0; C.choice = null;
+    $("#defi").textContent = "";
+    buildPred();
+    X.onEnd = limitEnd; X.locked = true; X.showRatio = false;
+    rxSetup(C.sit.eq, C.sit.n0);
+    X.locked = true; rxRender(false);
+    S.observe("#obs", "info", "Nouvelle situation. Regarde les quantités de matière initiales et l’équation, puis <b>prédis</b> quel réactif sera entièrement consommé en premier.");
+  }
+  function limitAfterReset() {
+    if (C.phase === "predict") S.observe("#obs", "info", "État initial. Valide d’abord ta prédiction, puis fais réagir.");
+    else S.observe("#obs", "info", "État initial rétabli. Fais réagir pour vérifier ta prédiction.");
+  }
+  function buildPred() {
+    var box = $("#pred-opts"); box.textContent = "";
+    C.sit.eq.R.forEach(function (r, i) {
+      box.appendChild(h("label", { class: "opt" }, h("input", { type: "radio", name: "pred", value: String(i) }), h("span", { html: spHTML(r.sp, true) + " (" + r.sp.nom + ")" })));
+    });
+    box.appendChild(h("label", { class: "opt" }, h("input", { type: "radio", name: "pred", value: "both" }), h("span", { text: "Les deux en même temps" })));
+    $("#pred").disabled = false;
+    setDis("#pred-ok", false);
+  }
+  $("#pred-ok").addEventListener("click", function () {
+    if (isDis("#pred-ok")) return;
+    var r = document.querySelector('input[name="pred"]:checked');
+    if (!r) { S.observe("#obs", "warn", "<b>Choisis une réponse</b> avant de valider ta prédiction."); return; }
+    C.choice = r.value; C.phase = "verify";
+    $("#pred").disabled = true; setDis("#pred-ok", true);
+    X.locked = false; rxRender(false);
+    S.observe("#obs", "info", "Prédiction enregistrée. <b>Fais réagir</b> pour la vérifier : la réaction s’arrêtera quand un réactif sera épuisé.");
+    $("#rx-step").focus();
+  });
+  $("#lim-hint").addEventListener("click", function () {
+    C.hint += 1;
+    if (C.hint === 1) S.observe("#obs", "warn", "<b>Indice :</b> pour chaque réactif, divise sa quantité de matière initiale par son nombre stœchiométrique. Le <b>plus petit</b> quotient désigne le réactif limitant.");
+    else { X.showRatio = true; rxRender(false); S.observe("#obs", "warn", "<b>Indice :</b> les quotients n ÷ nombre stœchiométrique sont affichés dans le tableau. Compare-les : le plus petit désigne le réactif limitant ; s’ils sont égaux, le mélange est stœchiométrique."); }
+  });
+  $("#lim-new").addEventListener("click", function () { rxStop(); newSituation(); $("#pred-opts input").focus(); });
+
+  function limitEnd() {
+    var lims2 = limIdx(), nR = X.eq.R.length, truth = lims2.length === nR ? "both" : String(lims2[0]);
+    var ok = C.choice === truth, trapFlag = false;
+    if (!ok && truth !== "both" && C.choice !== "both") trapFlag = X.n0[+C.choice] < X.n0[+truth];
+    if (C.phase === "verify") { C.tries += 1; if (ok) C.ok += 1; $("#n-try").textContent = C.tries; $("#n-ok").textContent = C.ok; C.phase = "done"; }
+    var msg;
+    if (ok) msg = "<b>Prédiction exacte.</b> " + outcomeHTML();
+    else {
+      var rem = "";
+      if (trapFlag) rem = " <br><b>Piège classique :</b> tu as choisi le réactif dont la quantité de matière est la plus petite. Or il faut tenir compte des nombres stœchiométriques : on compare les quotients n ÷ nombre stœchiométrique, pas les quantités de matière brutes.";
+      else if (C.choice === "both" && truth !== "both") rem = " <br>Les quotients ne sont pas égaux : le mélange n’est pas stœchiométrique.";
+      else if (truth === "both") rem = " <br>Les quotients sont égaux : les deux réactifs sont consommés en même temps.";
+      msg = "<b>Prédiction non confirmée.</b> " + outcomeHTML() + rem;
+    }
+    S.observe("#obs", ok ? "ok" : "bad", msg);
+    // Défi numérique : quantité de produit formé
+    var d = $("#defi"); d.textContent = "";
+    if (X.xmax > 0) {
+      var p = X.eq.P[rint(0, X.eq.P.length - 1)], ans = p.nu * X.xmax;
+      S.defi("#defi", {
+        question: "Pour aller plus loin : quelle quantité de matière de <b>" + spHTML(p.sp, true) + "</b> (en mol) s’est formée à l’état final ?", unit: "mol", answer: ans, tolerance: 0.02,
+        hint: "Le réactif limitant fixe combien de fois la réaction a lieu. Multiplie ce nombre par le nombre stœchiométrique du produit.",
+        explain: "La réaction a eu lieu " + amt(X.xmax) + " fois : n(" + spHTML(p.sp, false) + ") = " + p.nu + " × " + amt(X.xmax) + " = " + amt(ans) + " mol."
+      });
+    }
+  }
+
+  /* =====================================================================
+     6. Boutons, activités, démarrage
+     ===================================================================== */
+  $("#eq-check").addEventListener("click", validateEq);
+  $("#eq-hint").addEventListener("click", hintEq);
+  $("#eq-reset").addEventListener("click", function () { A.coefs = A.eq.all.map(function () { return 1; }); updateEq(); S.observe("#obs", "info", "Tous les nombres sont remis à 1."); });
+  $("#eq-new").addEventListener("click", function () { pickEq(); });
+  $("#eq-next").addEventListener("click", function () { pickEq(); $("#h-eq").scrollIntoView({ block: "nearest" }); });
+  $("#sw-auto").addEventListener("switch", function (e) { A.auto = e.detail.checked; updateEq(); });
+  $("#rx-step").addEventListener("click", function () { if (!isDis("#rx-step")) rxStep(); });
+  $("#rx-run").addEventListener("click", function () { if (!isDis("#rx-run")) rxRun(); });
+  $("#rx-reset").addEventListener("click", rxReset);
+
+  var forced = init.eq ? eqById(init.eq) : null;
+  if (forced) A.niv = forced.niv;
+  S.tabs("#lvls", function (v) { A.niv = +v; if (!A.eq || A.eq.niv !== A.niv) pickEq(!A.eq ? forced : null); }, String(A.niv));
+
+  function setMode(m) {
+    rxStop(); mode = m; share.mode = m; writeShare();
+    $("#m-eq").hidden = m !== "eq"; $("#m-rx").hidden = m === "eq";
+    $("#c-react").hidden = m !== "react"; $("#c-limit").hidden = m !== "limit";
+    $("#chip-eq").hidden = m !== "eq"; $("#chip-limit").hidden = m !== "limit";
+    $("#defi").textContent = "";
+    X.onEnd = null; X.locked = false;
+    if (m === "eq") {
+      S.observe("#obs", "info", "Équation à ajuster. <b>Prédis d’abord</b> les nombres à placer devant chaque formule, puis vérifie avec le bilan.");
+    } else if (m === "react") {
+      X.showRatio = $("#sw-ratio").getAttribute("aria-checked") === "true";
+      var e0 = eqById(init.rx); if (!e0 || !e0.lim) e0 = rxOptions[0];
+      function cl(v) { return Math.max(0, Math.min(10, Math.round(v) || 0)); }
+      buildExplorer(B.eq || e0, B.eq ? B.n : [cl(init.a), cl(init.b)]);
+      if (done()) defaultEnd();
+      else S.observe("#obs", "info", "Règle les quantités de matière, <b>prédis</b> quel réactif sera épuisé en premier, puis fais réagir pour vérifier.");
+    } else {
+      newSituation();
+    }
+  }
+  S.tabs("#tabs", setMode, ["eq", "react", "limit"].indexOf(init.mode) >= 0 ? init.mode : "eq");
+
+})();
+</script>
+</body>
+</html>

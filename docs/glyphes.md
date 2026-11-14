@@ -35,6 +35,7 @@ Les glyphes sont décoratifs (`aria-hidden`) : le titre de la carte porte le sen
 | `atom` | Couches électroniques, place du huitième électron | Structure électronique |
 | `velocity` | Chronophotographie, corde, vecteur vitesse | Construire un vecteur vitesse |
 | `signal` | Signal périodique et sa période | Signaux sonores périodiques |
+| `balance` | Balance à deux plateaux, mêmes atomes de chaque côté | Équilibrer une équation, réactif limitant |
 | `champ` | Deux plaques, équipotentielles pointillées, lignes de champ, sonde | Cartographier un champ : de la cuve à la pesanteur |
 | `graph` | Graphe de mesures (**repli** pour un nom inconnu) | — |
 | `chrono`, `beaker` | Anciens noms génériques, **à ne plus utiliser** | — |
