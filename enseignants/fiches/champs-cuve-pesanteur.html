@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fiche enseignant : Cartographier un champ, de la cuve à la pesanteur · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/champs-cuve-pesanteur.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Mouvement et interactions · Première spécialité</p>
+    <h1>Cartographier un champ : de la cuve à la pesanteur</h1>
+    <p class="lead">L'élève refait, sur une cuve virtuelle, la manipulation du TP « Cartographier un champ électrostatique » : il repère les points de même tension à la sonde, relie les équipotentielles, trace les lignes de champ perpendiculaires, calcule E = U / d. Il refait ensuite la même démarche pour le champ de pesanteur, ce qui est impossible en classe, puis zoome de la salle de classe jusqu'à la planète pour voir où un champ peut être dit uniforme. L'activité est construite pour que l'élève agisse avant que la notion soit nommée : prédire, mesurer, tracer, puis seulement conclure.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale, spécialité physique-chimie</li>
+      <li>Thème : Mouvement et interactions</li>
+      <li>environ 45 min pour la partie A (cuve), environ 25 min pour la partie B (pesanteur) : à confirmer en classe</li>
+      <li>Matériel : ordinateur ou tablette (souris recommandée pour tracer), papier pour les calculs</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/champs-cuve-pesanteur.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Programme de physique-chimie de la spécialité, classe de Première (BO spécial n° 1 du 22 janvier 2019), thème « Mouvement et interactions », sous-partie « Interactions fondamentales et notion de champ ». Le texte du programme introduit les interactions gravitationnelle et électrostatique comme « une première introduction à la notion de champ ». Les formulations ci-dessous sont des reformulations, non des citations.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme (reformulée)</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Force et champ électrostatiques : utiliser leurs expressions vectorielles</td><td>Mission 4 (E = U / d, F = q·E avec une charge d'essai positive puis négative)</td></tr>
+            <tr><td>Force et champ de gravitation : utiliser leurs expressions vectorielles</td><td>Missions 6 et 7 (g, P = m·g, variation de g avec l'altitude)</td></tr>
+            <tr><td>Caractériser localement une ligne de champ</td><td>Mission 3 (flèche de E perpendiculaire à l'équipotentielle, orientée vers les potentiels décroissants, puis lignes tracées à main levée)</td></tr>
+            <tr><td>Cartographier un champ électrostatique</td><td>Missions 1 à 3 (repérer, relier, orienter), mission 5 (autres électrodes) et atelier libre</td></tr>
+            <tr><td>Citer des analogies entre interaction électrostatique et interaction gravitationnelle</td><td>Missions 6 et 7 (table des correspondances, bilan final) ; la différence « charge de deux signes, masse d'un seul » est travaillée en mission 6</td></tr>
+            <tr><td>Notions d'équipotentielle, de champ uniforme, de champ de pesanteur : <span class="verify">À vérifier : ces termes n'apparaissent pas tels quels dans cette sous-partie du programme</span></td><td>Missions 2, 4, 6 et 7 : utilisées parce que le TP et l'activité de départ les emploient</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Compétences mobilisées : s'approprier (lire le montage de la cuve et la tension de la sonde), analyser et raisonner (prédire la forme d'une équipotentielle ou d'une ligne de champ), réaliser (relever des points, tracer, calculer E et g), valider (comparer prédiction et mesure, vérifier l'uniformité), communiquer (décrire un champ par sa valeur, sa direction et son sens).</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Démarche proposée : Prédire, Observer, Expliquer. Chaque mission propose d'abord une prédiction ou un geste, puis un retour qui oriente sans dire « faux » (par exemple « ici U = 1,2 V : rapproche-toi de la plaque + »). Les étapes d'une mission se débloquent dans l'ordre. L'aide qui trace une équipotentielle en un clic ne se débloque qu'après une première équipotentielle tracée à la main (4 points), pour que l'automatisation vienne après la compréhension de la méthode. Durées estimées, à confirmer en classe.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>Mission 1 · Lire un potentiel (8 min)</td><td>Observation, prédiction</td><td>Place la sonde sur chaque plaque et relève U, prédit la tension au milieu de la cuve, prédit puis teste ce qui se passe quand on monte la sonde sans changer sa distance à la plaque de référence.</td><td>« La tension ne dépend que de la distance à la plaque de référence »</td></tr>
+            <tr><td>Mission 2 · Équipotentielles (15 min)</td><td>Manipulation du TP, puis prédiction</td><td>Choisit une tension (1 à 5 V), cherche des points où la sonde la lit, les marque (au moins 4, bien espacés), les relie. Dès 2 points, une question « à y donné, quel x ? » l'amène à prédire au lieu de tâtonner. Puis il décrit la forme et l'écart des lignes.</td><td>Cinq droites parallèles aux plaques, séparées de 3,3 cm</td></tr>
+            <tr><td>Mission 3 · Lignes de champ (12 min)</td><td>Construction</td><td>Oriente une flèche de E en trois points éloignés (le simulateur donne l'angle d'écart avec la perpendiculaire), trace trois lignes de champ à main levée (acceptées si elles suivent le champ, sinon écart signalé), lâche deux ions Cu²⁺ pour comparer leur trace.</td><td>Ligne de champ : perpendiculaire aux équipotentielles, de la plaque + vers la plaque −</td></tr>
+            <tr><td>Mission 4 · Valeur de E (10 min)</td><td>Calcul, modélisation</td><td>Relève U et d en trois points, calcule E = U / d (d en mètres), lit la pente du graphe U = f(d), décrit le champ (valeur, direction, sens, nom), puis place une charge d'essai positive puis négative pour voir F = q·E.</td><td>E ≈ 30 V·m⁻¹ en tout point : champ uniforme</td></tr>
+            <tr><td>Mission 5 · Autres électrodes (10 min)</td><td>Prédiction, comparaison</td><td>Pour pointe et plaque, deux pointes, anneau : prédit la forme des équipotentielles, en trace trois avec l'aide, compare |E| aux points A et B, dit si le champ est uniforme.</td><td>Équipotentielles serrées là où E est grand ; champ non uniforme</td></tr>
+            <tr><td>Mission 6 · Même méthode pour la pesanteur (12 min)</td><td>Transfert par analogie</td><td>La sonde devient une bille de 1 kg et l'afficheur donne E<sub>pp</sub>/m. Trace des lignes de niveau, lâche des billes sans vitesse, calcule g = (E<sub>pp</sub>/m) / z, place une masse d'essai, complète la table des correspondances.</td><td>Lignes de niveau horizontales, lignes de champ verticales, g ≈ 9,8 N·kg⁻¹</td></tr>
+            <tr><td>Mission 7 · Zoom sur la Terre (10 min)</td><td>Prédiction, exploration à plusieurs échelles</td><td>Prédit l'allure des lignes de champ à 10 m puis à 30 000 km, règle la largeur de vue de 10 m à 30 000 km, cherche la largeur pour laquelle les verticales en A et B font 1°, l'altitude où g a baissé de 1 %, puis complète un bilan analogies et différences.</td><td>« Uniforme localement, radial à grande échelle »</td></tr>
+            <tr><td>Atelier libre (facultatif, 10 min)</td><td>Exploration</td><td>Choisit des électrodes ou la pesanteur, inverse le générateur, active la teinte du potentiel, les flèches en grille, la carte complète ou les lignes de champ automatiques.</td><td>Aucune : défis proposés (prévoir l'effet d'une inversion, trouver un point où |E| est presque nul)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>La page ne note pas et ne garde rien : les pastilles de progression du haut disparaissent au rechargement. L'élève n'est jamais bloqué : il peut valider autant de fois qu'il veut et refaire un geste.</p>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <p>Cuve virtuelle : deux plaques de cuivre distantes de 20 cm, générateur de 6 V, plaque de gauche à la référence (borne − et COM du voltmètre). Les lectures de la sonde comportent un bruit simulé d'environ ± 0,02 V.</p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>Mission 1</td><td>0 V sur la plaque de gauche, 6 V sur celle de droite, 3 V au milieu (x = 10 cm). U ne change pas quand y change à x constant : les plaques et les lignes parallèles à elles sont des équipotentielles</td><td>La prédiction est acceptée à ± 0,4 V près. La tension est repérée par rapport à la plaque de gauche</td></tr>
+                <tr><td>Mission 2</td><td>Équipotentielles verticales, parallèles aux plaques, aux abscisses x = 3,3 ; 6,7 ; 10 ; 13,3 ; 16,7 cm pour 1 à 5 V. Écart entre deux lignes voisines : 3,3 cm (réponse acceptée à ± 0,4 cm)</td><td>Chaque point marqué doit être lu à ± 0,05 V de la cible (± 1 J·kg⁻¹ pour la pesanteur). Deux points marqués se distinguent d'au moins 2 cm</td></tr>
+                <tr><td>Mission 3</td><td>Flèche de E horizontale, dirigée vers la plaque de gauche (angle 180°) en tout point, acceptée à ± 10°. Lignes de champ : droites horizontales, de droite à gauche. Ions Cu²⁺ : trace confondue avec une ligne de champ</td><td>Un angle à 0° est signalé comme « bonne direction, sens inversé » ; un angle à 90° comme « coupe l'équipotentielle à 0° »</td></tr>
+                <tr><td>Mission 4</td><td>E = 6 V / 0,20 m = 30 V·m⁻¹ en tout point (tolérance de 3 %). Pente de U = f(d) : 30 V·m⁻¹ = E. Champ de valeur constante, perpendiculaire aux plaques, de la plaque + vers la plaque − : uniforme. F = q·E : pour q = 2 nC, F = 60 nN, de même sens que E si q &gt; 0, de sens contraire si q &lt; 0</td><td>Erreur typique : d en cm, donc E = 0,3 au lieu de 30 : la page le repère (« tu sembles avoir utilisé d en centimètres »)</td></tr>
+                <tr><td>Mission 5</td><td>Équipotentielles non parallèles, qui épousent la forme des électrodes ; |E| plus grand en A (équipotentielles plus serrées) ; champ non uniforme</td><td>Les points A et B sont fixés par configuration. Ordre de grandeur : |E| ≈ 51 V·m⁻¹ en A et 33 V·m⁻¹ en B pour pointe et plaque</td></tr>
+                <tr><td>Mission 6</td><td>Lignes de niveau horizontales (E<sub>pp</sub>/m = g·z, z = 2,0 ; 4,1 ; 6,1 ; 8,2 ; 10,2 m pour 20 à 100 J·kg⁻¹). Billes lâchées sans vitesse : trajet vertical vers le bas. g = (E<sub>pp</sub>/m) / z ≈ 9,8 N·kg⁻¹ à toute altitude. Masse d'essai : P = m·g toujours dans le sens de g</td><td>Table des correspondances : V ↔ E<sub>pp</sub>/m ; E ↔ g ; q ↔ m ; plaque de référence ↔ sol ; équipotentielles ↔ lignes de niveau ; F = q·E ↔ P = m·g</td></tr>
+                <tr><td>Mission 7</td><td>À 10 m, les verticales en A et B sont parallèles (angle 0,00°) ; à 30 000 km elles convergent vers le centre de la Terre. Angle de 1° pour une largeur de vue d'environ 222 km (tolérance de 25 %). g diminue de 1 % à une altitude d'environ 32 km (tolérance de 20 %)</td><td>Modèle : A et B à ± L/4 du centre de la vue, angle ≈ L / (2R), R = 6 371 km ; g(h) = g₀·R² / (R + h)²</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top:12px">Contre-vérification faite pour la fiche : un parcours automatisé de la page (navigateur Chromium piloté par script) a joué chaque mission, avec les gestes d'un élève (clics, glissés, curseurs, réponses numériques justes et erreurs typiques) et a retrouvé les valeurs ci-dessus ; aucune erreur de script n'a été signalée. Ce parcours ne remplace pas un essai avec des élèves.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <p>Ces obstacles sont classiques à ce niveau ; la colonne de droite reprend ce que la page affiche réellement quand l'élève se trompe.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Un champ n'existe que s'il y a un objet dedans</td><td>« Sans charge dans la cuve, il n'y a pas de champ »</td><td>Mission 4 : le champ décrit ce que ressentirait une charge placée là ; la charge d'essai est placée, déplacée, son signe est changé</td></tr>
+            <tr><td>Confondre une ligne de champ et une équipotentielle</td><td>Tracer une ligne de champ parallèle aux plaques</td><td>Mission 3 : la page donne l'angle d'écart avec la perpendiculaire, propose l'aide « tangente » et remplace la ligne juste par la ligne exacte</td></tr>
+            <tr><td>Se tromper de sens du champ</td><td>Orienter E vers la plaque + (ou le dessiner du − vers le +)</td><td>Mission 3 : « la direction est bonne, mais le sens est inversé : le champ pointe vers les potentiels décroissants »</td></tr>
+            <tr><td>Confondre tension et position</td><td>Penser que U dépend de y ou de la forme de la plaque</td><td>Mission 1 : prédiction puis test en montant la sonde, l'élève constate que U ne change pas</td></tr>
+            <tr><td>Oublier de convertir d en mètres</td><td>E = 0,3 V·m⁻¹ au lieu de 30</td><td>Mission 4 : message spécifique « tu sembles avoir utilisé d en centimètres », ou « 100 fois trop grand »</td></tr>
+            <tr><td>Croire que le champ de pesanteur est toujours uniforme et que g « disparaît » en altitude</td><td>« Dans l'espace, il n'y a plus de pesanteur »</td><td>Mission 7 : g(h) est mesuré : 1 % de baisse à environ 32 km, et le champ devient radial à grande échelle</td></tr>
+            <tr><td>Confondre ligne de champ et trajectoire</td><td>« Une charge suit toujours une ligne de champ »</td><td>Notes en missions 3 et 6 : les ions suivent les lignes parce que l'électrolyte les freine, une bille lâchée sans vitesse parce qu'elle part du repos ; dans le vide, la trajectoire dépend aussi de la vitesse initiale</td></tr>
+            <tr><td>Transposer l'analogie trop loin</td><td>« La masse peut être négative comme la charge »</td><td>Mission 6 : question sur le sens de la force pour une masse, bilan de la mission 7 sur « toujours attractive » et « attractive ou répulsive »</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>La page est un fichier HTML autonome : pas de compte, aucune donnée envoyée, aucune ressource externe (polices hébergées sur le site), usage hors ligne possible. Elle repose sur le socle Simulabo : thème clair et sombre, cibles tactiles d'au moins 44 px, retours annoncés aux lecteurs d'écran (zones « aria-live »), animations remplacées par l'état final quand le système demande de les réduire.</p>
+      <p>Choix de conception pour les élèves en difficulté :</p>
+      <ul class="plain">
+        <li>L'information ne repose jamais sur la couleur seule : chaque équipotentielle porte son étiquette en volts, les électrodes portent leur signe, la légende nomme chaque tracé.</li>
+        <li>La sonde se déplace de trois façons : à la souris ou au doigt, avec les curseurs de position, ou avec les flèches du clavier (Maj pour des pas plus grands). La touche Entrée enregistre un relevé ou valide la flèche ; les touches R et E tournent la flèche de champ de 5°.</li>
+        <li>Consignes courtes, une tâche à la fois, retours qui orientent (« rapproche-toi de la plaque + ») sans dire « faux », indice facultatif sur les questions numériques, aucune limite de temps ni d'essais.</li>
+        <li>Champs numériques qui acceptent la virgule.</li>
+      </ul>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> pas de test avec un lecteur d'écran (le tracé dans la cuve est un canevas : une personne qui ne voit pas la scène ne peut pas faire les missions 2 et 3, qui reposent sur le dessin), pas d'essai avec des élèves. À l'écran d'un téléphone la cuve est petite : préférer une tablette ou un ordinateur. Le contrôle automatique du site ne vérifie que la structure de la page.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li><b>Avant le TP réel :</b> missions 1 et 2 en classe entière, projetées, avec prédiction à main levée ; l'élève arrive au TP avec la méthode déjà en tête.</li>
+        <li><b>Après le TP réel :</b> missions 3 à 5 en binôme pour consolider ; la mission 4 permet de comparer E mesuré en TP et E calculé dans la simulation (adapter l'écart des plaques et la tension à votre cuve, voir Limites).</li>
+        <li><b>Parallèle avec la pesanteur :</b> missions 6 et 7, en classe entière ou en autonomie ; la table des correspondances sert de trace écrite.</li>
+        <li><b>Différenciation :</b> élèves en aisance, directement missions 5 et 7 et atelier libre ; élèves en difficulté, missions 1 et 2 répétées avec l'aide désactivée jusqu'à ce que la démarche soit installée.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>Les mesures sont simulées : le bruit de ± 0,02 V est ajouté par la page et aucune donnée n'a été relevée sur une vraie cuve. Les dimensions de la cuve (20 cm × 12 cm, plaques à 20 cm, 6 V) donnent E = 30 V·m⁻¹ ; votre cuve réelle donnera d'autres valeurs. Les effets de bord des plaques ne sont pas modélisés : le champ est parfaitement uniforme entre elles.</li>
+        <li>La cuve est un modèle plan (deux dimensions) : le champ autour d'une pointe y varie en 1/r, alors qu'il varierait en 1/r² dans l'espace. La configuration « anneau » est une analogie avec un champ radial, pas la loi de Coulomb.</li>
+        <li>L'analogie potentiel électrique ↔ énergie potentielle de pesanteur par kilogramme (E<sub>pp</sub>/m = g·z) est un outil de travail. Elle s'arrête au signe : une masse n'a qu'un signe, il n'y a pas de gravitation répulsive.</li>
+        <li>Les ions Cu²⁺ de la cuve suivent les lignes de champ parce que l'électrolyte les freine. Ce n'est pas vrai dans le vide, où la trajectoire dépend aussi de la vitesse initiale : la page le signale, mais il est utile de le redire.</li>
+        <li>Zoom sur la Terre : planète sphérique homogène, sans rotation ; le champ est traité comme celui d'une masse ponctuelle centrale. Les échelles de la vue sont logarithmiques.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Relier à « <a href="../../sims/gravitation.html">Interaction gravitationnelle</a> » (page en préparation) pour la loi de gravitation universelle, et à la loi de Coulomb pour la force entre deux charges.</li>
+        <li>Exercice papier : à partir d'une carte d'équipotentielles tracée à la main (TP réel), retrouver la direction, le sens et la valeur du champ en un point.</li>
+        <li>Avec un tableur : l'export CSV des tableaux de relevés permet de tracer U = f(d) et de retrouver E comme coefficient directeur.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> la reformulation du programme a été relevée le 13/11/2026 sur l'annexe du BO par lecture automatisée du PDF, à comparer au texte officiel ; en particulier, les termes « champ uniforme » et « champ de pesanteur » ne figurent pas dans cette sous-partie telle que lue. Les valeurs de la cuve (20 cm, 6 V) sont celles du TP fourni par l'enseignant ; vérifier qu'elles correspondent à votre matériel.</p>
+      <ul class="plain">
+        <li><a href="https://www.education.gouv.fr/bo/19/Special1/MENE1901635A.htm">Bulletin officiel spécial n° 1 du 22 janvier 2019 : programme de l'enseignement de spécialité de physique-chimie de la classe de Première, ministère de l'Éducation nationale</a></li>
+        <li><a href="https://cache.media.education.gouv.fr/file/SP1-MEN-22-1-2019/43/2/spe635_annexe_1063432.pdf">Annexe du programme de physique-chimie de Première (PDF), ministère de l'Éducation nationale</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 13/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>

@@ -228,6 +228,37 @@
       return s;
   });
 
+  /* Tableau d'avancement : réservoirs de billes (1 bille = 1 mol). Les réactifs se vident (billes en pointillé = consommées), les produits se remplissent. */
+  add("avancement", function () {
+    var s = "", i, row, col;
+    function tube(x0) { return '<path class="s" d="M' + x0 + ' 22V102H' + (x0 + 30) + 'V22"/>'; }
+    function billes(x0, plein, fantome) {
+      var out = "";
+      for (i = 0; i < plein + fantome; i++) {
+        row = Math.floor(i / 2); col = i % 2;
+        out += '<circle class="' + (i < plein ? "f" : "s dash") + '" cx="' + pt(x0 + 9.5 + col * 11) + '" cy="' + pt(95 - row * 12) + '" r="5"/>';
+      }
+      return out;
+    }
+    s += tube(12) + tube(50) + tube(122) + tube(160);
+    s += billes(12, 2, 4) + billes(50, 4, 2) + billes(122, 4, 0) + billes(160, 2, 2);
+    s += '<line class="v" x1="92" y1="62" x2="112" y2="62"/><path class="v" d="M106 55L113 62L106 69"/>';
+    return s;
+  });
+
+  /* Champs : deux plaques (cuve), équipotentielles pointillées, lignes de champ de la plaque + vers la plaque −, sonde. */
+  add("champ", function () {
+    var s = "";
+    s += '<rect class="f" x="20" y="14" width="8" height="92" rx="2"/><rect class="f" x="172" y="14" width="8" height="92" rx="2"/>';
+    s += '<rect class="water" x="28" y="14" width="144" height="92" style="opacity:.35"/>';
+    [64, 100, 136].forEach(function (x) { s += '<line class="s dash" x1="' + x + '" y1="14" x2="' + x + '" y2="106"/>'; });
+    [34, 60, 86].forEach(function (y) {
+      s += '<line class="v" style="stroke-width:2" x1="166" y1="' + y + '" x2="40" y2="' + y + '"/><path class="v" style="stroke-width:2" d="M49 ' + (y - 6) + 'L39 ' + y + 'L49 ' + (y + 6) + '"/>';
+    });
+    s += '<line class="s" x1="100" y1="60" x2="100" y2="108"/><circle class="f" cx="100" cy="60" r="4"/>';
+    return s;
+  });
+
   /* ---------- Noms génériques (anciens noms, à éviter pour une nouvelle simulation) ---------- */
   /* Générique : chronophotographie d'un lancer. */
   add("chrono", function () {
