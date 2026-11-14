@@ -119,6 +119,8 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
     <span class="small">Garde un volume modéré : une écoute prolongée à fort niveau abîme l’audition. Chaque son s’arrête seul au bout de 6 s.</span>
   </div>
 
+  <div id="bruit-hote"></div>
+
   <ol class="stepper" id="stepper" aria-label="Étapes de l’activité"></ol>
 </header>
 
@@ -187,7 +189,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
 
   <div class="card">
     <p class="row"><button type="button" class="btn ghost" id="new2">Nouveau signal (au hasard)</button>
-    <label class="chk"><input type="checkbox" id="noise2"> Signal bruité (comme avec un vrai capteur)</label></p>
+    <label class="chk"><input type="checkbox" id="noise2"> Ajouter un fort bruit parasite (démonstration)</label></p>
     <div id="scope2"></div>
     <p class="small">Place les deux curseurs sur deux endroits identiques du signal : par exemple de sommet à sommet. Tu peux les faire glisser sur l’écran ou utiliser les curseurs de réglage.</p>
   </div>
@@ -380,6 +382,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
 </footer>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script>
 'use strict';
 /*PURE-START*/
@@ -426,6 +429,7 @@ function sample(sig,t){
   else if(sig.kind==='clap') v=clapSig(t);
   else v=wave(sig.kind,t*sig.f+(sig.phase||0));
   v*=(sig.amp==null?1:sig.amp);
+  if(sig.kind!=='noise') v=Bruit.appliquer(v,(sig.amp==null?1:sig.amp),Math.floor(t*48000)); // bruit de mesure global (shared/bruit.js) : 0,5 % de l'amplitude, nul en modèle théorique ; même instant = même bruit (pas de scintillement)
   if(sig.noise) v+=sig.noise*vnoise(t*30000+5);
   return v;
 }
@@ -791,6 +795,7 @@ function enterStep2(){
 }
 $('#new2').addEventListener('click',()=>loadSignal2(randomPeriodic()));
 $('#noise2').addEventListener('change',()=>{ st2.sig.noise=$('#noise2').checked?0.07:0; sc2.draw(); });
+Bruit.bascule('#bruit-hote',{onChange:()=>{ Scope.all.forEach(s=>s.draw()); }});
 sc2.freeze();
 const UT={ '1e-6':1e-6,'1e-3':1e-3,'1':1 };
 $('#check2').addEventListener('click',()=>{

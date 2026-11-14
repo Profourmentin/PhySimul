@@ -156,6 +156,7 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
       <section class="card" aria-labelledby="h-lcd">
         <h2 id="h-lcd">Afficheurs</h2>
         <div class="readouts" id="lcds"></div>
+        <div id="bruit-hote"></div>
       </section>
       <section class="card" aria-labelledby="h-tasks">
         <h2 id="h-tasks">À faire</h2>
@@ -188,6 +189,7 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
   </footer>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script src="../shared/simulabo.js"></script>
 <script>
 (function () {
@@ -203,13 +205,12 @@ var FONT = '"IBM Plex Sans", system-ui, sans-serif';
 function px(x) { return OX + x * K; }
 function py(y) { return OY + (DH - y) * K; }
 function angDiff(a, b) { var d = (a - b) % 360; if (d > 180) d -= 360; if (d <= -180) d += 360; return d; }
-function hash(x, y, s) { var n = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return (n - Math.floor(n)) * 2 - 1; }
 function r2(x) { return Math.round(x * 100) / 100; }
 function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
 
 /* ============================================================
    2. Les « mondes » : un potentiel V(x, y) et son gradient
-      E = −grad V ; la sonde lit V (+ un petit bruit de mesure).
+      E = −grad V ; la sonde lit V (+ le bruit de mesure global, shared/bruit.js).
    ============================================================ */
 function solveGrid(w) {
   var nx = 160, ny = 96, hh = DW / nx, n1 = nx + 1, N = n1 * (ny + 1);
@@ -263,7 +264,7 @@ function finish(w) {
   return w;
 }
 function gridWorld(id, nom, elec, plates, plV, AB) {
-  var w = { id: id, nom: nom, cuve: 1, unit: "cm", vu: "V", Vmax: 6, escale: 100, vs: 0.1, levels: [1, 2, 3, 4, 5], tol: 0.05, noise: 0.02,
+  var w = { id: id, nom: nom, cuve: 1, unit: "cm", vu: "V", Vmax: 6, escale: 100, vs: 0.1, levels: [1, 2, 3, 4, 5], tol: 0.05,
     plates: plates, plV: plV, elec: elec, AB: AB };
   w._V = function (x, y) {
     if (x > DW && w.plV.r != null) return w.plV.r;
@@ -278,10 +279,10 @@ function gridWorld(id, nom, elec, plates, plV, AB) {
   return finish(w);
 }
 var WORLDS = {
-  plaques: finish({ id: "plaques", nom: "Plaques parallèles", cuve: 1, unit: "cm", vu: "V", Vmax: 6, escale: 100, vs: 0.1, levels: [1, 2, 3, 4, 5], tol: 0.05, noise: 0.02,
+  plaques: finish({ id: "plaques", nom: "Plaques parallèles", cuve: 1, unit: "cm", vu: "V", Vmax: 6, escale: 100, vs: 0.1, levels: [1, 2, 3, 4, 5], tol: 0.05,
     plates: { l: 1, r: 1 }, elec: [{ t: "left", V: 0 }, { t: "right", V: 6 }],
     _V: function (x) { return clamp(6 * x / DW, 0, 6); }, _G: function (x) { return (x < 0 || x > DW) ? [0, 0] : [6 / DW, 0]; } }),
-  pesanteur: finish({ id: "pesanteur", nom: "Pesanteur près du sol", cuve: 0, unit: "m", vu: "J/kg", Vmax: G0 * DH, escale: 1, vs: 0.4, levels: [20, 40, 60, 80, 100], tol: 1, noise: 0.15,
+  pesanteur: finish({ id: "pesanteur", nom: "Pesanteur près du sol", cuve: 0, unit: "m", vu: "J/kg", Vmax: G0 * DH, escale: 1, vs: 0.4, levels: [20, 40, 60, 80, 100], tol: 1,
     plates: { b: 1 }, elec: [],
     _V: function (x, y) { return G0 * clamp(y, 0, DH); }, _G: function (x, y) { return y < 0 ? [0, 0] : [0, G0]; } }),
   pointe: gridWorld("pointe", "Pointe et plaque", [{ t: "disc", cx: 5, cy: 6, r: 0.45, V: 6 }, { t: "right", V: 0 }], { r: 1 }, { r: 0 }, { A: [7, 6], B: [15, 10] }),
@@ -290,7 +291,12 @@ var WORLDS = {
 };
 var CFGS = ["pointe", "deux", "anneau"];
 
-function reading(w, x, y) { return w.V(x, y) + w.noise * hash(Math.round(x * 20), Math.round(y * 20), w.seed); }
+/* Lecture de la sonde : bruit global (shared/bruit.js), proportionnel à la pleine échelle Vmax de la cuve,
+   nul en modèle théorique. Même position = même bruit : la lecture ne scintille pas quand la sonde est immobile. */
+function cle(w, x, y, k) { return Math.round(x * 20) * 7919 + Math.round(y * 20) * 104729 + (w.seed || 3) * 13 + k; }
+function reading(w, x, y) { return Bruit.appliquer(w.V(x, y), w.Vmax, cle(w, x, y, 1)); }
+/* Tolérance d'un pointage : jamais plus étroite que l'incertitude de la lecture (3 σ de la pleine échelle). */
+function tolW(w) { return Bruit.actif() ? Math.max(w.tol, 3 * Bruit.niveau() * w.Vmax) : w.tol; }
 /* distance à la plaque de référence (V = 0) : cuve à plaques, ou sol */
 function refDist(w, x, y) { return w.id === "plaques" ? (w.flip ? DW - x : x) : (w.id === "pesanteur" ? y : NaN); }
 function eDir(w, x, y) { var e = w.E(x, y); return Math.atan2(e[1], e[0]) / RAD; }
@@ -620,7 +626,7 @@ function updateLCD() {
   if (L.X) L.X.set(w.id === "plaques" ? refDist(w, st.x, st.y) : st.x);
   if (L.Y) L.Y.set(st.y);
   if (L.T) L.T.set(st.target);
-  if (L.E) L.E.set(w.Emag(st.x, st.y) * (1 + w.noise * 0.5 * hash(Math.round(st.x * 20), Math.round(st.y * 20), 9)));
+  if (L.E) L.E.set(Bruit.appliquer(w.Emag(st.x, st.y), null, cle(w, st.x, st.y, 9)));
 }
 
 /* ============================================================
@@ -968,8 +974,8 @@ function addMark(x, y, pred) {
 }
 function markPoint() {
   var w = world(), d = D(), t = st.target, U = reading(w, st.x, st.y);
-  if (Math.abs(U - t) > w.tol) {
-    obs("warn", "Ici <b>U = " + vtxt(w, U) + "</b>, ce n’est pas " + vtxt(w, t, 0) + " (à ± " + fmt(w.tol, w.cuve ? 2 : 0) + " près). " + (U < t ? "C’est plus faible : " : "C’est plus fort : ") + hintDir(w, U, t) + ".");
+  if (Math.abs(U - t) > tolW(w)) {
+    obs("warn", "Ici <b>U = " + vtxt(w, U) + "</b>, ce n’est pas " + vtxt(w, t, 0) + " (à ± " + fmt(tolW(w), w.cuve ? 2 : 1) + " près). " + (U < t ? "C’est plus faible : " : "C’est plus fort : ") + hintDir(w, U, t) + ".");
     return;
   }
   if (d.marks.some(function (m) { return m.t === t && dist([m.x, m.y], [st.x, st.y]) < MINSEP; })) { obs("warn", "Ce point est trop proche d’un point déjà marqué : choisis-en un plus éloigné (au moins " + MINSEP + " " + w.unit + ")."); return; }
@@ -1009,7 +1015,7 @@ function updatePred() {
     var v = S.parseNum($("#pin", box).value); if (isNaN(v)) { obs("warn", "Écris d’abord une valeur numérique."); return; }
     var X = vert ? v : best, Y = vert ? best : v;
     moveProbe(X, Y, false); var U = reading(w, st.x, st.y);
-    if (Math.abs(U - t) <= w.tol) {
+    if (Math.abs(U - t) <= tolW(w)) {
       if (d.marks.some(function (m) { return m.t === t && dist([m.x, m.y], [st.x, st.y]) < MINSEP; })) { obs("warn", "Prédiction juste, mais ce point est trop proche d’un autre : essaie un autre endroit."); return; }
       addMark(st.x, st.y, true); obs("ok", "<b>Prédiction juste :</b> on lit " + vtxt(w, U) + ", point enregistré. Tu as compris où se trouve la ligne."); refresh();
     } else obs("bad", "On lit <b>" + vtxt(w, U) + "</b> à cet endroit, pas " + vtxt(w, t, 0) + ". " + (U < t ? "C’est plus faible : " : "C’est plus fort : ") + hintDir(w, U, t) + ", puis réessaie en te servant de tes points précédents.");
@@ -1645,6 +1651,7 @@ scene = S.canvas("#cv", { width: CW, height: CH, draw: function (ctx) { if (cur 
 var cvEl = $("#cv");
 cvEl.addEventListener("pointerdown", onDown); cvEl.addEventListener("pointermove", onMove);
 cvEl.addEventListener("pointerup", onUp); cvEl.addEventListener("pointercancel", onUp); cvEl.addEventListener("keydown", onKey);
+Bruit.bascule("#bruit-hote", { onChange: function () { updateLCD(); probeHooks.forEach(function (f) { f(); }); scene.redraw(); } });
 S.tabs("#tabs", enter, "M1");
 })();
 </script>

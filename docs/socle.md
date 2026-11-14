@@ -7,6 +7,7 @@ Le socle garantit que toutes les simulations ont la même identité, la même er
 | `shared/simulabo.css` | Jetons de design (couleurs clair/sombre, typographie système), mise en page, boutons, onglets, curseurs, afficheurs, zone d'observation, tableau de mesures, impression |
 | `shared/simulabo.js` | Briques JavaScript : `Simulabo.slider`, `readout`, `tabs`, `observe`, `canvas`, `loop`, `measureTable`, `defi`, `shareState`, `fmt` |
 | `templates/simulation.html` | Gabarit complet et fonctionnel, qui sert de point de départ |
+| `shared/bruit.js` | Bruit de mesure commun à toutes les animations : niveau global réglable (0,5 % par défaut) et interrupteur « Modèle théorique » |
 | `shared/glyphs.js` | Catalogue des vignettes SVG de l'accueil (un glyphe par simulation, voir `docs/glyphes.md`) |
 | `tools/new-sim.py` | Crée la simulation depuis le gabarit et l'inscrit au catalogue |
 | `tools/check.py` | Contrôle de cohérence (catalogue, fichiers, charte, accessibilité mécanique) |
@@ -58,6 +59,34 @@ Vérifié automatiquement pour toute simulation qui utilise le socle :
 - **Conformité au programme** : vérifier les notions, les notations et le vocabulaire contre le programme officiel du niveau visé (BO spécial n° 1 du 22 janvier 2019 pour le lycée général et technologique) et marquer « À vérifier » ce qui ne l'est pas dans la fiche enseignant.
 - **Pédagogie** : une simulation n'enseigne rien seule. Prévoir une consigne d'observation, un moment de prédiction avant l'expérience, et au moins une question qui oblige à interpréter (c'est le rôle du `defi` et de la zone d'observation).
 
+## Bruit de mesure : un seul réglage pour tout le site
+
+Au laboratoire, une mesure n'est jamais exacte. Par défaut, toutes les grandeurs **mesurées** (capteur de pression, multimètre, puissance d'une cellule, sonde, oscilloscope, spectromètre) sont affichées avec un petit bruit aléatoire, et un interrupteur **« Modèle théorique »** le supprime pour montrer la valeur exacte du modèle. Le module est `shared/bruit.js`, à charger **avant** `shared/simulabo.js`.
+
+**Régler le niveau** : une seule ligne, en tête de `shared/bruit.js`.
+
+```js
+window.SIMULABO_BRUIT = 0.005;   // 0,5 % ; mettre 0 pour supprimer le bruit partout
+```
+
+Modèle : bruit gaussien d'écart-type σ = niveau × échelle, borné à ±3 σ. L'échelle est la valeur mesurée elle-même (puissance, pression, tension) ou, pour un signal qui passe par zéro, son amplitude ou la pleine échelle de l'appareil.
+
+| Fonction | Usage |
+|---|---|
+| `Bruit.appliquer(valeur, echelle, cle)` | Valeur bruitée. Sans `cle` : nouveau tirage à chaque appel (nouvelle mesure). Avec une `cle` entière : même bruit pour la même clé (courbe redessinée, sonde immobile), donc pas de scintillement |
+| `Bruit.lecture(id, valeur, echelle, periodeMs)` | Afficheur en direct : le bruit est renouvelé toutes les 250 ms, pas à chaque image |
+| `Bruit.bascule("#hote", {onChange: fn})` | Construit l'interrupteur « Modèle théorique » et son texte d'état ; `fn` redessine la simulation |
+| `Bruit.actif()`, `Bruit.theorique()`, `Bruit.niveau()` | États et niveau courants |
+| `Bruit.lien()` | `theo=1` en mode théorique, à ajouter au lien partageable. La page s'ouvre aussi en mode théorique avec `#theo=1` |
+
+Règles pour une nouvelle simulation :
+
+1. **Bruiter ce qui est lu sur un instrument, jamais ce qui est calculé ou construit par l'élève** (équations, constructions géométriques, valeurs de référence, résultats attendus d'un `defi`).
+2. **Le modèle tracé en parallèle reste exact** (droite d'ajustement, loi théorique) : c'est la comparaison mesure / modèle qui enseigne.
+3. **Une tolérance de correction ne doit pas être plus étroite que le bruit** : voir `tolW` dans `champs-cuve-pesanteur.html` (tolérance = max(tolérance prévue, 3 σ)).
+4. **Aucune grandeur mesurée dans la simulation** : le déclarer par un commentaire `<!-- bruit : sans objet : raison -->` dans le `<head>`. `tools/check.py` avertit quand il n'y a ni bruit ni cette mention.
+5. Ne pas bruiter 60 fois par seconde : garder le bruit à l'échantillonnage d'une mesure (`appliquer` avec clé, ou `lecture`).
+
 ## Conventions communes
 
 - **Une couleur = une grandeur** sur tout le site (variables `--c-force`, `--c-vitesse`, `--c-position`, `--c-energie`, `--c-temps`).
@@ -73,7 +102,7 @@ Le socle est partagé : toute modification touche toutes les simulations qui l'u
 
 1. Ne jamais renommer ni supprimer une variable CSS ou une fonction existante sans migrer les simulations concernées dans la même pull request.
 2. Ajouter plutôt que modifier : une nouvelle variable, une nouvelle fonction.
-3. Mettre à jour le numéro `version` de `shared/simulabo.js` et cette page.
+3. Mettre à jour le numéro `version` de `shared/simulabo.js` (1.0.1 : ajout du bruit de mesure) et cette page.
 4. Ouvrir chaque simulation concernée dans un navigateur (clair et sombre) avant de fusionner.
 
 ## Migrer une simulation existante

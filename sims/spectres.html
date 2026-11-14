@@ -137,6 +137,7 @@ footer{color:var(--muted);font-size:.82rem;margin-top:10px}
         <p class="lead">Tout corps chaud émet de la lumière sur un <b>spectre continu</b> d'origine thermique. Modifie la température <b>T</b> de sa surface : la courbe change de forme et de position.</p>
         <canvas id="cvPlanck" class="plot" role="img" aria-label="Courbe d'intensité lumineuse en fonction de la longueur d'onde pour un corps chaud"></canvas>
         <div class="legend-row"><span><span class="sw" style="background:linear-gradient(90deg,#7a00ff,#00a0ff,#00d060,#ffe000,#ff3000)"></span>zone du visible (380–780 nm)</span><span>La hauteur est exprimée en unités arbitraires (u. a.).</span></div>
+        <div id="bruit-hote"></div>
         <h3>Ce que verrait un spectroscope (partie visible)</h3>
         <canvas id="cvVis" class="vis" role="img" aria-label="Spectre visible du corps chaud"></canvas>
       </div>
@@ -329,6 +330,7 @@ footer{color:var(--muted);font-size:.82rem;margin-top:10px}
 <footer>Longueurs d'onde de référence arrondies (≈ dans l'air) ; intensités relatives schématiques. Visible : 380 nm (violet) à 780 nm (rouge). Constante de Wien : 2,898 × 10⁻³ m·K.</footer>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script>
 'use strict';
 /* ============================ Utilitaires ============================ */
@@ -530,10 +532,10 @@ function drawPlanck(){
   ctx.textAlign='right'; ctx.fillText('UV',X(VMIN)-3,m.t+ph-6);
   ctx.textAlign='left'; ctx.fillText('IR',X(VMAX)+3,m.t+ph-6);
   if(X(VMAX)-X(VMIN)>56){ctx.textAlign='center'; ctx.fillText('visible',(X(VMIN)+X(VMAX))/2,m.t+ph-6);}
-  // courbes
+  // courbes (bruit de mesure global shared/bruit.js : 0,5 % de la pleine échelle, nul en modèle théorique)
   for(const c of [...curves].reverse()){
     ctx.beginPath();
-    for(let px=0;px<=pw;px++){ const l=Math.max(8,px/pw*xmax); const y=Y(val(c,l)); px?ctx.lineTo(m.l+px,y):ctx.moveTo(m.l+px,y); }
+    for(let px=0;px<=pw;px++){ const l=Math.max(8,px/pw*xmax); const y=Y(Bruit.appliquer(val(c,l),1,px*3+Math.round(c.T))); px?ctx.lineTo(m.l+px,y):ctx.moveTo(m.l+px,y); }
     ctx.lineWidth=c.cur?3:2; ctx.strokeStyle=c.col; ctx.stroke();
     if(c.cur){ ctx.lineTo(m.l+pw,Y(0)); ctx.lineTo(m.l,Y(0)); ctx.globalAlpha=.1; ctx.fillStyle=c.col; ctx.fill(); ctx.globalAlpha=1; }
     // maximum
@@ -859,6 +861,7 @@ makeProbe($('#grid4'),null);
 /* ============================ Démarrage ============================ */
 buildPresets(); buildChips2(); buildRefRows(); buildCmpChips();
 newMystery(); update1();
+Bruit.bascule('#bruit-hote',{onChange:()=>{ drawPlanck(); }});
 </script>
 </body>
 </html>
