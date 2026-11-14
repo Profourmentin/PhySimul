@@ -170,8 +170,8 @@ details ul { padding-left: 20px; }
       <button type="button" class="btn primary" id="addBtn">＋ Relever la mesure</button>
       <button type="button" class="btn" id="delBtn">Supprimer la dernière</button>
       <button type="button" class="btn" id="clearBtn">Tout effacer</button>
-      <label class="check"><input type="checkbox" id="realChk"> Capteur réaliste (petites variations de mesure)</label>
     </div>
+    <div id="bruit-hote"></div>
     <div class="tablewrap">
       <table id="tbl">
         <thead><tr><th scope="col">n°</th><th scope="col">V (mL)</th><th scope="col">P (hPa)</th><th scope="col">P × V (hPa·mL)</th></tr></thead>
@@ -223,12 +223,13 @@ details ul { padding-left: 20px; }
     <summary>Repères pour l'enseignant</summary>
     <ul>
       <li><b>Programme de Première spécialité</b>, thème « Mouvement et interactions », partie « Description d'un fluide au repos » : grandeurs macroscopiques (pression, température), modèle de comportement d'un gaz (loi de Mariotte), relation <i>F</i> = <i>P</i>·<i>S</i>.</li>
-      <li><b>Capacités travaillées</b> : expliquer qualitativement le lien entre grandeurs macroscopiques et agitation des particules ; tester la loi de Mariotte à partir de mesures (le capteur réaliste ajoute une incertitude de lecture d'environ 0,4 %) ; utiliser la loi de Mariotte dans un calcul ; exploiter <i>F</i> = <i>P</i>·<i>S</i> avec les conversions d'unités.</li>
+      <li><b>Capacités travaillées</b> : expliquer qualitativement le lien entre grandeurs macroscopiques et agitation des particules ; tester la loi de Mariotte à partir de mesures (le capteur est bruité par défaut (0,5 % de la valeur, réglage global de shared/bruit.js ; l'interrupteur « Modèle théorique » le supprime)) ; utiliser la loi de Mariotte dans un calcul ; exploiter <i>F</i> = <i>P</i>·<i>S</i> avec les conversions d'unités.</li>
       <li><b>Au-delà du programme de Première</b> : l'équation d'état <i>PV</i> = <i>nRT</i> (Terminale) n'est proposée que dans le volet « Pour aller plus loin ».</li>
     </ul>
   </details>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script>
 (function () {
   'use strict';
@@ -245,7 +246,7 @@ details ul { padding-left: 20px; }
   var N_AVOGADRO = 6.022e23;
 
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var st = { V: V_REF, th: TH_REF, n: N_REF, paused: !!reduceMotion, realistic: false, tab: 'P', model: false, rows: [], P: P_REF };
+  var st = { V: V_REF, th: TH_REF, n: N_REF, paused: !!reduceMotion, tab: 'P', model: false, rows: [], P: P_REF };
 
   function Tk() { return st.th + 273.15; }
   function kJ() { return (st.n / 1000) * R * Tk(); }           // P·V en Pa·m³ (= J)
@@ -323,10 +324,8 @@ details ul { padding-left: 20px; }
   }
 
   /* ---------- capteur ---------- */
-  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
   function readSensor() {
-    var p = pTrueHpa(st.V);
-    if (st.realistic) p *= 1 + 0.004 * gauss();
+    var p = Bruit.appliquer(pTrueHpa(st.V));       // bruit global (shared/bruit.js), nul en modèle théorique
     st.P = Number(p.toPrecision(4));
   }
 
@@ -568,7 +567,7 @@ details ul { padding-left: 20px; }
   $('delBtn').addEventListener('click', function () { st.rows.pop(); renderTable(); dirty = true; });
   $('clearBtn').addEventListener('click', function () { st.rows = []; renderTable(); dirty = true; });
   $('modelChk').addEventListener('change', function (e) { st.model = e.target.checked; dirty = true; });
-  $('realChk').addEventListener('change', function (e) { st.realistic = e.target.checked; readSensor(); refresh(); });
+  Bruit.bascule('#bruit-hote', { onChange: function () { readSensor(); refresh(); } });
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
     b.addEventListener('click', function () {
       st.tab = b.getAttribute('data-tab');
@@ -582,7 +581,7 @@ details ul { padding-left: 20px; }
     st.th = TH_REF; st.n = N_REF; $('thSlider').value = TH_REF; $('nSlider').value = N_REF;
     syncParticles(); readSensor(); refresh();
   });
-  setInterval(function () { if (st.realistic) { readSensor(); refresh(); } }, 900);
+  setInterval(function () { if (Bruit.actif()) { readSensor(); refresh(); } }, 900);   /* le capteur fluctue tant que le bruit est actif */
 
   // faire glisser le piston
   var dragging = false;

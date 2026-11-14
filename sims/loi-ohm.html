@@ -139,7 +139,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
           </div>
           <p id="status" class="status" aria-live="polite"></p>
           <div class="switches">
-            <button type="button" class="sw" role="switch" aria-checked="true" id="sw-noise"><span class="track"><span class="knob"></span></span>Simuler les incertitudes de mesure (≈ 1 %)</button>
+            <div id="bruit-hote"></div>
             <button type="button" class="sw" role="switch" aria-checked="true" id="sw-live"><span class="track"><span class="knob"></span></span>Montrer le point de fonctionnement sur le graphique</button>
             <button type="button" class="sw" role="switch" aria-checked="true" id="sw-fit" data-m="13"><span class="track"><span class="knob"></span></span>Tracer la droite modèle (U = k × I)</button>
             <button type="button" class="sw" role="switch" aria-checked="true" id="sw-link" data-m="2"><span class="track"><span class="knob"></span></span>Relier les points</button>
@@ -181,7 +181,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
         <li>Modèle : le générateur, les fils et les appareils de mesure sont idéaux (le voltmètre ne dérive aucun courant, l'ampèremètre n'a aucune résistance).</li>
         <li>Le conducteur ohmique est parfaitement linéaire ; sa valeur réelle s'écarte de la valeur inscrite de 3 % au plus.</li>
         <li>La lampe, la thermistance et la photorésistance suivent des lois empiriques de simulation, pas une fiche constructeur. Les capteurs ne s'échauffent pas.</li>
-        <li>Les « incertitudes de mesure » sont un bruit d'environ 1 % ; elles ne représentent pas la résolution réelle d'un multimètre.</li>
+        <li>Par défaut, les valeurs lues sont bruitées (niveau global de <code>shared/bruit.js</code>, 0,5 % de la valeur) ; ce bruit ne représente pas la résolution réelle d'un multimètre. L'interrupteur « Modèle théorique » le supprime.</li>
       </ul>
     </details>
   </main>
@@ -192,6 +192,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
   </footer>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script src="../shared/simulabo.js"></script>
 <script>
 (function () {
@@ -223,7 +224,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
     mode: 1, dip: "ohm", Ridx: 4, T: 20, E: 100, U: 6,
     hid: null, seed: Math.floor(Math.random() * 1000),
     points: [], cur: { U: 0, I: 0 },
-    noise: true, live: true, anim: !S.reducedMotion, fit: true, link: true,
+    live: true, anim: !S.reducedMotion, fit: true, link: true,
     revealed: false, cursor: null
   };
 
@@ -280,10 +281,10 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
   function measure(Uset) {                   // valeurs lues sur les afficheurs
     var d = dipoleInfo();
     var u = Uset, i = trueCurrent(d, Uset) * 1000;
-    if (st.noise && Uset > 0) {
-      var k = Math.round(Uset * 100);
-      u *= 1 + 0.01 * rnd(k, d.par + 1);
-      i *= 1 + 0.01 * rnd(k, d.par + 2);
+    if (Uset > 0) {                          // bruit global (shared/bruit.js), nul en modèle théorique ; même clé = même mesure
+      var k = Math.round(Uset * 100) * 1009 + Math.round(d.par) * 31 + st.seed * 7;
+      u = Bruit.appliquer(u, u, k + 1);
+      i = Bruit.appliquer(i, i, k + 2);
     }
     return { U: +u.toFixed(2), I: +i.toFixed(decI(i)) };
   }
@@ -764,12 +765,13 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
   $("btn-undo").addEventListener("click", function () { st.points.pop(); say(""); update(); });
   $("btn-clear").addEventListener("click", function () { clearPoints(); update(); });
 
-  [["sw-noise", "noise"], ["sw-live", "live"], ["sw-fit", "fit"], ["sw-link", "link"], ["sw-anim", "anim"]].forEach(function (p) {
+  [["sw-live", "live"], ["sw-fit", "fit"], ["sw-link", "link"], ["sw-anim", "anim"]].forEach(function (p) {
     var b = $(p[0]);
     b.setAttribute("aria-checked", String(st[p[1]]));
     b.addEventListener("switch", function (e) { st[p[1]] = e.detail.checked; update(); });
   });
 
+  Bruit.bascule("#bruit-hote", { onChange: function () { update(); } });
   var dipTabs = S.tabs("#dipoles", function (v) { st.dip = v; clearPoints(); update(); }, st.dip);
   var modeTabs = S.tabs("#modes", function (v) { setMode(Number(v)); }, "1");
 })();

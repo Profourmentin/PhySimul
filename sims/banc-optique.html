@@ -155,8 +155,8 @@ details p { margin: 8px 0 0; max-width: 70ch; }
         </div>
         <div class="switches">
           <button type="button" class="sw" id="cone" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span>Visualiser le faisceau intercepté par la cellule</button>
-          <button type="button" class="sw" id="noise" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span>Mesures bruitées (±&#8239;1&#8239;%)</button>
         </div>
+        <div id="bruit-hote"></div>
       </section>
 
       <section class="card" aria-labelledby="h-mesure">
@@ -186,6 +186,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   </footer>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script src="../shared/simulabo.js"></script>
 <script>
 (function () {
@@ -197,16 +198,15 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   var ALPHA = 25, T = Math.tan(ALPHA * Math.PI / 180), H = 30; /* demi-ouverture du faisceau (°), demi-hauteur de la cellule (px) */
   var XE = 900, FAR = (XE - X0) * T;
 
-  /* Réglages partageables par lien : #d=40&th=30&cone=1&bruit=0 */
-  var etat = S.shareState({ d: 40, th: 0, cone: 0, bruit: 0 });
+  /* Réglages partageables par lien : #d=40&th=30&cone=1&theo=1 (theo=1 : modèle théorique, sans bruit) */
+  var etat = S.shareState({ d: 40, th: 0, cone: 0, theo: 0 });
   var init = etat.read();
   var state = {
     d: S.clamp(Math.round(init.d * 2) / 2, DMIN, DMAX),
     th: S.clamp(Math.round(init.th), 0, 90),
-    cone: Number(init.cone) === 1,
-    noise: Number(init.bruit) === 1
+    cone: Number(init.cone) === 1
   };
-  var eps = 1;
+  var meas = 0;   /* puissance lue : tirée à chaque changement de réglage et à chaque enregistrement */
   var timer = null;
 
   function ideal(d, th) {
@@ -214,12 +214,12 @@ details p { margin: 8px 0 0; max-width: 70ch; }
     if (th >= 90 || c < 1e-9) c = 0;
     return 50 * Math.pow(20 / d, 2) * c;
   }
-  function reading() { return ideal(state.d, state.th) * (state.noise ? eps : 1); }
-  function resample() { eps = 1 + (Math.random() * 2 - 1) * 0.01; }
+  function reading() { return meas; }
+  function resample() { meas = Bruit.appliquer(ideal(state.d, state.th)); }   /* bruit global (shared/bruit.js), nul en modèle théorique */
   function persist() {
     clearTimeout(timer);
     timer = setTimeout(function () {
-      etat.write({ d: state.d, th: state.th, cone: state.cone ? 1 : 0, bruit: state.noise ? 1 : 0 });
+      etat.write({ d: state.d, th: state.th, cone: state.cone ? 1 : 0, theo: Bruit.theorique() ? 1 : 0 });
     }, 250);
   }
 
@@ -259,7 +259,8 @@ details p { margin: 8px 0 0; max-width: 70ch; }
 
   function setSwitch(btn, on) { btn.setAttribute("aria-checked", on ? "true" : "false"); }
   setSwitch($("cone"), state.cone);
-  setSwitch($("noise"), state.noise);
+  Bruit.bascule("#bruit-hote", { onChange: function () { resample(); persist(); render(); } });
+  resample();
 
   /* ----- Dessin (géométrie inchangée) ----- */
   function P(px, py) { return px.toFixed(1) + "," + py.toFixed(1); }
@@ -330,9 +331,6 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   $("cone").addEventListener("switch", function (e) {
     state.cone = e.detail.checked; persist(); render();
   });
-  $("noise").addEventListener("switch", function (e) {
-    state.noise = e.detail.checked; resample(); persist(); render();
-  });
 
   /* glisser la cellule */
   var bench = $("bench"), dragging = false;
@@ -354,6 +352,7 @@ details p { margin: 8px 0 0; max-width: 70ch; }
   /* ----- Tableau de mesures ----- */
   function say(t) { statusEl.textContent = t; }
   $("save").addEventListener("click", function () {
+    resample(); render();   /* nouvelle mesure : la valeur lue fluctue d'une mesure à l'autre */
     var p = Math.round(reading() * 100) / 100;
     var n = table.rows().length + 1;
     table.add({ n: n, d: state.d, th: state.th, p: p });

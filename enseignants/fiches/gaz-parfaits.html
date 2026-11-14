@@ -61,7 +61,7 @@
             <tr><td>Expliquer qualitativement le lien entre les grandeurs macroscopiques de description d'un fluide et la valeur de la pression <span class="verify">Fin de phrase à vérifier</span></td><td>Particules animées : moins de volume, plus de chocs sur le piston par seconde (indicateur sous la seringue), donc pression plus grande</td></tr>
             <tr><td>Modèle de comportement d'un gaz : loi de Mariotte</td><td>Étapes 3 et 4 : tableau de mesures, produit P × V, graphiques P = f(V), P = f(1/V) et P × V = f(V)</td></tr>
             <tr><td>Utiliser la loi de Mariotte</td><td>Défis de calcul de type A (trouver P₂) et B (trouver V₂)</td></tr>
-            <tr><td>Tester la loi de Mariotte (le programme cite l'exemple d'un microcontrôleur)</td><td>Étapes 3 et 4, avec un capteur virtuel ; l'option « capteur réaliste » ajoute une incertitude de lecture d'environ 0,4 %. Le dispositif réel avec microcontrôleur reste à faire (voir Prolongements)</td></tr>
+            <tr><td>Tester la loi de Mariotte (le programme cite l'exemple d'un microcontrôleur)</td><td>Étapes 3 et 4, avec un capteur virtuel ; le capteur est bruité par défaut (0,5 % de la valeur, niveau global réglable dans <code>shared/bruit.js</code>) ; l'interrupteur « Modèle théorique » donne la valeur exacte. Le dispositif réel avec microcontrôleur reste à faire (voir Prolongements)</td></tr>
             <tr><td>Exploiter la relation F = P·S pour déterminer la force pressante exercée par un fluide</td><td>Carte « Force pressante F » avec le calcul détaillé en pascal et en m², flèche de force sur le piston, défi de type C</td></tr>
           </tbody>
         </table>
@@ -99,7 +99,7 @@
                 <tr><td>1, prédiction</td><td>La pression est multipliée par 2</td><td>Conception fréquente : « elle diminue de moitié » ou « elle augmente un peu » (voir plus bas)</td></tr>
                 <tr><td>2, état de départ</td><td>V = 50 mL et P ≈ 1 014 hPa (pression atmosphérique), F ≈ 60,8 N</td><td>Section du piston S = 6,0 cm² ; air à 20 °C</td></tr>
                 <tr><td>3, mesures (capteur idéal)</td><td>10 mL : 5 069 hPa · 20 mL : 2 535 hPa · 30 mL : 1 690 hPa · 40 mL : 1 267 hPa · 50 mL : 1 014 hPa · 60 mL : 844,9 hPa</td><td>Pour chaque mesure, P × V ≈ 50 700 hPa·mL (écarts de quelques unités dus à l'arrondi à 4 chiffres significatifs)</td></tr>
-                <tr><td>3, avec « capteur réaliste »</td><td>P × V varie de moins de 1 % autour de 50 700 hPa·mL</td><td>Le bilan reste « vérifié » tant que l'écart maximal à la moyenne est inférieur à 2 %. Montrer qu'un produit n'est jamais exactement identique en mesure réelle</td></tr>
+                <tr><td>3, capteur bruité (par défaut)</td><td>P × V varie d'environ 1 % au plus autour de 50 700 hPa·mL</td><td>Le bilan reste « vérifié » tant que l'écart maximal à la moyenne est inférieur à 2 %. Montrer qu'un produit n'est jamais exactement identique en mesure réelle</td></tr>
                 <tr><td>4, graphiques</td><td>P = f(V) : hyperbole · P = f(1/V) : droite passant par l'origine · P × V = f(V) : droite horizontale</td><td>La droite P = f(1/V) est la signature d'une proportionnalité entre P et 1/V</td></tr>
                 <tr><td>4, énoncé</td><td>À température constante et pour une quantité de gaz donnée, le produit de la pression par le volume est constant : P₁ × V₁ = P₂ × V₂</td><td>Les conditions font partie de la réponse</td></tr>
                 <tr><td>5, défi A (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, V₂ = 40 mL : P₂ = 1 000 × 100 / 40 = 2 500 hPa</td><td>Réponse acceptée à 2 % près</td></tr>
@@ -126,7 +126,7 @@
             <tr><td>Penser que P + V est constant, ou que seul « le produit » compte sans condition</td><td>Additionner les valeurs, oublier la température et la quantité de gaz</td><td>Colonne P × V dans le tableau et carte dédiée ; rappel permanent des conditions de la loi. Si la température ou la quantité de gaz est modifiée dans le volet repliable, un avertissement orange s'affiche et le bilan refuse de comparer des mesures faites dans des conditions différentes</td></tr>
             <tr><td>Imaginer que les particules se compriment ou que leur nombre change</td><td>« Il y a plus de particules quand on comprime »</td><td>Le nombre de particules dessinées reste le même ; seul le volume varie. Le compteur de chocs par seconde (environ 4 par seconde à 60 mL, environ 25 par seconde à 10 mL) relie le modèle microscopique à la pression</td></tr>
             <tr><td>Oublier les conversions d'unités dans F = P·S</td><td>Multiplier des hPa par des cm², ou des bar par des m²</td><td>La carte « Force pressante » détaille le calcul en pascal et en m². Le défi C donne un indice ciblé selon l'erreur : section non convertie, pression non convertie, ou aucune des deux</td></tr>
-            <tr><td>Exiger que P × V soit exactement identique</td><td>« Mes produits ne sont pas égaux, la loi est fausse »</td><td>Avec « capteur réaliste », les produits varient légèrement ; le bilan conclut à partir d'un écart inférieur à 2 %, aux incertitudes de mesure près</td></tr>
+            <tr><td>Exiger que P × V soit exactement identique</td><td>« Mes produits ne sont pas égaux, la loi est fausse »</td><td>Avec le capteur bruité (réglage par défaut), les produits varient légèrement ; le bilan conclut à partir d'un écart inférieur à 2 %, aux incertitudes de mesure près</td></tr>
             <tr><td>Conclure à partir d'une seule mesure ou de mesures trop proches</td><td>Trois mesures entre 48 et 52 mL</td><td>La consigne demande des mesures réparties entre 10 et 60 mL. Le bilan n'apparaît qu'à partir de 3 mesures, mais la page ne vérifie pas la répartition : à contrôler</td></tr>
           </tbody>
         </table>
@@ -149,7 +149,7 @@
       <ul class="plain">
         <li>En binôme : un élève manipule le piston, l'autre note les mesures puis inverse les rôles pour les défis.</li>
         <li>En classe entière : étape 1 au tableau avec vote à main levée, puis une mesure projetée avant de laisser les élèves explorer.</li>
-        <li>Pour alléger la charge de lecture : laisser l'onglet P × V = f(V) ouvert, ne pas activer le capteur réaliste dans un premier temps et limiter le défi à un seul type (A ou B).</li>
+        <li>Pour alléger la charge de lecture : laisser l'onglet P × V = f(V) ouvert, activer d'abord le « Modèle théorique » (mesures exactes) puis le désactiver et limiter le défi à un seul type (A ou B).</li>
         <li>Pour différencier vers le haut : demander de prévoir la valeur de P à un volume donné avant de la lire, puis d'ouvrir le volet « Pour aller plus loin (Terminale) ».</li>
         <li>Trace écrite : recopier le tableau et la phrase de conclusion, ou imprimer la page en PDF avec les mesures affichées.</li>
       </ul>

@@ -216,6 +216,7 @@ canvas.measuring { cursor: crosshair; }
           <div class="bil"><b id="rB1">Forces compensées</b><span id="rB2">immobile</span></div>
         </div>
       </section>
+      <div id="bruit-hote"></div>
 
       <div class="panel">
         <section class="card" aria-label="Commandes">
@@ -277,6 +278,7 @@ canvas.measuring { cursor: crosshair; }
   </footer>
 </div>
 
+<script src="../shared/bruit.js"></script>
 <script src="../shared/simulabo.js"></script>
 <script>
 (function () {
@@ -855,7 +857,7 @@ canvas.measuring { cursor: crosshair; }
       return;
     }
     // afficheurs
-    setText("rV", fmt(Math.abs(S.v), 2));
+    setText("rV", fmt(Bruit.lecture("v", Math.abs(S.v)), 2));   // capteur de vitesse : bruit global (shared/bruit.js), renouvelé 4 fois par seconde
     if (S.atEnd) { setText("rF", "—"); setText("rFu", ""); }
     else { setText("rF", Math.abs(S.net) < 0.05 ? "0" : fmt(Math.abs(S.net), 1)); setText("rFu", "N"); }
     setText("rB1", S.atEnd ? "Fin de course" : (Math.abs(S.net) < 0.05 ? "Forces compensées" : "Forces non compensées"));
@@ -984,6 +986,7 @@ canvas.measuring { cursor: crosshair; }
     if (!MEAS.active) { acc += dt; while (acc >= DT) { step(); acc -= DT; } } else acc = 0;
     render(); updateUI();
   });
+  Bruit.bascule("#bruit-hote");   // la valeur affichée suit au prochain rafraîchissement
   applyModeUI();
   loop.start();
 })();

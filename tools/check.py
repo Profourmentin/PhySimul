@@ -219,6 +219,15 @@ def check_sims(rep):
         if not p.has_dark and not uses_socle: rep.warn(where, "pas de thème sombre (prefers-color-scheme)" + tag)
         if p.imgs_without_alt: rule(where, f"{p.imgs_without_alt} image(s) sans attribut alt{tag}")
         if p.canvas_unlabeled: rule(where, f"{p.canvas_unlabeled} canvas sans aria-label{tag}")
+        # Bruit de mesure commun (shared/bruit.js, voir docs/socle.md) : utilisé, ou déclaré « sans objet » avec la raison
+        uses_bruit = "Bruit." in text
+        if uses_bruit and not any("shared/bruit.js" in s for s in p.scripts):
+            rep.err(where, "utilise Bruit sans charger ../shared/bruit.js")
+        if uses_bruit and uses_socle and "shared/bruit.js" in text and "shared/simulabo.js" in text \
+                and text.index("shared/bruit.js") > text.index("shared/simulabo.js"):
+            rep.err(where, "shared/bruit.js doit être chargé AVANT shared/simulabo.js")
+        if not uses_bruit and not re.search(r"<!--\s*bruit\s*:\s*sans objet", text):
+            rep.warn(where, "ni bruit de mesure (shared/bruit.js) ni mention « <!-- bruit : sans objet : raison --> » : voir docs/socle.md")
         if not uses_socle:
             rep.warn(where, "n'utilise pas encore le socle shared/simulabo.css (migration à planifier)")
         else:
@@ -237,7 +246,7 @@ def main() -> int:
     args = ap.parse_args()
 
     rep = Report()
-    for needed in ("shared/simulabo.css", "shared/simulabo.js", "templates/simulation.html"):
+    for needed in ("shared/simulabo.css", "shared/simulabo.js", "shared/bruit.js", "templates/simulation.html"):
         if not (ROOT / needed).is_file(): rep.err(needed, "fichier du socle manquant")
     fonts_css = ROOT / "shared" / "fonts.css"
     if fonts_css.is_file():

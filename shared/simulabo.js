@@ -18,7 +18,7 @@
 (function (global) {
   "use strict";
 
-  var Simulabo = { version: "1.0.0" };
+  var Simulabo = { version: "1.0.1" };
 
   /* ---------- Outils : DOM ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -376,5 +376,7 @@
   Simulabo.slider = slider; Simulabo.readout = readout; Simulabo.tabs = tabs; Simulabo.observe = observe;
   Simulabo.canvas = canvas; Simulabo.cssVar = cssVar; Simulabo.loop = loop;
   Simulabo.measureTable = measureTable; Simulabo.defi = defi; Simulabo.shareState = shareState;
+  /* Bruit de mesure commun (shared/bruit.js, à charger AVANT ce script) */
+  if (global.Bruit) Simulabo.bruit = global.Bruit;
   global.Simulabo = Simulabo;
 })(window);

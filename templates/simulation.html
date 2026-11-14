@@ -8,7 +8,7 @@
   au catalogue. Ensuite, remplacer le bloc « DÉMO » (physique) par la vôtre.
 
   À conserver pour l'uniformité du site :
-  - les deux liens vers ../shared/ (styles et briques JavaScript) ;
+  - les liens vers ../shared/ (styles, briques JavaScript, bruit de mesure commun bruit.js) ;
   - le fil d'Ariane, l'en-tête (kicker, h1 unique, sous-titre), la zone d'observation
     (aria-live) et le pied de page ;
   - aucune ressource externe (police, CDN, image distante, statistiques).
@@ -51,6 +51,7 @@ canvas { aspect-ratio: 1000 / 320; }
         <h2 id="h-reglages">Réglages</h2>
         <div id="sliders" class="card" style="padding:0;border:0;background:none"></div>
         <div class="row"><button type="button" class="primary" id="mesurer">Relever une mesure</button></div>
+        <div id="bruit-hote"></div>   <!-- interrupteur « Modèle théorique » (bruit de mesure global) -->
       </section>
       <section class="card" aria-labelledby="h-mesures">
         <h2 id="h-mesures">Valeurs affichées</h2>
@@ -82,6 +83,7 @@ canvas { aspect-ratio: 1000 / 320; }
   </footer>
 </div>
 
+<script src="../shared/bruit.js"></script>   <!-- bruit de mesure commun : à charger AVANT le socle -->
 <script src="../shared/simulabo.js"></script>
 <script>
 (function () {
@@ -109,7 +111,9 @@ canvas { aspect-ratio: 1000 / 320; }
     ctx.strokeStyle = S.cssVar("--c-position"); ctx.lineWidth = 3; ctx.beginPath();
     for (var x = 0; x <= W; x += 2) {
       var t = x / W * 20;                          // 20 ms affichées
-      var y = H / 2 - Math.sin(2 * Math.PI * t / T) * A / 5 * (H / 2 - 16);
+      var v = Math.sin(2 * Math.PI * t / T) * A;
+      v = Bruit.appliquer(v, A, x);                // bruit de mesure global (shared/bruit.js) : 0,5 % de l'amplitude, nul en modèle théorique
+      var y = H / 2 - v / 5 * (H / 2 - 16);
       if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.stroke();
@@ -117,7 +121,7 @@ canvas { aspect-ratio: 1000 / 320; }
 
   function update() {
     var A = amp.get(), T = per.get(), f = 1000 / T;
-    lcdF.set(f); lcdU.set(2 * A);
+    lcdF.set(f); lcdU.set(Bruit.appliquer(2 * A));   // valeur « mesurée » : bruitée, sauf en modèle théorique
     S.observe("#obs", "info", "Amplitude <b>" + S.fmt(A, 1) + " V</b>, période <b>" + S.fmt(T, 1) + " ms</b> : la fréquence vaut <b>" + S.fmt(f, 0) + " Hz</b>.");
     etat.write({ A: A, T: T });
     scene.redraw();
@@ -132,6 +136,7 @@ canvas { aspect-ratio: 1000 / 320; }
     explain: "f = 1 / T = 1 / (5×10⁻³ s) = 200 Hz."
   });
 
+  Bruit.bascule("#bruit-hote", { onChange: update });
   update();
 })();
 </script>
