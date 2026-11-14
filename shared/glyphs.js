@@ -269,15 +269,16 @@
       s += '<line class="v" x1="22" y1="102" x2="38" y2="72"/>';
       return s;
   });
-  /* Équation de réaction : balance à deux plateaux, mêmes atomes de chaque côté (conservation des éléments). */
-  add("balance", function () {
+  /* Équation de réaction : 2 H2 + 2 O2 -> 2 H2O + O2. Mêmes atomes de chaque côté (4 H, 4 O) ; le dioxygène restant montre le réactif en excès. */
+  add("equilibre", function () {
     var s = "";
-    s += '<line class="s" x1="100" y1="34" x2="100" y2="104"/><line class="s" x1="76" y1="106" x2="124" y2="106"/>';
-    s += '<line class="s" x1="30" y1="36" x2="170" y2="36"/><circle class="f" cx="100" cy="36" r="4.2"/>';
-    s += '<path class="s" d="M30 36L9 82M30 36L51 82M170 36L149 82M170 36L191 82"/>';
-    s += '<path class="water s" d="M7 82H53Q51 95 30 95Q9 95 7 82Z"/><path class="water s" d="M147 82H193Q191 95 170 95Q149 95 147 82Z"/>';
-    s += '<circle class="f" cx="19" cy="75.5" r="6.2"/><circle class="f" cx="31" cy="75.5" r="6.2"/><circle class="f" cx="43" cy="75.5" r="6.2"/><circle class="f" cx="25" cy="64" r="6.2"/><circle class="f" cx="37" cy="64" r="6.2"/>';
-    s += '<circle class="f" cx="159" cy="75.5" r="6.2"/><circle class="f" cx="171" cy="75.5" r="6.2"/><circle class="f" cx="183" cy="75.5" r="6.2"/><circle class="f" cx="165" cy="64" r="6.2"/><circle class="f" cx="177" cy="64" r="6.2"/>';
+    function h2(x, y) { return '<circle class="s" cx="' + x + '" cy="' + y + '" r="5"/><circle class="s" cx="' + (x + 11) + '" cy="' + y + '" r="5"/>'; }
+    function o2(x, y) { return '<circle class="f" cx="' + x + '" cy="' + y + '" r="7.5"/><circle class="f" cx="' + (x + 15) + '" cy="' + y + '" r="7.5"/>'; }
+    function eau(x, y) { return '<circle class="f" cx="' + x + '" cy="' + (y - 3) + '" r="7.5"/><circle class="s" cx="' + (x - 9) + '" cy="' + (y + 6) + '" r="5"/><circle class="s" cx="' + (x + 9) + '" cy="' + (y + 6) + '" r="5"/>'; }
+    function plus(x, y) { return '<path class="s" d="M' + (x - 4) + ' ' + y + 'H' + (x + 4) + 'M' + x + ' ' + (y - 4) + 'V' + (y + 4) + '"/>'; }
+    s += h2(18, 40) + h2(18, 80) + plus(43, 60) + o2(57, 40) + o2(57, 80);
+    s += '<line class="v" x1="90" y1="60" x2="108" y2="60"/><path class="v" d="M102 53L109 60L102 67"/>';
+    s += eau(129, 40) + eau(129, 80) + plus(152, 60) + o2(166, 60);
     return s;
   });
 

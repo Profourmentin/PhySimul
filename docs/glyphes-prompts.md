@@ -219,10 +219,10 @@ Palette: blue #1B5E8C on pale blue #DCEAF4; amber #B56F00 only for measured quan
 
 ### Équilibrer une équation / réactif limitant
 
-- Thème : Constitution et transformations de la matière · nom de glyphe réservé : `equilibre` · fiabilité : **A**
-- Contrôle : Sphères uniquement, pas de formules.
+- Thème : Constitution et transformations de la matière · glyphe actuel : `equilibre` · fiabilité : **A**
+- Contrôle : Sphères uniquement, pas de formules. Compter : 4 petites et 4 grosses sphères de chaque côté de la flèche.
 ```
-Palette: teal #0E7566 on pale mint #DDF0EC; amber #B56F00 only for measured quantities (arrows, rays, curves). Scene: a balance scale with a few simple molecule models (spheres) of two colours on each pan, level.
+Palette: teal #0E7566 on pale mint #DDF0EC; amber #B56F00 only for measured quantities (arrows, rays, curves). Scene: on the left, two pairs of small hollow spheres and two pairs of larger solid spheres; one arrow in the middle; on the right, two bent water-molecule models (one large solid sphere touching two small hollow spheres) and one pair of larger solid spheres left over. Same number of small spheres (4) and large spheres (4) on both sides.
 ```
 
 ### Interaction gravitationnelle et poids
