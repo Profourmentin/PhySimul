@@ -51,6 +51,11 @@ button{font:inherit;cursor:pointer}
 .scene .solid{transition:opacity 2.2s ease}
 .scene svg[data-kind="diss"] .only-dil{display:none}
 .scene svg[data-kind="dil"] .only-diss{display:none}
+.scene .g-piss{transition:transform .55s ease}
+.scene .g-past,.scene .g-bal,.scene .propi,.scene .g-waste{transition:opacity .4s ease}
+.scene .dropx{opacity:0}
+.scene .dropx.fall{animation:dfall .5s ease-in}
+@keyframes dfall{0%{opacity:1;transform:translateY(0)}85%{opacity:1}100%{opacity:0;transform:translateY(24px)}}
 .g-flask{transform-box:fill-box;transform-origin:50% 100%}
 .g-flask.shake{animation:shake .9s}
 .g-flask.flip{animation:flip 1.7s}
@@ -97,6 +102,20 @@ fieldset{border:0;padding:0;margin:0 0 10px}legend{font-weight:600;font-size:.95
 .opt input{margin-top:2px}
 /* balance */
 .weigh{border:1px solid var(--pri);border-radius:12px;padding:10px;margin:10px 0;background:var(--card)}
+.btn[aria-pressed="true"]{background:var(--pri2);border-color:var(--pri);color:var(--pri)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.gestes{list-style:none;margin:0 0 8px;padding:8px 10px;border:1px dashed var(--bd);border-radius:10px;font-size:.84rem;display:grid;gap:2px}
+.gestes li{color:var(--mut)}.gestes li.ok{color:var(--ok);font-weight:600}
+.sec{border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:0 0 8px;min-width:0}
+fieldset.sec.cur{border:2px solid var(--pri);background:var(--pri2)}
+.sec.sdone{background:var(--okbg);border-color:var(--ok);font-size:.88rem}
+.zoomwrap{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:10px;align-items:start;margin-top:8px}
+.zoom{width:100%;height:auto;border:1px solid var(--bd);border-radius:10px;display:block}
+.eyes{display:flex;flex-wrap:wrap;gap:6px}.eyes .btn{padding:6px 10px;font-size:.84rem}
+#bpanel .btn{min-height:44px}
+@media(max-width:560px){.zoomwrap{grid-template-columns:1fr}.zoom{max-width:220px}}
+.sol{display:flex;flex-wrap:wrap;gap:6px}
 .disp{font:600 1.7rem/1 ui-monospace,Menlo,Consolas,monospace;background:#1d2b1f;color:#9dff9d;border-radius:8px;padding:10px 14px;text-align:right;margin-bottom:8px}
 .weigh .btnrow button{padding:6px 10px;font-size:.88rem}
 /* bilan */
@@ -226,44 +245,83 @@ function createScene(host,uid,kind){
  <defs>
   <clipPath id="fc-${uid}"><path d="${FL}"/></clipPath>
   <clipPath id="bc-${uid}"><path d="${BK} Z"/></clipPath>
+  <clipPath id="pc-${uid}"><rect class="pclip" x="-16" y="-170" width="32" height="170"/></clipPath>
   <linearGradient id="gr-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
  </defs>
  <rect class="tbl" x="0" y="345" width="560" height="55"/>
  <g class="only-dil"><g clip-path="url(#bc-${uid})"><g class="bliq-g" style="transform:translateY(124px)"><rect class="bliq" x="70" y="220" width="100" height="124" fill="#2b7bd6" opacity=".9"/></g></g>
   <path class="ln" d="${BK}" stroke-width="3"/><line class="ln" x1="64" y1="220" x2="176" y2="220" stroke-width="3"/><text x="120" y="368" text-anchor="middle">solution mère</text></g>
- <g class="only-diss"><path class="ln" d="M110 326 Q150 352 190 326 Z" stroke-width="3"/><ellipse class="cupsolid" cx="150" cy="324" rx="26" ry="8" fill="#4b8fe0" opacity="0"/><text x="150" y="368" text-anchor="middle">coupelle</text></g>
+ <g class="only-diss tblcup"><path class="ln" d="M110 326 Q150 352 190 326 Z" stroke-width="3"/><ellipse class="cupsolid" cx="150" cy="324" rx="26" ry="8" fill="#4b8fe0" opacity="0"/><text x="150" y="368" text-anchor="middle">coupelle</text></g>
+ <g class="only-diss g-bal" opacity="0">
+  <rect x="50" y="298" width="170" height="47" rx="8" fill="var(--pri2)" stroke="var(--glass)" stroke-width="2.5"/>
+  <rect x="64" y="308" width="82" height="25" rx="4" fill="#1d2b1f"/>
+  <text class="bal-d" x="140" y="326" text-anchor="end" style="fill:#9dff9d;font:600 16px ui-monospace,Menlo,Consolas,monospace">0,00 g</text>
+  <rect x="160" y="310" width="42" height="21" rx="5" fill="var(--card)" stroke="var(--glass)" stroke-width="1.5"/><text x="181" y="325" text-anchor="middle" style="font-size:12px;font-weight:700">T</text>
+  <line x1="135" y1="298" x2="135" y2="288" stroke="var(--glass)" stroke-width="3"/>
+  <ellipse cx="135" cy="286" rx="64" ry="7" fill="var(--card)" stroke="var(--glass)" stroke-width="2.5"/>
+  <g class="bal-cup" opacity="0"><path d="M103 279 Q135 302 167 279 Z" fill="var(--card)" stroke="var(--glass)" stroke-width="2.5"/><ellipse class="bal-solid" cx="135" cy="277" rx="20" ry="5" fill="#f4f4f4" opacity="0"/></g>
+  <text x="135" y="368" text-anchor="middle">balance</text>
+ </g>
+ <g class="only-dil g-waste" opacity="0"><path class="ln" d="M396 304 L396 341 Q396 345 400 345 L436 345 Q440 345 440 341 L440 304" stroke-width="2.5"/><text x="418" y="368" text-anchor="middle" style="font-size:11px">récupération</text></g>
  <g class="g-flask">
   <g clip-path="url(#fc-${uid})"><g class="liqg" style="transform:translateY(250px)"><rect class="liq" x="200" y="95" width="200" height="262" fill="#9cc9e8" opacity=".35"/><rect class="grad" x="200" y="95" width="200" height="262" fill="url(#gr-${uid})" opacity="0"/></g>
    <g class="solid" opacity="0" fill="#fff" stroke="#8aa" stroke-width=".5">${grains}</g></g>
   <path class="ln" d="${FL}" stroke-width="3"/>
   <line x1="280" x2="320" y1="95" y2="95" stroke="#c0392b" stroke-width="2.5"/>
   <text x="326" y="99" style="font-size:12px">trait de jauge</text>
+  <text class="grav" x="300" y="262" text-anchor="middle" style="font-size:11px;opacity:.75"></text>
   <path class="stopper" d="M281 44 L319 44 L315 72 L285 72 Z" fill="#7b8a9c" opacity="0"/>
  </g>
  <text x="300" y="368" text-anchor="middle">fiole jaugée</text>
  <g class="g-funnel only-diss" opacity="0"><path d="M252 24 L348 24 L314 62 L314 92 L286 92 L286 62 Z" fill="rgba(160,190,220,.35)" stroke="var(--glass)" stroke-width="2"/></g>
+ <g class="g-piss" opacity="0" style="transform:translate(486px,300px)">
+  <rect x="-22" y="-18" width="44" height="64" rx="9" fill="rgba(255,255,255,.55)" stroke="var(--glass)" stroke-width="2.5"/>
+  <rect x="-8" y="-32" width="16" height="16" fill="rgba(255,255,255,.55)" stroke="var(--glass)" stroke-width="2"/>
+  <path d="M-3 -32 L-3 -46 L-16 -60 L-11 -64 L3 -48 L3 -32" fill="rgba(255,255,255,.7)" stroke="var(--glass)" stroke-width="2" stroke-linejoin="round"/>
+  <text x="0" y="22" text-anchor="middle" style="font-size:10px">eau dist.</text>
+ </g>
+ <g class="g-past" opacity="0"><ellipse cx="300" cy="14" rx="8" ry="11" fill="#c0392b" opacity=".85"/><rect class="ln" x="298" y="24" width="4" height="46" stroke-width="1.6"/><path class="ln" d="M298 70 L302 70 L300.6 78 L299.4 78 Z" stroke-width="1.4"/><circle class="dropx" cx="300" cy="82" r="3.2" fill="#9cc9e8"/></g>
  <g class="g-pip only-dil" style="transform:translate(500px,345px)">
-  <g class="pfill" opacity="0"><rect x="-2.4" y="-62" width="4.8" height="62"/><ellipse cx="0" cy="-74" rx="8" ry="13"/><rect x="-2.4" y="-135" width="4.8" height="62"/></g>
+  <g class="pfill" opacity="0" clip-path="url(#pc-${uid})"><rect x="-2.4" y="-62" width="4.8" height="62"/><ellipse cx="0" cy="-74" rx="8" ry="13"/><rect x="-2.4" y="-165" width="4.8" height="92"/></g>
   <path class="ln" d="M-2 0 L2 0 L3.2 -16 L-3.2 -16 Z" stroke-width="1.6"/><rect class="ln" x="-3.2" y="-62" width="6.4" height="46" stroke-width="1.6"/>
   <ellipse class="ln" cx="0" cy="-74" rx="10" ry="14" stroke-width="1.6"/><rect class="ln" x="-3.2" y="-150" width="6.4" height="62" stroke-width="1.6"/>
   <line x1="-6" x2="6" y1="-135" y2="-135" stroke="#c0392b" stroke-width="2"/>
+  <g class="propi" opacity="0"><path d="M-8 -150 L8 -150 L11 -172 Q0 -190 -11 -172 Z" fill="#c0392b" opacity=".92"/><text x="0" y="-160" text-anchor="middle" style="font-size:8px;fill:#fff;font-weight:700">A S E</text></g>
  </g>
 </svg>`;
  const q=s=>host.querySelector(s);
- const E={liqg:q('.liqg'),liq:q('.liq'),grad:q('.grad'),solid:q('.solid'),funnel:q('.g-funnel'),stopper:q('.stopper'),pip:q('.g-pip'),pfill:q('.pfill'),bliqg:q('.bliq-g'),bliq:q('.bliq'),cup:q('.cupsolid'),flask:q('.g-flask')};
- const POS={rest:[500,345],beaker:[120,330],flask:[300,170]};
+ const E={liqg:q('.liqg'),liq:q('.liq'),grad:q('.grad'),solid:q('.solid'),funnel:q('.g-funnel'),stopper:q('.stopper'),pip:q('.g-pip'),pfill:q('.pfill'),bliqg:q('.bliq-g'),bliq:q('.bliq'),cup:q('.cupsolid'),flask:q('.g-flask'),
+  bal:q('.g-bal'),balD:q('.bal-d'),balCup:q('.bal-cup'),balSolid:q('.bal-solid'),tblcup:q('.tblcup'),piss:q('.g-piss'),past:q('.g-past'),dropx:q('.dropx'),propi:q('.propi'),waste:q('.g-waste'),pclip:q('.pclip'),grav:q('.grav')};
+ const POS={rest:[500,345],beaker:[120,330],flask:[300,170],waste:[418,326]};
+ const retrig=(el,cls)=>{el.classList.remove(cls);void el.getBoundingClientRect();el.classList.add(cls);};
  return {render(s,anim){
   E.liqg.style.transform=`translateY(${250*(1-s.level)}px)`;
   E.liq.setAttribute('fill',s.color);E.liq.setAttribute('opacity',s.op);
   E.grad.setAttribute('opacity',s.grad?1:0);
-  E.solid.setAttribute('opacity',s.solid?1:0);E.solid.setAttribute('fill',s.solidColor||'#f4f4f4');
+  E.solid.setAttribute('opacity',s.solid?(s.solidOp===undefined?1:s.solidOp):0);E.solid.setAttribute('fill',s.solidColor||'#f4f4f4');
   E.funnel.setAttribute('opacity',s.funnel?1:0);
   E.stopper.setAttribute('opacity',s.stopper?1:0);
   if(s.pip){const p=POS[s.pip];E.pip.style.transform=`translate(${p[0]}px,${p[1]}px)`;
-   E.pfill.setAttribute('opacity',s.pipFill?0.9:0);$$('rect,ellipse',E.pfill).forEach(e=>e.setAttribute('fill',s.pipColor||'#2b7bd6'));}
+   const pl=s.pipLevel;
+   if(pl===undefined){E.pclip.setAttribute('y',-170);E.pclip.setAttribute('height',170);E.pfill.setAttribute('opacity',s.pipFill?0.9:0);}
+   else{const top=Math.max(-170,-135*pl);E.pclip.setAttribute('y',top);E.pclip.setAttribute('height',-top+2);E.pfill.setAttribute('opacity',pl>0.004?0.9:0);}
+   $$('rect,ellipse',E.pfill).forEach(e=>e.setAttribute('fill',s.pipColor||'#2b7bd6'));}
+  E.propi.setAttribute('opacity',s.propi?1:0);
   if(s.beakerColor){E.bliq.setAttribute('fill',s.beakerColor);}
   E.bliqg.style.transform=`translateY(${124*(1-(s.beaker||0))}px)`;
   E.cup.setAttribute('opacity',s.cup?0.95:0);if(s.cupColor)E.cup.setAttribute('fill',s.cupColor);
+  /* objets de la paillasse (manipulation) */
+  if(E.bal){
+   E.bal.setAttribute('opacity',s.bal?1:0);E.tblcup.style.opacity=s.bal?0:1;
+   if(s.bal){E.balD.textContent=s.bal.text;E.balCup.setAttribute('opacity',s.bal.cupOn?1:0);
+    E.balSolid.setAttribute('opacity',s.bal.solid>0?0.95:0);E.balSolid.setAttribute('fill',s.solidColor||'#f4f4f4');}
+   E.piss.setAttribute('opacity',s.piss?1:0);
+   E.piss.style.transform=s.piss==='pour'?'translate(372px,62px) rotate(-68deg)':'translate(486px,300px)';
+   E.past.setAttribute('opacity',s.past?1:0);
+   E.waste.setAttribute('opacity',s.waste?1:0);
+   E.grav.textContent=s.grav||'';
+   if(s.drop)retrig(E.dropx,'fall');
+  }
   if(anim){E.flask.classList.remove('shake','flip');void E.flask.getBoundingClientRect();E.flask.classList.add(anim);setTimeout(()=>E.flask.classList.remove(anim),1800);}
  }};
 }
@@ -633,76 +691,352 @@ function labMat(){
  };
 }
 
-/* --- phase 3 : manipulation --- */
-function labMan(){
- labHost.innerHTML=`${mission()}<div id="eng"></div>`;
- engine($('#eng'),{steps:L.proto.steps,dist:L.proto.dist,state:L.proto.state,anims:L.proto.anims,weighAt:L.proto.weighAt,target:L.kind==='diss'?L.task.m:0,scene:L.scene,
-  onError:()=>{L.errs.man++;},cap:h=>{$('#lab-cap').innerHTML=h;},onDone:()=>labGo(4)});
+/* --- phase 3 : manipulation (paillasse virtuelle) --- */
+/* Ici on ne clique plus des étapes dans l'ordre : on agit sur le matériel, et c'est la physique qui répond
+   (masse sur la balance, niveau dans la fiole, ménisque, dissolution). Les erreurs ont des conséquences chiffrées. */
+const BORE={50:7,100:9,200:11,250:12,500:15,1000:18};            /* diamètre intérieur du col de la fiole (mm) */
+const mmPerMl=b=>1000/(Math.PI*Math.pow(b/2,2));                  /* hauteur de liquide (mm) pour 1 mL dans un tube de diamètre b */
+const r2=x=>Math.round(x*100)/100;
+const RATE={NaCl:0.5,CuSO4:0.35,KMnO4:0.26};                       /* part dissoute à chaque agitation */
+const DROPV=0.05;                                                  /* volume d'une goutte de pipette Pasteur (mL) */
+const TOLF=0.04;                                                   /* tolérance de l'ajustement au trait de la fiole (mL) */
+const balTxt=x=>x.toFixed(2).replace('.',',')+' g';
+let B=null,bTimer=null;
+
+function benchNew(keep){
+ const t=L.task,diss=L.kind==='diss',Vf=diss?t.V:t.Vf,old=keep?B:null;
+ B={kind:L.kind,Vf,epi:old?old.epi:{blouse:false,lunettes:false},eye:rnd(['haut','bas']),errs:old?old.errs:0,redo:old?old.redo+1:0,msg:null,pour:false,drop:false,sins:old?old.sins:{},
+  fl:{V:0,mIn:0,d:0,stopper:false,funnel:false,flips:0,ruined:false,shaken:0,label:false,cm:null,adj:false}};
+ if(diss){
+  B.bal={cup:r2(2+Math.random()*2.2),cupOn:false,tare:0,tareOk:false,solid:0,mRec:null,poured:false,cupRes:0,funRes:0,cupRinsed:false,funRinsed:false};
+ }else{
+  B.mb={V:0};
+  B.pi={Vm:t.Vm,v:0,loc:'rest',bulb:false,rinsed:false,vTr:null,eff:1,draining:false,waited:false,done:false,adj:false,bore:1.6+Math.pow(t.Vm,0.4)};
+ }
 }
-function engine(host,cfg){
- let k=0,consec=0;const N=cfg.steps.length;
- const items=shuffle([...cfg.steps.map((s,i)=>({i,label:s.short})),...cfg.dist.map((d,j)=>({i:-1-j,label:d.label,why:d.why}))]);
- host.innerHTML=`<p class="mut" style="margin:0">Clique sur les actions <b>dans le bon ordre</b>. Attention : certaines sont des erreurs classiques !</p><div class="pool">${items.map((it,n)=>`<button class="act" data-n="${n}">${it.label}</button>`).join('')}</div><div class="weigh" hidden></div><div class="msg" aria-live="polite"></div><div class="btnrow" id="endrow"></div>`;
- const msg=$('.msg',host);
- const show=(c,h)=>{msg.className='msg '+c;msg.innerHTML=h;};
- function advance(btn){
-  const s=cfg.steps[k];k++;consec=0;btn.classList.add('done');btn.disabled=true;btn.textContent=`${k}. ${btn.textContent}`;
-  cfg.scene.render(cfg.state(k),cfg.anims[k]);cfg.cap(s.detail);
-  show('ok',`<b>✓ ${s.short}.</b> ${s.detail}<br><i>${s.why}</i>`);
-  if(k===N){show('ok',`<b>Manipulation terminée !</b> ${s.detail}`);$('#endrow').innerHTML='<button class="btn pri" id="go-bil">Voir le bilan ▶</button>';$('#go-bil').onclick=cfg.onDone;}
+function bsay(k,h){B.msg={k,h};}
+function bErr(key,h){B.errs++;L.errs.man++;B.sins[key]=(B.sins[key]||0)+1;bsay('ko','<b>✗ </b>'+h);}
+const balRead=()=>B.bal.cupOn?r2(B.bal.cup+B.bal.solid-B.bal.tare):0;
+
+/* ---- loupe sur le ménisque : l'œil doit être à la hauteur du trait (parallaxe) ---- */
+function zoomSvg(dMm,bore,eye,title,col,op){
+ const big=Math.abs(dMm)>10,px=big?3:9,lim=big?33:10,hw=Math.max(16,Math.min(58,bore*4.5)),x1=125-hw,x2=125+hw,y0=100,ry=14;
+ const pos=Math.abs(dMm)>lim?(dMm<0?'Le niveau est en dessous du trait, hors de la loupe.':'Le niveau est au-dessus du trait, hors de la loupe.'):(Math.abs(dMm)<0.4?'Le bas du ménisque est au niveau du trait.':(dMm<0?'Le bas du ménisque est sous le trait.':'Le bas du ménisque est au-dessus du trait.'));
+ let s=`<svg class="zoom" viewBox="0 0 250 200" role="img" aria-label="Loupe sur ${title}. ${pos} ${eye==='niveau'?'Œil à la hauteur du trait.':'Œil '+(eye==='haut'?'au-dessus':'en dessous')+' du trait : le trait apparaît en ellipse.'}">`;
+ s+=`<rect x="0" y="0" width="250" height="200" rx="10" fill="var(--bg)"/>`;
+ if(Math.abs(dMm)<=lim){
+  const yl=y0-dMm*px;
+  s+=`<path d="M${x1} ${yl-7} Q125 ${yl+9} ${x2} ${yl-7} V200 H${x1} Z" fill="${col}" opacity="${op}"/>`;
+  s+=`<path d="M${x1} ${yl-7} Q125 ${yl+9} ${x2} ${yl-7}" fill="none" stroke="var(--tx)" stroke-width="1.6"/>`;
+ }else{
+  s+=`<text x="125" y="${dMm<0?172:34}" text-anchor="middle" style="font-size:12px;fill:var(--mut)">${dMm<0?'↓ le niveau est plus bas':'↑ le niveau est plus haut'}</text>`;
+  if(dMm<0)s+=`<path d="M${x1} 192 L${x2} 192" stroke="${col}" stroke-width="6" opacity="${op}"/>`;
  }
- function wrong(btn,it){
-  cfg.onError();consec++;btn.classList.remove('bump');void btn.offsetWidth;btn.classList.add('bump');
-  let h=it.i<0?`<b>✗ Erreur.</b> ${it.why}`:'<b>✗ Pas dans cet ordre.</b> Relis le protocole : quelle est la prochaine étape ?';
-  if(consec>=3)h+=`<br><i>Indice : la prochaine action commence par « ${cfg.steps[k].short.split(' ').slice(0,3).join(' ')}… »</i>`;
-  show('ko',h);
+ s+=`<line x1="${x1}" y1="0" x2="${x1}" y2="200" stroke="var(--glass)" stroke-width="3"/><line x1="${x2}" y1="0" x2="${x2}" y2="200" stroke="var(--glass)" stroke-width="3"/>`;
+ if(eye==='niveau'){s+=`<line x1="${x1}" y1="${y0}" x2="${x2}" y2="${y0}" stroke="#c0392b" stroke-width="2.5"/>`;}
+ else{
+  const front=eye==='haut'?0:1,back=1-front;
+  s+=`<path d="M${x1} ${y0} A${hw} ${ry} 0 0 ${back} ${x2} ${y0}" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>`;
+  s+=`<path d="M${x1} ${y0} A${hw} ${ry} 0 0 ${front} ${x2} ${y0}" fill="none" stroke="#c0392b" stroke-width="2.5"/>`;
  }
- function weigh(btn){
-  const w=$('.weigh',host);w.hidden=false;
-  const cup=Math.round((2+Math.random()*2)*100)/100;let onPan=false,tare=0,solid=0;
-  const rd=()=>onPan?Math.round((cup+solid-tare)*100)/100:0;
-  w.innerHTML=`<div class="kick">Balance</div><div class="disp" id="disp">0,00 g</div>
-  <div class="btnrow"><button class="btn" data-a="pose">Poser / retirer la coupelle</button><button class="btn" data-a="tare">Tarer</button></div>
-  <div class="btnrow">${[10,1,0.1,0.01].map(d=>`<button class="btn" data-d="${d}">+ ${fmt(d)} g</button>`).join('')}</div>
-  <div class="btnrow">${[1,0.1,0.01].map(d=>`<button class="btn" data-d="${-d}">− ${fmt(d)} g</button>`).join('')}</div>
-  <div class="btnrow"><button class="primary" data-a="ok">Valider la pesée</button></div><div class="fb" id="wfb" aria-live="polite"></div>
-  <p class="mut" style="margin:6px 0 0">Masse à peser : <b>${fmt(cfg.target)} g</b></p>`;
-  const up=()=>{$('#disp',w).textContent=rd().toFixed(2).replace('.',',')+' g';};
-  w.onclick=e=>{const b=e.target.closest('button');if(!b)return;const f=$('#wfb',w);
-   if(b.dataset.a==='pose'){onPan=!onPan;if(!onPan){solid=0;tare=0;}up();f.className='fb';f.innerHTML='';return;}
-   if(b.dataset.a==='tare'){if(!onPan){f.className='fb info';f.innerHTML='Pose d’abord la coupelle sur le plateau.';return;}tare=Math.round((cup+solid)*100)/100;up();return;}
-   if(b.dataset.d){if(!onPan){f.className='fb info';f.innerHTML='Pose d’abord la coupelle sur le plateau.';return;}solid=Math.max(0,Math.round((solid+parseFloat(b.dataset.d))*100)/100);up();return;}
-   if(b.dataset.a==='ok'){
-    if(!onPan){f.className='fb info';f.innerHTML='Pose la coupelle et pèse le solide.';return;}
-    if(Math.abs(tare-cup)>0.001){cfg.onError();f.className='fb ko';f.innerHTML='La tare doit être faite avec la <b>coupelle vide</b>, avant d’ajouter le solide.';return;}
-    const r=rd();
-    if(Math.round(r*100)!==Math.round(cfg.target*100)){cfg.onError();f.className='fb ko';f.innerHTML=r<cfg.target?'Il manque du solide : continue d’ajouter.':'Trop de solide : retire un peu de solide.';return;}
-    w.hidden=true;advance(btn);
-   }
-  };
+ s+=`<text x="8" y="16" style="font-size:11px;fill:var(--mut)">trait de jauge</text><text x="242" y="16" text-anchor="end" style="font-size:11px;fill:var(--mut)">loupe ×${big?'3':'9'}</text></svg>`;
+ return s;
+}
+const EYES=[['haut','Œil au-dessus du trait'],['niveau','Œil à la hauteur du trait'],['bas','Œil en dessous du trait']];
+const eyesHtml=()=>`<div class="eyes" role="group" aria-label="Position de l’œil">${EYES.map(e=>`<button type="button" class="btn" data-a="eye" data-v="${e[0]}" aria-pressed="${B.eye===e[0]}">${e[1]}</button>`).join('')}</div>`;
+const r3=x=>Math.round(x*1000)/1000;
+const flaskDmm=()=>(B.fl.V-B.Vf)*mmPerMl(BORE[B.Vf]||9);
+const pipDmm=()=>(B.pi.v-B.pi.Vm)*mmPerMl(B.pi.bore);
+
+/* ---- état de la scène à partir de l'état de la paillasse ---- */
+function benchState(){
+ const t=L.task,F=B.fl,diss=B.kind==='diss',Vf=B.Vf;
+ const st={level:clamp(F.V/Vf,0,1.06),color:'#9cc9e8',op:F.V>0?0.35:0,solid:false,solidOp:0,funnel:F.funnel,stopper:F.stopper,grad:false,cup:false,
+  piss:B.pour?'pour':'rest',past:F.d>=1&&F.V>=0.5*Vf&&!F.adj&&!F.ruined,drop:B.drop,grav:`${fmt(Vf)} mL · 20 °C`};
+ if(diss){
+  const sol=t.solute,conc=F.V>0?F.mIn*F.d/(F.V/1000):0;
+  if(sol.color&&F.d>0&&F.V>0){st.color=sol.color;st.op=clamp(0.92*Math.pow(conc/sol.ref,0.6),0.08,0.95);}
+  st.solid=F.mIn>0&&F.d<1;st.solidOp=1-F.d;st.solidColor=sol.grain;
+  st.bal={text:balTxt(balRead()),cupOn:B.bal.cupOn,solid:B.bal.solid};
+ }else{
+  const conc=F.V>0?F.mIn/(F.V/1000):0;
+  if(F.mIn>0&&F.V>0){st.color=t.dye.color;st.op=clamp(0.92*Math.sqrt(conc/t.Cm),0.07,0.95);}
+  st.pip=B.pi.loc;st.pipLevel=B.pi.v/B.pi.Vm;st.pipColor=t.dye.color;st.propi=true;st.waste=true;
+  st.beaker=clamp(B.mb.V/50,0,0.95);st.beakerColor=t.dye.color;
  }
- $$('.act',host).forEach(b=>b.onclick=()=>{
-  const it=items[+b.dataset.n];
-  if(it.i===k){if(k===cfg.weighAt)weigh(b);else advance(b);}
-  else wrong(b,it);
- });
+ return st;
+}
+function bScene(anim){L.scene.render(benchState(),anim);B.drop=false;}
+function bPour(){B.pour=true;bScene();clearTimeout(bTimer);bTimer=setTimeout(()=>{B.pour=false;bScene();},650);}
+
+/* ---- panneaux ---- */
+const bb=(a,label,o={})=>`<button type="button" class="btn${o.cls?' '+o.cls:''}" data-a="${a}"${o.v!==undefined?` data-v="${o.v}"`:''}${o.dis?' disabled':''}${o.p!==undefined?` aria-pressed="${o.p}"`:''}>${label}</button>`;
+const Rmb=()=>Math.max(10,L.task.Vm+8);
+const dissReady=()=>B.kind==='diss'?B.bal.poured:B.pi.done;
+function gestes(){
+ const F=B.fl,D=B.kind==='diss',a=[{l:'Se protéger : blouse et lunettes',ok:B.epi.blouse&&B.epi.lunettes}];
+ if(D){
+  a.push({l:'Peser en tarant la coupelle vide, puis noter la masse lue',ok:B.bal.mRec!==null},
+   {l:'Transférer le solide sans perte : entonnoir, coupelle et entonnoir rincés',ok:B.bal.poured&&B.bal.cupRinsed&&B.bal.funRinsed&&!F.funnel},
+   {l:'Dissoudre : eau aux 2/3, fiole bouchée, agitation',ok:F.d>=1});
+ }else{
+  a.push({l:'Verser un peu de solution mère dans un bécher',ok:B.mb.V>=Rmb()},
+   {l:'Rincer la pipette jaugée avec la solution mère',ok:B.pi.rinsed},
+   {l:'Prélever avec la propipette (A, S, E) : bas du ménisque au trait',ok:B.pi.vTr!==null},
+   {l:'Vider dans la fiole : pointe contre la paroi, sans souffler',ok:B.pi.done},
+   {l:'Ajouter l’eau aux 2/3, boucher, agiter',ok:F.d>=1});
+ }
+ a.push({l:'Ajuster au trait : œil à la hauteur, bas du ménisque tangent',ok:F.adj},
+  {l:'Homogénéiser : boucher, retourner au moins 15 fois',ok:F.flips>=15},
+  {l:'Étiqueter avec la concentration obtenue',ok:F.label});
+ return a;
+}
+const sec=(id,title,done,summary,html)=>({id,title,done,summary,html});
+const fillTxt=()=>{const p=Math.round(clamp(B.fl.V/B.Vf,0,1)*10)*10;return B.fl.V<=0?'vide':'à vue d’œil : environ '+p+' %';};
+
+function secEpi(){
+ const e=B.epi;
+ return sec('epi','Sécurité',e.blouse&&e.lunettes,'Blouse et lunettes de protection mises.',
+  `<p class="mut" style="margin:0 0 6px">Au laboratoire, on commence toujours par se protéger.</p><div class="btnrow">${bb('epi','Mettre la blouse',{v:'blouse',p:e.blouse})}${bb('epi','Mettre les lunettes de protection',{v:'lunettes',p:e.lunettes})}</div>`);
+}
+function secBal(){
+ const b=B.bal,m=L.task.m,rd=balRead();
+ return sec('bal','Pesée à la balance',b.mRec!==null,`Masse notée : ${fmt(b.mRec)} g (visée : ${fmt(m)} g).`,
+  `<p class="mut" style="margin:0 0 6px">Masse à peser (calculée en phase 1) : <b>${fmt(m)} g</b>. La balance affiche au centigramme.</p>
+  <div class="disp" aria-live="polite">${balTxt(rd)}</div>
+  <div class="btnrow">${bb('balCup',b.cupOn?'Retirer la coupelle':'Poser la coupelle sur le plateau')}${bb('tare','Tarer (touche T)')}</div>
+  <div class="btnrow">${bb('spat','Prélever une spatule de solide')}${bb('pinch','Ajouter quelques grains')}${bb('rem','Enlever un peu de solide')}</div>
+  <div class="btnrow">${bb('note','Noter la masse affichée',{cls:'pri'})}</div>`);
+}
+function secTransfer(){
+ const b=B.bal,F=B.fl,ok=b.poured&&b.cupRinsed&&b.funRinsed&&!F.funnel;
+ return sec('tr','Transfert du solide dans la fiole jaugée',ok,'Solide transféré sans perte.',
+  `<p class="mut" style="margin:0 0 6px">Le col de la fiole est étroit : on utilise un entonnoir à solide. Rien ne doit rester sur la coupelle ni sur l’entonnoir.</p>
+  <div class="btnrow">${bb('funnel',F.funnel?'Retirer l’entonnoir':'Poser l’entonnoir à solide sur la fiole',{})}${bb('pourSolid','Verser le solide dans l’entonnoir',{dis:b.poured})}</div>
+  <div class="btnrow">${bb('rinseCup','Rincer la coupelle à la pissette',{dis:!b.poured||b.cupRinsed})}${bb('rinseFun','Rincer l’entonnoir à la pissette',{dis:!b.poured||b.funRinsed})}</div>`);
+}
+function secMother(){
+ const R=Rmb(),ok=B.mb.V>=R;
+ return sec('mb','Solution mère',ok,`Bécher de prélèvement : environ ${Math.round(B.mb.V)} mL de solution mère.`,
+  `<p class="mut" style="margin:0 0 6px">On ne plonge jamais la pipette dans le flacon de stockage : on verse d’abord un peu de solution mère dans un bécher propre. Il en faut de quoi plonger la pipette.</p>
+  <div class="btnrow">${bb('mbPour','Verser environ 5 mL',{v:5})}${bb('mbPour','Verser environ 10 mL',{v:10})}<span class="mut">Bécher : environ ${Math.round(B.mb.V)} mL</span></div>`);
+}
+function secPip(){
+ const P=B.pi,pr=P.vTr===null;
+ const zoom=pr?`<div class="zoomwrap">${zoomSvg(pipDmm(),P.bore,B.eye,'le col de la pipette jaugée',L.task.dye.color,0.85)}<div>${eyesHtml()}
+   <div class="btnrow">${bb('piE','E : écoulement rapide',{v:'fast'})}${bb('piE','E : goutte à goutte',{v:'mid'})}${bb('piE','E : ajustement fin',{v:'fine'})}</div>
+   <div class="btnrow">${bb('piOk','Valider : bas du ménisque au trait',{cls:'pri'})}</div></div></div>`:'';
+ const tail=P.vTr!==null?`<div class="btnrow">${bb('loc','Pointe contre la paroi de la fiole',{v:'flask',p:P.loc==='flask',dis:P.done})}${bb('piEmpty','E : vider dans la fiole',{dis:P.draining})}${bb('piWait','Attendre 15 s, pointe contre la paroi',{dis:!P.draining||P.done})}${bb('piBlow','Souffler la dernière goutte',{dis:!P.draining||P.done})}</div>`:'';
+ return sec('pip','Pipette jaugée et propipette',P.done,`Pipette jaugée de ${fmt(P.Vm)} mL vidée dans la fiole.`,
+  `<p class="mut" style="margin:0 0 6px">Propipette à trois molettes : <b>A</b> chasse l’air de la poire, <b>S</b> aspire, <b>E</b> laisse s’écouler. Le liquide ne doit jamais monter dans la poire.</p>
+  <div class="btnrow">${bb('loc','Plonger la pointe dans le bécher',{v:'beaker',p:P.loc==='beaker'})}${bb('loc','Plonger la pointe dans le flacon de solution mère',{v:'stock'})}${bb('loc','Sortir la pipette du liquide',{v:'rest',p:P.loc==='rest'})}</div>
+  <div class="btnrow">${bb('piA','A : presser la poire',{p:P.bulb})}${bb('piS','S : aspirer',{dis:P.vTr!==null})}${bb('piRinse','Rincer la pipette avec la solution mère',{dis:P.rinsed})}</div>${zoom}${tail}`);
+}
+function secWater(){
+ const F=B.fl,V=B.Vf,j=n=>fmt(Math.round(V*n*10)/10);
+ return sec('water','Eau distillée, bouchon et agitation',F.d>=1,B.kind==='diss'?'Solide entièrement dissous.':'Solutions mélangées.',
+  `<p class="mut" style="margin:0 0 6px">Pissette d’eau distillée : le volume versé est approximatif. Vise les 2/3 de la fiole (${fillTxt()}).</p>
+  <div class="btnrow">${bb('jet','Jet long (≈ '+j(0.2)+' mL)',{v:'long'})}${bb('jet','Jet court (≈ '+j(0.05)+' mL)',{v:'court'})}${bb('jet','Filet (≈ '+j(0.01)+' mL)',{v:'filet'})}</div>
+  <div class="btnrow">${bb('stop',F.stopper?'Déboucher la fiole':'Boucher la fiole',{p:F.stopper})}${bb('shake','Agiter la fiole bouchée',{cls:'pri'})}${(B.kind==='diss'&&F.shaken>=1&&F.d<1)?bb('heat','Chauffer doucement la fiole'):''}</div>`);
+}
+function secAdj(){
+ const F=B.fl,st=benchState();
+ return sec('adj','Ajustement au trait de jauge',F.adj,`Niveau ajusté au trait de jauge (${fmt(B.Vf)} mL).`,
+  `<p class="mut" style="margin:0 0 6px">Fiole ${F.stopper?'<b>bouchée</b> : débouche-la pour ajouter de l’eau':'débouchée'}. Approche avec la pissette, puis termine <b>goutte à goutte</b> à la pipette Pasteur, l’œil à la hauteur du trait.</p>
+  <div class="zoomwrap">${zoomSvg(flaskDmm(),BORE[B.Vf]||9,B.eye,'le col de la fiole jaugée',st.color,Math.max(0.35,st.op))}<div>${eyesHtml()}
+  <div class="btnrow">${bb('stop',F.stopper?'Déboucher la fiole':'Boucher la fiole',{p:F.stopper})}${bb('jet','Jet court à la pissette',{v:'court'})}${bb('jet','Filet à la pissette',{v:'filet'})}</div>
+  <div class="btnrow">${bb('drop','+ 1 goutte',{v:1})}${bb('drop','+ 5 gouttes',{v:5})}${bb('drop','+ 20 gouttes',{v:20})}</div>
+  <div class="btnrow">${bb('adjOk','Valider : bas du ménisque tangent au trait',{cls:'pri'})}</div></div></div>`);
+}
+function secFinish(){
+ const F=B.fl,fl=F.flips;
+ return sec('fin','Homogénéisation et étiquette',F.label,`Fiole étiquetée : C<sub>m</sub> = ${fmt(F.cm)} ${U}.`,
+  `<p class="mut" style="margin:0 0 6px">Fiole bouchée, on la retourne au moins 15 fois pour que la concentration soit la même partout.</p>
+  <div class="btnrow">${bb('stop',F.stopper?'Déboucher la fiole':'Boucher la fiole',{p:F.stopper})}${bb('flip','Retourner la fiole ×1',{v:1})}${bb('flip','Retourner ×5',{v:5})}<span class="mut" aria-live="polite">${fl} / 15 retournements</span></div>
+  <div class="field"><label for="b-cm">Concentration en masse C<sub>m</sub> à écrire sur l’étiquette :</label><span class="inp"><input id="b-cm" inputmode="decimal" autocomplete="off" placeholder="?" value="${B.cmIn||''}"><span>${U}</span></span>${bb('label','Étiqueter',{cls:'pri'})}</div>`);
+}
+function sections(){
+ const D=B.kind==='diss',F=B.fl,L0=[secEpi()],epi=L0[0].done,out=[L0[0]];
+ if(!epi)return out;
+ if(D){out.push(secBal());if(B.bal.mRec!==null)out.push(secTransfer());}
+ else{out.push(secMother());if(B.mb.V>=Rmb())out.push(secPip());}
+ if(dissReady())out.push(secWater());
+ if(F.d>=1&&F.V>=0.5*B.Vf)out.push(secAdj());
+ if(F.adj)out.push(secFinish());
+ return out;
+}
+function bRender(){
+ const host=$('#bpanel');if(!host)return;
+ const a=document.activeElement,key=a&&a.dataset&&a.dataset.a?a.dataset.a+'|'+(a.dataset.v||''):null;
+ const cls={ok:'ok',ko:'ko',info:'info',warn:'info'};
+ let h=`<ol class="gestes" aria-label="Fiche de gestes">${gestes().map(g=>`<li class="${g.ok?'ok':''}"><span aria-hidden="true">${g.ok?'✓':'○'}</span> ${g.l}${g.ok?'<span class="sr"> (fait)</span>':''}</li>`).join('')}</ol>`;
+ h+=`<div class="fb ${B.msg?cls[B.msg.k]:''}" id="bfb" role="status" aria-live="polite">${B.msg?B.msg.h:''}</div>`;
+ if(B.fl.ruined){
+  h+=`<div class="sec cur"><p style="margin:0 0 8px"><b>Fiole à refaire.</b> On ne peut pas retirer du liquide d’une fiole jaugée : la solution est jetée dans le récipient de récupération.</p><div class="btnrow">${bb('redo','Recommencer la préparation',{cls:'pri'})}</div></div>`;
+ }else{
+  const S=sections(),cur=S.findIndex(s=>!s.done);
+  h+=S.map((s,i)=>s.done?`<div class="sec sdone"><span aria-hidden="true">✓</span> <b>${s.title}</b> · ${s.summary}</div>`:`<fieldset class="sec${i===cur?' cur':''}"><legend>${s.title}</legend>${s.html}</fieldset>`).join('');
+  if(B.fl.label)h+=`<div class="btnrow"><button type="button" class="btn pri" data-a="finish">Voir le bilan ▶</button></div>`;
+ }
+ host.innerHTML=h;
+ if(key){const p=key.split('|'),n=host.querySelector('[data-a="'+p[0]+'"]'+(p[1]?'[data-v="'+p[1]+'"]':'')+':not(:disabled)');if(n)n.focus();}
+ bScene();
+}
+
+/* ---- gestes : chaque action agit sur l'état, et la physique répond ---- */
+const BA={};
+BA.epi=v=>{B.epi[v]=!B.epi[v];bsay(B.epi.blouse&&B.epi.lunettes?'ok':'info',B.epi.blouse&&B.epi.lunettes?'<b>✓ Équipement de protection en place.</b> Tu peux commencer.':'Mets ta blouse et tes lunettes de protection avant de toucher au matériel.');};
+BA.eye=v=>{B.eye=v;bsay('info',v==='niveau'?'Œil à la hauteur du trait : les deux parties du trait se confondent en une ligne droite, tu peux juger si le ménisque est tangent.':'Œil '+(v==='haut'?'au-dessus':'en dessous')+' du trait : le trait apparaît en ellipse. À cause de la parallaxe, tu ne peux pas juger si le ménisque est tangent.');};
+
+/* balance */
+BA.balCup=()=>{const b=B.bal;b.cupOn=!b.cupOn;if(!b.cupOn){b.tare=0;b.tareOk=false;}bsay('info',b.cupOn?'Coupelle sur le plateau. Appuie sur T pour tarer : l’affichage doit revenir à 0,00 g.':'Coupelle retirée du plateau.');};
+BA.tare=()=>{const b=B.bal;if(!b.cupOn){bsay('info','Pose d’abord la coupelle sur le plateau.');return;}b.tare=r2(b.cup+b.solid);b.tareOk=b.solid===0;bsay(b.tareOk?'ok':'info',b.tareOk?'Tare faite avec la coupelle vide : l’affichage indique 0,00 g.':'Tare faite alors qu’il y a déjà du solide sur la coupelle : l’affichage ne donnera pas la masse du solide seul.');};
+function addSolid(x){const b=B.bal;
+ if(!b.cupOn){bErr('plateau','On ne dépose jamais un produit directement sur le plateau de la balance : il l’abîmerait et fausserait la pesée. Pose d’abord la coupelle, puis tare.');return;}
+ b.solid=r2(b.solid+x);bsay('info','Affichage : '+balTxt(balRead())+'.');}
+BA.spat=()=>addSolid(Math.max(0.05,r2(L.task.m*0.3*(0.7+Math.random()*0.6))));
+BA.pinch=()=>addSolid(Math.random()<0.5?0.01:0.02);
+BA.rem=()=>{const b=B.bal;if(!b.cupOn||b.solid<=0){bsay('info','Il n’y a rien à enlever.');return;}b.solid=Math.max(0,r2(b.solid-(Math.random()<0.5?0.01:0.02)));bsay('info','L’excès est jeté dans le récipient de récupération : on ne le remet <b>jamais</b> dans le flacon (risque de contamination). Affichage : '+balTxt(balRead())+'.');};
+BA.note=()=>{const b=B.bal,m=L.task.m,tol=Math.max(0.01,0.01*m);
+ if(!b.cupOn){bsay('info','Pose la coupelle sur le plateau et pèse le solide.');return;}
+ if(!b.tareOk){bErr('tare','La tare doit être faite avec la <b>coupelle vide</b>, avant d’ajouter le solide : sinon l’affichage n’est pas la masse du solide seul. Enlève tout le solide, tare de nouveau, puis recommence.');return;}
+ const x=r2(b.solid);
+ if(x<m-tol){bErr('pesee','Il manque du solide : la balance affiche '+balTxt(x)+' pour '+balTxt(m)+' visés. Ajoute du solide.');return;}
+ if(x>m+tol){bErr('pesee','Trop de solide : la balance affiche '+balTxt(x)+' pour '+balTxt(m)+' visés. Enlève un peu de solide.');return;}
+ b.mRec=x;bsay('ok','<b>✓ Masse notée : m = '+fmt(x)+' g.</b>'+(x===m?'':' Elle est proche de la valeur visée ('+fmt(m)+' g) : au laboratoire, on note la masse <b>réellement</b> pesée, pas celle qu’on visait.'));};
+
+/* transfert du solide */
+BA.funnel=()=>{const F=B.fl;if(F.stopper){bsay('info','Débouche d’abord la fiole.');return;}F.funnel=!F.funnel;
+ bsay('info',F.funnel?'Entonnoir à solide posé sur le col de la fiole.':(B.bal.poured&&!(B.bal.cupRinsed&&B.bal.funRinsed)?'Entonnoir retiré. <b>Attention</b> : il reste du solide sur l’entonnoir ou la coupelle si tu ne les as pas rincés.':'Entonnoir retiré.'));};
+BA.pourSolid=()=>{const b=B.bal,F=B.fl;
+ if(!F.funnel){bsay('info','Pose d’abord l’entonnoir à solide : le col de la fiole est trop étroit pour y verser directement.');return;}
+ const s=b.solid;b.cupRes=r3(s*0.04+0.004);b.funRes=r3(s*0.03+0.003);F.mIn=r3(s-b.cupRes-b.funRes);b.poured=true;b.cupOn=false;b.solid=0;
+ bsay('info','Le solide est dans la fiole, mais il en reste un peu sur la coupelle et sur l’entonnoir. Rince-les à la pissette au-dessus de la fiole : sinon la masse introduite sera inférieure à la masse pesée.');};
+BA.rinseCup=()=>{const b=B.bal,F=B.fl;if(!F.funnel){bsay('info','Rince au-dessus de l’entonnoir posé sur la fiole.');return;}
+ b.cupRinsed=true;F.mIn=r3(F.mIn+b.cupRes);b.cupRes=0;F.V=r3(F.V+0.02*B.Vf);bPour();bsay('ok','<b>✓ Coupelle rincée</b> : l’eau de rinçage entraîne le solide dans la fiole.');};
+BA.rinseFun=()=>{const b=B.bal,F=B.fl;if(!F.funnel){bsay('info','L’entonnoir doit être posé sur la fiole pour être rincé.');return;}
+ b.funRinsed=true;F.mIn=r3(F.mIn+b.funRes);b.funRes=0;F.V=r3(F.V+0.03*B.Vf);bPour();bsay('ok','<b>✓ Entonnoir rincé</b> : tout le solide est dans la fiole. Tu peux retirer l’entonnoir.');};
+
+/* fiole jaugée */
+function checkRuin(){const F=B.fl;if(F.V>B.Vf+TOLF&&!F.ruined){F.ruined=true;bErr('trait','Le niveau a <b>dépassé le trait de jauge</b> : le volume de la solution n’est plus '+fmt(B.Vf)+' mL, donc la concentration n’est plus celle visée. On ne peut pas retirer du liquide : il faut recommencer. Près du trait, on avance goutte à goutte.');}}
+BA.jet=v=>{const F=B.fl;
+ if(!dissReady()){bsay('info',B.kind==='diss'?'Introduis d’abord le solide dans la fiole.':'Verse d’abord dans la fiole la solution mère prélevée avec la pipette.');return;}
+ if(F.funnel){bsay('info','Retire l’entonnoir avant de verser l’eau.');return;}
+ if(F.stopper){bsay('info','Débouche la fiole pour ajouter de l’eau.');return;}
+ if(F.adj){bsay('info','Le volume est déjà ajusté au trait : n’ajoute plus d’eau.');return;}
+ const x=B.Vf*{long:0.2,court:0.05,filet:0.01}[v]*(0.75+Math.random()*0.5);
+ if(F.d<1&&F.V+x>0.9*B.Vf){bsay('info','Pas maintenant : la fiole serait presque pleine avant la dissolution. Agite d’abord la fiole bouchée pour '+(B.kind==='diss'?'dissoudre tout le solide':'mélanger')+', <b>puis</b> ajuste au trait.');return;}
+ F.V=r3(F.V+x);bPour();checkRuin();if(!F.ruined)bsay('info','Niveau '+fillTxt()+'.');};
+BA.drop=v=>{const F=B.fl,n=+v;
+ if(!dissReady()){bsay('info','Introduis d’abord le soluté dans la fiole.');return;}
+ if(F.d<1){bsay('info','Le volume ne s’ajuste qu’une fois '+(B.kind==='diss'?'tout le solide dissous':'les solutions mélangées')+' : agite d’abord la fiole bouchée.');return;}
+ if(F.funnel||F.stopper){bsay('info','Débouche la fiole (et retire l’entonnoir) pour ajouter de l’eau.');return;}
+ if(F.adj){bsay('info','Le volume est déjà ajusté : ne touche plus au niveau.');return;}
+ let x=0;for(let i=0;i<n;i++)x+=DROPV*(0.9+Math.random()*0.2);
+ F.V=r3(F.V+x);B.drop=true;checkRuin();if(!F.ruined)bsay('info','Pipette Pasteur : '+n+' goutte'+(n>1?'s':'')+' ajoutée'+(n>1?'s':'')+'.');};
+BA.stop=()=>{const F=B.fl;if(!F.stopper&&F.funnel){bsay('info','Retire l’entonnoir avant de boucher.');return;}F.stopper=!F.stopper;bsay('info',F.stopper?'Fiole bouchée.':'Fiole débouchée.');};
+BA.shake=()=>{const F=B.fl,D=B.kind==='diss';
+ if(!F.stopper){bErr('bouchon','Tu as agité la fiole <b>sans bouchon</b> : la solution gicle et du soluté est perdu. Bouche toujours la fiole avant de l’agiter ou de la retourner.');return;}
+ if(!dissReady()){bsay('info','Il n’y a encore rien à mélanger dans la fiole.');return;}
+ if(F.V<0.5*B.Vf){bsay('info','Il n’y a pas assez d’eau pour dissoudre : ajoute de l’eau jusqu’aux 2/3 de la fiole environ.');return;}
+ F.shaken++;F.d=D?Math.min(1,F.d+RATE[L.task.key]):1;bScene('shake');
+ bsay(F.d>=1?'ok':'info',F.d>=1?'<b>✓ '+(D?'Le solide est entièrement dissous.':'Les solutions sont mélangées.')+'</b> Tu peux maintenant ajuster le niveau au trait de jauge.':'Il reste du solide au fond : continue d’agiter.');};
+BA.heat=()=>bErr('chauffe','La verrerie jaugée ne se chauffe pas : la dilatation du verre et du liquide fausserait le volume (et la fiole pourrait se fissurer). On agite plutôt, fiole bouchée.');
+BA.adjOk=()=>{const F=B.fl;
+ if(B.eye!=='niveau'){bErr('parallaxe','Tu n’as pas l’œil à la hauteur du trait : à cause de la <b>parallaxe</b>, tu ne peux pas juger si le bas du ménisque est tangent. Place l’œil au niveau du trait.');return;}
+ if(F.V<B.Vf-TOLF){bsay('info','Le bas du ménisque est encore <b>sous</b> le trait. Ajoute de l’eau goutte à goutte avec la pipette Pasteur.');return;}
+ F.adj=true;bsay('ok','<b>✓ Ajustement réussi</b> : le bas du ménisque est tangent au trait de jauge. La solution fait bien '+fmt(B.Vf)+' mL.');};
+BA.flip=v=>{const F=B.fl;
+ if(!F.stopper){bErr('bouchon','Tu retournes la fiole <b>sans bouchon</b> : la solution s’écoule. Bouche-la d’abord.');return;}
+ F.flips+=+v;bScene('flip');bsay(F.flips>=15?'ok':'info',F.flips>=15?'<b>✓ Solution homogène</b> ('+F.flips+' retournements) : la concentration est la même en tout point.':F.flips+' retournement'+(F.flips>1?'s':'')+' : continue (au moins 15).');};
+BA.label=()=>{const F=B.fl,D=B.kind==='diss';
+ if(F.flips<15){bsay('info','Homogénéise d’abord la solution : au moins 15 retournements, fiole bouchée.');return;}
+ const x=parseNum(B.cmIn);if(isNaN(x)){bsay('info','Écris la concentration en masse de ta solution (la virgule est acceptée).');return;}
+ const ref=D?B.bal.mRec/(B.Vf/1000):L.task.Cm*L.task.Vm/L.task.Vf;
+ if(!near(x,ref,0.015)){bErr('etiquette','Ce n’est pas la bonne valeur. '+(D?'Calcule C<sub>m</sub> = m / V avec la masse que tu as <b>réellement</b> pesée ('+fmt(B.bal.mRec)+' g) et le volume de la fiole ('+fmt(B.Vf/1000)+' L).':'Utilise '+TF+' = '+TM+' × '+VM+' / '+VF+'.'));return;}
+ F.label=true;F.cm=x;bsay('ok','<b>✓ Fiole étiquetée</b> : « '+(D?L.task.solute.name:L.task.dye.name)+', C<sub>m</sub> = '+fmt(x)+' '+U+' ».');};
+BA.finish=()=>{labGo(4);};
+BA.redo=()=>{benchNew(true);bsay('info','On recommence : la solution ratée est jetée dans le récipient de récupération. Tu gardes ta blouse et tes lunettes.');};
+
+/* dilution : bécher, pipette jaugée, propipette (A, S, E) */
+BA.mbPour=v=>{B.mb.V=Math.min(50,r2(B.mb.V+(+v)*(0.85+Math.random()*0.3)));bsay('info','Bécher de prélèvement : environ '+Math.round(B.mb.V)+' mL de solution mère.'+(B.mb.V>=Rmb()?' C’est suffisant pour prélever.':' Il en faut encore un peu pour pouvoir y plonger la pipette.'));};
+BA.loc=v=>{const P=B.pi,F=B.fl;
+ if(v==='stock'){bErr('stock','Tu as plongé la pipette dans le <b>flacon</b> de solution mère : tu risques de le contaminer pour tous les autres utilisateurs. On verse d’abord un peu de solution dans un bécher.');return;}
+ if(v==='beaker'){P.loc='beaker';bsay('info','Pointe de la pipette dans la solution, sans toucher le fond du bécher.');return;}
+ if(v==='flask'){
+  if(P.vTr===null){bsay('info','Ajuste d’abord le ménisque au trait de jauge avant de transférer.');return;}
+  if(F.stopper||F.funnel){bsay('info','Débouche la fiole avant d’y vider la pipette.');return;}
+  P.loc='flask';bsay('info','Pointe contre la paroi de la fiole, pipette verticale. Appuie sur E pour laisser s’écouler.');return;}
+ if(P.draining&&!P.waited){P.eff*=0.992;F.mIn=r3(F.mIn*0.992);P.done=true;P.loc='rest';bErr('attente','Tu as retiré la pipette <b>trop tôt</b> : il faut attendre une quinzaine de secondes, pointe contre la paroi, pour que tout le liquide s’écoule. Un peu de solution est resté dans la pipette.');return;}
+ P.loc='rest';bsay('info','Pipette sortie du liquide.');};
+BA.piA=()=>{B.pi.bulb=true;bsay('info','Poire pressée, A appuyé : l’air est chassé de la poire. Pour aspirer, appuie maintenant sur S.');};
+BA.piS=()=>{const P=B.pi;
+ if(!P.bulb){bsay('info','Appuie d’abord sur <b>A</b> en pressant la poire, pour chasser l’air.');return;}
+ if(P.loc!=='beaker'){bsay('info','La pointe doit être plongée dans la solution du bécher pour aspirer.');return;}
+ P.v=r3(P.v+P.Vm*0.2*(0.8+Math.random()*0.4));
+ if(P.v>1.3*P.Vm){P.v=1.3*P.Vm;bErr('poire','Le liquide est monté dans la <b>propipette</b> : elle est contaminée. Arrête d’aspirer dès que le niveau dépasse un peu le trait de jauge.');return;}
+ bsay('info',P.v>=P.Vm?'Le liquide est au-dessus du trait de jauge. Ajuste maintenant avec E, à la loupe.':'Continue d’aspirer (S) jusqu’un peu au-dessus du trait de jauge.');};
+BA.piRinse=()=>{const P=B.pi;
+ if(!P.bulb){bsay('info','Appuie d’abord sur <b>A</b> en pressant la poire.');return;}
+ if(P.loc!=='beaker'){bsay('info','Plonge d’abord la pointe dans le bécher de solution mère.');return;}
+ P.rinsed=true;P.bulb=false;bsay('ok','<b>✓ Pipette rincée</b> : tu as aspiré un peu de solution mère, mouillé toutes les parois, puis vidé le liquide dans le bécher de récupération. Appuie sur A pour reprendre.');};
+BA.piE=v=>{const P=B.pi;
+ if(P.vTr!==null){bsay('info','Le volume est déjà ajusté.');return;}
+ if(P.v<=0){bsay('info','La pipette est vide : aspire d’abord avec S.');return;}
+ P.v=Math.max(0,r3(P.v-{fast:0.05,mid:0.01,fine:0.003}[v]*P.Vm*(0.9+Math.random()*0.2)));
+ bsay('info','E : un peu de liquide s’écoule. Regarde le ménisque à la loupe.');};
+BA.piOk=()=>{const P=B.pi;
+ if(P.v<=0){bsay('info','Aspire d’abord de la solution avec S.');return;}
+ if(B.eye!=='niveau'){bErr('parallaxe','Tu n’as pas l’œil à la hauteur du trait : à cause de la <b>parallaxe</b>, tu ne peux pas juger si le bas du ménisque est tangent. Place l’œil au niveau du trait.');return;}
+ const d=P.v-P.Vm,tol=0.004*P.Vm;
+ if(d>tol){bsay('info','Le bas du ménisque est encore <b>au-dessus</b> du trait de jauge : laisse s’écouler un peu (E).');return;}
+ if(d<-tol){bsay('info','Le niveau est passé <b>sous</b> le trait : aspire de nouveau un peu (S), puis ajuste plus doucement.');return;}
+ P.vTr=P.v;P.eff=P.rinsed?1:0.97;
+ if(P.rinsed)bsay('ok','<b>✓ Ménisque tangent au trait</b> : la pipette contient exactement '+fmt(P.Vm)+' mL.');
+ else bErr('rincage','Le ménisque est bien au trait, mais la pipette n’avait <b>pas été rincée</b> avec la solution mère : les gouttes d’eau restées sur les parois diluent un peu le prélèvement (la concentration obtenue sera trop faible).');};
+BA.piEmpty=()=>{const P=B.pi,F=B.fl;
+ if(P.vTr===null){bsay('info','Ajuste d’abord le ménisque au trait.');return;}
+ if(P.loc!=='flask'){bsay('info','Place d’abord la pointe contre la paroi de la fiole.');return;}
+ F.V=r3(F.V+P.vTr);F.mIn=r3(L.task.Cm*P.vTr/1000*P.eff);P.v=0;P.draining=true;
+ bsay('info','Le liquide s’écoule dans la fiole. Garde la pointe contre la paroi et attends une quinzaine de secondes : la dernière goutte fait partie du volume prévu.');};
+BA.piWait=()=>{const P=B.pi;P.waited=true;P.done=true;P.loc='rest';P.bulb=false;bsay('ok','<b>✓ Transfert terminé</b> : la pipette a été vidée sans souffler. Tu peux ajouter l’eau distillée.');};
+BA.piBlow=()=>bErr('souffle','On ne souffle pas dans une pipette jaugée : elle est étalonnée pour s’écouler librement, et la goutte restée dans la pointe fait partie du volume prévu.');
+
+/* ---- phase 3 : mise en place ---- */
+function labMan(){
+ benchNew(false);
+ labHost.innerHTML=`${mission()}<div id="bench"><p class="mut" style="margin:0 0 8px">Tu es à la paillasse : <b>agis sur le matériel</b>, dans l’ordre du protocole. Le schéma à gauche montre ce que tu fais ; les erreurs ont des conséquences sur ta solution.</p><div id="bpanel"></div></div>`;
+ const bench=$('#bench');
+ bench.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=BA[b.dataset.a];if(f){f(b.dataset.v);bRender();}});
+ bench.addEventListener('input',e=>{if(e.target.id==='b-cm')B.cmIn=e.target.value;});
+ bench.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='b-cm'){BA.label();bRender();}});
+ $('#lab-cap').textContent='';
+ bRender();
 }
 
 /* --- phase 4 : bilan --- */
 function labBilan(){
- const t=L.task,e=L.errs,tot=e.calc+e.mat+e.man,st=tot<=1?'★★★':tot<=4?'★★☆':'★☆☆';
+ const t=L.task,e=L.errs,F=B.fl,tot=e.calc+e.mat+e.man,st=tot<=1?'★★★':tot<=4?'★★☆':'★☆☆';
+ const CAUSES={plateau:'produit posé sur le plateau',tare:'tare mal faite',pesee:'pesée hors tolérance',bouchon:'fiole agitée ou retournée sans bouchon',chauffe:'verrerie jaugée chauffée',trait:'trait de jauge dépassé',parallaxe:'œil mal placé (parallaxe)',etiquette:'concentration mal calculée',stock:'pipette plongée dans le flacon',poire:'liquide dans la propipette',attente:'pipette retirée trop tôt',rincage:'pipette non rincée',souffle:'souffle dans la pipette jaugée'};
+ const sins=Object.keys(B.sins).map(k=>`${CAUSES[k]||k}${B.sins[k]>1?' ×'+B.sins[k]:''}`);
  let res='',sw='';
  if(L.kind==='diss'){
-  res=`<p style="margin:6px 0">Tu as pesé <b>${fmt(t.m)} g</b> de ${t.solute.name} pour obtenir <b>${fmt(t.V)} mL</b> de solution :<br>C<sub>m</sub> = m / V = ${fmt(t.m)} g / ${fmt(t.V/1000)} L = <b>${fmt(t.t)} ${U}</b> ✓</p>`;
+  const m=B.bal.mRec,real=F.mIn/(B.Vf/1000),ecart=(real-t.t)/t.t*100;
+  res=`<p style="margin:6px 0">Masse notée : <b>${fmt(m)} g</b> de ${t.solute.name} (visée : ${fmt(t.m)} g) pour <b>${fmt(t.V)} mL</b> de solution.<br>C<sub>m</sub> = m / V = ${fmt(m)} g / ${fmt(t.V/1000)} L = <b>${fmt(F.cm)} ${U}</b> (visée : ${fmt(t.t)} ${U}) ✓</p>
+  <p class="mut" style="margin:4px 0">Concentration réellement obtenue : ${fmt(Math.round(real*10)/10)} ${U}, soit un écart de ${fmt(Math.round(Math.abs(ecart)*10)/10)} % avec la valeur visée${Math.abs(ecart)>1?' (du solide est resté sur le matériel ou la pesée est approximative)':''}.</p>`;
   prog.labDiss=true;
  }else{
-  const op=c=>clamp(0.92*Math.sqrt(c/t.Cm),0.07,0.95);
-  sw=`<span class="sw"><i style="background:${t.dye.color};opacity:.92"></i>mère<br>${fmt(t.Cm)} ${U}</span><span class="sw">→</span><span class="sw"><i style="background:${t.dye.color};opacity:${op(t.Cf)}"></i>fille<br>${fmt(t.Cf)} ${U}</span>`;
-  res=`<p style="margin:6px 0">Tu as prélevé <b>${fmt(t.Vm)} mL</b> de solution mère et complété à <b>${fmt(t.Vf)} mL</b> :<br>${TF} = ${TM} × ${VM} / ${VF} = ${fmt(t.Cm)} × ${fmt(t.Vm)} / ${fmt(t.Vf)} = <b>${fmt(t.Cf)} ${U}</b> ✓<br>La solution a été diluée <b>${fmt(t.F)} fois</b> : elle est ${fmt(t.F)} fois moins concentrée.</p>${sw}`;
+  const op=c=>clamp(0.92*Math.sqrt(c/t.Cm),0.07,0.95),real=F.mIn/(t.Vf/1000),ecart=(real-t.Cf)/t.Cf*100;
+  sw=`<span class="sw"><i style="background:${t.dye.color};opacity:.92"></i>mère<br>${fmt(t.Cm)} ${U}</span><span class="sw">→</span><span class="sw"><i style="background:${t.dye.color};opacity:${op(real)}"></i>fille<br>${fmt(Math.round(real*100)/100)} ${U}</span>`;
+  res=`<p style="margin:6px 0">Tu as prélevé <b>${fmt(t.Vm)} mL</b> de solution mère et complété à <b>${fmt(t.Vf)} mL</b> :<br>${TF} = ${TM} × ${VM} / ${VF} = ${fmt(t.Cm)} × ${fmt(t.Vm)} / ${fmt(t.Vf)} = <b>${fmt(t.Cf)} ${U}</b> ✓<br>La solution a été diluée <b>${fmt(t.F)} fois</b>.</p>
+  <p class="mut" style="margin:4px 0">Concentration réellement obtenue : ${fmt(Math.round(real*100)/100)} ${U}, soit un écart de ${fmt(Math.round(Math.abs(ecart)*10)/10)} % avec la valeur visée.</p>${sw}`;
   prog.labDil=true;
  }
  saveProg();
+ const ge=gestes().map(g=>`<li>${g.ok?'✓':'✗'} ${g.l}</li>`).join('');
  labHost.innerHTML=`${mission()}<div class="kick">Bilan</div><div class="stars" aria-label="${st.split('★').length-1} étoiles sur 3">${st}</div>${res}
+ <ul class="gestes" aria-label="Gestes réalisés" style="list-style:none">${ge}</ul>
+ ${sins.length?`<p class="mut" style="margin:4px 0"><b>Erreurs de manipulation :</b> ${sins.join(' ; ')}.${B.redo?' Préparation recommencée '+B.redo+' fois.':''}</p>`:''}
  <table class="tbl2" style="margin:8px 0"><tr><th>Phase</th><th>Erreurs</th></tr><tr><td>Calculs</td><td>${e.calc}</td></tr><tr><td>Matériel</td><td>${e.mat}</td></tr><tr><td>Manipulation</td><td>${e.man}</td></tr></table>
  <div class="btnrow"><button class="btn pri" id="again">Nouvelle situation ▶</button></div>`;
  $('#again').onclick=labNew;
@@ -715,7 +1049,7 @@ function showTab(t){
 }
 $$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.t)));
 refreshGoals();protoSwitch('diss');exNew();labNew();
-window.__sdd={L,prog,CX,PT};
+window.__sdd={L,prog,CX,PT,get B(){return B;},BA,bRender,labGo};
 </script>
 </body>
 </html>
