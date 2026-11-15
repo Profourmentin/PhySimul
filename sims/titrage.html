@@ -90,8 +90,15 @@ sup, sub { line-height: 0; }
 .stage svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
 .stage text { font-family: var(--font-data); fill: var(--stage-ink); }
 .bench { fill: #2A3944; }
-.glass { fill: rgba(255,255,255,.05); stroke: #B9CBD6; stroke-width: 1.6; stroke-linejoin: round; }
-.metal { fill: #8EA2AF; stroke: #5E7280; stroke-width: 1; }
+.glass { fill: url(#gGlass); stroke: #B9CBD6; stroke-width: 1.6; stroke-linejoin: round; }
+.metal { fill: url(#gMetalV); stroke: #5E7280; stroke-width: 1; }
+.rod { fill: url(#gMetal); stroke: #5E7280; stroke-width: 1; }
+.rim { fill: none; stroke: #B9CBD6; stroke-width: 1.4; }
+.shade { fill: url(#gLiqShade); pointer-events: none; }
+/* léger effet de profondeur : les objets de premier plan suivent le pointeur un peu plus que le fond */
+.l-back { transform: translate(calc(var(--px, 0) * -3px), calc(var(--py, 0) * -1px)); transition: transform .25s ease-out; }
+.l-front { transform: translate(calc(var(--px, 0) * 12px), calc(var(--py, 0) * 3px)); transition: transform .25s ease-out; }
+@media (prefers-reduced-motion: reduce) { .l-back, .l-front { transform: none; transition: none; } }
 .dark { fill: #2B3944; stroke: #1A252D; }
 .tickline { stroke: #B9CBD6; stroke-width: 1; }
 .halo { paint-order: stroke; stroke: var(--stage-a); stroke-width: 3px; stroke-linejoin: round; }
@@ -211,8 +218,15 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 30px; ma
 .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 0; padding: 0; list-style: none; }
 .legend svg { width: 34px; height: 10px; vertical-align: middle; margin-right: 6px; }
 .res { font-size: 18px; }
-.pipette { display: flex; gap: 14px; align-items: center; }
-.pipette svg { width: 80px; flex: 0 0 auto; }
+.pipette { display: flex; gap: 14px; align-items: flex-start; }
+.pipette > svg { width: 80px; flex: 0 0 auto; position: sticky; top: 10px; }
+/* Gestes de paillasse : position de l'œil, loupe */
+.eyes { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.eyes button { font-size: 13px; padding: 6px 10px; min-height: 36px; }
+.eyes button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.zoomwrap { display: grid; grid-template-columns: minmax(120px, 170px) 1fr; gap: 10px; align-items: start; width: 100%; }
+.zoom { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; display: block; background: var(--bg); }
+@media (max-width: 560px) { .zoomwrap { grid-template-columns: 1fr; } .zoom { max-width: 220px; } }
 hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
 details { color: var(--muted); font-size: 14px; }
 details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
@@ -239,12 +253,20 @@ footer { color: var(--muted); font-size: 13px; }
           <defs>
             <clipPath id="clipErlen"><path d="M262 410V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V410Z"/></clipPath>
             <clipPath id="clipBecher"><path d="M214 420V528Q214 538 224 538H336Q346 538 346 528V420Z"/></clipPath>
+            <linearGradient id="gGlass" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".30"/><stop offset=".16" stop-color="#fff" stop-opacity=".08"/><stop offset=".6" stop-color="#fff" stop-opacity=".02"/><stop offset=".9" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".24"/></linearGradient>
+            <linearGradient id="gMetal" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6E8290"/><stop offset=".35" stop-color="#CBD8E0"/><stop offset="1" stop-color="#5E7280"/></linearGradient>
+            <linearGradient id="gMetalV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#B4C4CE"/><stop offset="1" stop-color="#788C99"/></linearGradient>
+            <linearGradient id="gBench" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3D505D"/><stop offset="1" stop-color="#202B33"/></linearGradient>
+            <linearGradient id="gLiqShade" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".3" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>
+            <radialGradient id="gShadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
           </defs>
-          <rect class="bench" x="0" y="600" width="560" height="20"/>
+          <rect class="bench" x="0" y="574" width="560" height="46" fill="url(#gBench)"/>
+          <line x1="0" y1="574.5" x2="560" y2="574.5" stroke="#6A808F" stroke-width="1" opacity=".6"/>
           <g id="gAll">
-            <g id="gStand">
+            <g id="gStand" class="l-back">
+              <ellipse cx="135" cy="602" rx="92" ry="8" fill="url(#gShadow)"/>
               <rect class="metal" x="60" y="588" width="150" height="12" rx="3"/>
-              <rect class="metal" x="126" y="20" width="9" height="568"/>
+              <rect class="rod" x="126" y="20" width="9" height="568"/>
               <rect class="metal" x="120" y="140" width="21" height="22" rx="3"/>
               <rect class="metal" x="141" y="146" width="128" height="9"/>
               <rect class="metal" x="262" y="136" width="34" height="28" rx="5"/>
@@ -255,6 +277,8 @@ footer { color: var(--muted); font-size: 13px; }
               <polygon class="glass" points="271,344 289,344 283,352 277,352"/>
               <g id="ticks"></g>
               <rect id="buLiq" x="273" y="90" width="14" height="0"/>
+              <rect id="buShade" class="shade" x="273" y="90" width="14" height="0"/>
+              <ellipse class="rim" cx="280" cy="38" rx="9" ry="2.4"/>
               <rect id="tipLiq" x="278" y="344" width="4" height="0"/>
               <ellipse id="bubble" cx="280" cy="372" rx="2.4" ry="3.6" fill="#EAF2F6" opacity="0"/>
               <rect class="metal" x="266" y="352" width="28" height="10" rx="2"/>
@@ -263,8 +287,10 @@ footer { color: var(--muted); font-size: 13px; }
               <path id="meniscus" d="" fill="none" stroke="#EAF2F6" stroke-width="1.4"/>
             </g>
             <g id="gStirrer">
+              <ellipse cx="280" cy="604" rx="118" ry="9" fill="url(#gShadow)"/>
               <rect class="dark" x="190" y="556" width="180" height="44" rx="6"/>
               <rect x="180" y="540" width="200" height="16" rx="3" fill="#3A4A55" stroke="#1A252D"/>
+              <ellipse cx="280" cy="540" rx="100" ry="7" fill="#4A5D6B" stroke="#1A252D"/>
               <circle cx="345" cy="580" r="11" fill="#55697A" stroke="#1A252D"/>
               <line id="knobPtr" x1="345" y1="580" x2="345" y2="571" stroke="#EAF2F6" stroke-width="2" stroke-linecap="round"/>
               <circle id="led" cx="215" cy="580" r="3.5" fill="#33423D"/>
@@ -273,10 +299,52 @@ footer { color: var(--muted); font-size: 13px; }
               <rect x="196" y="402" width="168" height="136" rx="6" fill="#FFFFFF" opacity=".93"/>
               <rect x="176" y="538" width="208" height="3" fill="#FFFFFF"/>
             </g>
+            <g id="gWaste">
+              <ellipse cx="280" cy="540" rx="46" ry="6" fill="url(#gShadow)"/>
+              <rect id="wLiq" x="247" y="520" width="66" height="0" fill="rgb(160,150,175)" fill-opacity=".5"/>
+              <rect id="wShade" class="shade" x="247" y="520" width="66" height="0"/>
+              <path d="M247 450V528Q247 538 257 538H303Q313 538 313 528V450Z" fill="url(#gGlass)"/>
+              <path d="M242 450H252M247 450V528Q247 538 257 538H303Q313 538 313 528V450M308 450H318" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+              <ellipse class="rim" cx="280" cy="450" rx="33" ry="5"/>
+              <text x="280" y="566" text-anchor="middle" style="font-size:11px">récupération</text>
+            </g>
+            <g id="gFunnel">
+              <path d="M256 10H304L287 34V44H273V34Z" fill="url(#gGlass)"/>
+              <path d="M256 10H304L287 34V44H273V34Z" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+              <ellipse class="rim" cx="280" cy="10" rx="24" ry="4"/>
+            </g>
+            <g id="gBeak" class="l-front">
+              <ellipse cx="440" cy="600" rx="40" ry="6" fill="url(#gShadow)"/>
+              <rect id="bkLiq" x="413" y="560" width="54" height="0" fill="rgb(196,224,190)" fill-opacity=".6"/>
+              <rect id="bkShade" class="shade" x="413" y="560" width="54" height="0"/>
+              <path d="M412 530V590Q412 598 420 598H460Q468 598 468 590V530Z" fill="url(#gGlass)"/>
+              <path d="M408 530H418M412 530V590Q412 598 420 598H460Q468 598 468 590V530M462 530H472" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+              <ellipse class="rim" cx="440" cy="530" rx="28" ry="4"/>
+              <text x="440" y="616" text-anchor="middle" style="font-size:11px">à titrer</text>
+            </g>
+            <g id="gPiss" class="l-front">
+              <ellipse cx="516" cy="600" rx="26" ry="5" fill="url(#gShadow)"/>
+              <path d="M498 566Q498 560 506 560H526Q534 560 534 566V590Q534 598 526 598H506Q498 598 498 590Z" fill="url(#gGlass)"/>
+              <path d="M498 566Q498 560 506 560H526Q534 560 534 566V590Q534 598 526 598H506Q498 598 498 590Z" fill="none" stroke="#B9CBD6" stroke-width="1.8"/>
+              <path d="M512 560V548L526 538" fill="none" stroke="#B9CBD6" stroke-width="3" stroke-linecap="round"/>
+              <text x="516" y="616" text-anchor="middle" style="font-size:11px">eau dist.</text>
+            </g>
             <g id="gFlask">
               <rect id="fLiq" x="190" y="500" width="180" height="40" fill="rgb(196,224,190)" fill-opacity=".3"/>
-              <path id="glassErlen" d="M258 408H302M262 408V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V408" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
-              <path id="glassBecher" d="M208 418H220M214 418V528Q214 538 224 538H336Q346 538 346 528V418M340 418H352" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+              <rect id="fShade" class="shade" x="190" y="500" width="180" height="0"/>
+              <ellipse id="fSurf" cx="280" cy="500" rx="30" ry="6" fill="rgb(196,224,190)" fill-opacity=".5" stroke="#fff" stroke-opacity=".3"/>
+              <g id="glassErlen">
+                <path d="M262 408V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V408Z" fill="url(#gGlass)"/>
+                <path d="M258 408H302M262 408V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V408" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+                <ellipse class="rim" cx="280" cy="408" rx="21" ry="4"/>
+                <path d="M226 538Q280 548 334 538" fill="none" stroke="#B9CBD6" stroke-width="1" opacity=".45"/>
+              </g>
+              <g id="glassBecher">
+                <path d="M214 418V528Q214 538 224 538H336Q346 538 346 528V418Z" fill="url(#gGlass)"/>
+                <path d="M208 418H220M214 418V528Q214 538 224 538H336Q346 538 346 528V418M340 418H352" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
+                <ellipse class="rim" cx="280" cy="418" rx="66" ry="7"/>
+                <path d="M226 538Q280 548 334 538" fill="none" stroke="#B9CBD6" stroke-width="1" opacity=".45"/>
+              </g>
               <ellipse id="bar" cx="280" cy="533" rx="14" ry="3.2" fill="#F4F7F9" stroke="#8EA2AF"/>
               <line id="stream" x1="280" y1="387" x2="280" y2="500" stroke="#9B2FB0"/>
               <circle id="drop" cx="280" cy="392" r="3.2" fill="#9B2FB0"/>
@@ -311,6 +379,7 @@ footer { color: var(--muted); font-size: 13px; }
       <li>Titrant : permanganate de potassium, c₂ = 2,00×10⁻² mol·L⁻¹. Solution titrée : sulfate de fer (II) acidifié, V₁ = 10,0 mL. La concentration c₁ est tirée au hasard à chaque séance.</li>
       <li>Une goutte vaut 0,05 mL en moyenne, avec une petite dispersion. La pipette jaugée a une tolérance de ± 0,02 mL.</li>
       <li>La couleur est calculée à partir de la concentration en ions permanganate en excès (loi de Beer-Lambert). Sans papier blanc, la couleur est vue un peu plus tard.</li>
+      <li>Gestes : une burette non rincée avec le titrant ou une pipette non rincée avec la solution à titrer diluent de 3 % environ. Un ménisque n'est validé que si l'œil est à la hauteur du trait (parallaxe). Le volume d'une demi-goutte rincée à la pissette ajoute un peu d'eau, sans changer les quantités de matière.</li>
       <li>L'incertitude-type calculée est celle de répétabilité : u(V<sub>E</sub>) = s / √n. Elle ne détecte pas une erreur systématique (bulle d'air, par exemple).</li>
     </ul>
   </details>
@@ -351,15 +420,18 @@ footer { color: var(--muted); font-size: 13px; }
 
   /* ---------- état ---------- */
   var S;
+  function newFlask() { return { has: false, bar: false, placed: false, Vs: V1N, thr: 1, poured: 0, w: 0, kp: 1, washed: false }; }
+  function r3(x) { return Math.round(x * 1000) / 1000; }
   function newSession() {
     S = {
       step: 0, maxStep: 0, done: [],
       c1: Math.round(rnd(0.050, 0.120) * 1000) / 1000,     // concentration cachée, mol/L
       form: {}, eq: { res: {}, done: false },
       picks: {}, matOK: false, matBad: {},
-      bu: { rW: false, rT: false, filled: false, level: 0, bubble: false, checked: false, purged: false, zeroOK: false, anim: null },
-      pi: { rW: false, rS: false, up: false, adj: false, anim: null },
-      flask: { has: false, bar: false, Vs: 10, thr: 1, poured: 0 },
+      bu: { rW: false, rT: 0, filled: false, level: 0, bubble: false, checked: false, purged: false, zeroOK: false, anim: null, fun: false, pend: null, eff: 1 },
+      pi: { rW: false, rS: false, bV: 0, loc: "rest", bulb: false, v: 0, vTr: null, kp: 1, draining: false, waited: false, done: false, anim: null },
+      flask: newFlask(),
+      eye: Math.random() < 0.5 ? "haut" : "bas", sins: {}, waste: 0, firstSample: true,
       stir: 0, paper: false, aide: false,
       rapid: { rows: [], zone: null },
       pr: { reading: false, recorded: false, runs: [] },
@@ -370,8 +442,9 @@ footer { color: var(--muted); font-size: 13px; }
 
   /* ---------- modèle chimique ---------- */
   // Réaction : 5 Fe2+ + MnO4- + 8 H+ -> 5 Fe3+ + Mn2+ + 4 H2O   (volumes en mL, concentrations en mol/L, quantités en mmol)
-  function chem(liq, Vs) {
-    var n1 = S.c1 * Vs, nA = C2 * liq, xmax = n1 / 5, x = Math.min(nA, xmax), nMn = nA - x, Vt = Vs + liq;
+  function chem(liq, Vs, k) {
+    k = k || {};   // k.p : dilution de la prise d'essai ; k.b : dilution du titrant ; k.w : eau ajoutée (mL)
+    var n1 = S.c1 * Vs * (k.p || 1), nA = C2 * (k.b || 1) * liq, xmax = n1 / 5, x = Math.min(nA, xmax), nMn = nA - x, Vt = Vs + liq + (k.w || 0);
     var conc = nMn / Vt;
     return {
       n1: n1, nA: nA, xmax: xmax, x: x, nFe2: n1 - 5 * x, nMn: nMn, nFe3: 5 * x, nMn2: x, Vt: Vt, conc: conc,
@@ -383,7 +456,7 @@ footer { color: var(--muted); font-size: 13px; }
   function mix() {
     var f = S.flask; if (!f.has) return null;
     var liq = Math.max(0, f.poured - (S.bu.bubble ? BUB : 0));
-    var m = chem(liq, f.Vs);
+    var m = chem(liq, f.Vs, { p: f.kp, b: S.bu.eff, w: f.w });
     m.liq = liq;
     m.persist = m.alpha >= (S.paper ? 0.08 : 0.16) * f.thr;
     return m;
@@ -400,6 +473,7 @@ footer { color: var(--muted); font-size: 13px; }
 
   /* ---------- messages ---------- */
   function say(kind, html) { S.msg = { k: kind, h: html }; renderMsg(); }
+  function sin(key, html) { S.sins[key] = (S.sins[key] || 0) + 1; say("err", html); }
   function renderMsg() {
     $("msg").innerHTML = S.msg ? '<p class="msg ' + S.msg.k + '"><span class="sr">' + ({ ok: "Bravo. ", err: "Erreur. ", warn: "Attention. ", info: "Info. " })[S.msg.k] + '</span><span>' + S.msg.h + '</span></p>' : "";
   }
@@ -429,12 +503,38 @@ footer { color: var(--muted); font-size: 13px; }
       '<label class="check"><input type="checkbox" data-act="aide"' + (S.aide ? " checked" : "") + '> Aide : afficher le volume lu</label></div>';
   }
 
+  var EYES = [["haut", "Œil au-dessus"], ["niveau", "Œil à la hauteur"], ["bas", "Œil en dessous"]];
+  function eyesHtml() {
+    return '<div class="eyes" role="group" aria-label="Position de l\'œil">' + EYES.map(function (e) { return btn("eye", e[1], { val: e[0], pressed: S.eye === e[0] }); }).join("") + '</div>';
+  }
+  function zoomSvg(dMm, eye, title, col, op) {
+    var big = Math.abs(dMm) > 10, px = big ? 3 : 9, lim = big ? 33 : 10, x1 = 100, x2 = 150, y0 = 100, ry = 14, hw = 25;
+    var pos = Math.abs(dMm) > lim ? (dMm < 0 ? "Le niveau est en dessous du trait, hors de la loupe." : "Le niveau est au-dessus du trait, hors de la loupe.") : (Math.abs(dMm) < 0.4 ? "Le bas du ménisque est au niveau du trait." : (dMm < 0 ? "Le bas du ménisque est sous le trait." : "Le bas du ménisque est au-dessus du trait."));
+    var t = '<svg class="zoom" viewBox="0 0 250 200" role="img" aria-label="Loupe sur ' + title + '. ' + pos + ' ' + (eye === "niveau" ? "Œil à la hauteur du trait." : "Œil " + (eye === "haut" ? "au-dessus" : "en dessous") + " du trait : le trait apparaît en ellipse.") + '">';
+    if (Math.abs(dMm) <= lim) {
+      var yl = y0 - dMm * px;
+      t += '<path d="M' + x1 + ' ' + (yl - 7) + ' Q125 ' + (yl + 9) + ' ' + x2 + ' ' + (yl - 7) + ' V200 H' + x1 + ' Z" fill="' + col + '" opacity="' + op + '"/>';
+      t += '<path d="M' + x1 + ' ' + (yl - 7) + ' Q125 ' + (yl + 9) + ' ' + x2 + ' ' + (yl - 7) + '" fill="none" stroke="var(--ink)" stroke-width="1.6"/>';
+    } else {
+      t += '<text x="125" y="' + (dMm < 0 ? 172 : 34) + '" text-anchor="middle" style="font-size:12px;fill:var(--muted)">' + (dMm < 0 ? "↓ le niveau est plus bas" : "↑ le niveau est plus haut") + '</text>';
+      if (dMm < 0) t += '<path d="M' + x1 + ' 192 L' + x2 + ' 192" stroke="' + col + '" stroke-width="6" opacity="' + op + '"/>';
+    }
+    t += '<line x1="' + x1 + '" y1="0" x2="' + x1 + '" y2="200" stroke="var(--muted)" stroke-width="3"/><line x1="' + x2 + '" y1="0" x2="' + x2 + '" y2="200" stroke="var(--muted)" stroke-width="3"/>';
+    if (eye === "niveau") t += '<line x1="' + x1 + '" y1="' + y0 + '" x2="' + x2 + '" y2="' + y0 + '" stroke="#C0392B" stroke-width="2.5"/>';
+    else {
+      var front = eye === "haut" ? 0 : 1, back = 1 - front;
+      t += '<path d="M' + x1 + ' ' + y0 + ' A' + hw + ' ' + ry + ' 0 0 ' + back + ' ' + x2 + ' ' + y0 + '" fill="none" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>';
+      t += '<path d="M' + x1 + ' ' + y0 + ' A' + hw + ' ' + ry + ' 0 0 ' + front + ' ' + x2 + ' ' + y0 + '" fill="none" stroke="#C0392B" stroke-width="2.5"/>';
+    }
+    return t + '<text x="8" y="16" style="font-size:11px;fill:var(--muted)">trait de jauge</text><text x="242" y="16" text-anchor="end" style="font-size:11px;fill:var(--muted)">loupe ×' + (big ? "3" : "9") + '</text></svg>';
+  }
+
   /* ---------- commande de remise à zéro (burette) ---------- */
   function zeroBlock() {
     var b = S.bu;
     if (b.zeroOK) return "";
     if (b.level > 0.05) return btn("buRefill", "Remplir la burette au-dessus du zéro", { cls: "primary" });
-    return btn("drain", "Laisser couler 1 mL", { val: "1" }) + btn("drain", "0,1 mL", { val: "0.1" }) + btn("drain", "1 goutte", { val: "d" }) +
+    return eyesHtml() + btn("drain", "Laisser couler 1 mL", { val: "1" }) + btn("drain", "0,1 mL", { val: "0.1" }) + btn("drain", "1 goutte", { val: "d" }) +
       btn("buRefill", "Remplir un peu", { dis: b.level < -4.4 }) + btn("buZero", "Valider le zéro", { cls: "primary" });
   }
 
@@ -503,50 +603,73 @@ footer { color: var(--muted); font-size: 13px; }
   }
 
   function panelBurette() {
-    var b = S.bu, flags = [b.rW, b.rT, b.filled, b.checked, b.zeroOK], cur = firstCur(flags);
-    var l = '<p class="lead">Prépare la burette dans l\'ordre. Chaque geste a une raison.</p><ol class="tasks">';
-    l += task(1, b.rW, cur === 0, "Rince la burette à l'eau distillée.", "Pour nettoyer la verrerie.", btn("buRW", "Rincer à l'eau distillée", { dis: b.rW }));
-    l += task(2, b.rT, cur === 1, "Rince la burette avec la solution titrante.", "Il reste de l'eau sur les parois. Sans ce rinçage, la solution serait diluée.", btn("buRT", "Rincer avec le permanganate", { dis: !b.rW || b.rT }));
-    l += task(3, b.filled, cur === 2, "Remplis la burette au-dessus du zéro.", "On remplit un peu trop. On ajustera ensuite.", btn("buFill", "Remplir la burette", { dis: !b.rT || b.filled }));
+    var b = S.bu, bubOK = b.checked && !(b.bubble && !b.purged);
+    var flags = [b.fun || b.filled, b.rW || b.filled, b.rT >= 1 || b.filled, b.filled, b.filled && !b.fun, bubOK, b.zeroOK], cur = firstCur(flags);
+    var l = '<p class="lead">Prépare la burette comme au laboratoire. Chaque geste a une raison, et un oubli a une conséquence.</p><ol class="tasks">';
+    l += task(1, b.fun || b.filled, cur === 0, "Pose le bécher de récupération sous la burette, puis l'entonnoir à liquide sur la burette.", "L'entonnoir évite de renverser du liquide. Le bécher recueille les rinçages.", btn("buFun", "Poser l'entonnoir à liquide", { dis: b.fun || b.filled }));
+    l += task(2, b.rW, cur === 1, "Rince la burette à l'eau distillée.", "Pour nettoyer la verrerie : on verse environ 5 mL, on fait rouler la burette, puis on vide par le robinet.",
+      btn("buPour", "Verser ≈ 5 mL d'eau distillée", { val: "eau", dis: !b.fun || !!b.pend || b.filled }) + btn("buRinse", "Faire rouler et vider par le robinet", { dis: b.pend !== "eau" }));
+    l += task(3, b.rT >= 1, cur === 2, "Rince la burette avec le permanganate.", "Il reste de l'eau sur les parois. Sans ce rinçage, la solution serait diluée." + (b.rT ? " Rinçages faits : " + b.rT + "." : ""),
+      btn("buPour", "Verser ≈ 5 mL de permanganate", { val: "titrant", dis: !b.fun || !!b.pend || b.filled }) + btn("buRinse", "Faire rouler et vider par le robinet", { dis: b.pend !== "titrant" }));
+    l += task(4, b.filled, cur === 3, "Remplis la burette au-dessus du zéro.", "On remplit un peu trop. On ajustera ensuite.", btn("buFill", "Remplir la burette", { dis: !b.fun || !!b.pend || b.filled }));
+    l += task(5, b.filled && !b.fun, cur === 4, "Retire l'entonnoir.", "Une goutte pourrait tomber de l'entonnoir et fausser le niveau.", btn("buFun", "Retirer l'entonnoir", { dis: !b.filled || !b.fun }));
     var ctl = btn("buCheck", "Regarder sous le robinet", { dis: !b.filled || b.checked });
     if (b.checked && b.bubble && !b.purged) ctl += btn("buPurge", "Chasser la bulle", { cls: "primary" });
-    l += task(4, b.checked && !(b.bubble && !b.purged), cur === 3 || (b.checked && b.bubble && !b.purged), "Vérifie qu'il n'y a pas de bulle d'air sous le robinet.", "Une bulle fausse le volume lu : elle se remplit à la place de la solution.", ctl);
-    l += task(5, b.zeroOK, cur === 4, "Mets le bas du ménisque sur le zéro.", "Lis sur la loupe, l'œil à la hauteur du ménisque. Il reste du liquide à vider.", b.filled ? zeroBlock() : "");
+    l += task(6, bubOK, cur === 5 || (b.checked && b.bubble && !b.purged), "Vérifie qu'il n'y a pas de bulle d'air sous le robinet.", "Une bulle fausse le volume lu : elle se remplit à la place de la solution.", ctl);
+    l += task(7, b.zeroOK, cur === 6, "Mets le bas du ménisque sur le zéro.", "Lis sur la loupe, l'œil à la hauteur du ménisque. Il reste du liquide à vider dans le bécher de récupération.", b.filled ? zeroBlock() : "");
     l += '</ol>';
     l += '<div class="row">' + btn("go", "Étape suivante : le prélèvement", { val: 3, cls: "primary", dis: !b.zeroOK }) + '</div>';
     return l;
   }
 
+  var PBORE = 3.6;   // diamètre intérieur du col de la pipette (mm)
+  function pipDmm() { return (S.pi.v - V1N) * 1000 / (Math.PI * Math.pow(PBORE / 2, 2)); }
   function pipetteSvg() {
-    var p = S.pi, liq = null, y = 0;
-    if (p.anim === "water") { liq = "rgba(150,210,235,.7)"; y = 90; }
-    else if (p.anim === "sample") { liq = "rgba(180,220,170,.75)"; y = 90; }
-    else if (p.up) { liq = "rgba(180,220,170,.75)"; y = p.adj ? 74 : 56; }
-    if (S.flask.has && !p.up) liq = null;
-    return '<svg viewBox="0 0 80 250" role="img" aria-label="Pipette jaugée">' +
-      '<rect x="22" y="4" width="36" height="34" rx="14" fill="var(--accent)" opacity=".85"/>' +
+    var p = S.pi, liq = p.anim === "water" ? "rgba(150,210,235,.7)" : "rgba(150,205,140,.8)", t = '', y;
+    if (p.anim === "water" || p.anim === "sample") { t = '<rect x="37" y="130" width="6" height="96" fill="' + liq + '"/><path d="M37 226L40 238L43 226Z" fill="' + liq + '"/><path d="M29 118Q29 130 40 130Q51 130 51 118V98H29Z" fill="' + liq + '"/>'; }
+    else if (p.v > 0) {
+      var f = p.v / V1N;
+      y = p.v >= V1N ? 74 - (p.v - V1N) * 22 : 236 - f * 162; y = Math.max(40, y);
+      var ys = Math.max(y, 130);
+      t = '<rect x="37" y="' + ys.toFixed(1) + '" width="6" height="' + (226 - ys).toFixed(1) + '" fill="' + liq + '"/><path d="M37 226L40 238L43 226Z" fill="' + liq + '"/>';
+      if (y < 130) { var yb = Math.max(y, 98); t += '<path d="M29 ' + yb.toFixed(1) + 'H51V118Q51 130 40 130Q29 130 29 118Z" fill="' + liq + '"/>'; }
+      if (y < 98) t += '<rect x="35" y="' + y.toFixed(1) + '" width="10" height="' + (98 - y).toFixed(1) + '" fill="' + liq + '"/>';
+    }
+    return '<svg viewBox="0 0 80 250" role="img" aria-label="Pipette jaugée de 10 mL avec sa propipette">' + t +
+      '<rect x="22" y="4" width="36" height="34" rx="14" fill="var(--accent)" opacity=".85"/><text x="40" y="26" text-anchor="middle" style="font-size:11px;font-weight:700;fill:var(--accent-ink)">A S E</text>' +
       '<path d="M34 38V96Q28 104 28 118Q28 130 40 130Q52 130 52 118Q52 104 46 96V38" fill="none" stroke="currentColor" stroke-width="2"/>' +
-      '<path d="M40 130V228L40 240" fill="none" stroke="currentColor" stroke-width="2"/><path d="M36 128V220L40 238L44 220V128" fill="none" stroke="currentColor" stroke-width="2"/>' +
-      '<line x1="28" y1="74" x2="52" y2="74" stroke="var(--err)" stroke-width="2.4"/>' +
-      (liq ? '<path d="M35 ' + y + 'H45V220L40 238L36 220ZM29 118Q29 130 40 130Q51 130 51 118V' + Math.max(y, 98) + 'H29Z" fill="' + liq + '"/>' : "") +
-      '</svg>';
+      '<path d="M36 128V220L40 238L44 220V128" fill="none" stroke="currentColor" stroke-width="2"/>' +
+      '<line x1="28" y1="74" x2="52" y2="74" stroke="var(--err)" stroke-width="2.4"/></svg>';
   }
   function panelPipette() {
-    var p = S.pi, f = S.flask, flags = [p.rW, p.rS, p.up, p.adj, f.has, f.bar], cur = firstCur(flags);
-    var l = '<div class="pipette"><div class="small" style="min-width:0">Trait de jauge en rouge. La pipette prélève un volume exact de 10,0 mL.</div></div>' +
+    var p = S.pi, f = S.flask, tr = p.vTr !== null, atB = p.loc === "beaker";
+    var flags = [p.bV > 0, p.rS || tr || p.v > 0, tr || p.v >= V1N, tr, p.done, f.bar, f.placed], cur = firstCur(flags);
+    var l = '<div class="pipette"><div class="small" style="min-width:0">Trait de jauge en rouge. La pipette prélève un volume exact de 10,0 mL. La propipette a trois molettes : <b>A</b> chasse l\'air de la poire, <b>S</b> aspire, <b>E</b> laisse s\'écouler.</div></div>' +
       '<div class="pipette">' + pipetteSvg() + '<ol class="tasks" style="flex:1;min-width:0">';
-    l += task(1, p.rW, cur === 0, "Rince la pipette à l'eau distillée.", "", btn("pwRW", "Rincer à l'eau", { dis: p.rW }));
-    l += task(2, p.rS, cur === 1, "Rince la pipette avec la solution à titrer.", "Pour ne pas la diluer. Vide dans un bécher de récupération.", btn("pwRS", "Rincer avec " + F2, { dis: !p.rW || p.rS }));
-    l += task(3, p.up, cur === 2, "Aspire la solution un peu au-dessus du trait de jauge.", "Utilise la propipette.", btn("pwUp", "Aspirer", { dis: !p.rS || p.up }));
-    l += task(4, p.adj, cur === 3, "Ajuste le bas du ménisque sur le trait de jauge.", "", btn("pwAdj", "Ajuster au trait", { dis: !p.up || p.adj }));
-    l += task(5, f.has, cur === 4, "Vide la pipette dans l'erlenmeyer.", "Appuie la pointe contre la paroi. Ne souffle pas la dernière goutte.", btn("pwEmpty", "Vider dans l'erlenmeyer", { dis: !p.adj || f.has }));
-    l += task(6, f.bar, cur === 5, "Ajoute le barreau aimanté.", "Il permet d'agiter pendant le titrage.", btn("pwBar", "Ajouter le barreau", { dis: !f.has || f.bar }));
-    l += '</ol></div><div class="row">' + btn("go", "Étape suivante : le titrage rapide", { val: 4, cls: "primary", dis: !(f.has && f.bar) }) + '</div>';
+    l += task(1, p.bV > 0, cur === 0, "Verse un peu de solution à titrer dans un bécher.", "On ne plonge jamais la pipette dans le flacon : on le polluerait.", btn("pwBeak", "Verser ≈ 25 mL de " + F2 + " dans un bécher", { dis: p.bV > 0 }));
+    l += task(2, p.rW, cur === 1 && !p.rW, "Rince la pipette à l'eau distillée.", "Pour nettoyer la verrerie.", btn("pwRW", "Rincer à l'eau", { dis: p.rW }));
+    l += task(3, p.rS, cur === 1 && p.rW, "Rince la pipette avec la solution à titrer.", "Il reste de l'eau sur les parois. On aspire un peu de solution, on mouille les parois, on vide dans le bécher de récupération.", btn("pwRS", "Rincer avec " + F2, { dis: !p.bV || p.rS }));
+    l += task(4, tr || p.v >= V1N, cur === 2, "Prélève avec la propipette, un peu au-dessus du trait.", "Plonge la pointe dans le bécher. Appuie sur A, puis sur S. Le liquide ne doit jamais monter dans la poire.",
+      btn("pwLoc", "Pointe dans le bécher", { val: "beaker", pressed: atB, dis: !p.bV || tr }) + btn("pwLoc", "Pointe dans le flacon de stock", { val: "stock", dis: tr }) +
+      btn("pwA", "A : presser la poire", { pressed: p.bulb, dis: tr }) + btn("pwS", "S : aspirer", { dis: tr }));
+    var adj = "";
+    if (p.v > 0 && !tr) {
+      adj = '<div class="zoomwrap">' + zoomSvg(pipDmm(), S.eye, "le col de la pipette jaugée", "rgb(150,205,140)", 0.85) + '<div style="display:flex;flex-direction:column;gap:8px">' + eyesHtml() +
+        '<div class="row">' + btn("pwDrip", "E : écoulement rapide", { val: "fast" }) + btn("pwDrip", "E : goutte à goutte", { val: "mid" }) + btn("pwDrip", "E : ajustement fin", { val: "fine" }) + '</div>' +
+        '<div class="row">' + btn("pwOk", "Valider : bas du ménisque au trait", { cls: "primary" }) + '</div></div></div>';
+    }
+    l += task(5, tr, cur === 3, "Ajuste le bas du ménisque sur le trait de jauge.", "Regarde la loupe, l'œil à la hauteur du trait. Sinon, la parallaxe te trompe.", adj);
+    l += task(6, p.done, cur === 4, "Vide la pipette dans l'erlenmeyer.", "Appuie la pointe contre la paroi et attends environ 15 s. Ne souffle pas la dernière goutte.",
+      btn("pwLoc", "Pointe contre la paroi de l'erlenmeyer", { val: "flask", pressed: p.loc === "flask", dis: !tr || p.done || p.draining }) + btn("pwEmpty", "E : vider", { dis: !tr || p.loc !== "flask" || p.draining || p.done }) +
+      btn("pwWait", "Attendre 15 s, pointe contre la paroi", { dis: !p.draining || p.done }) + btn("pwLoc", "Retirer la pipette tout de suite", { val: "rest", dis: !p.draining || p.done }) + btn("pwBlow", "Souffler la dernière goutte", { dis: !p.draining || p.done }));
+    l += task(7, f.bar, cur === 5, "Ajoute le barreau aimanté.", "Il permet d'agiter pendant le titrage.", btn("pwBar", "Ajouter le barreau", { dis: !f.has || f.bar }));
+    l += task(8, f.placed, cur === 6, "Place l'erlenmeyer sur l'agitateur, la pointe de la burette dans le col.", "Sans cela, la solution titrante tomberait à côté.", btn("pwPlace", "Placer l'erlenmeyer", { dis: !(f.has && f.bar) || f.placed }));
+    l += '</ol></div><div class="row">' + btn("go", "Étape suivante : le titrage rapide", { val: 4, cls: "primary", dis: !(f.has && f.bar && f.placed) }) + '</div>';
     return l;
   }
 
   function lcdRead() { return S.aide ? '<span class="lcd"><small>Volume lu</small>' + fmt(S.bu.level, 2) + '<small>mL</small></span>' : ""; }
-  function canPour() { return S.bu.zeroOK && S.flask.has && S.flask.bar; }
+  function canPour() { return S.bu.zeroOK && S.flask.has && S.flask.bar && S.flask.placed; }
 
   function panelRapide() {
     var R = S.rapid, can = canPour() && !R.zone && 25 - S.bu.level >= 1 - 1e-9;
@@ -572,13 +695,13 @@ footer { color: var(--muted); font-size: 13px; }
     var runN = P.runs.length + (P.recorded ? 0 : 1);
     var h = '<p class="lead">Titrage n° ' + runN + '. Le virage est entre ' + fmt(lo, 0) + ' et ' + fmt(lo + 1, 0) + ' mL.</p><ol class="tasks">';
     h += task(1, b.zeroOK, !b.zeroOK, "Remets la burette à zéro.", "On recommence avec un niveau de départ propre.", b.zeroOK ? "" : zeroBlock());
-    h += task(2, f.has && f.bar, b.zeroOK && !(f.has && f.bar), "Prélève une nouvelle prise d'essai de 10,0 mL.", "La pipette est déjà rincée. Le barreau est ajouté.", btn("newSample", "Prélever 10,0 mL", { dis: f.has || P.recorded }));
+    h += task(2, f.has && f.bar && f.placed, b.zeroOK && !(f.has && f.bar && f.placed), "Prélève une nouvelle prise d'essai de 10,0 mL.", "La pipette est déjà rincée. Les gestes sont les mêmes : barreau ajouté, erlenmeyer sous la burette.", btn("newSample", "Prélever 10,0 mL", { dis: f.has || P.recorded }));
     var ctl = '<div class="row" style="width:100%"><span class="small">Agitation :</span>' + stirSeg() + '</div>';
     ctl += '<div style="width:100%">' + options() + '</div>';
-    ctl += btn("pour1", "+ 1 mL", { dis: !can }) + btn("pourD", "+ 5 gouttes", { val: 5, dis: !can }) + btn("pourD", "+ 1 goutte", { val: 1, dis: !can }) + lcdRead();
-    h += task(3, P.recorded, b.zeroOK && f.has && f.bar && !P.recorded, "Verse la solution titrante.", "Verse vite jusqu'à " + fmt(Math.max(0, lo - 1), 0) + " mL. Puis ajoute les gouttes une par une. Arrête-toi quand la couleur change pour de bon.", ctl);
+    ctl += btn("pour1", "+ 1 mL", { dis: !can }) + btn("pourD", "+ 5 gouttes", { val: 5, dis: !can }) + btn("pourD", "+ 1 goutte", { val: 1, dis: !can }) + btn("pourH", "+ ½ goutte", { dis: !can }) + btn("wash", "Rincer les parois (pissette)", { dis: !(titrating && f.has) }) + lcdRead();
+    h += task(3, P.recorded, b.zeroOK && f.has && f.bar && !P.recorded, "Verse la solution titrante.", "Verse vite jusqu'à " + fmt(Math.max(0, lo - 1), 0) + " mL. Puis ajoute les gouttes une par une. Près du virage, laisse une demi-goutte au bout de la burette, touche la paroi et rince à la pissette. Arrête-toi quand la couleur change pour de bon.", ctl);
     var rd = btn("seeEnd", "J'ai vu le virage", { cls: "primary", dis: !titrating || P.reading });
-    if (P.reading) rd = '<label class="small" for="vRead">Volume équivalent lu (mL) :</label><input id="vRead" class="cf wide" data-f="vRead" inputmode="decimal" autocomplete="off" value="' + (S.form.vRead || "") + '" placeholder="ex. 9,85">' + btn("record", "Enregistrer", { cls: "primary" });
+    if (P.reading) rd = eyesHtml() + '<label class="small" for="vRead">Volume équivalent lu (mL) :</label><input id="vRead" class="cf wide" data-f="vRead" inputmode="decimal" autocomplete="off" value="' + (S.form.vRead || "") + '" placeholder="ex. 9,85">' + btn("record", "Enregistrer", { cls: "primary" });
     h += task(4, P.recorded, titrating && !P.recorded, "Relève le volume équivalent sur la burette.", "Lis le bas du ménisque avec la loupe. Précision : 0,05 mL.", rd);
     h += '</ol>';
     if (P.runs.length) h += runsTable();
@@ -685,9 +808,18 @@ footer { color: var(--muted); font-size: 13px; }
   function debrief() {
     var P = S.pr, items = [], noPaper = P.runs.filter(function (r) { return !r.paper; }).length;
     var err = P.runs.reduce(function (a, r) { return a + (r.v - r.ve); }, 0) / P.runs.length;
+    var sy = S.sins || {}, sys = S.bu.eff < 1 || S.pi.kp < 1;
+    if (S.bu.eff < 1) items.push("La burette n'a pas été rincée avec le permanganate : l'eau restée sur les parois a dilué le titrant (environ 3 %). V<sub>E</sub> est trop grand d'environ 3 %.");
+    if (S.pi.kp < 1) items.push("La pipette n'a pas été rincée avec la solution à titrer : la prise d'essai a été diluée (environ 3 %). V<sub>E</sub> est trop petit d'environ 3 %.");
+    if (sy.entonnoir) items.push("Tu as voulu régler le zéro avec l'entonnoir sur la burette : on le retire toujours, une goutte pourrait tomber et fausser le niveau.");
+    if (sy.parallaxe) items.push("Tu as validé ou lu sans l'œil à la hauteur du ménisque (" + sy.parallaxe + " fois). La parallaxe donne une lecture trop forte ou trop faible selon la position de l'œil : on se place toujours au niveau.");
+    if (sy.stock) items.push("Tu as plongé la pipette dans le flacon de stockage : on prélève toujours dans un bécher pour ne pas polluer le flacon.");
+    if (sy.poire) items.push("Le liquide est monté dans la propipette : arrête d'aspirer dès que le niveau dépasse un peu le trait.");
+    if (sy.attente) items.push("Tu as retiré la pipette avant la fin de l'écoulement : la prise d'essai est un peu trop petite (≈ 0,03 mL).");
+    if (sy.souffle) items.push("Tu as soufflé dans la pipette jaugée : la prise d'essai est trop grande (≈ 0,04 mL).");
     if (S.bu.bubble && !S.bu.purged) items.push("Une bulle d'air est restée sous le robinet. Le volume lu est trop grand d'environ 0,2 mL.");
     if (noPaper) items.push("Tu as fait " + noPaper + " titrage" + (noPaper > 1 ? "s" : "") + " sans papier blanc. Une couleur très pâle est repérée un peu trop tard : V<sub>E</sub> est un peu surestimé.");
-    if (!(S.bu.bubble && !S.bu.purged) && err > 0.12) items.push("En moyenne, tu as versé " + fmt(err, 2) + " mL de trop. Arrête-toi dès que la couleur change pour de bon.");
+    if (!(S.bu.bubble && !S.bu.purged) && !sys && err > 0.12) items.push("En moyenne, tu as versé " + fmt(err, 2) + " mL de trop. Arrête-toi dès que la couleur change pour de bon.");
     if (err < -0.08) items.push("Tes volumes sont trop petits. Relis le bas du ménisque avec la loupe.");
     return '<h3>Ce qui a pu fausser ta mesure</h3>' + (items.length ? '<ul>' + items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + '</ul>' : '<p class="small">Rien à signaler : tes gestes étaient corrects.</p>');
   }
@@ -741,11 +873,13 @@ footer { color: var(--muted); font-size: 13px; }
     for (var i = Math.ceil((r - 0.75) * 10); i <= Math.floor((r + 0.75) * 10); i++) {
       var q = i / 10; if (q < -1e-9) continue;
       var y = cy + (q - r) * P, isInt = Math.abs(q - Math.round(q)) < 1e-6, isHalf = Math.abs(q * 2 - Math.round(q * 2)) < 1e-6, L = isInt ? 26 : isHalf ? 18 : 11;
-      s += '<line x1="' + (cx - 30) + '" x2="' + (cx - 30 + L) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="#EAF2F6" stroke-width="' + (isInt ? 2 : 1.2) + '"/>';
+      var cv = S.eye === "haut" ? 4 : S.eye === "bas" ? -4 : 0;
+      s += '<path d="M' + (cx - 30) + ' ' + y.toFixed(1) + ' Q' + (cx - 30 + L / 2) + ' ' + (y + cv).toFixed(1) + ' ' + (cx - 30 + L) + ' ' + y.toFixed(1) + '" fill="none" stroke="#EAF2F6" stroke-width="' + (isInt ? 2 : 1.2) + '"/>';
       if (isInt) s += '<text x="' + (cx - 30 + L + 5) + '" y="' + (y + 5).toFixed(1) + '" class="halo" style="font-size:15px;font-weight:600">' + Math.round(q) + '</text>';
     }
     s += '<path d="M' + (cx - 29) + ' ' + (cy - 9) + ' Q' + cx + ' ' + (cy + 9) + ' ' + (cx + 29) + ' ' + (cy - 9) + '" fill="none" stroke="#EAF2F6" stroke-width="2"/></g>';
-    s += '<text x="' + cx + '" y="' + (cy + R + 22) + '" text-anchor="middle" style="font-size:11px;fill:#8EA2AF">loupe (bas du ménisque)</text>';
+    s += '<path d="M' + (cx - R * 0.72).toFixed(1) + ' ' + (cy - R * 0.45).toFixed(1) + ' A' + R + ' ' + R + ' 0 0 1 ' + (cx - R * 0.15).toFixed(1) + ' ' + (cy - R * 0.95).toFixed(1) + '" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>';
+    s += '<text x="' + cx + '" y="' + (cy + R + 22) + '" text-anchor="middle" style="font-size:11px;fill:#8EA2AF">loupe ' + (S.eye === "niveau" ? "(œil au niveau)" : "(parallaxe !)") + '</text>';
     g.innerHTML = s;
   }
   var timers = {};
@@ -758,21 +892,32 @@ footer { color: var(--muted); font-size: 13px; }
     show("gStand", have("potence")); show("gBurette", have("burette")); show("gStirrer", have("agit"));
     var cont = P.erlen || (S.matOK && P.erlen) ? "erlen" : (P.becher ? "becher" : (preview ? "erlen" : null));
     if (S.matOK) cont = P.erlen ? "erlen" : "becher";
-    show("glassErlen", cont === "erlen"); show("glassBecher", cont === "becher");
-    show("fLiq", cont && S.flask.has); show("gPaper", S.paper && !!cont);
-    show("bar", !!cont && (S.flask.bar || preview));
+    var wasteOn = !preview && (S.step === 2 || (S.step === 5 && !S.flask.has && !S.bu.zeroOK));
+    show("glassErlen", cont === "erlen" && !wasteOn); show("glassBecher", cont === "becher" && !wasteOn);
+    show("fLiq", cont && S.flask.has && !wasteOn); show("fSurf", cont && S.flask.has && !wasteOn); show("fShade", cont && S.flask.has && !wasteOn);
+    show("gPaper", S.paper && !!cont && !wasteOn);
+    show("bar", !!cont && (S.flask.bar || preview) && !wasteOn);
     var b = S.bu, m = mix();
+    show("gWaste", wasteOn); show("gFunnel", !!b.fun && !preview); show("gBeak", !preview && S.step === 3); show("gPiss", !preview && S.matOK && S.step >= 2);
+    var wh = Math.min(70, S.waste * 1.6), wl = $("wLiq"), ws = $("wShade");
+    wl.setAttribute("y", (538 - wh).toFixed(1)); wl.setAttribute("height", wh.toFixed(1)); ws.setAttribute("y", (538 - wh).toFixed(1)); ws.setAttribute("height", wh.toFixed(1));
+    var bh = Math.min(56, S.pi.bV * 1.9), bl2 = $("bkLiq"), bs = $("bkShade");
+    bl2.setAttribute("y", (598 - bh).toFixed(1)); bl2.setAttribute("height", bh.toFixed(1)); bs.setAttribute("y", (598 - bh).toFixed(1)); bs.setAttribute("height", bh.toFixed(1));
     // burette
     var bl = $("buLiq"), tl = $("tipLiq"), bub = $("bubble");
     var water = b.anim === "water", tit = b.anim === "titrant";
     if (water || tit) {
       bl.setAttribute("y", yOf(8)); bl.setAttribute("height", 342 - yOf(8)); bl.setAttribute("fill", water ? "rgb(150,210,235)" : "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".7");
       tl.setAttribute("height", 0);
+    } else if (b.pend) {
+      bl.setAttribute("y", 294); bl.setAttribute("height", 50); bl.setAttribute("fill", b.pend === "eau" ? "rgb(150,210,235)" : "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".7");
+      tl.setAttribute("height", 0);
     } else if (b.filled) {
       var y = Math.max(yOf(b.level), 40);
       bl.setAttribute("y", y); bl.setAttribute("height", Math.max(0, 344 - y)); bl.setAttribute("fill", "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".8");
       tl.setAttribute("height", 42); tl.setAttribute("y", 344); tl.setAttribute("fill", "rgb(122,28,140)"); tl.setAttribute("fill-opacity", ".8");
     } else { bl.setAttribute("height", 0); tl.setAttribute("height", 0); }
+    var bsh = $("buShade"); bsh.setAttribute("y", bl.getAttribute("y")); bsh.setAttribute("height", bl.getAttribute("height"));
     var showB = b.filled && b.bubble && b.checked && !water && !tit;
     bub.setAttribute("opacity", showB ? 1 : 0);
     if (showB) tl.setAttribute("height", 42);
@@ -788,6 +933,12 @@ footer { color: var(--muted); font-size: 13px; }
       lq.style.fill = col.fill; lq.style.fillOpacity = col.op;
       $("stream").setAttribute("y2", top.toFixed(1));
       $("drop").style.setProperty("--fall", (top - 392).toFixed(0) + "px");
+      var hw = cont === "becher" ? 66 : (top <= 446 ? 18 : Math.min(66, 18 + (top - 446) / 78 * 48)), sf = $("fSurf"), sh = $("fShade");
+      sf.setAttribute("cy", top.toFixed(1)); sf.setAttribute("rx", hw.toFixed(1)); sf.setAttribute("ry", (hw * 0.2).toFixed(1)); sf.style.fill = col.fill; sf.style.fillOpacity = Math.min(1, col.op + 0.15).toFixed(2);
+      sh.setAttribute("y", top.toFixed(1)); sh.setAttribute("height", (542 - top).toFixed(1)); sh.setAttribute("clip-path", cont === "becher" ? "url(#clipBecher)" : "url(#clipErlen)");
+    } else if (wasteOn) {
+      $("stream").setAttribute("y2", (538 - wh).toFixed(1));
+      $("drop").style.setProperty("--fall", (538 - wh - 392).toFixed(0) + "px");
     }
     var bar = $("bar"); bar.setAttribute("class", S.stir ? "s" + S.stir : "");
     $("led").setAttribute("fill", S.stir ? "#4CE08A" : "#33423D");
@@ -858,11 +1009,37 @@ footer { color: var(--muted); font-size: 13px; }
     clearTimeout(timers[key + name]);
     timers[key + name] = setTimeout(function () { obj[key] = null; refresh(); }, ms);
   }
-  A.buRW = function () { S.bu.rW = true; say("info", "Burette rincée à l'eau distillée. Le liquide est jeté dans un bécher de récupération."); anim(S.bu, "anim", "water", 900); };
-  A.buRT = function () { S.bu.rT = true; say("info", "Burette rincée avec le permanganate. Les parois sont maintenant en contact avec la bonne solution."); anim(S.bu, "anim", "titrant", 900); };
+  A.eye = function (el) {
+    S.eye = el.getAttribute("data-val");
+    say("info", S.eye === "niveau" ? "Œil à la hauteur du trait : les deux parties du trait se confondent en une ligne droite. Tu peux juger si le ménisque est tangent." : "Œil " + (S.eye === "haut" ? "au-dessus" : "en dessous") + " du trait : il apparaît en ellipse. À cause de la parallaxe, tu ne peux pas juger si le ménisque est tangent.");
+    refresh();
+  };
+  A.buFun = function () {
+    var b = S.bu;
+    if (b.pend) { say("warn", "Vide d'abord la burette par le robinet."); return; }
+    b.fun = !b.fun;
+    say("info", b.fun ? "Entonnoir à liquide posé sur la burette. Le robinet est fermé, le bécher de récupération est dessous." : "Entonnoir retiré, posé à côté de la burette.");
+    refresh();
+  };
+  A.buPour = function (el) {
+    var b = S.bu, liq = el.getAttribute("data-val");
+    b.pend = liq;
+    say("info", "≈ 5 mL de " + (liq === "eau" ? "d'eau distillée" : "de permanganate") + " sont dans la burette. Fais-la rouler pour mouiller toutes les parois, puis vide par le robinet.");
+    refresh();
+  };
+  A.buRinse = function () {
+    var b = S.bu, liq = b.pend; if (!liq) return;
+    if (liq === "eau") b.rW = true; else b.rT += 1;
+    b.pend = null; S.waste = r6(S.waste + 5); flowAnim(5);
+    say("info", liq === "eau" ? "Burette rincée à l'eau distillée. Le liquide est dans le bécher de récupération." : "Burette rincée avec le permanganate. Les parois sont maintenant en contact avec la bonne solution.");
+    anim(b, "anim", liq === "eau" ? "water" : "titrant", 900);
+  };
   A.buFill = function () {
-    S.bu.filled = true; S.bu.level = -Math.round(rnd(2, 4) * 20) / 20; S.bu.bubble = Math.random() < 0.65; S.bu.checked = false; S.bu.purged = false;
-    say("warn", "Attention : regarde sous le robinet. Y a-t-il une bulle d'air ?"); refresh();
+    var b = S.bu; b.filled = true; b.level = -Math.round(rnd(2, 4) * 20) / 20; b.bubble = Math.random() < 0.65; b.checked = false; b.purged = false;
+    b.eff = b.rT >= 1 ? 1 : 0.97;
+    if (b.rT < 1) sin("rincT", "Tu remplis la burette <b>sans l'avoir rincée avec le permanganate</b> : l'eau restée sur les parois dilue la solution (environ 3 %). Le volume équivalent sera trop grand. Regarde aussi sous le robinet : y a-t-il une bulle d'air ?");
+    else say("warn", "Attention : regarde sous le robinet. Y a-t-il une bulle d'air ?");
+    refresh();
   };
   A.buCheck = function () {
     S.bu.checked = true;
@@ -871,13 +1048,13 @@ footer { color: var(--muted); font-size: 13px; }
     refresh();
   };
   A.buPurge = function () {
-    S.bu.bubble = false; S.bu.purged = true; S.bu.level = r6(S.bu.level + 0.5); flowAnim(0.5);
+    S.bu.bubble = false; S.bu.purged = true; S.bu.level = r6(S.bu.level + 0.5); S.waste = r6(S.waste + 0.5); flowAnim(0.5);
     say("ok", "La bulle est partie. Un peu de liquide a coulé : vérifie où est le ménisque."); refresh();
   };
   A.drain = function (el) {
     var v = el.getAttribute("data-val"), amt = v === "d" ? Math.max(0.03, DROP + randn() * DROP_SD) : Number(v);
     if (S.bu.level + amt > 25) return;
-    S.bu.level = r6(S.bu.level + amt); flowAnim(amt);
+    S.bu.level = r6(S.bu.level + amt); S.waste = r6(S.waste + amt); flowAnim(amt);
     if (S.bu.level > 0.05) say("warn", "Tu as dépassé le zéro. Remplis la burette et recommence."); else renderMsgClear();
     refresh();
   };
@@ -890,6 +1067,8 @@ footer { color: var(--muted); font-size: 13px; }
   A.buZero = function () {
     var b = S.bu;
     if (S.step === 2 && !b.checked) { say("warn", "Vérifie d'abord sous le robinet : y a-t-il une bulle d'air ?"); return; }
+    if (b.fun) { sin("entonnoir", "L'entonnoir est resté sur la burette : <b>retire-le</b> avant d'ajuster le zéro. Une goutte tombant de l'entonnoir fausserait le niveau."); refresh(); return; }
+    if (S.eye !== "niveau") { sin("parallaxe", "Tu n'as pas l'œil à la hauteur du ménisque : à cause de la <b>parallaxe</b>, tu ne peux pas juger s'il est sur le zéro. Place l'œil au niveau du trait."); refresh(); return; }
     if (b.level < -0.05) { say("err", "Le ménisque est encore au-dessus du zéro. Laisse couler un peu de liquide."); return; }
     if (b.level > 0.05) { say("err", "Tu as dépassé le zéro. Remplis la burette un peu et recommence."); return; }
     b.level = 0; b.zeroOK = true;
@@ -898,13 +1077,68 @@ footer { color: var(--muted); font-size: 13px; }
     refresh();
   };
 
+  A.pwBeak = function () { S.pi.bV = 25; say("info", "25 mL de solution à titrer sont dans un bécher propre. On prélève dans le bécher, jamais dans le flacon."); refresh(); };
   A.pwRW = function () { S.pi.rW = true; say("info", "Pipette rincée à l'eau distillée."); anim(S.pi, "anim", "water", 800); };
-  A.pwRS = function () { S.pi.rS = true; say("info", "Pipette rincée avec la solution à titrer."); anim(S.pi, "anim", "sample", 800); };
-  A.pwUp = function () { S.pi.up = true; say("info", "La solution est au-dessus du trait de jauge."); refresh(); };
-  A.pwAdj = function () { S.pi.adj = true; say("info", "Le bas du ménisque est sur le trait de jauge : la pipette contient 10,0 mL."); refresh(); };
-  function sample() { S.flask.has = true; S.flask.Vs = V1N + rnd(-0.02, 0.02); S.flask.thr = rnd(0.85, 1.15); S.flask.poured = 0; }
-  A.pwEmpty = function () { sample(); S.pi.up = false; S.pi.adj = false; say("info", "10,0 mL de solution sont dans l'erlenmeyer."); refresh(); };
-  A.pwBar = function () { S.flask.bar = true; unlock(4); say("ok", "L'erlenmeyer est prêt, avec son barreau aimanté."); refresh(); };
+  A.pwRS = function () { S.pi.rS = true; say("ok", "<b>✓ Pipette rincée</b> avec la solution à titrer : on a aspiré un peu de solution, mouillé les parois, puis vidé dans le bécher de récupération."); anim(S.pi, "anim", "sample", 800); };
+  A.pwLoc = function (el) {
+    var v = el.getAttribute("data-val"), p = S.pi, f = S.flask;
+    if (v === "stock") { sin("stock", "Tu as plongé la pipette dans le <b>flacon</b> de solution : tu risques de le polluer pour tous les autres utilisateurs. On verse d'abord un peu de solution dans un bécher."); refresh(); return; }
+    if (v === "beaker") { p.loc = "beaker"; say("info", "Pointe dans la solution du bécher, sans toucher le fond."); }
+    else if (v === "flask") {
+      if (p.vTr === null) { say("info", "Ajuste d'abord le ménisque au trait de jauge."); return; }
+      p.loc = "flask"; say("info", "Pointe contre la paroi de l'erlenmeyer, pipette verticale. Appuie sur E pour laisser s'écouler.");
+    } else {
+      if (p.draining && !p.waited) { f.Vs = r6(f.Vs - 0.03); p.done = true; p.loc = "rest"; sin("attente", "Tu as retiré la pipette <b>trop tôt</b> : il faut attendre une quinzaine de secondes, pointe contre la paroi, pour que tout le liquide s'écoule. Un peu de solution est resté dans la pipette."); refresh(); return; }
+      p.loc = "rest"; say("info", "Pipette sortie du liquide.");
+    }
+    refresh();
+  };
+  A.pwA = function () { S.pi.bulb = true; say("info", "Poire pressée, A appuyé : l'air est chassé. Pour aspirer, appuie maintenant sur S."); refresh(); };
+  A.pwS = function () {
+    var p = S.pi;
+    if (!p.bulb) { say("info", "Appuie d'abord sur <b>A</b> en pressant la poire, pour chasser l'air."); return; }
+    if (p.loc !== "beaker") { say("info", "La pointe doit être plongée dans la solution du bécher pour aspirer."); return; }
+    p.v = r6(p.v + V1N * 0.2 * (0.8 + Math.random() * 0.4));
+    if (p.v > 1.3 * V1N) { p.v = 1.3 * V1N; sin("poire", "Le liquide est monté dans la <b>propipette</b> : elle est contaminée. Arrête d'aspirer dès que le niveau dépasse un peu le trait de jauge."); refresh(); return; }
+    say("info", p.v >= V1N ? "Le liquide est au-dessus du trait de jauge. Ajuste maintenant avec E, à la loupe." : "Continue d'aspirer (S) jusqu'un peu au-dessus du trait de jauge.");
+    refresh();
+  };
+  A.pwDrip = function (el) {
+    var p = S.pi, v = el.getAttribute("data-val");
+    if (p.vTr !== null) return;
+    p.v = Math.max(0, r6(p.v - ({ fast: 0.05, mid: 0.01, fine: 0.003 })[v] * V1N * (0.9 + Math.random() * 0.2)));
+    say("info", "E : un peu de liquide s'écoule. Regarde le ménisque à la loupe."); refresh();
+  };
+  A.pwOk = function () {
+    var p = S.pi;
+    if (p.v <= 0) { say("info", "Aspire d'abord de la solution avec S."); return; }
+    if (S.eye !== "niveau") { sin("parallaxe", "Tu n'as pas l'œil à la hauteur du trait : à cause de la <b>parallaxe</b>, tu ne peux pas juger si le bas du ménisque est tangent. Place l'œil au niveau du trait."); refresh(); return; }
+    var d = p.v - V1N, tol = 0.004 * V1N;
+    if (d > tol) { say("info", "Le bas du ménisque est encore <b>au-dessus</b> du trait de jauge : laisse s'écouler un peu (E)."); return; }
+    if (d < -tol) { say("info", "Le niveau est passé <b>sous</b> le trait : aspire de nouveau un peu (S), puis ajuste plus doucement."); return; }
+    p.vTr = p.v; p.kp = p.rS ? 1 : 0.97;
+    if (p.rS) say("ok", "<b>✓ Ménisque tangent au trait</b> : la pipette contient 10,0 mL.");
+    else sin("rincP", "Le ménisque est bien au trait, mais la pipette n'avait <b>pas été rincée</b> avec la solution à titrer : l'eau restée sur les parois la dilue un peu (environ 3 %). Le volume équivalent sera trop petit.");
+    refresh();
+  };
+  function sample() {
+    var f = S.flask, p = S.pi;
+    f.has = true; f.Vs = V1N + (S.firstSample && p.vTr !== null ? p.vTr - V1N : rnd(-0.03, 0.03)) + rnd(-0.02, 0.02);
+    f.kp = p.kp; f.thr = rnd(0.85, 1.15); f.poured = 0; f.w = 0; f.washed = false; S.firstSample = false;
+  }
+  A.pwEmpty = function () {
+    var p = S.pi;
+    sample(); p.v = 0; p.draining = true;
+    say("info", "Le liquide s'écoule dans l'erlenmeyer. Garde la pointe contre la paroi et attends une quinzaine de secondes : la dernière goutte fait partie du volume prévu.");
+    refresh();
+  };
+  A.pwWait = function () { var p = S.pi; p.waited = true; p.done = true; p.loc = "rest"; p.bulb = false; say("ok", "<b>✓ Transfert terminé</b> : la pipette a été vidée sans souffler. Ajoute le barreau aimanté."); refresh(); };
+  A.pwBlow = function () {
+    var p = S.pi; S.flask.Vs = r6(S.flask.Vs + 0.04); p.done = true; p.loc = "rest";
+    sin("souffle", "On ne souffle pas dans une pipette jaugée : elle est étalonnée pour s'écouler librement, et la goutte restée dans la pointe fait partie du volume prévu. Tu as ajouté environ 0,04 mL en trop."); refresh();
+  };
+  A.pwBar = function () { S.flask.bar = true; say("info", "Le barreau aimanté est dans l'erlenmeyer. Place maintenant l'erlenmeyer sous la burette."); refresh(); };
+  A.pwPlace = function () { S.flask.placed = true; unlock(4); say("ok", "L'erlenmeyer est sur l'agitateur, la pointe de la burette dans le col. Tu peux titrer."); refresh(); };
 
   A.stir = function (el) {
     S.stir = Number(el.getAttribute("data-val"));
@@ -942,13 +1176,25 @@ footer { color: var(--muted); font-size: 13px; }
     if (pour(tot)) { var m = mix(); if (m.persist) say("ok", "La couleur ne disparaît plus. Tu peux relever le volume."); else renderMsgClear(); }
     refresh();
   };
+  A.pourH = function () {
+    if (S.stir !== 2) { say("warn", "Mets l'agitation sur « Modérée » avant de verser."); return; }
+    var tot = Math.max(0.015, DROP / 2 + randn() * DROP_SD / 2);
+    if (pour(tot)) { S.flask.w = r6(S.flask.w + 0.2); var m = mix(); say("info", "Une demi-goutte est restée au bout de la burette : tu l'as touchée contre la paroi puis rincée à la pissette." + (m.persist ? " La couleur ne disparaît plus : tu peux relever le volume." : "")); }
+    refresh();
+  };
+  A.wash = function () {
+    var f = S.flask; if (!f.has) return;
+    f.w = r6(f.w + 0.5); f.washed = true;
+    say("info", "Les parois sont rincées avec un peu d'eau distillée : tout le titrant est dans le mélange. La quantité de matière ne change pas, la solution est juste un peu plus diluée.");
+    refresh();
+  };
   A.toPrecise = function () {
-    S.flask = { has: false, bar: false, Vs: V1N, thr: 1, poured: 0 };
+    S.flask = newFlask(); S.eye = Math.random() < 0.5 ? "haut" : "bas";
     S.bu.zeroOK = false; S.pr.reading = false; S.pr.recorded = false;
     unlock(5); S.step = 5; S.msg = null; renderMsg();
     say("info", "L'erlenmeyer est vidé et rincé. Remets la burette à zéro, puis prélève une nouvelle prise d'essai."); refresh();
   };
-  A.newSample = function () { sample(); S.flask.bar = true; say("info", "10,0 mL de solution et un barreau aimanté sont dans l'erlenmeyer."); refresh(); };
+  A.newSample = function () { sample(); S.flask.bar = true; S.flask.placed = true; say("info", "10,0 mL de solution sont dans l'erlenmeyer, avec son barreau, sous la burette."); refresh(); };
   A.seeEnd = function () {
     var m = mix();
     if (!m || !m.persist) { say("warn", "Je ne vois pas de changement de couleur qui reste. Continue de verser, goutte à goutte."); return; }
@@ -957,6 +1203,7 @@ footer { color: var(--muted); font-size: 13px; }
   A.record = function () {
     var v = num(S.form.vRead);
     if (isNaN(v)) { say("err", "Écris le volume lu, par exemple 9,85."); return; }
+    if (S.eye !== "niveau") { sin("parallaxe", "Tu lis la burette sans avoir l'œil à la hauteur du ménisque : la <b>parallaxe</b> fausse la lecture. Place l'œil au niveau du ménisque, puis relis."); refresh(); return; }
     if (Math.abs(v - S.bu.level) > 0.06) { say("err", "Ce n'est pas la valeur de la burette. Relis le bas du ménisque avec la loupe."); return; }
     S.pr.runs.push({ v: v, ve: veExact(S.flask.Vs) + (S.bu.bubble ? BUB : 0), paper: S.paper });
     S.pr.reading = false; S.pr.recorded = true; unlock(6);
@@ -964,7 +1211,7 @@ footer { color: var(--muted); font-size: 13px; }
     refresh();
   };
   A.nextRun = function () {
-    S.flask = { has: false, bar: false, Vs: V1N, thr: 1, poured: 0 };
+    S.flask = newFlask(); S.eye = Math.random() < 0.5 ? "haut" : "bas";
     S.bu.zeroOK = false; S.pr.reading = false; S.pr.recorded = false;
     say("info", "Nouveau titrage : remets la burette à zéro, puis prélève 10,0 mL."); refresh();
   };
@@ -1009,6 +1256,17 @@ footer { color: var(--muted); font-size: 13px; }
   });
 
   /* ---------- démarrage ---------- */
+  (function () {
+    var st = document.querySelector(".stage");
+    if (!st || !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    st.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "touch") return;
+      var r = st.getBoundingClientRect();
+      st.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      st.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+    });
+    st.addEventListener("pointerleave", function () { st.style.setProperty("--px", 0); st.style.setProperty("--py", 0); });
+  })();
   newSession(); buildTicks(); refresh();
   window.__titrage = { get S() { return S; }, chem: chem, veExact: veExact, mix: mix, stats: stats, A: A };
 })();
