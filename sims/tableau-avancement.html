@@ -534,7 +534,7 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
     function check() { if (flags.q1 && flags.q2 && flags.q3) { markDone("1"); S.observe("#obs", "ok", "<b>Mission 1 réussie.</b> x est l’avancement : le même pour toutes les espèces, en mol. Chaque quantité varie de <i>coefficient × x</i>."); autoObs = false; } }
 
     var s = pick(act().filter(function (i) { return st.co[i] >= 2; })), react = s < 2, c = st.co[s];
-    card(T, '<span class="tag">Prédire</span><p class="stmt">Équation : ' + eqHtml() + ". Au départ, x = 0. La réaction avance jusqu’à <b>x = 1 mol</b>.</p>");
+    card(T, '<span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span><p class="stmt">Équation : ' + eqHtml() + ". Au départ, x = 0. La réaction avance jusqu’à <b>x = 1 mol</b>.</p>");
     mcq(T, {
       legend: "Que devient la quantité de matière de " + sph(s) + " ?",
       options: [
@@ -562,7 +562,7 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
     });
     var t = pick([0, 1]), xv = pick([1.5, 2, 2.5]), ans = st.ni[t] - st.co[t] * xv;
     S.defi(T, {
-      question: '<span class="tag">Calculer</span><br>Pour <b>x = ' + nf(xv) + ' mol</b>, quelle quantité de matière de ' + sph(t) + ' reste-t-il ? (Tu peux placer le curseur sur cette valeur pour vérifier.)',
+      question: '<span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span><br>Pour <b>x = ' + nf(xv) + ' mol</b>, quelle quantité de matière de ' + sph(t) + ' reste-t-il ? (Tu peux placer le curseur sur cette valeur pour vérifier.)',
       unit: "mol", answer: ans, tolerance: { abs: 0.011 },
       hint: "n = n<sub>i</sub> − coefficient × x. Le coefficient de " + sph(t) + " est " + st.co[t] + ".",
       explain: "n(" + sph(t) + ") = " + nf(st.ni[t]) + " − " + st.co[t] + " × " + nf(xv) + " = " + nf(ans) + " mol.",
@@ -613,11 +613,11 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
     showCtl({ on: false });
     S.observe("#obs", "info", "Prédis d’abord quel réactif sera entièrement consommé en premier.");
     var I = xinfo(), T = $("#tache"), T2 = $("#tache2"), pred = null;
-    card(T, '<span class="tag">Situation</span><p class="stmt">' + stmtHtml() + '</p><p class="help">On laisse la réaction se faire jusqu’à ce qu’elle s’arrête.</p>');
+    card(T, '<span class="comp" data-comp="app"><abbr title="S’approprier">APP</abbr> · S’approprier</span><p class="stmt">' + stmtHtml() + '</p><p class="help">On laisse la réaction se faire jusqu’à ce qu’elle s’arrête.</p>');
     var runCard = h("section", { class: "card", hidden: true }), calcCard = h("section", { class: "card", hidden: true });
 
     mcq(T, {
-      legend: "<span class=\"tag\">Prédire</span><br>Quel réactif sera entièrement consommé en premier ?",
+      legend: "<span class=\"comp\" data-comp=\"ana\"><abbr title=\"Analyser / Raisonner\">ANA</abbr> · Prévoir</span><br>Quel réactif sera entièrement consommé en premier ?",
       anyAnswer: true,
       options: [
         { t: sph(0), v: 0 }, { t: sph(1), v: 1 }, { t: "Les deux en même temps", v: -1, last: true }
@@ -627,7 +627,7 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
     });
     T.appendChild(runCard); T.appendChild(calcCard);
 
-    runCard.innerHTML = '<span class="tag">Observer</span><div class="row"><button type="button" class="primary" id="run">Lancer la réaction</button></div><div class="fb" id="run-fb" role="status" aria-live="polite" hidden></div>';
+    runCard.innerHTML = '<span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Observer</span><div class="row"><button type="button" class="primary" id="run">Lancer la réaction</button></div><div class="fb" id="run-fb" role="status" aria-live="polite" hidden></div>';
     $("#run", runCard).addEventListener("click", function () {
       var b = this; b.disabled = true;
       animateTo(I.xm, 3, function () {
@@ -642,7 +642,7 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
     });
 
     var A = sph(0), B = sph(1);
-    calcCard.innerHTML = '<span class="tag">Calculer</span><p class="help">Pour chaque réactif, cherche la valeur de <i>x</i> qui annulerait sa quantité de matière : <i>n</i><sub>i</sub> − coefficient × <i>x</i> = 0.</p>' +
+    calcCard.innerHTML = '<span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span><p class="help">Pour chaque réactif, cherche la valeur de <i>x</i> qui annulerait sa quantité de matière : <i>n</i><sub>i</sub> − coefficient × <i>x</i> = 0.</p>' +
       '<div class="fields">' +
       '<div class="field"><label for="f-xa">Si ' + A + ' était épuisé : <i>x</i> = </label><input class="nin" id="f-xa" type="text" inputmode="decimal" autocomplete="off"></div>' +
       '<div class="field"><label for="f-xb">Si ' + B + ' était épuisé : <i>x</i> = </label><input class="nin" id="f-xb" type="text" inputmode="decimal" autocomplete="off"></div>' +
@@ -739,9 +739,9 @@ fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom
     showCtl({ on: false });
     S.observe("#obs", "info", "Déduis x<sub>f</sub> de la mesure, calcule x<sub>max</sub>, puis compare.");
     var T = $("#tache"), T2 = $("#tache2"), s = inst.meas;
-    card(T, '<span class="tag">Situation</span><p class="stmt">' + stmtHtml() + '<br>À la fin de la transformation, on mesure <i>n</i><sub>f</sub>(' + sph(s) + ') = <b>' + nf(inst.measVal) + ' mol</b>.</p>');
+    card(T, '<span class="comp" data-comp="app"><abbr title="S’approprier">APP</abbr> · S’approprier</span><p class="stmt">' + stmtHtml() + '<br>À la fin de la transformation, on mesure <i>n</i><sub>f</sub>(' + sph(s) + ') = <b>' + nf(inst.measVal) + ' mol</b>.</p>');
     card(T,
-      '<span class="tag">Calculer puis conclure</span>' +
+      '<span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Conclure</span>' +
       '<div class="fields">' +
       '<div class="field"><label for="g-xf"><i>x</i><sub>f</sub> (déduit de la mesure) = </label><input class="nin" id="g-xf" type="text" inputmode="decimal" autocomplete="off"></div>' +
       '<div class="field"><label for="g-xm"><i>x</i><sub>max</sub> = </label><input class="nin" id="g-xm" type="text" inputmode="decimal" autocomplete="off"></div>' +

@@ -110,6 +110,8 @@ th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
 .mission summary::-webkit-details-marker{display:none}
 .mission .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--brand);color:var(--on-brand);flex:none}
 .mission .ttl{flex:1}
+.comp{display:inline-block;padding:1px 9px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;font-weight:600;color:var(--muted);vertical-align:middle;white-space:nowrap}
+.comp abbr{text-decoration:none;font-weight:700;color:var(--ink)}
 .mission .st{font-size:.85rem;font-weight:600;color:var(--muted)}
 .mission[data-status=locked]{opacity:.65}
 .mission[data-status=locked] summary{cursor:not-allowed}
@@ -170,7 +172,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
       <p class="help">5 missions, à faire dans l'ordre. Chaque mission réussie rapporte des points : 3 points si tu réussis du premier coup, moins ensuite.</p>
 
       <details class="mission" id="m1" data-status="active" open>
-        <summary aria-disabled="false"><span class="num">1</span><span class="ttl">Prédire</span><span class="st">À faire</span></summary>
+        <summary aria-disabled="false"><span class="num">1</span><span class="ttl">Ma prévision</span><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span><span class="st">À faire</span></summary>
         <div class="body">
           <p>Un archéologue fait toujours une <strong>hypothèse</strong> avant de fouiller. Fais la tienne.</p>
           <p>Tu vas lancer les dés jusqu'à ce que la <strong>moitié</strong> des noyaux de départ se soit désintégrée : c'est la <strong>demi-vie</strong>. Tu continues ensuite pendant la <strong>même durée</strong>.</p>
@@ -187,7 +189,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
       </details>
 
       <details class="mission" id="m2" data-status="locked">
-        <summary aria-disabled="true"><span class="num">2</span><span class="ttl">Observer</span><span class="st">Verrouillée</span></summary>
+        <summary aria-disabled="true"><span class="num">2</span><span class="ttl">Mon observation</span><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Observer</span><span class="st">Verrouillée</span></summary>
         <div class="body">
           <p>Dans le laboratoire, lance les dés jusqu'à ce qu'il reste <strong>moins de 10 %</strong> des noyaux de départ. Regarde la forme de la courbe qui se dessine.</p>
           <progress id="prog" max="100" value="0" aria-labelledby="prog-label"></progress>
@@ -198,7 +200,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
       </details>
 
       <details class="mission" id="m3" data-status="locked">
-        <summary aria-disabled="true"><span class="num">3</span><span class="ttl">Mesurer la demi-vie</span><span class="st">Verrouillée</span></summary>
+        <summary aria-disabled="true"><span class="num">3</span><span class="ttl">Mesurer la demi-vie</span><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span><span class="st">Verrouillée</span></summary>
         <div class="body">
           <p>La <strong>demi-vie</strong> t<sub>1/2</sub> est la durée au bout de laquelle la moitié des noyaux de départ s'est désintégrée. Ici, on la compte en <strong>nombre de lancers</strong>.</p>
           <p>Lis ton graphique : au bout de combien de lancers N est-il passé de N₀ à N₀/2 ? <span class="small">(Tu peux donner une valeur décimale, par exemple 3,5.)</span></p>
@@ -216,7 +218,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
       </details>
 
       <details class="mission" id="m4" data-status="locked">
-        <summary aria-disabled="true"><span class="num">4</span><span class="ttl">Expliquer : hasard et grand nombre</span><span class="st">Verrouillée</span></summary>
+        <summary aria-disabled="true"><span class="num">4</span><span class="ttl">Hasard et grand nombre</span><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Interpréter</span><span class="st">Verrouillée</span></summary>
         <div class="body">
           <p>Pour répondre, tu peux explorer le laboratoire : change le <strong>nombre de noyaux</strong> et le <strong>type de noyau</strong>, puis regarde le <em>journal des expériences</em> sous le graphique.</p>
           <div id="vf-list"></div>
@@ -228,7 +230,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
       </details>
 
       <details class="mission" id="m5" data-status="locked">
-        <summary aria-disabled="true"><span class="num">5</span><span class="ttl">Dater la relique</span><span class="st">Verrouillée</span></summary>
+        <summary aria-disabled="true"><span class="num">5</span><span class="ttl">Dater la relique</span><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Transférer</span><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span><span class="st">Verrouillée</span></summary>
         <div class="body">
           <div id="m5a">
             <p><strong>Attention :</strong> dans le jeu, l'unité de temps est le lancer, pas l'année. Pour un vrai noyau, c'est la nature qui fixe la demi-vie.</p>
@@ -275,7 +277,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
 
           <div id="m5-end" hidden>
             <hr>
-            <p><strong>Mon carnet de fouille</strong> (à copier dans mon cahier ou à envoyer à mon professeur) :</p>
+            <p><span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · Communiquer</span> <strong>Mon carnet de fouille</strong> (à copier dans mon cahier ou à envoyer à mon professeur) :</p>
             <pre class="summary" id="summary"></pre>
             <button class="btn" id="btn-copy" type="button">Copier mon carnet</button>
             <p class="fb" id="copy-fb" role="status"></p>
@@ -362,7 +364,7 @@ footer{padding:18px 0 40px;color:var(--muted);font-size:.9rem}
       <li><strong>Programme :</strong> enseignement scientifique, classe de première (voie générale), thème « Une longue histoire de la matière » (BO spécial n° 1 du 22 janvier 2019).</li>
       <li><strong>Notions :</strong> certains noyaux sont instables et se désintègrent (radioactivité) ; la durée de vie d'un noyau est aléatoire ; la demi-vie est caractéristique du noyau ; datation au carbone 14.</li>
       <li><strong>Capacités :</strong> utiliser une représentation graphique pour déterminer une demi-vie ; estimer la durée nécessaire pour obtenir une proportion donnée de noyaux restants au bout de n demi-vies ; utiliser une décroissance radioactive pour une datation (carbone 14).</li>
-      <li><strong>Démarche :</strong> Prédire (mission 1), Observer (2), Mesurer (3), Expliquer (4), Transférer (5).</li>
+      <li><strong>Compétences :</strong> ANA (mission 1, prévoir), RÉA (2 et 3, observer et mesurer), VAL (4, interpréter), ANA et RÉA (5, transférer), COM (carnet de fouille copiable).</li>
       <li><strong>Durée estimée :</strong> 30 à 45 minutes (à confirmer en classe). La fiche complète est fournie à part.</li>
     </ul>
   </details>

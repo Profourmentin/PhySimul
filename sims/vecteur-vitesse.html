@@ -6,6 +6,8 @@
 <title>Construire un vecteur vitesse · Simulabo PhCh</title>
 <meta name="description" content="Seconde, Mouvement et interactions : construire le vecteur vitesse d’un point à partir d’une chronophotographie. Exercices générés au hasard, trois niveaux, retours gradués.">
 <style>
+.comp{display:inline-block;padding:1px 9px;border:1px solid var(--border);border-radius:999px;font-size:.8rem;font-weight:600;color:var(--muted);vertical-align:middle;margin-left:6px;white-space:nowrap}
+.comp abbr{text-decoration:none;font-weight:700;color:var(--text)}
 :root{
   --bg:#f4f6f9; --surface:#ffffff; --text:#1b2430; --muted:#566274; --border:#cfd7e2;
   --accent:#1d5fbf; --accent-ink:#ffffff; --accent-soft:#e7f0fd;
@@ -212,7 +214,7 @@ footer{margin-top:24px;color:var(--muted);font-size:.88rem}
     <ul>
       <li><strong>Programme de Seconde, « Décrire un mouvement »</strong> : approcher le vecteur vitesse d’un point par le vecteur déplacement entre deux positions successives voisines séparées de Δt, et le représenter ; caractériser un mouvement rectiligne uniforme ou non uniforme et différentes trajectoires ; exploiter une chronophotographie pour représenter des vecteurs vitesse et décrire la variation du vecteur vitesse ; capacité mathématique « représenter des vecteurs ».</li>
       <li><strong>Convention retenue</strong> : le vecteur vitesse en M<sub>i</sub> est approché avec M<sub>i</sub> et M<sub>i+1</sub>, comme dans la formulation du programme (M et M′). La méthode centrée (M<sub>i−1</sub>, M<sub>i+1</sub>) et la construction du vecteur variation de vitesse relèvent de la Première et ne sont pas abordées ici.</li>
-      <li><strong>Démarche</strong> : observer (trajectoire, évolution des distances), construire (mesure, échelle, valeur, tracé avec les quatre caractéristiques), puis prédire avant de voir tous les vecteurs et expliquer.</li>
+      <li><strong>Compétences</strong> : s’approprier (observer la trajectoire et les distances, APP), réaliser (mesure, échelle, valeur, tracé avec les quatre caractéristiques, RÉA), analyser (prévoir l’évolution du vecteur avant de voir tous les vecteurs, ANA), valider (comparer à la prévision et conclure, VAL).</li>
       <li><strong>Niveaux</strong> : 1 = trajectoires rectilignes, origine imposée, formules rappelées ; 2 = toutes les trajectoires, rappels repliés ; 3 = conversions cm/ms → m/s et origine à placer soi-même.</li>
       <li><strong>Même exercice pour toute la classe</strong> : « Copier le lien de l’exercice » reproduit exactement le même énoncé (niveau et numéro).</li>
       <li><strong>Limites</strong> : la distance sur le schéma est donnée par un outil de mesure (pas de lecture de règle, pas d’incertitude) ; aucune sauvegarde des résultats ; durée par exercice estimée à 10–15 min, à confirmer en classe.</li>
@@ -509,7 +511,9 @@ function revealAll(){
 }
 
 /* ───────── Cartes ───────── */
-function head(st,title){return '<div class="chead"><h2><span class="num" aria-hidden="true">'+numOf(st)+'</span>'+title+'</h2><span class="badge" data-badge>À faire</span></div>'}
+var COMP={obs:['APP','S’approprier','S’approprier'],mes:['RÉA','Réaliser','Mesurer'],dist:['RÉA','Réaliser','Mesurer'],dt:['RÉA','Réaliser','Mesurer'],vit:['RÉA','Réaliser','Calculer'],len:['RÉA','Réaliser','Calculer'],tr:['RÉA','Réaliser','Tracer'],pred:['ANA','Analyser / Raisonner','Prévoir'],bilan:['VAL','Valider','Conclure']};
+function compChip(st){var c=COMP[st];return c?' <span class="comp"><abbr title="'+c[1]+'">'+c[0]+'</abbr> · '+c[2]+'</span>':''}
+function head(st,title){return '<div class="chead"><h2><span class="num" aria-hidden="true">'+numOf(st)+'</span>'+title+compChip(st)+'</h2><span class="badge" data-badge>À faire</span></div>'}
 var FB='<div class="fb" role="status" aria-live="polite"></div>';
 function radio(name,val,label){return '<label class="opt"><input type="radio" name="'+name+'" value="'+val+'"><span>'+label+'</span></label>'}
 function help(html){
@@ -558,7 +562,7 @@ function cardsHTML(){
     +'<p>Un vecteur se décrit par : <strong>point d’application</strong>, <strong>direction</strong>, <strong>sens</strong>, <strong>valeur</strong>.</p>'
     +'<div class="actions"><button class="btn primary" type="button" id="btnCheck">Vérifier le vecteur</button><button class="btn" type="button" id="btnGhost" hidden>Montrer la flèche attendue</button></div>'
     +'<ul class="chk" id="chk" hidden></ul>'+FB+'</section>';
-  h+='<section class="card" id="c-pred" hidden>'+head('pred','Prédire, observer, expliquer')
+  h+='<section class="card" id="c-pred" hidden>'+head('pred','Prévoir puis vérifier')
     +'<p>Avant de regarder : de '+Mh(0)+' à '+Mh(ex.N-2)+', que va devenir le vecteur vitesse ?</p>'
     +'<form data-form="pred" novalidate>'
     +'<div class="row"><label for="p-val">Sa valeur (la longueur de la flèche)</label><select id="p-val"><option value="">Choisir…</option><option value="const">reste la même</option><option value="aug">augmente</option><option value="dim">diminue</option><option value="mixte">varie dans les deux sens</option></select></div>'
