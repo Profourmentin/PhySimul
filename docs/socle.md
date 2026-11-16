@@ -57,7 +57,7 @@ Vérifié automatiquement pour toute simulation qui utilise le socle :
 - **Cibles tactiles** d'au moins 44 px (déjà le cas des boutons du socle).
 - **Texte alternatif utile** : le `aria-label` d'un canvas décrit ce que l'on voit et ce que l'on peut régler, pas « graphique ».
 - **Conformité au programme** : vérifier les notions, les notations et le vocabulaire contre le programme officiel du niveau visé (BO spécial n° 1 du 22 janvier 2019 pour le lycée général et technologique) et marquer « À vérifier » ce qui ne l'est pas dans la fiche enseignant.
-- **Pédagogie** : une simulation n'enseigne rien seule. Prévoir une consigne d'observation, un moment de prédiction avant l'expérience, et au moins une question qui oblige à interpréter (c'est le rôle du `defi` et de la zone d'observation).
+- **Pédagogie** : une simulation n'enseigne rien seule. Chaque tâche porte une puce de compétence (`.comp` : APP, ANA, RÉA, VAL, COM) et le parcours respecte la couverture minimale décrite dans `docs/specs/methode-scientifique.md` : une prévision (ANA) relue ensuite, des mesures bruitées (RÉA) à confronter à un modèle ou à une référence (VAL), et une trace de l'élève (COM). Au moins une question doit obliger à interpréter (c'est le rôle du `defi` et de la zone d'observation).
 
 ## Bruit de mesure : un seul réglage pour tout le site
 

@@ -234,3 +234,11 @@ details ul { margin: 8px 0 0; padding-left: 20px; max-width: 74ch; }
   .tabs, .stagebar, .crumb, .skip, button { display: none !important; }
   .card, .obs, .stage { break-inside: avoid; box-shadow: none; }
 }
+
+/* ---------- 16. Puces de compétence (APP · ANA · RÉA · VAL · COM) ----------
+   Voir docs/specs/methode-scientifique.md. Puce neutre : une couleur désigne une grandeur sur ce site,
+   jamais une compétence. Le code est toujours accompagné d'un verbe d'action. */
+.comp { display: inline-block; padding: 1px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font: 600 12px/1.5 var(--font-data); letter-spacing: .04em; vertical-align: middle; }
+.comp abbr { text-decoration: none; font-weight: 700; color: var(--ink); }
+.comp + .comp { margin-left: 4px; }
+@media (forced-colors: active) { .comp { border-color: CanvasText; } }

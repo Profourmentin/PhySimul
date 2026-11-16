@@ -99,7 +99,8 @@ table.q input{width:20px;height:20px;accent-color:var(--accent)}
 footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
 .two{display:grid;grid-template-columns:1fr;gap:12px}
 @media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
-.tag{display:inline-block;padding:1px 8px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;font-weight:700;color:var(--muted)}
+.comp{display:inline-block;padding:1px 9px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;font-weight:600;color:var(--muted);vertical-align:middle}
+.comp abbr{text-decoration:none;font-weight:700;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -141,7 +142,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
 
   <div class="card">
     <fieldset>
-      <legend><span class="tag">Prédire</span> Quand un micro enregistrera ce son, le signal sera-t-il périodique ?</legend>
+      <legend><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span> Quand un micro enregistrera ce son, le signal sera-t-il périodique ?</legend>
       <div class="chips" id="pred1">
         <label class="chip"><input type="radio" name="pred1" value="oui"><span>Oui, périodique</span></label>
         <label class="chip"><input type="radio" name="pred1" value="non"><span>Non, pas périodique</span></label>
@@ -153,7 +154,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
   </div>
 
   <div class="card" id="obs1" hidden>
-    <h3><span class="tag">Observer</span> Ce que le micro enregistre</h3>
+    <h3><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Observer</span> Ce que le micro enregistre</h3>
     <canvas id="air" width="1280" height="280" role="img" aria-label="Animation ralentie : un haut-parleur à gauche met l’air en mouvement ; la perturbation se propage vers un micro à droite." style="width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:var(--surface)"></canvas>
     <p class="small" id="airNote"></p>
     <div id="scope1"></div>
@@ -162,7 +163,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
 
   <div class="card" id="verdict1" hidden>
     <fieldset>
-      <legend><span class="tag">Expliquer</span> Après observation, ce signal est-il périodique ?</legend>
+      <legend><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Confronter</span> Après observation, ce signal est-il périodique ?</legend>
       <div class="chips">
         <label class="chip"><input type="radio" name="verdict1" value="oui"><span>Oui, périodique</span></label>
         <label class="chip"><input type="radio" name="verdict1" value="non"><span>Non, pas périodique</span></label>
@@ -276,14 +277,14 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
   <div class="card">
     <h3>A · La hauteur</h3>
     <fieldset>
-      <legend><span class="tag">Prédire</span> Un son devient plus aigu. Sa période va…</legend>
+      <legend><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span> Un son devient plus aigu. Sa période va…</legend>
       <div class="chips">
         <label class="chip"><input type="radio" name="hp" value="grande"><span>augmenter</span></label>
         <label class="chip"><input type="radio" name="hp" value="petite"><span>diminuer</span></label>
         <label class="chip"><input type="radio" name="hp" value="pareille"><span>rester la même</span></label>
       </div>
     </fieldset>
-    <h3><span class="tag">Observer</span> Compare deux sons</h3>
+    <h3><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Observer</span> Compare deux sons</h3>
     <p class="small">Son A : fréquence fixe. Son B : règle sa fréquence et son amplitude, et compare les deux signaux (même base de temps).</p>
     <div class="two">
       <div><p class="readout"><strong>Son A</strong> · f = <span id="hAf"></span> · T = <span id="hAT"></span></p><div id="scopeHA"></div><p class="row"><button type="button" class="btn ghost" id="listenHA">Écouter A</button></p></div>
@@ -291,7 +292,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
     </div>
     <div class="field"><label for="hFreq">Fréquence de B</label><input type="range" id="hFreq" min="0" max="1000" step="1" value="402"></div>
     <div class="field"><label for="hAmp">Amplitude de B</label><input type="range" id="hAmp" min="20" max="100" step="5" value="100"></div>
-    <h3><span class="tag">Expliquer</span> Complète</h3>
+    <h3><span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · Conclure</span> Complète</h3>
     <p>Plus un son est aigu, plus sa fréquence est
       <select id="hc1" aria-label="Fréquence : grande ou petite"><option value="">—</option><option value="grande">grande</option><option value="petite">petite</option></select>
       et plus sa période est
@@ -310,7 +311,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
       <div><div class="field"><label for="tShapeA">Forme du son A</label><select id="tShapeA"></select></div><div id="scopeTA"></div><p class="row"><button type="button" class="btn ghost" id="listenTA">Écouter A</button></p></div>
       <div><div class="field"><label for="tShapeB">Forme du son B</label><select id="tShapeB"></select></div><div id="scopeTB"></div><p class="row"><button type="button" class="btn ghost" id="listenTB">Écouter B</button></p></div>
     </div>
-    <h3><span class="tag">Expliquer</span> Compare A et B</h3>
+    <h3><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Comparer</span> Compare A et B</h3>
     <table class="q">
       <tbody id="tQ"></tbody>
     </table>
@@ -373,7 +374,7 @@ footer{margin-top:28px;font-size:.88rem;color:var(--muted)}
     <li>relier qualitativement la fréquence à la hauteur ; lien entre forme du signal et timbre ; lien qualitatif entre amplitude et intensité sonore ;</li>
     <li>capacité mathématique : identifier une fonction périodique et déterminer sa période ; compétence « Valider » : estimer une incertitude, comparer à une valeur de référence.</li>
   </ul>
-  <p><strong>Choix didactiques.</strong> Chaque étape suit la séquence <em>Prédire, Observer, Expliquer</em>. Le timbre est relié à la <em>forme du signal</em>, comme le programme de Seconde le formule : le spectre en fréquence, le fondamental et les harmoniques ne sont volontairement pas abordés. Le retour sur les mesures est gradué (indices sur les erreurs courantes : oubli de diviser par le nombre de motifs, confusion des unités, motif incomplet) et la valeur de référence n’est donnée qu’à la demande. Les durées affichées sont à valider en classe.</p>
+  <p><strong>Choix didactiques.</strong> Chaque étape mobilise les compétences de la démarche scientifique, signalées par les puces <em>ANA, RÉA, VAL, COM</em> (voir <code>docs/specs/methode-scientifique.md</code>) : prévoir, observer, confronter, conclure. Le timbre est relié à la <em>forme du signal</em>, comme le programme de Seconde le formule : le spectre en fréquence, le fondamental et les harmoniques ne sont volontairement pas abordés. Le retour sur les mesures est gradué (indices sur les erreurs courantes : oubli de diviser par le nombre de motifs, confusion des unités, motif incomplet) et la valeur de référence n’est donnée qu’à la demande. Les durées affichées sont à valider en classe.</p>
   <p class="small">Les signaux sont calculés par le simulateur (aucun enregistrement). Les sons sont synthétisés localement avec l’API Web Audio.</p>
 </details>
 
