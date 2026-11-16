@@ -219,6 +219,18 @@
       s += '<line class="v" x1="38" y1="104" x2="134" y2="104"/><line class="v" x1="38" y1="98" x2="38" y2="110"/><line class="v" x1="134" y1="98" x2="134" y2="110"/>';
       return s;
   });
+  /* Vitesse du son : émetteur et ses arcs, deux récepteurs sur un rail, distance d entre eux, salve reçue. */
+  add("vitesse-son", function () {
+      var s = "";
+      s += '<line class="s" x1="8" y1="98" x2="192" y2="98"/>';
+      [20, 44, 68, 92, 116, 140, 164, 188].forEach(function (x) { s += '<line class="s" x1="' + x + '" y1="98" x2="' + x + '" y2="103"/>'; });
+      s += '<rect class="f" x="12" y="52" width="18" height="30" rx="3"/>';
+      s += '<path class="s" d="M40 58Q47 67 40 76"/><path class="s" d="M48 51Q60 67 48 83"/><path class="s" d="M56 44Q73 67 56 90"/>';
+      s += '<rect class="s" x="104" y="52" width="16" height="30" rx="3"/><rect class="s" x="156" y="52" width="16" height="30" rx="3"/>';
+      s += '<line class="v" x1="112" y1="112" x2="164" y2="112"/><line class="v" x1="112" y1="107" x2="112" y2="117"/><line class="v" x1="164" y1="107" x2="164" y2="117"/>';
+      s += '<path class="v" d="M70 26C74 12 78 12 82 26S90 40 94 26 102 12 106 26 114 40 118 26 124 16 128 26"/>';
+      return s;
+  });
   /* Principe d'inertie : positions régulières d'un mobile et vecteur vitesse. */
   add("chrono-droite", function () {
       var s = "";
