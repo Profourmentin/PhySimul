@@ -1,0 +1,978 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mesurer la vitesse de propagation du son · Simulabo PhCh</title>
+<meta name="description" content="TP virtuel pour la classe de Seconde : de la mesure historique du canon (1822) à la mesure avec des ultrasons, deux récepteurs et une console d'acquisition. Tableau de mesures, calcul de v pour chaque distance, graphe d = f(Δt), comparaison à la valeur de référence.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+.wrap, #sim, #sim > * { min-width: 0; }
+#sim { width: 100%; }
+sub, sup { font-size: .7em; line-height: 0; }
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.tab { flex: 1 1 auto; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+
+.progress { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.mchip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; background: var(--surface); color: var(--muted); }
+.mchip[data-done="true"] { border-color: var(--ok); color: var(--ok); background: var(--ok-bg); font-weight: 600; }
+
+.step h2 { gap: 10px; }
+.step h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 600 15px var(--font-body); flex: none; }
+.card p, .card li { max-width: 76ch; }
+.card ol, .card ul.plain { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.stmt { font-size: 16px; line-height: 1.65; }
+.note { font-size: 14px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.tag { font: 600 12px var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.niv-badge { display: inline-block; font: 600 12px var(--font-data); border: 1px solid var(--line); border-radius: 99px; padding: 1px 10px; color: var(--muted); }
+
+/* Questions */
+fieldset.q { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+fieldset.q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom: 8px; line-height: 1.5; }
+.opts { display: grid; gap: 6px; }
+.opt { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; line-height: 1.4; }
+.opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--info-bg); }
+.fb ul { margin: 6px 0 0; padding-left: 20px; }
+textarea.proto { width: 100%; min-height: 120px; font: 400 15px/1.5 var(--font-body); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); resize: vertical; }
+.chk { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 6px 0; line-height: 1.4; cursor: pointer; }
+.chk input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; margin-top: 1px; }
+
+/* Scènes */
+.stagebar { gap: 10px 14px; }
+.ctl { padding: 12px 14px 14px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
+.ctlgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 22px; align-items: start; }
+.ctl .lab { font: 600 14px var(--font-body); margin-bottom: 6px; display: block; }
+.cv canvas.grab { cursor: grab; touch-action: none; }
+.cv canvas.pt { cursor: col-resize; touch-action: none; }
+.cv canvas:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.legend .lg i.d1 { background: #6BB4E8; } .legend .lg i.d2 { background: #FFC24A; } .legend .lg i.pt { background: #C084FC; }
+.legend .lg i.sq { width: 12px; height: 12px; border-radius: 50%; }
+.legend .lg i.ln { height: 4px; }
+.legend .lg i.dash { background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); }
+.readouts.three { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.big-btn { min-height: 48px; font-size: 16px; }
+.nin { min-height: 44px; font: 600 17px var(--font-data); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+
+table.compar { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.compar caption { text-align: left; font: 600 16px var(--font-head); padding: 0 0 8px; }
+table.compar th, table.compar td { padding: 7px 10px; border-top: 1px solid var(--line); text-align: left; }
+table.compar td:nth-child(n+2), table.compar th:nth-child(n+2) { text-align: right; white-space: nowrap; }
+table.compar th { font: 600 13px var(--font-data); color: var(--muted); background: var(--bg); }
+table.compar tr.ref td { font-weight: 700; color: var(--accent); }
+.resbox { display: grid; gap: 10px; }
+.resline { font: 500 16px/1.7 var(--font-data); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.resline b { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="ondes">Ondes et signaux · Seconde</p>
+    <h1>Mesurer la vitesse de propagation du son</h1>
+    <p class="sub">Un son ne se propage pas instantanément. Tu pars d’une mesure historique avec un canon, puis tu réalises toi-même la mesure avec des ultrasons : deux récepteurs, une console d’acquisition, un tableau de mesures et un graphe. À la fin, tu compares ton résultat à la valeur de référence.</p>
+  </header>
+
+  <noscript><p class="note">Cette simulation a besoin de JavaScript pour fonctionner.</p></noscript>
+
+  <main id="sim" class="wrap" style="gap:16px">
+
+    <section class="card" aria-labelledby="h-niv">
+      <h2 id="h-niv">Choisis ton niveau d’autonomie</h2>
+      <div class="tabs" id="niv" role="group" aria-label="Niveau d’autonomie">
+        <button class="tab" data-mode="1" type="button">Pas à pas</button>
+        <button class="tab" data-mode="2" type="button">Guidé</button>
+        <button class="tab" data-mode="3" type="button">Autonome</button>
+      </div>
+      <p class="help" id="niv-desc" aria-live="polite"></p>
+    </section>
+
+    <div class="progress" id="progress" aria-label="Avancement des étapes"></div>
+
+    <div class="tabs" id="steps" role="group" aria-label="Choisir une étape">
+      <button class="tab" data-mode="1" type="button">1 · Mesure historique</button>
+      <button class="tab" data-mode="2" type="button">2 · Protocole</button>
+      <button class="tab" data-mode="3" type="button">3 · Mesurer</button>
+      <button class="tab" data-mode="4" type="button">4 · Exploiter</button>
+      <button class="tab" data-mode="5" type="button">5 · Synthèse</button>
+    </div>
+
+    <!-- ================= ÉTAPE 1 ================= -->
+    <section class="stack step" id="s1" aria-labelledby="h-s1">
+      <div class="card">
+        <h2 id="h-s1"><span class="num">1</span>Une mesure historique : le canon de 1822</h2>
+        <p class="stmt">Dans la nuit du 21 au 22 juin 1822, par une température de 15,9 °C, les physiciens F. Arago, L.-J. Gay-Lussac et G. de Prony tirent des coups de canon entre deux lieux distants de <b>L = 18 612 m</b>. Entre l’instant où ils aperçoivent la lumière de l’explosion et celui où ils entendent le son, ils mesurent au chronomètre une durée <b>Δt = 54,6 s</b>.</p>
+        <p class="note">Cette expérience a été réalisée par ordre du Bureau des longitudes.</p>
+      </div>
+
+      <section class="stage" aria-label="Scène du canon">
+        <div class="stagebar">
+          <div class="row">
+            <button type="button" class="primary big-btn" id="b-canon">Tirer le coup de canon</button>
+            <button type="button" id="b-canon-r">Recommencer</button>
+          </div>
+          <span class="help" id="canon-note">Chronomètre accéléré 6 fois pour ne pas attendre une minute.</span>
+        </div>
+        <div class="cv">
+          <canvas id="cv1" role="img" aria-label="Paysage vu de côté : un canon à gauche, un observateur avec un chronomètre à droite, à 18 612 mètres. À l’explosion, la lumière est vue immédiatement ; le son, représenté par des arcs qui s’éloignent du canon, met 54,6 secondes à arriver."></canvas>
+        </div>
+        <div class="ctl"><div class="readouts three" id="lcd1"></div></div>
+      </section>
+
+      <div class="card">
+        <span class="tag">À faire</span>
+        <div data-niv="1">
+          <ol>
+            <li>Tire le coup de canon et regarde l’ordre dans lequel l’observateur perçoit la lumière et le son.</li>
+            <li>Réponds à la question sur la lumière.</li>
+            <li>Écris la relation entre la vitesse v, la distance L et la durée Δt, puis calcule v.</li>
+          </ol>
+        </div>
+        <div data-niv="2"><p>Observe l’expérience, explique l’hypothèse faite sur la lumière, puis calcule la vitesse du son dans l’air lors de cette expérience.</p></div>
+        <div data-niv="3"><p>Détermine la vitesse du son dans l’air lors de cette expérience historique et justifie l’hypothèse qui rend ton calcul possible.</p></div>
+        <div id="q1"></div>
+        <div id="d1"></div>
+      </div>
+    </section>
+
+    <!-- ================= ÉTAPE 2 ================= -->
+    <section class="stack step" id="s2" aria-labelledby="h-s2" hidden>
+      <div class="card">
+        <h2 id="h-s2"><span class="num">2</span>Passer au laboratoire : quel protocole ?</h2>
+        <p class="stmt">Au laboratoire, on remplace le canon par un <b>émetteur d’ultrasons</b>. Les ultrasons sont des signaux sonores inaudibles pour l’oreille humaine : la salle reste silencieuse. L’émetteur peut produire des <b>salves</b> (de courts paquets d’ondes) ou un signal <b>continu</b>.</p>
+        <p><b>Matériel disponible :</b> un émetteur d’ultrasons (40 kHz) avec son générateur, deux récepteurs R<sub>1</sub> et R<sub>2</sub>, un rail gradué, une console d’acquisition reliée à un ordinateur, un thermomètre.</p>
+      </div>
+      <div class="card">
+        <span class="tag">À faire</span>
+        <div data-niv="1">
+          <p>Lis le protocole proposé, puis réponds aux deux questions pour comprendre pourquoi il est construit ainsi.</p>
+          <ol>
+            <li>Place les deux récepteurs face à l’émetteur, sur le rail.</li>
+            <li>Règle l’émetteur sur « salves ».</li>
+            <li>Déclenche une acquisition : la console enregistre les deux signaux reçus.</li>
+            <li>Repère le début de chaque salve avec le pointeur : tA pour R<sub>1</sub>, tB pour R<sub>2</sub>. Calcule Δt = tB − tA.</li>
+            <li>Mesure la distance d entre R<sub>1</sub> et R<sub>2</sub> sur le rail.</li>
+            <li>Recommence pour six distances différentes, puis exploite le tableau.</li>
+          </ol>
+        </div>
+        <div data-niv="2"><p>À l’aide du matériel décrit, réponds aux questions pour construire le protocole qui permet de déterminer la vitesse du son dans l’air.</p></div>
+        <div data-niv="3">
+          <p>À l’aide du matériel décrit, élabore un protocole expérimental permettant de déterminer la vitesse du son dans l’air. Décris-le avec du texte (matériel, étapes, grandeurs mesurées, nombre de mesures). Un schéma sur papier est un bon complément.</p>
+          <label for="proto" class="lab" style="font-weight:600">Mon protocole</label>
+          <textarea class="proto" id="proto" placeholder="Pour déterminer la vitesse du son, je mesure… Je place… Je répète…"></textarea>
+          <p class="help" id="proto-st" aria-live="polite"></p>
+        </div>
+        <div data-niv="1 2" id="q2"></div>
+        <p class="note" data-niv="3">Pas de correction automatique pour un texte libre : compare ton protocole avec celui d’un camarade, ou demande à ton professeur de le relire. Tu peux aussi passer à l’étape 3 pour le tester.</p>
+      </div>
+    </section>
+
+    <!-- ================= ÉTAPE 3 ================= -->
+    <section class="stack step" id="s3" aria-labelledby="h-s3" hidden>
+      <div class="card">
+        <h2 id="h-s3"><span class="num">3</span>Mesurer la durée de propagation entre deux récepteurs</h2>
+        <div data-niv="1">
+          <ol>
+            <li>Place R<sub>1</sub> et R<sub>2</sub> face à l’émetteur E (curseurs, ou glisse les récepteurs sur le rail). Commence avec d = 5 cm.</li>
+            <li>Vérifie que l’émetteur est en mode « salves ».</li>
+            <li>Choisis la durée d’acquisition (5 ms pour commencer) et appuie sur « Acquérir ».</li>
+            <li>Place le pointeur au début de la salve de la voie 1 et appuie sur « Noter tA ». Fais de même pour la voie 2 (tB).</li>
+            <li>Ajoute la mesure au tableau, puis recommence pour d = 10, 15, 20, 25 et 30 cm.</li>
+          </ol>
+          <div class="row"><button type="button" id="b-next">Placer R₂ pour la prochaine distance</button><span class="help" id="next-note" aria-live="polite"></span></div>
+        </div>
+        <div data-niv="2"><p class="stmt">Mesure la durée Δt de propagation du signal entre R<sub>1</sub> et R<sub>2</sub> pour les distances d = 5, 10, 15, 20, 25 et 30 cm. Repère le début de chaque salve avec le pointeur.</p></div>
+        <div data-niv="3"><p class="stmt">Détermine, avec le dispositif, la durée de propagation entre les deux récepteurs pour plusieurs distances que tu choisis (au moins cinq, bien réparties). Les réglages de l’émetteur et de la console sont à ta charge. Tu peux refaire une même distance pour voir si le résultat change.</p></div>
+        <div id="q3"></div>
+      </div>
+
+      <section class="stage" aria-label="Banc d’ultrasons">
+        <div class="stagebar">
+          <span class="lab" style="margin:0;font:600 15px var(--font-body)">Le montage</span>
+          <span class="help" id="bench-note">Glisse R₁ et R₂ sur le rail, ou utilise les curseurs.</span>
+        </div>
+        <div class="cv">
+          <canvas id="cv-b" class="grab" role="img" aria-label="Rail gradué de 0 à 70 centimètres. L’émetteur E est fixé à 5 centimètres. Les deux récepteurs R1 et R2, tournés vers l’émetteur, se déplacent sur le rail avec la souris ou le doigt, ou avec les deux curseurs placés sous le schéma. La distance d entre R1 et R2 est indiquée par une double flèche."></canvas>
+        </div>
+        <div class="legend">
+          <span class="lg" style="color:var(--c-position)"><i class="ln"></i>Distance d entre R₁ et R₂</span>
+          <span class="lg" style="color:var(--muted)"><i class="ln dash"></i>Repère de lecture sur la règle</span>
+          <span class="lg" id="slow-note" style="color:var(--muted)">Pendant l’acquisition, la propagation est ralentie 1 000 fois.</span>
+        </div>
+        <div class="ctl">
+          <div class="ctlgrid">
+            <div id="sl-x1"></div>
+            <div id="sl-x2"></div>
+            <div>
+              <span class="lab" id="lab-mode">Mode de l’émetteur</span>
+              <div class="tabs" id="mode" role="group" aria-labelledby="lab-mode">
+                <button class="tab" data-mode="salves" type="button">Salves</button>
+                <button class="tab" data-mode="continu" type="button">Continu</button>
+              </div>
+              <div id="bruit-hote"></div>
+            </div>
+          </div>
+          <div class="readouts three" id="lcd-pos"></div>
+        </div>
+      </section>
+
+      <section class="stage" aria-label="Console d’acquisition">
+        <div class="stagebar">
+          <span class="lab" style="margin:0;font:600 15px var(--font-body)">La console d’acquisition</span>
+          <span class="help">501 points sont enregistrés sur la durée choisie.</span>
+        </div>
+        <div class="cv">
+          <canvas id="cv-s" class="pt" tabindex="0" role="img" aria-label="Écran de la console d’acquisition à deux voies : voie 1 pour le récepteur R1 en haut, voie 2 pour le récepteur R2 en bas, avec un axe des temps en microsecondes. Un pointeur vertical se déplace avec la souris, le doigt, le curseur placé sous l’écran ou les flèches gauche et droite du clavier ; le temps au pointeur est affiché dans l’afficheur."></canvas>
+        </div>
+        <div class="legend">
+          <span class="lg" style="color:#6BB4E8"><i class="d1"></i>Voie 1 : récepteur R₁</span>
+          <span class="lg" style="color:#B8860B"><i class="d2"></i>Voie 2 : récepteur R₂</span>
+          <span class="lg" style="color:#8E4FD6"><i class="pt"></i>Pointeur</span>
+        </div>
+        <div class="ctl">
+          <div class="ctlgrid">
+            <div>
+              <span class="lab" id="lab-T">Durée d’acquisition</span>
+              <div class="tabs" id="win" role="group" aria-labelledby="lab-T">
+                <button class="tab" data-mode="500" type="button">0,5 ms</button>
+                <button class="tab" data-mode="1000" type="button">1 ms</button>
+                <button class="tab" data-mode="2000" type="button">2 ms</button>
+                <button class="tab" data-mode="5000" type="button">5 ms</button>
+              </div>
+            </div>
+            <div class="row" style="align-self:end"><button type="button" class="primary big-btn" id="b-acq">● Acquérir</button></div>
+            <div id="sl-ptr"></div>
+          </div>
+          <div class="readouts three" id="lcd-t"></div>
+          <div class="row">
+            <button type="button" id="b-tA">Noter tA (voie 1)</button>
+            <button type="button" id="b-tB">Noter tB (voie 2)</button>
+            <button type="button" class="primary" id="b-add">Ajouter la mesure au tableau</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="obs" id="obs3" aria-live="polite" data-tone="info">
+        <h2>Observation</h2>
+        <p data-obs-text>Place les récepteurs, puis appuie sur « Acquérir ».</p>
+      </section>
+    </section>
+
+    <!-- ================= TABLEAU (étapes 3 et 4) ================= -->
+    <section id="tablesec" hidden aria-label="Tableau de mesures"><div id="tableau"></div></section>
+
+    <!-- ================= ÉTAPE 4 ================= -->
+    <section class="stack step" id="s4" aria-labelledby="h-s4" hidden>
+      <div class="card">
+        <h2 id="h-s4"><span class="num">4</span>Exploiter les mesures : deux méthodes</h2>
+        <p class="note" id="s4-empty">Il faut au moins 4 mesures dans le tableau (étape 3) pour exploiter les résultats.</p>
+        <div data-niv="1"><p>Méthode 1 : calcule v pour une mesure, puis la moyenne des vitesses du tableau. Méthode 2 : place les points sur un graphe d = f(Δt), ajuste la droite et lis la vitesse.</p></div>
+        <div data-niv="2 3"><p>Détermine la vitesse des ultrasons dans l’air par deux méthodes, puis compare-les.</p></div>
+      </div>
+
+      <div id="s4-body" class="stack" hidden>
+        <article class="card" aria-labelledby="h-m1">
+          <h3 id="h-m1">Méthode 1 : une vitesse par distance, puis la moyenne</h3>
+          <p class="help" data-niv="1 2">Convertis d en mètres (1 cm = 10⁻² m) et Δt en secondes (1 µs = 10⁻⁶ s) avant de diviser.</p>
+          <div id="m1-ex"></div>
+          <p class="help">La colonne « v » du tableau a été calculée de la même façon pour chaque ligne, comme le ferait un tableur.</p>
+          <div id="m1-mean"></div>
+          <div class="resbox" id="m1-res" hidden>
+            <div class="readouts three" id="lcd-m1"></div>
+            <p class="resline" id="m1-line"></p>
+            <p class="help">L’écart-type s mesure la dispersion des valeurs. L’incertitude-type de la moyenne vaut u(v) = s / √n, où n est le nombre de valeurs. Le résultat s’écrit v = valeur ± u(v).</p>
+          </div>
+        </article>
+
+        <article class="card" aria-labelledby="h-m2">
+          <h3 id="h-m2">Méthode 2 : le graphe d = f(Δt)</h3>
+          <div id="q4a"></div>
+          <div class="stage">
+            <div class="cv"><canvas id="cv-g" role="img" aria-label="Graphe de la distance d en mètres en fonction de la durée Δt en millisecondes. Chaque mesure du tableau est un point. Une droite passant par l’origine se règle avec le curseur du coefficient directeur."></canvas></div>
+            <div class="legend">
+              <span class="lg" style="color:var(--c-position)"><i class="sq"></i>Mesures</span>
+              <span class="lg" style="color:var(--c-vitesse)"><i class="ln"></i>Ta droite</span>
+              <span class="lg" style="color:var(--ink)"><i class="ln dash"></i>Modélisation (ajustement)</span>
+            </div>
+            <div class="ctl">
+              <div id="sl-k"></div>
+              <div class="readouts three" id="lcd-g"></div>
+              <div class="row"><button type="button" class="primary" id="b-fit">Modéliser (comme le logiciel)</button></div>
+              <p class="obs" id="obs4" aria-live="polite" data-tone="info" style="padding:12px 14px"><span data-obs-text>Règle la droite pour qu’elle passe au plus près des points : l’écart quadratique moyen doit devenir le plus petit possible.</span></p>
+            </div>
+          </div>
+          <div id="q4b"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= ÉTAPE 5 ================= -->
+    <section class="stack step" id="s5" aria-labelledby="h-s5" hidden>
+      <div class="card">
+        <h2 id="h-s5"><span class="num">5</span>Synthèse : comparer, interpréter, conclure</h2>
+        <p class="stmt">Pour de l’air entre −20 °C et 40 °C, la vitesse du son peut être calculée avec la relation <b>v<sub>son</sub> = 331,5 + 0,607 × θ</b> (θ en °C, v<sub>son</sub> en m/s).</p>
+        <div class="readouts three" id="lcd-th"></div>
+        <p class="help">Le thermomètre de la salle est lu à ± 0,1 °C environ.</p>
+        <div id="d5-th"></div>
+      </div>
+
+      <div class="card">
+        <h3>Comparer les résultats</h3>
+        <p class="note" id="cmp-empty">Termine d’abord l’étape 4 (au moins la méthode 1 et la modélisation) pour afficher la comparaison.</p>
+        <div id="cmp-body" hidden>
+          <div class="cv"><canvas id="cv-c" role="img" aria-label="Axe des vitesses en mètres par seconde. La valeur obtenue par la méthode 1 est un point avec une barre d’incertitude, la valeur de la méthode 2 est un losange, la valeur théorique est une ligne verticale en pointillés."></canvas></div>
+          <p class="resline" id="cmp-line" aria-live="polite"></p>
+          <p class="help">Quand les valeurs sont proches et que les barres d’incertitude se recouvrent, on dit que les résultats sont compatibles. Si ce n’est pas le cas, cherche une source d’erreur.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Interpréter</h3>
+        <div id="q5a"></div>
+        <div id="q5b"></div>
+      </div>
+
+      <div class="card">
+        <h3>Comparer à d’autres vitesses</h3>
+        <table class="compar">
+          <caption>Ordres de grandeur de quelques vitesses</caption>
+          <thead><tr><th scope="col">Situation</th><th scope="col">Valeur (m/s)</th><th scope="col">Rapport à la vitesse du son</th></tr></thead>
+          <tbody id="vit-body"></tbody>
+        </table>
+        <div id="q5c"></div>
+        <div id="d5-orage"></div>
+      </div>
+
+      <div class="card">
+        <h3>Je réussis si…</h3>
+        <label class="chk"><input type="checkbox"> Je sais réaliser le montage expérimental.</label>
+        <label class="chk"><input type="checkbox"> Je détermine la distance parcourue par le signal et sa durée de parcours.</label>
+        <label class="chk"><input type="checkbox"> Je détermine la vitesse de propagation du son.</label>
+        <label class="chk"><input type="checkbox"> Je décris le protocole expérimental avec du texte et des schémas.</label>
+        <p class="help">Auto-évaluation : rien n’est enregistré ni envoyé.</p>
+      </div>
+    </section>
+
+    <details>
+      <summary>Pour aller plus loin</summary>
+      <ul>
+        <li>Modèle utilisé : le son se propage en ligne droite à la vitesse v = 331,5 + 0,607 θ (valeur « vraie » de la simulation). Les ultrasons de 40 kHz se propagent à la même vitesse que les sons audibles dans l’air.</li>
+        <li>L’électronique de l’émetteur introduit un retard inconnu. C’est pourquoi la vitesse se mesure avec la durée entre deux récepteurs, et non entre l’émetteur et un seul récepteur.</li>
+        <li>Les mesures sont bruitées comme au laboratoire (environ 0,5 % de la valeur). L’interrupteur « Modèle théorique » supprime ce bruit. La lecture du pointeur reste limitée à la résolution de la console : durée d’acquisition ÷ 500.</li>
+        <li>La distance d est lue sur la règle sans incertitude dans cette simulation. Au laboratoire, elle est connue à environ 1 mm.</li>
+        <li>Lien avec le programme de Seconde (Ondes et signaux) : « Mesurer la vitesse d’un signal sonore » et « Citer une valeur approchée de la vitesse de propagation d’un signal sonore dans l’air et la comparer à d’autres valeurs de vitesses couramment rencontrées ».</li>
+      </ul>
+      <div class="row" style="margin-top:10px"><button type="button" class="small" id="b-link">Copier le lien de cette situation</button><span class="status" id="link-st" aria-live="polite"></span></div>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d’accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/bruit.js"></script>   <!-- bruit de mesure commun : à charger AVANT le socle -->
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = Simulabo, h = S.h, $ = S.$, $$ = S.$$;
+
+  /* ---------------------------------------------------------------- Modèle physique */
+  var PER = 25;            // période du signal à 40 kHz (µs)
+  var BURST = 250;         // durée d'une salve : 10 périodes (µs)
+  var RISE = 50;           // montée et descente de l'enveloppe (µs)
+  var DELAY = 45;          // retard inconnu de l'électronique d'émission (µs)
+  var X_E = 5;             // position de l'émetteur sur le rail (cm)
+  var RAIL = 70;           // longueur du rail (cm)
+  var NPTS = 500;          // 501 points : indices 0 à 500
+  function vTheo(th) { return 331.5 + 0.607 * th; }
+  function env(u) { if (u < 0 || u > BURST) return 0; if (u < RISE) return u / RISE; if (u > BURST - RISE) return (BURST - u) / RISE; return 1; }
+  function amp(rcm) { return 0.95 * Math.pow(12 / Math.max(rcm, 12), 0.6); }
+  function sup(n) { var m = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" }; return String(n).split("").map(function (c) { return m[c] || c; }).join(""); }
+  function sci(x, d) { if (!isFinite(x) || x === 0) return "0"; var e = Math.floor(Math.log10(Math.abs(x))), m = x / Math.pow(10, e); var mr = Number(m.toFixed(d)); if (Math.abs(mr) >= 10) { mr /= 10; e += 1; } return S.fmt(mr, d) + "×10" + sup(e); }
+  function mean(a) { return a.reduce(function (s, x) { return s + x; }, 0) / a.length; }
+  function stats(a) { var n = a.length, m = mean(a), s = 0; if (n > 1) s = Math.sqrt(a.reduce(function (t, x) { return t + (x - m) * (x - m); }, 0) / (n - 1)); return { n: n, mean: m, s: s, u: n > 1 ? s / Math.sqrt(n) : 0 }; }
+  function withU(m, u) { if (!(u > 0)) return S.fmt(m, 0); var dec = Math.max(0, 1 - Math.floor(Math.log10(u))); return S.fmt(m, dec) + " ± " + S.fmt(u, dec); }
+
+  /* ---------------------------------------------------------------- État */
+  function randTheta() { return Math.round((17 + Math.random() * 9) * 2) / 2; }
+  var etat = S.shareState({ theta: randTheta(), niv: 2 });
+  var init = etat.read();
+  var st = {
+    niv: (init.niv === 1 || init.niv === 3) ? init.niv : 2,
+    theta: Math.min(35, Math.max(5, init.theta)),
+    x1: 20, x2: 40, mode: "salves", T: 5000,
+    acq: null, acqId: 0, idx: 0, tA: null, tB: null,
+    anim: null, busy: false, flags: {}, fit: false, thetaMes: 20
+  };
+  st.v = vTheo(st.theta);
+  var CHIPS = ["Mesure historique", "Protocole", "Mesures", "Exploitation", "Synthèse"];
+  function saveState() { var o = { theta: st.theta, niv: st.niv }; if (Bruit.theorique()) o.theo = 1; etat.write(o); }
+
+  var kS = 1;   // échelle des polices dans les canvas : grossit le texte quand le schéma est affiché petit (téléphone)
+  function setK(sel, max) { var el = $(sel), w = el ? el.getBoundingClientRect().width : 0; if (!w) w = 1000; kS = Math.min(max || 2, Math.max(1, 700 / w)); }
+  function fx(f) { return f.replace(/(\d+(?:\.\d+)?)px/, function (m, n) { return Math.round(n * kS) + "px"; }); }
+  function rrect(ctx, x, y, w, hh, r) { if (ctx.roundRect) ctx.roundRect(x, y, w, hh, r); else ctx.rect(x, y, w, hh); }
+
+  /* ---------------------------------------------------------------- Questions à choix unique */
+  var qn = 0;
+  function ask(host, q) {
+    host = $(host); if (!host) return;
+    var name = "q" + (++qn), inputs = [];
+    var fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+    var opts = h("div", { class: "opts" });
+    q.options.forEach(function (o, i) {
+      var inp = h("input", { type: "radio", name: name, id: name + "-" + i, value: String(i) });
+      inputs.push(inp);
+      opts.appendChild(h("label", { class: "opt", "for": name + "-" + i }, inp, h("span", { html: o.t })));
+    });
+    var btn = h("button", { type: "button", class: "primary", text: q.predict ? "Valider ma prédiction" : "Vérifier" });
+    host.appendChild(h("fieldset", { class: "q" }, h("legend", { html: q.legend }), opts, h("div", { class: "row" }, btn), fb));
+    function show(tone, html) { fb.hidden = false; fb.setAttribute("data-tone", tone); fb.innerHTML = html; }
+    btn.addEventListener("click", function () {
+      var k = -1; inputs.forEach(function (x, i) { if (x.checked) k = i; });
+      if (k < 0) { show("warn", "<b>À vérifier :</b> choisis une réponse."); return; }
+      var o = q.options[k];
+      if (q.predict) { show("info", "<b>Prédiction notée.</b> " + (o.fb || "")); st.flags[q.id] = true; progress(); return; }
+      if (o.ok) { show("ok", "<b>Bien vu.</b> " + (o.fb || "")); st.flags[q.id] = true; } else show("bad", "<b>Pas tout à fait.</b> " + (o.fb || ""));
+      progress();
+    });
+  }
+  function renderDefi(host, spec) { host = $(host); host.textContent = ""; if (spec) S.defi(host, spec); }
+
+  /* ---------------------------------------------------------------- Niveaux d'autonomie */
+  var NIV_TXT = {
+    1: "<b>Pas à pas</b> : le protocole est donné et chaque étape est détaillée. Tu réalises les mesures et les calculs.",
+    2: "<b>Guidé</b> : tu disposes d’un objectif par étape et de questions pour construire le protocole.",
+    3: "<b>Autonome</b> : tu disposes du matériel et d’un objectif. À toi d’élaborer le protocole, de le décrire, puis de le mettre en œuvre."
+  };
+  function applyLevel() {
+    $$("[data-niv]").forEach(function (el) { el.hidden = el.getAttribute("data-niv").split(" ").indexOf(String(st.niv)) < 0; });
+    $("#niv-desc").innerHTML = NIV_TXT[st.niv] + " Le niveau ne change pas l’expérience, seulement l’aide fournie.";
+    progress(); saveState();
+  }
+  S.tabs("#niv", function (v) { st.niv = Number(v); applyLevel(); }, String(st.niv));
+
+  /* ---------------------------------------------------------------- ÉTAPE 1 : le canon */
+  var L1 = 18612, DT1 = 54.6;
+  var lcdChrono = S.readout("#lcd1", { label: "Chronomètre de l’observateur", unit: "s", digits: 1 });
+  var lcdL = S.readout("#lcd1", { label: "Distance canon – observateur L", unit: "m", digits: 0 }); lcdL.set("18 612");
+  var an1 = { t: 0, running: false, started: false };
+  var cv1 = S.canvas("#cv1", { width: 1000, height: 250, draw: draw1 });
+  function draw1(ctx, W, H) {
+    setK("#cv1", 1.8);
+    var ink = S.cssVar("--ink"), muted = S.cssVar("--muted"), line = S.cssVar("--line"), tond = S.cssVar("--t-ondes"), fb = S.cssVar("--font-body"), sur = S.cssVar("--surface");
+    var gy = 190, xc = 90, xo = 900, flash = "#E8A317";
+    ctx.fillStyle = S.cssVar("--bg"); ctx.fillRect(0, gy, W, H - gy);
+    ctx.strokeStyle = line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+    // arcs sonores
+    var R = (an1.t / DT1) * (xo - xc - 22);
+    if (an1.started && R > 2) {
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 20, W, gy - 20); ctx.clip();
+      for (var k = 0; k < 3; k++) {
+        var r = R - k * 22; if (r <= 2) continue;
+        ctx.strokeStyle = tond; ctx.globalAlpha = 1 - k * 0.3; ctx.lineWidth = 4 - k;
+        ctx.beginPath(); ctx.arc(xc + 28, gy - 36, r, -1.0, 1.0); ctx.stroke();
+      }
+      ctx.restore(); ctx.globalAlpha = 1;
+    }
+    // canon
+    ctx.fillStyle = ink; ctx.save(); ctx.translate(xc + 28, gy - 36); ctx.rotate(-0.12);
+    ctx.fillRect(-52, -10, 80, 20); ctx.restore();
+    ctx.beginPath(); ctx.arc(xc - 6, gy - 16, 16, 0, 6.3); ctx.fill();
+    ctx.fillStyle = sur; ctx.beginPath(); ctx.arc(xc - 6, gy - 16, 6, 0, 6.3); ctx.fill();
+    // éclair de lumière : vu aussitôt par l'observateur
+    if (an1.started && an1.t < 4) {
+      ctx.strokeStyle = flash; ctx.lineWidth = 4;
+      [[xc + 40, gy - 40], [xo, gy - 120]].forEach(function (p) {
+        for (var a = 0; a < 8; a++) { var th = a * Math.PI / 4; ctx.beginPath(); ctx.moveTo(p[0] + Math.cos(th) * 12, p[1] + Math.sin(th) * 12); ctx.lineTo(p[0] + Math.cos(th) * 30, p[1] + Math.sin(th) * 30); ctx.stroke(); }
+      });
+      ctx.fillStyle = flash; ctx.font = fx("600 14px " + fb); ctx.textAlign = "center"; ctx.fillText("lumière vue aussitôt", xo, gy - 160);
+    }
+    // observateur
+    ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(xo, gy - 92, 11, 0, 6.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(xo, gy - 81); ctx.lineTo(xo, gy - 40); ctx.moveTo(xo, gy - 40); ctx.lineTo(xo - 12, gy); ctx.moveTo(xo, gy - 40); ctx.lineTo(xo + 12, gy);
+    ctx.moveTo(xo, gy - 70); ctx.lineTo(xo - 22, gy - 56); ctx.stroke();
+    ctx.strokeStyle = muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(xo - 26, gy - 54, 7, 0, 6.3); ctx.stroke();
+    ctx.fillStyle = muted; ctx.font = fx("500 14px " + fb); ctx.textAlign = "center";
+    ctx.fillText("Canon", xc + 6, gy + 24); ctx.fillText("Observateur", xo, gy + 24);
+    // cote
+    ctx.strokeStyle = S.cssVar("--c-position"); ctx.fillStyle = S.cssVar("--c-position"); ctx.lineWidth = 2;
+    var yy = 226; ctx.beginPath(); ctx.moveTo(xc, yy); ctx.lineTo(xo, yy); ctx.moveTo(xc, yy - 6); ctx.lineTo(xc, yy + 6); ctx.moveTo(xo, yy - 6); ctx.lineTo(xo, yy + 6); ctx.stroke();
+    ctx.font = fx("600 15px " + fb); ctx.fillText("L = 18 612 m", (xc + xo) / 2, yy - 8);
+  }
+  var loop1 = S.loop(function (dt) {
+    an1.t = Math.min(DT1, an1.t + dt * 6);
+    lcdChrono.set(an1.t); cv1.redraw();
+    if (an1.t >= DT1) { loop1.stop(); an1.running = false; $("#b-canon").disabled = false; st.flags.seen1 = true; }
+  });
+  function canon() {
+    if (an1.running) return;
+    an1.started = true; an1.t = 0; an1.running = true; $("#b-canon").disabled = true;
+    if (S.reducedMotion) { an1.t = DT1; an1.running = false; $("#b-canon").disabled = false; lcdChrono.set(an1.t); cv1.redraw(); return; }
+    loop1.start();
+  }
+  $("#b-canon").addEventListener("click", canon);
+  $("#b-canon-r").addEventListener("click", function () { loop1.stop(); an1.running = false; an1.started = false; an1.t = 0; $("#b-canon").disabled = false; lcdChrono.set(0); cv1.redraw(); });
+  lcdChrono.set(0);
+
+  var tLum = L1 / 3.00e8;
+  ask("#q1", { id: "q1", legend: "<b>Question 1.</b> Quelle hypothèse fait-on sur la propagation de la lumière dans cette expérience ?", options: [
+    { t: "La lumière se propage pratiquement instantanément : sa durée de propagation est négligeable devant 54,6 s.", ok: true, fb: "À 3,00×10⁸ m/s, la lumière parcourt 18 612 m en " + sci(tLum, 1) + " s, soit environ un millionième de la durée mesurée. Δt est donc bien la durée de propagation du son seul." },
+    { t: "La lumière se propage aussi lentement que le son.", fb: "Si c’était le cas, l’observateur verrait l’éclair en même temps qu’il entend le bruit. Or il voit d’abord la lumière, puis il entend le son." },
+    { t: "La lumière se propage plus lentement que le son.", fb: "Alors l’observateur entendrait le canon avant de voir l’éclair. Ce n’est pas ce que l’on observe." }
+  ] });
+  renderDefi("#d1", {
+    question: "<b>Question 2.</b> Calcule la vitesse du son dans l’air lors de cette expérience (L = 18 612 m, Δt = 54,6 s).", unit: "m/s", answer: L1 / DT1, tolerance: 0.006,
+    hint: "La vitesse est le quotient de la distance parcourue par la durée du parcours : v = L / Δt.",
+    explain: "v = L / Δt = 18 612 m / 54,6 s ≈ 341 m/s. À 15,9 °C, la valeur de référence est voisine.",
+    onResult: function (ok) { if (ok) { st.flags.c1 = true; progress(); } }
+  });
+
+  /* ---------------------------------------------------------------- ÉTAPE 2 : protocole */
+  ask("#q2", { id: "q2a", legend: "<b>Question 1.</b> Pour déterminer la vitesse de propagation du son, quelles grandeurs faut-il mesurer ?", options: [
+    { t: "La distance parcourue par le signal et la durée de propagation.", ok: true, fb: "On utilise v = d / Δt." },
+    { t: "La fréquence du signal et la masse volumique de l’air.", fb: "Ces grandeurs ne permettent pas de calculer directement une vitesse de propagation." },
+    { t: "L’intensité sonore et la distance.", fb: "L’intensité sonore ne donne pas la durée de propagation." }
+  ] });
+  ask("#q2", { id: "q2b", legend: "<b>Question 2.</b> Pourquoi place-t-on deux récepteurs plutôt qu’un seul ?", options: [
+    { t: "Pour mesurer la durée entre les deux détections : on n’a pas besoin de connaître l’instant exact où le signal quitte l’émetteur.", ok: true, fb: "L’instant d’émission n’est pas repérable avec précision. Le retard inconnu de l’émetteur est le même pour les deux récepteurs : il disparaît dans la différence tB − tA." },
+    { t: "Pour que le signal reçu soit deux fois plus fort.", fb: "Les deux récepteurs ne s’additionnent pas : chacun a sa voie sur la console." },
+    { t: "Parce que l’émetteur ne fonctionne qu’avec deux récepteurs.", fb: "Un seul récepteur fonctionne. Mais on ne saurait pas à quel instant exact le signal est parti." }
+  ] });
+  var proto = $("#proto");
+  proto.addEventListener("input", function () { var n = proto.value.trim().length; $("#proto-st").textContent = n >= 60 ? "Protocole rédigé. Tu peux le tester à l’étape 3." : "Continue : décris le matériel, les étapes, les grandeurs mesurées."; progress(); });
+
+  /* ---------------------------------------------------------------- ÉTAPE 3 : le banc */
+  var X0 = 50, XS = 900 / RAIL;                       // abscisse logique du 0 cm et pixels par cm
+  function xpx(cm) { return X0 + cm * XS; }
+  var slX1 = S.slider("#sl-x1", { label: "Position de R₁ sur le rail", unit: "cm", min: 10, max: 45, step: 0.5, value: st.x1, digits: 1, bounds: true, onInput: function (v) { setPos(1, v); } });
+  var slX2 = S.slider("#sl-x2", { label: "Position de R₂ sur le rail", unit: "cm", min: 13, max: 70, step: 0.5, value: st.x2, digits: 1, bounds: true, onInput: function (v) { setPos(2, v); } });
+  var lcdX1 = S.readout("#lcd-pos", { label: "Position de R₁", unit: "cm", digits: 1 });
+  var lcdX2 = S.readout("#lcd-pos", { label: "Position de R₂", unit: "cm", digits: 1 });
+  var lcdD = S.readout("#lcd-pos", { label: "Distance d = x₂ − x₁", unit: "cm", digits: 1 });
+  function setPos(which, v) {
+    v = Math.round(v * 2) / 2;
+    if (which === 1) { st.x1 = Math.min(45, Math.max(10, v)); if (st.x2 < st.x1 + 3) st.x2 = st.x1 + 3; }
+    else { st.x2 = Math.min(RAIL, Math.max(st.x1 + 3, v)); }
+    slX1.set(st.x1, true); slX2.set(st.x2, true);
+    lcdX1.set(st.x1); lcdX2.set(st.x2); lcdD.set(st.x2 - st.x1);
+    cvB.redraw(); cvS.redraw();
+  }
+
+  var cvB = S.canvas("#cv-b", { width: 1000, height: 250, draw: drawBench });
+  function drawBench(ctx, W, H) {
+    setK("#cv-b", 1.5);
+    var ink = S.cssVar("--ink"), muted = S.cssVar("--muted"), line = S.cssVar("--line"), sur = S.cssVar("--surface"), bg = S.cssVar("--bg"),
+      acc = S.cssVar("--accent"), pos = S.cssVar("--c-position"), okc = S.cssVar("--ok"), okbg = S.cssVar("--ok-bg"), tond = S.cssVar("--t-ondes"), fb = S.cssVar("--font-body"), fd = S.cssVar("--font-data");
+    var yb = 114, hb = 50, wb = 36;
+    // générateur et console
+    ctx.fillStyle = muted; ctx.font = fx("500 12px " + fb); ctx.textAlign = "left"; ctx.fillText("Générateur · " + st.mode, 34, 13);
+    ctx.textAlign = "right"; ctx.fillText("Console d’acquisition", 966, 13); ctx.textAlign = "left";
+    ctx.fillStyle = sur; ctx.strokeStyle = line; ctx.lineWidth = 1.5;
+    [[34, 20, 172, 46], [794, 20, 172, 46]].forEach(function (r) { ctx.beginPath(); rrect(ctx, r[0], r[1], r[2], r[3], 6); ctx.fill(); ctx.stroke(); });
+    ctx.fillStyle = S.cssVar("--lcd-bg"); ctx.fillRect(44, 28, 152, 30); ctx.fillRect(804, 28, 152, 30);
+    var k0 = kS; kS = 1;   // textes des afficheurs : taille fixe, ils doivent tenir dans leur cadre
+    ctx.fillStyle = S.cssVar("--lcd-fg"); ctx.font = fx("600 17px " + fd); ctx.textAlign = "center"; ctx.fillText("40,000 kHz", 120, 50);
+    ctx.font = fx("500 13px " + fd); ctx.fillText("voie 1 · voie 2", 880, 49); kS = k0;
+    // fils
+    ctx.strokeStyle = muted; ctx.lineWidth = 2;
+    function wire(x0, y0, x1, y1) { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.bezierCurveTo(x0, y0 + 36, x1, y1 - 36, x1, y1); ctx.stroke(); }
+    wire(120, 66, xpx(X_E), yb); wire(850, 66, xpx(st.x1), yb); wire(910, 66, xpx(st.x2), yb);
+    // règle
+    ctx.fillStyle = sur; ctx.strokeStyle = line; ctx.lineWidth = 1.5; ctx.fillRect(X0 - 18, 172, 900 + 36, 34); ctx.strokeRect(X0 - 18, 172, 900 + 36, 34);
+    ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 1; ctx.font = fx("500 11px " + fd); ctx.textAlign = "center";
+    for (var c = 0; c <= RAIL; c++) { var xx = xpx(c), big = c % 5 === 0; ctx.beginPath(); ctx.moveTo(xx, 172); ctx.lineTo(xx, 172 + (big ? 13 : 7)); ctx.stroke(); if (big && c > 0) ctx.fillText(String(c), xx, 203); }
+    // paquet d'ondes en cours d'animation
+    var an = st.anim;
+    if (an) {
+      var rf = (an.t - DELAY) * st.v * 1e-6 * 100, lam = st.v / 40000 * 100;
+      for (var k = 0; k < 10; k++) {
+        var r = rf - k * lam; if (r < 0 || X_E + r > RAIL) continue;
+        var al = 0.15 + 0.85 * env(k * PER);
+        ctx.strokeStyle = tond; ctx.globalAlpha = al; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(xpx(X_E + r), 100); ctx.lineTo(xpx(X_E + r), 172); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    // récepteurs et émetteur
+    function box(x, label, face, lit) {
+      ctx.fillStyle = lit ? okbg : sur; ctx.strokeStyle = lit ? okc : ink; ctx.lineWidth = lit ? 3 : 2;
+      ctx.beginPath(); rrect(ctx, x - wb / 2, yb, wb, hb, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = ink; var fxp = face > 0 ? x + wb / 2 - 2 : x - wb / 2 - 8; ctx.fillRect(fxp, yb + 12, 10, 26);
+      ctx.fillStyle = ink; ctx.font = fx("600 15px " + fb); ctx.textAlign = "center"; ctx.fillText(label, x, yb - 8);
+    }
+    var litA = an && an.t - DELAY >= (st.x1 - X_E) / 100 / st.v * 1e6 && an.t - DELAY <= (st.x1 - X_E) / 100 / st.v * 1e6 + BURST;
+    var litB = an && an.t - DELAY >= (st.x2 - X_E) / 100 / st.v * 1e6 && an.t - DELAY <= (st.x2 - X_E) / 100 / st.v * 1e6 + BURST;
+    box(xpx(X_E), "E", 1, false); box(xpx(st.x1), "R₁", -1, litA); box(xpx(st.x2), "R₂", -1, litB);
+    // repères de lecture et cote d
+    ctx.strokeStyle = pos; ctx.fillStyle = pos; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+    [st.x1, st.x2].forEach(function (c) { ctx.beginPath(); ctx.moveTo(xpx(c), yb + hb); ctx.lineTo(xpx(c), 236); ctx.stroke(); });
+    ctx.setLineDash([]); ctx.lineWidth = 2;
+    var ya = 232, a = xpx(st.x1), b = xpx(st.x2);
+    ctx.beginPath(); ctx.moveTo(a, ya); ctx.lineTo(b, ya); ctx.moveTo(a, ya); ctx.lineTo(a + 9, ya - 5); ctx.moveTo(a, ya); ctx.lineTo(a + 9, ya + 5); ctx.moveTo(b, ya); ctx.lineTo(b - 9, ya - 5); ctx.moveTo(b, ya); ctx.lineTo(b - 9, ya + 5); ctx.stroke();
+    ctx.font = fx("italic 600 16px " + fb); ctx.textAlign = "center"; ctx.fillText("d", (a + b) / 2, ya - 7);
+    if (an) { ctx.fillStyle = muted; ctx.font = fx("500 12px " + fb); ctx.textAlign = "right"; ctx.fillText("ralenti ×1 000", W - 10, H - 6); }
+  }
+  // glisser les récepteurs
+  (function () {
+    var cvEl = $("#cv-b"), drag = 0;
+    cvEl.addEventListener("pointerdown", function (ev) {
+      var p = cvB.toLocal(ev); if (p.y < 100 || p.y > 175) return;
+      var d1 = Math.abs(p.x - xpx(st.x1)), d2 = Math.abs(p.x - xpx(st.x2));
+      if (Math.min(d1, d2) > 30) return;
+      drag = d2 <= d1 ? 2 : 1; cvEl.setPointerCapture(ev.pointerId); ev.preventDefault();
+    });
+    cvEl.addEventListener("pointermove", function (ev) { if (!drag) return; var p = cvB.toLocal(ev); setPos(drag, (p.x - X0) / XS); });
+    function end() { drag = 0; }
+    cvEl.addEventListener("pointerup", end); cvEl.addEventListener("pointercancel", end);
+  })();
+
+  /* console d'acquisition */
+  var PL = 24, PR = 980, PT = [34, 208], PH = 142;     // abscisses du tracé, ordonnées des deux voies
+  var cvS = S.canvas("#cv-s", { width: 1000, height: 400, draw: drawScreen });
+  function sampleSig(a, ch, t) {
+    var ta = ch === 1 ? a.ta1 : a.ta2, A = ch === 1 ? a.A1 : a.A2;
+    return a.mode === "continu" ? A * Math.sin(2 * Math.PI * (t - ta) / PER) : A * env(t - ta) * Math.sin(2 * Math.PI * (t - ta) / PER);
+  }
+  function drawScreen(ctx, W, H) {
+    setK("#cv-s", 2);
+    var fd = S.cssVar("--font-data"), fb = S.cssVar("--font-body"), a = st.acq, an = st.anim;
+    ctx.fillStyle = "#0F1A21"; ctx.beginPath(); rrect(ctx, 0, 0, W, H, 8); ctx.fill();
+    var T = a ? a.T : st.T;
+    ctx.strokeStyle = "rgba(255,255,255,.11)"; ctx.lineWidth = 1;
+    for (var i = 0; i <= 10; i++) { var gx = PL + i * (PR - PL) / 10; ctx.beginPath(); ctx.moveTo(gx, PT[0]); ctx.lineTo(gx, PT[1] + PH); ctx.stroke(); }
+    ctx.fillStyle = "#8FA3AF"; ctx.font = fx("500 13px " + fd); ctx.textAlign = "center";
+    for (i = 0; i <= 10; i += 2) { ctx.fillText(S.fmt(i * T / 10, 0), PL + i * (PR - PL) / 10, PT[1] + PH + 24); }
+    ctx.textAlign = "right"; ctx.fillText("t (µs)", W - 6, H - 8);
+    var cols = ["#6BB4E8", "#FFC24A"], names = ["Voie 1 · R₁", "Voie 2 · R₂"];
+    [0, 1].forEach(function (c) {
+      var top = PT[c], yc = top + PH / 2;
+      ctx.strokeStyle = "rgba(255,255,255,.2)"; ctx.beginPath(); ctx.moveTo(PL, yc); ctx.lineTo(PR, yc); ctx.stroke();
+      ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.strokeRect(PL, top, PR - PL, PH);
+      ctx.fillStyle = cols[c]; ctx.font = fx("600 13px " + fb); ctx.textAlign = "left"; ctx.fillText(names[c], PL + 8, top + 18 * kS);
+    });
+    if (!a || an) {
+      ctx.fillStyle = "#C9D4DA"; ctx.font = fx("600 17px " + fb); ctx.textAlign = "center";
+      ctx.fillText(an ? "Acquisition en cours…" : "Aucune acquisition : place les récepteurs puis appuie sur « Acquérir »", (PL + PR) / 2, (PT[0] + PT[1] + PH) / 2);
+      if (!a) return; if (an) return;
+    }
+    var stale = a.x1 !== st.x1 || a.x2 !== st.x2;
+    ctx.save(); if (stale) ctx.globalAlpha = 0.3;
+    [1, 2].forEach(function (ch) {
+      var yc = PT[ch - 1] + PH / 2, sc = PH / 2 - 8, A = ch === 1 ? a.A1 : a.A2;
+      ctx.strokeStyle = cols[ch - 1]; ctx.lineWidth = 1.6; ctx.beginPath();
+      for (var px = PL; px <= PR; px++) {
+        var t = (px - PL) / (PR - PL) * a.T, v = sampleSig(a, ch, t);
+        v = Bruit.appliquer(v, A, a.id * 7919 + ch * 104729 + px);
+        var y = yc - v * sc; if (px === PL) ctx.moveTo(px, y); else ctx.lineTo(px, y);
+      }
+      ctx.stroke();
+    });
+    ctx.restore();
+    ctx.fillStyle = "#8FA3AF"; ctx.font = fx("500 12px " + fb); ctx.textAlign = "left";
+    ctx.fillText("Acquisition n° " + a.id + " · " + S.fmt(a.T / 1000, a.T === 500 ? 1 : 0) + " ms · " + a.mode + " · pas " + S.fmt(a.T / NPTS, 0) + " µs", PL + 6, H - 8);
+    if (stale) { ctx.fillStyle = "#FFC24A"; ctx.font = fx("600 15px " + fb); ctx.textAlign = "center"; ctx.fillText("Les récepteurs ont bougé : refais une acquisition", (PL + PR) / 2, PT[1] + PH / 2 - 2); }
+    // marques tA et tB déjà notées
+    function mark(t, c, lab) { if (t == null) return; var x = PL + t / a.T * (PR - PL); ctx.strokeStyle = "#C084FC"; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, PT[c]); ctx.lineTo(x, PT[c] + PH); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = "#C084FC"; ctx.font = fx("700 13px " + fb); ctx.textAlign = "left"; ctx.fillText(lab, x + 4, PT[c] + PH - 6); }
+    mark(st.tA, 0, "tA"); mark(st.tB, 1, "tB");
+    // pointeur
+    var xp = PL + st.idx / NPTS * (PR - PL);
+    ctx.strokeStyle = "#C084FC"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(xp, PT[0] - 8); ctx.lineTo(xp, PT[1] + PH); ctx.stroke();
+    ctx.fillStyle = "#C084FC"; ctx.beginPath(); ctx.moveTo(xp - 7, PT[0] - 8); ctx.lineTo(xp + 7, PT[0] - 8); ctx.lineTo(xp, PT[0] + 2); ctx.fill();
+  }
+  var slPtr = S.slider("#sl-ptr", { label: "Pointeur (numéro du point, de 0 à 500)", unit: "", min: 0, max: NPTS, step: 1, value: 0, digits: 0, bounds: true, onInput: function (v) { st.idx = v; updatePtr(); } });
+  var lcdPt = S.readout("#lcd-t", { label: "Temps au pointeur", unit: "µs", digits: 0 });
+  var lcdTA = S.readout("#lcd-t", { label: "tA noté (voie 1)", unit: "µs", digits: 0 });
+  var lcdTB = S.readout("#lcd-t", { label: "tB noté (voie 2)", unit: "µs", digits: 0 });
+  var lcdDt = S.readout("#lcd-t", { label: "Δt = tB − tA", unit: "µs", digits: 0 });
+  function tPtr() { return st.idx * (st.acq ? st.acq.T : st.T) / NPTS; }
+  function updatePtr() {
+    lcdPt.set(tPtr()); lcdTA.set(st.tA == null ? "–" : st.tA); lcdTB.set(st.tB == null ? "–" : st.tB);
+    lcdDt.set(st.tA != null && st.tB != null ? st.tB - st.tA : "–");
+    cvS.redraw();
+  }
+  (function () {
+    var el = $("#cv-s"), drag = false;
+    function at(ev) { var p = cvS.toLocal(ev); st.idx = Math.max(0, Math.min(NPTS, Math.round((p.x - PL) / (PR - PL) * NPTS))); slPtr.set(st.idx, true); updatePtr(); }
+    el.addEventListener("pointerdown", function (ev) { drag = true; el.setPointerCapture(ev.pointerId); el.focus(); at(ev); ev.preventDefault(); });
+    el.addEventListener("pointermove", function (ev) { if (drag) at(ev); });
+    el.addEventListener("pointerup", function () { drag = false; }); el.addEventListener("pointercancel", function () { drag = false; });
+    el.addEventListener("keydown", function (ev) {
+      var d = 0, k = ev.key;
+      if (k === "ArrowLeft") d = ev.shiftKey ? -10 : -1; else if (k === "ArrowRight") d = ev.shiftKey ? 10 : 1;
+      else if (k === "Home") { st.idx = 0; d = 0; } else if (k === "End") { st.idx = NPTS; d = 0; } else return;
+      st.idx = Math.max(0, Math.min(NPTS, st.idx + d)); slPtr.set(st.idx, true); updatePtr(); ev.preventDefault();
+    });
+  })();
+
+  function obs3(tone, html) { S.observe("#obs3", tone, html); }
+  var loopB = S.loop(function (dt) {
+    var an = st.anim; if (!an) { loopB.stop(); return; }
+    an.t += dt * 1000;                                 // 1 s réelle = 1 000 µs : ralenti ×1 000
+    if (an.t >= an.tEnd) { endAcq(); return; }
+    cvB.redraw();
+  });
+  function acquire() {
+    if (st.busy) return;
+    var r1 = (st.x1 - X_E) / 100, r2 = (st.x2 - X_E) / 100;
+    var ta1 = Bruit.appliquer(DELAY + r1 / st.v * 1e6), ta2 = Bruit.appliquer(DELAY + r2 / st.v * 1e6);
+    var a = { id: ++st.acqId, T: st.T, mode: st.mode, x1: st.x1, x2: st.x2, d: st.x2 - st.x1, ta1: ta1, ta2: ta2, A1: amp(r1 * 100), A2: amp(r2 * 100), used: false };
+    st.busy = true; $("#b-acq").disabled = true; st.tA = null; st.tB = null; updatePtr();
+    st.anim = { t: 0, tEnd: ta2 + BURST + 150, a: a }; cvS.redraw();
+    if (S.reducedMotion) { endAcq(); return; }
+    obs3("info", "Le signal part de l’émetteur E et se propage vers R<sub>1</sub> puis R<sub>2</sub> (animation ralentie).");
+    loopB.start();
+  }
+  function endAcq() {
+    var a = st.anim.a; loopB.stop(); st.anim = null; st.acq = a; st.busy = false; $("#b-acq").disabled = false;
+    cvB.redraw(); updatePtr();
+    if (a.mode === "continu") obs3("warn", "<b>Signal continu :</b> les deux voies montrent des sinusoïdes qui se ressemblent à un décalage près. Y a-t-il un « début » que tu peux repérer ? Essaie de noter tA.");
+    else if (a.ta2 > a.T) obs3("warn", "<b>La voie 2 est vide :</b> la salve de R<sub>2</sub> arrive après la fin de l’acquisition. Choisis une durée d’acquisition plus longue.");
+    else if (a.ta1 > a.T) obs3("warn", "<b>Les deux voies sont vides :</b> les salves arrivent après la fin de l’acquisition. Choisis une durée plus longue.");
+    else obs3("info", "<b>Acquisition n° " + a.id + " :</b> la voie 2 est décalée par rapport à la voie 1. Place le pointeur au tout début de la salve de la voie 1, puis note tA. Fais de même pour la voie 2.");
+  }
+  function note(which) {
+    var a = st.acq; if (!a) { obs3("warn", "Fais d’abord une acquisition."); return; }
+    if (a.x1 !== st.x1 || a.x2 !== st.x2) { obs3("warn", "Les récepteurs ont bougé depuis l’acquisition : refais une acquisition."); return; }
+    if (a.mode === "continu") { obs3("bad", "<b>Impossible de repérer un début de signal :</b> en mode continu, le signal n’a ni début ni fin. On ne peut pas dire quel maximum de la voie 1 correspond à quel maximum de la voie 2. Passe l’émetteur en mode « salves »."); return; }
+    var ta = which === "A" ? a.ta1 : a.ta2, res = a.T / NPTS, t = tPtr(), voie = which === "A" ? 1 : 2;
+    if (ta > a.T) { obs3("warn", "Il n’y a pas de salve visible sur la voie " + voie + " : augmente la durée d’acquisition."); return; }
+    if (t < ta - res) { obs3("warn", "Le pointeur est <b>avant</b> le début de la salve de la voie " + voie + " : il n’y a encore rien à cet instant."); return; }
+    if (t > ta + Math.max(2 * res, 12)) { obs3("warn", "Le pointeur est <b>trop tard</b> : la salve de la voie " + voie + " a déjà commencé avant ce point. Recule jusqu’au premier écart par rapport à zéro."); return; }
+    if (which === "A") st.tA = t; else st.tB = t;
+    if (st.tA != null && st.tB != null && st.tB <= st.tA) { obs3("warn", "tB doit être plus grand que tA : R<sub>2</sub> reçoit le signal après R<sub>1</sub>. Revérifie tes deux repérages."); return; }
+    updatePtr();
+    obs3("ok", "<b>t" + which + " = " + S.fmt(t, 0) + " µs noté.</b> " + (st.tA != null && st.tB != null ? "Δt = " + S.fmt(st.tB - st.tA, 0) + " µs. Tu peux ajouter la mesure au tableau." : "Il reste à noter " + (which === "A" ? "tB sur la voie 2." : "tA sur la voie 1.")));
+  }
+  function addRow() {
+    var a = st.acq;
+    if (!a || st.tA == null || st.tB == null) { obs3("warn", "Il faut d’abord noter tA et tB sur la même acquisition."); return; }
+    if (a.used) { obs3("warn", "Cette acquisition est déjà dans le tableau. Pour une nouvelle mesure, fais une nouvelle acquisition (même distance ou autre)."); return; }
+    var dt = st.tB - st.tA, v = (a.d / 100) / (dt * 1e-6);
+    if (table.add({ d: a.d, tA: st.tA, tB: st.tB, dt: dt, v: v })) {
+      a.used = true; st.tA = null; st.tB = null; updatePtr();
+      obs3("ok", "<b>Mesure ajoutée :</b> d = " + S.fmt(a.d, 1) + " cm, Δt = " + S.fmt(dt, 0) + " µs. " + (table.rows().length >= 6 ? "Tu as de quoi passer à l’exploitation (étape 4)." : "Change la distance et recommence."));
+      refresh(); nextNote();
+    } else obs3("warn", "Le tableau est complet (12 mesures). Efface-le pour recommencer.");
+  }
+  $("#b-acq").addEventListener("click", acquire);
+  $("#b-tA").addEventListener("click", function () { note("A"); });
+  $("#b-tB").addEventListener("click", function () { note("B"); });
+  $("#b-add").addEventListener("click", addRow);
+
+  /* aide du niveau « pas à pas » : prochaine distance */
+  var DLIST = [5, 10, 15, 20, 25, 30];
+  function nextD() { var done = table.rows().map(function (r) { return Math.round(r.d); }); for (var i = 0; i < DLIST.length; i++) if (done.indexOf(DLIST[i]) < 0) return DLIST[i]; return null; }
+  function nextNote() { var d = nextD(); $("#next-note").textContent = d == null ? "Les six distances sont mesurées." : "Prochaine distance : d = " + d + " cm."; }
+  $("#b-next").addEventListener("click", function () { var d = nextD(); if (d == null) return; setPos(2, st.x1 + d); nextNote(); });
+
+  ask("#q3", { id: "p3", predict: true, legend: "<b>Prédis, puis teste.</b> Si l’émetteur est réglé en mode <b>continu</b> au lieu de « salves », pourra-t-on repérer le début du signal sur chaque voie et mesurer Δt ?", options: [
+    { t: "Oui, aussi facilement qu’avec des salves.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA." },
+    { t: "Non, il n’y a plus de début identifiable.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA." },
+    { t: "Oui, mais seulement si les récepteurs sont très proches.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA." }
+  ] });
+
+  /* tableau de mesures */
+  var table = S.measureTable("#tableau", {
+    caption: "Mesures de la durée de propagation entre R₁ et R₂",
+    columns: [{ key: "d", label: "d", unit: "cm", digits: 1 }, { key: "tA", label: "tA", unit: "µs", digits: 0 }, { key: "tB", label: "tB", unit: "µs", digits: 0 }, { key: "dt", label: "Δt", unit: "µs", digits: 0 }, { key: "v", label: "v = d/Δt", unit: "m/s", digits: 0 }],
+    filename: "mesures-vitesse-son", max: 12,
+    empty: "Aucune mesure pour l’instant : fais une acquisition, repère tA et tB, puis ajoute la mesure."
+  });
+  var bClear = table.el.querySelector("button"); if (bClear) bClear.addEventListener("click", function () { refresh(); nextNote(); });
+
+  /* ---------------------------------------------------------------- ÉTAPE 4 : exploitation */
+  var lcdM1 = [S.readout("#lcd-m1", { label: "Moyenne des v", unit: "m/s", digits: 1 }), S.readout("#lcd-m1", { label: "Écart-type s", unit: "m/s", digits: 1 }), S.readout("#lcd-m1", { label: "Incertitude u(v) = s/√n", unit: "m/s", digits: 1 })];
+  var slK = S.slider("#sl-k", { label: "Coefficient directeur de ta droite", unit: "m/s", min: 250, max: 450, step: 1, value: 300, digits: 0, bounds: true, onInput: function () { drawG(); gLcd(); } });
+  var lcdK = S.readout("#lcd-g", { label: "Ton coefficient directeur", unit: "m/s", digits: 0 });
+  var lcdE = S.readout("#lcd-g", { label: "Écart quadratique moyen", unit: "mm", digits: 1 });
+  var lcdF = S.readout("#lcd-g", { label: "Modélisation : v", unit: "m/s", digits: 1 });
+  var cvG = S.canvas("#cv-g", { width: 1000, height: 400, draw: drawGraph });
+  function drawG() { cvG.redraw(); }
+  function pts() { return table.rows().map(function (r) { return { d: r.d / 100, t: r.dt * 1e-6 }; }); }
+  function fitV(p) { var sdt = 0, stt = 0; p.forEach(function (q) { sdt += q.d * q.t; stt += q.t * q.t; }); return stt > 0 ? sdt / stt : NaN; }
+  function rmse(p, k) { return Math.sqrt(mean(p.map(function (q) { var e = q.d - k * q.t; return e * e; }))) * 1000; }
+  function gLcd() {
+    var p = pts(), k = slK.get(); lcdK.set(k);
+    lcdE.set(p.length ? rmse(p, k) : "–"); lcdF.set(st.fit && p.length ? fitV(p) : "–");
+  }
+  function drawGraph(ctx, W, H) {
+    setK("#cv-g", 2);
+    var ink = S.cssVar("--ink"), muted = S.cssVar("--muted"), line = S.cssVar("--line"), pos = S.cssVar("--c-position"), vit = S.cssVar("--c-vitesse"), sur = S.cssVar("--surface"), fb = S.cssVar("--font-body"), fd = S.cssVar("--font-data");
+    var p = pts(), L = 84, R = 24, T = 28, B = 58;
+    ctx.fillStyle = sur; ctx.fillRect(0, 0, W, H);
+    if (p.length < 3) { ctx.fillStyle = muted; ctx.font = fx("600 17px " + fb); ctx.textAlign = "center"; ctx.fillText("Ajoute au moins 3 mesures au tableau pour tracer le graphe.", W / 2, H / 2); return; }
+    var tmax = Math.max.apply(null, p.map(function (q) { return q.t * 1000; })), dmax = Math.max.apply(null, p.map(function (q) { return q.d; }));
+    var xm = Math.max(0.4, Math.ceil(tmax * 1.1 / 0.2) * 0.2), ym = Math.max(0.1, Math.ceil(dmax * 1.12 / 0.05) * 0.05);
+    function X(t) { return L + t / xm * (W - L - R); } function Y(d) { return H - B - d / ym * (H - B - T); }
+    ctx.strokeStyle = line; ctx.fillStyle = muted; ctx.lineWidth = 1; ctx.font = fx("500 13px " + fd);
+    ctx.textAlign = "center"; for (var x = 0; x <= xm + 1e-9; x += 0.2) { ctx.beginPath(); ctx.moveTo(X(x), T); ctx.lineTo(X(x), H - B); ctx.stroke(); ctx.fillText(S.fmt(x, 1), X(x), H - B + 20); }
+    ctx.textAlign = "right"; for (var y = 0; y <= ym + 1e-9; y += 0.05) { ctx.beginPath(); ctx.moveTo(L, Y(y)); ctx.lineTo(W - R, Y(y)); ctx.stroke(); ctx.fillText(S.fmt(y, 2), L - 8, Y(y) + 4); }
+    ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, H - B); ctx.lineTo(W - R, H - B); ctx.stroke();
+    ctx.fillStyle = ink; ctx.font = fx("600 14px " + fb); ctx.textAlign = "left"; ctx.fillText("d (m)", L + 6, T + 2); ctx.textAlign = "right"; ctx.fillText("Δt (ms)", W - R, H - 14);
+    ctx.save(); ctx.beginPath(); ctx.rect(L, T, W - L - R, H - B - T); ctx.clip();
+    function ln(k, col, dash, w) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(xm), Y(k * xm / 1000)); ctx.stroke(); ctx.setLineDash([]); }
+    ln(slK.get(), vit, [], 3.5);
+    if (st.fit) ln(fitV(p), ink, [8, 6], 2.5);
+    ctx.restore();
+    p.forEach(function (q) { ctx.fillStyle = pos; ctx.strokeStyle = sur; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X(q.t * 1000), Y(q.d), 7, 0, 6.3); ctx.fill(); ctx.stroke(); });
+  }
+  function m1Spec() {
+    var rows = table.rows(); if (rows.length < 4) return null;
+    var vs = rows.map(function (r) { return r.v; }), s = stats(vs);
+    return { question: "<b>Calcule la moyenne</b> des vitesses de la colonne « v » du tableau.", unit: "m/s", answer: s.mean, tolerance: 0.005,
+      hint: "Additionne toutes les valeurs de la colonne v, puis divise par le nombre de mesures (" + rows.length + ").",
+      explain: "Moyenne = (somme des v) / " + rows.length + " ≈ " + S.fmt(s.mean, 1) + " m/s.",
+      onResult: function (ok) { if (ok) { st.flags.m1 = true; showM1(s); progress(); } } };
+  }
+  function exSpec() {
+    var rows = table.rows(); if (!rows.length) return null; var r = rows[0];
+    return { question: "<b>Exemple de calcul.</b> Avec ta première mesure (d = " + S.fmt(r.d, 1) + " cm ; Δt = " + S.fmt(r.dt, 0) + " µs), calcule v en m/s.", unit: "m/s", answer: r.v, tolerance: 0.005,
+      hint: "d = " + S.fmt(r.d / 100, 3) + " m et Δt = " + sci(r.dt * 1e-6, 2) + " s. Puis v = d / Δt.",
+      explain: "v = " + S.fmt(r.d / 100, 3) + " m / (" + sci(r.dt * 1e-6, 2) + " s) ≈ " + S.fmt(r.v, 0) + " m/s." };
+  }
+  function showM1(s) {
+    $("#m1-res").hidden = false; lcdM1[0].set(s.mean); lcdM1[1].set(s.s); lcdM1[2].set(s.u);
+    $("#m1-line").innerHTML = "Résultat de la méthode 1 : <b>v = " + withU(s.mean, s.u) + " m/s</b> (n = " + s.n + " valeurs)";
+  }
+  $("#b-fit").addEventListener("click", function () {
+    var p = pts(); if (p.length < 3) return;
+    st.fit = true; var v = fitV(p), k = slK.get();
+    gLcd(); drawG(); st.flags.fit = true;
+    S.observe("#obs4", Math.abs(k - v) / v < 0.02 ? "ok" : "warn", Math.abs(k - v) / v < 0.02
+      ? "<b>Bien réglé :</b> ta droite (" + S.fmt(k, 0) + " m/s) est très proche de la modélisation (" + S.fmt(v, 1) + " m/s). La droite passe par l’origine : d et Δt sont proportionnels."
+      : "<b>La modélisation donne v = " + S.fmt(v, 1) + " m/s.</b> Ta droite (" + S.fmt(k, 0) + " m/s) s’en écarte : ajuste le curseur pour réduire l’écart quadratique moyen.");
+    progress();
+  });
+  ask("#q4a", { id: "q4a", legend: "<b>Question.</b> Quelle est l’allure des points du graphe d = f(Δt) ?", options: [
+    { t: "Des points alignés sur une droite qui passe par l’origine : d est proportionnelle à Δt.", ok: true, fb: "Si Δt = 0, le signal n’a parcouru aucune distance : d = 0." },
+    { t: "Des points alignés sur une droite qui ne passe pas par l’origine.", fb: "Regarde la droite que tu règles : elle part du point (0 ; 0) et passe près de tous les points." },
+    { t: "Des points qui forment une courbe qui monte de plus en plus vite.", fb: "Ce n’est pas ce que montrent les mesures : d augmente de la même quantité quand Δt augmente de la même quantité." }
+  ] });
+  ask("#q4b", { id: "q4b", legend: "<b>Question.</b> Que représente le coefficient directeur de la droite d = f(Δt) ?", options: [
+    { t: "La vitesse de propagation du signal : d = v × Δt.", ok: true, fb: "Le coefficient directeur est le rapport d / Δt, c’est-à-dire la vitesse v. Les unités le confirment : m / s." },
+    { t: "La durée de propagation entre R₁ et R₂.", fb: "La durée est en abscisse (Δt). Un coefficient directeur est le quotient d / Δt." },
+    { t: "La distance entre l’émetteur et R₁.", fb: "Cette distance n’apparaît pas sur le graphe. Elle est la même quel que soit d." }
+  ] });
+
+  /* ---------------------------------------------------------------- ÉTAPE 5 : synthèse */
+  var lcdTh = [S.readout("#lcd-th", { label: "Température θ de la salle", unit: "°C", digits: 1 })];
+  function readTheta() { st.thetaMes = Math.round(Bruit.appliquer(st.theta, st.theta, 4242) * 10) / 10; lcdTh[0].set(st.thetaMes); }
+  function vRef() { return vTheo(st.thetaMes); }
+  function thSpec() { var th = st.thetaMes; return { question: "<b>Calcule la vitesse théorique</b> du son dans l’air à la température de la salle (θ = " + S.fmt(th, 1) + " °C).", unit: "m/s", answer: vTheo(th), tolerance: 0.002, hint: "Remplace θ par sa valeur dans v = 331,5 + 0,607 × θ.", explain: "v = 331,5 + 0,607 × " + S.fmt(th, 1) + " ≈ " + S.fmt(vTheo(th), 1) + " m/s.", onResult: function (ok) { if (ok) { st.flags.th = true; progress(); } } }; }
+  var cvC = S.canvas("#cv-c", { width: 1000, height: 250, draw: drawCmp });
+  function cmpData() {
+    var rows = table.rows(); if (rows.length < 4 || !st.flags.m1 || !st.fit) return null;
+    var s = stats(rows.map(function (r) { return r.v; })); return { m1: s, m2: fitV(pts()), ref: vRef() };
+  }
+  function drawCmp(ctx, W, H) {
+    setK("#cv-c", 2);
+    var D = cmpData(); if (!D) return;
+    var ink = S.cssVar("--ink"), muted = S.cssVar("--muted"), line = S.cssVar("--line"), vit = S.cssVar("--c-vitesse"), fb = S.cssVar("--font-body"), fd = S.cssVar("--font-data");
+    var lo = Math.min(D.m1.mean - D.m1.u, D.m2, D.ref) - 12, hi = Math.max(D.m1.mean + D.m1.u, D.m2, D.ref) + 12;
+    lo = Math.floor(lo / 10) * 10; hi = Math.ceil(hi / 10) * 10; if (hi - lo < 40) { var c = (hi + lo) / 2; lo = Math.floor((c - 20) / 10) * 10; hi = lo + 40; }
+    var L = 40, R = 40; function X(v) { return L + (v - lo) / (hi - lo) * (W - L - R); }
+    ctx.strokeStyle = ink; ctx.fillStyle = muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(L, 206); ctx.lineTo(W - R, 206); ctx.stroke();
+    ctx.font = fx("500 13px " + fd); ctx.textAlign = "center"; ctx.lineWidth = 1; ctx.strokeStyle = line;
+    for (var v = lo; v <= hi; v += 10) { ctx.beginPath(); ctx.moveTo(X(v), 40); ctx.lineTo(X(v), 206); ctx.stroke(); ctx.fillText(String(v), X(v), 226); }
+    ctx.textAlign = "right"; ctx.fillText("v (m/s)", W - R, 246);
+    ctx.strokeStyle = ink; ctx.lineWidth = 2.5; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(X(D.ref), 34); ctx.lineTo(X(D.ref), 206); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = ink; ctx.font = fx("600 14px " + fb); ctx.textAlign = "center"; ctx.fillText("valeur théorique " + S.fmt(D.ref, 1) + " m/s", Math.min(Math.max(X(D.ref), 140), W - 140), 20);
+    // méthode 1 : point et barre d'incertitude
+    ctx.strokeStyle = vit; ctx.fillStyle = vit; ctx.lineWidth = 3;
+    var y1 = 90; ctx.beginPath(); ctx.moveTo(X(D.m1.mean - D.m1.u), y1); ctx.lineTo(X(D.m1.mean + D.m1.u), y1); ctx.moveTo(X(D.m1.mean - D.m1.u), y1 - 8); ctx.lineTo(X(D.m1.mean - D.m1.u), y1 + 8); ctx.moveTo(X(D.m1.mean + D.m1.u), y1 - 8); ctx.lineTo(X(D.m1.mean + D.m1.u), y1 + 8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(X(D.m1.mean), y1, 8, 0, 6.3); ctx.fill();
+    var sur = S.cssVar("--surface"); function lab(t, x, y) { ctx.save(); ctx.font = fx("600 14px " + fb); ctx.textAlign = "center"; ctx.lineWidth = 5; ctx.strokeStyle = sur; ctx.strokeText(t, x, y); ctx.fillStyle = vit; ctx.fillText(t, x, y); ctx.restore(); }
+    lab("Méthode 1 : moyenne ± u", X(D.m1.mean), y1 - 16);
+    // méthode 2 : losange
+    var y2 = 156, x2 = X(D.m2); ctx.beginPath(); ctx.moveTo(x2, y2 - 10); ctx.lineTo(x2 + 10, y2); ctx.lineTo(x2, y2 + 10); ctx.lineTo(x2 - 10, y2); ctx.closePath(); ctx.fill();
+    lab("Méthode 2 : modélisation", x2, y2 - 16);
+  }
+  function cmpUpdate() {
+    var D = cmpData(); $("#cmp-empty").hidden = !!D; $("#cmp-body").hidden = !D; if (!D) return;
+    var e1 = (D.m1.mean - D.ref) / D.ref * 100, e2 = (D.m2 - D.ref) / D.ref * 100;
+    var inside = D.ref >= D.m1.mean - D.m1.u && D.ref <= D.m1.mean + D.m1.u;
+    $("#cmp-line").innerHTML = "Méthode 1 : <b>" + withU(D.m1.mean, D.m1.u) + " m/s</b> (écart à la valeur théorique : " + S.fmt(e1, 1) + " %) · Méthode 2 : <b>" + S.fmt(D.m2, 1) + " m/s</b> (écart : " + S.fmt(e2, 1) + " %). " + (inside ? "La valeur théorique se trouve dans l’intervalle v ± u de la méthode 1." : "La valeur théorique est en dehors de l’intervalle v ± u de la méthode 1.");
+    cvC.redraw();
+  }
+  ask("#q5a", { id: "q5a", legend: "<b>Question.</b> Une même erreur de lecture de Δt (par exemple 10 µs) a un effet plus grand sur la vitesse v = d/Δt calculée pour d = 5 cm que pour d = 30 cm. Pourquoi ?", options: [
+    { t: "Pour d = 5 cm, Δt est très court (environ 150 µs) : 10 µs représentent une grande part de Δt, alors que pour d = 30 cm (environ 870 µs) c’est une petite part.", ok: true, fb: "Un écart relatif sur Δt se retrouve tel quel sur v. C’est aussi pourquoi la méthode 2, qui utilise toutes les mesures ensemble, est moins sensible à une mesure isolée. Une durée d’acquisition plus courte améliore la résolution du pointeur (durée ÷ 500)." },
+    { t: "Les ultrasons vont moins vite quand la distance est petite.", fb: "La vitesse du son dans l’air ne dépend pas de la distance parcourue." },
+    { t: "Le tableur se trompe sur les petits nombres.", fb: "Le calcul est exact. Ce sont les valeurs mesurées qui portent une incertitude." }
+  ] });
+  ask("#q5b", { id: "q5b", legend: "<b>Question.</b> Quelles différences ou similitudes y a-t-il entre les ondes sonores et les ondes ultrasonores ?", options: [
+    { t: "Leurs fréquences sont différentes (les ultrasons sont au-dessus de 20 kHz, inaudibles), mais elles se propagent à la même vitesse dans l’air.", ok: true, fb: "Ta mesure avec des ultrasons de 40 kHz donne la vitesse du son dans l’air. Les ultrasons sont des signaux sonores : ils ont besoin d’un milieu matériel pour se propager." },
+    { t: "Les ultrasons se propagent plus vite car leur fréquence est plus grande.", fb: "Dans l’air, la vitesse ne dépend pas de la fréquence." },
+    { t: "Les ultrasons se propagent dans le vide, pas les sons audibles.", fb: "Tout signal sonore, audible ou non, a besoin d’un milieu matériel pour se propager." }
+  ] });
+  var VIT = [["Marcheur", 1.4], ["Cycliste", 8], ["Voiture sur autoroute (130 km/h)", 36], ["TGV (300 km/h)", 83], ["Avion de ligne (900 km/h)", 250], ["Son dans l’air à 20 °C", 344], ["Satellite en orbite basse", 7700], ["Lumière dans le vide", 3.00e8]];
+  VIT.forEach(function (r) {
+    var tr = h("tr", r[1] === 344 ? { class: "ref" } : null, h("th", { scope: "row", text: r[0] }), h("td", { text: r[1] >= 1e4 ? sci(r[1], 2) : S.fmt(r[1], r[1] < 10 ? 1 : 0) }), h("td", { text: r[1] === 344 ? "1" : (r[1] >= 344 ? "× " + (r[1] / 344 >= 1e4 ? sci(r[1] / 344, 1) : S.fmt(r[1] / 344, 1)) : "÷ " + S.fmt(344 / r[1], 1)) }));
+    $("#vit-body").appendChild(tr);
+  });
+  ask("#q5c", { id: "q5c", legend: "<b>Question.</b> Un avion de ligne vole à environ 900 km/h. Va-t-il plus vite ou moins vite que le son dans l’air ?", options: [
+    { t: "Moins vite : 900 km/h ≈ 250 m/s, c’est inférieur à 344 m/s.", ok: true, fb: "Pour convertir : 900 km/h = 900 000 m / 3 600 s = 250 m/s." },
+    { t: "Plus vite : 900 est plus grand que 344.", fb: "Attention aux unités : 344 est en m/s, 900 en km/h. Convertis avant de comparer (1 km/h ≈ 0,28 m/s)." }
+  ] });
+  renderDefi("#d5-orage", { question: "<b>Transfert.</b> Pendant un orage, tu vois un éclair, puis tu entends le tonnerre <b>6,0 s</b> plus tard (θ = 20 °C). À quelle distance la foudre est-elle tombée ?", unit: "m", answer: 6.0 * vTheo(20), tolerance: 0.03,
+    hint: "Pense à l’hypothèse de la mesure historique : la lumière est vue aussitôt. Utilise ensuite d = v × Δt avec v ≈ 344 m/s.",
+    explain: "d = v × Δt ≈ 344 m/s × 6,0 s ≈ 2,1×10³ m, soit environ 2 km.", onResult: function (ok) { if (ok) { st.flags.orage = true; progress(); } } });
+
+  /* ---------------------------------------------------------------- Mise à jour générale */
+  function stepDone() {
+    var rows = (typeof table !== "undefined" && table && table.rows) ? table.rows() : [], dist = {}; rows.forEach(function (r) { dist[Math.round(r.d)] = 1; });
+    return [
+      !!(st.flags.q1 && st.flags.c1),
+      st.niv === 3 ? !!(proto && proto.value.trim().length >= 60) : !!(st.flags.q2a && st.flags.q2b),
+      rows.length >= 5 && Object.keys(dist).length >= 4,
+      !!(st.flags.m1 && st.flags.fit),
+      !!(st.flags.q5b && st.flags.orage)
+    ];
+  }
+  function progress() {
+    var box = $("#progress"), d = stepDone(); box.textContent = "";
+    CHIPS.forEach(function (c, i) { box.appendChild(h("span", { class: "mchip", "data-done": String(d[i]) }, (d[i] ? "✓ " : "") + (i + 1) + " · " + c)); });
+  }
+  function refresh(force) {
+    var rows = table.rows(), ok = rows.length >= 4;
+    var sig = rows.map(function (r) { return r.d + ":" + r.dt; }).join("|");
+    $("#s4-empty").hidden = ok; $("#s4-body").hidden = !ok;
+    if (force || sig !== st.sig) {
+      st.sig = sig; st.flags.m1 = false; st.fit = false; st.flags.fit = false; $("#m1-res").hidden = true;
+      renderDefi("#m1-ex", exSpec()); renderDefi("#m1-mean", m1Spec());
+    }
+    gLcd(); cvG.redraw(); cmpUpdate(); progress();
+  }
+  function resetTheta() { readTheta(); renderDefi("#d5-th", thSpec()); st.flags.th = false; cmpUpdate(); }
+  Bruit.bascule("#bruit-hote", { onChange: function () { resetTheta(); cvS.redraw(); saveState(); } });
+
+  var stepEls = { 1: $("#s1"), 2: $("#s2"), 3: $("#s3"), 4: $("#s4"), 5: $("#s5") };
+  S.tabs("#steps", function (v) {
+    Object.keys(stepEls).forEach(function (k) { stepEls[k].hidden = k !== v; });
+    $("#tablesec").hidden = !(v === "3" || v === "4");
+    if (v === "3") { cvB.redraw(); cvS.redraw(); } if (v === "4") { refresh(); } if (v === "5") { cmpUpdate(); }
+  }, "1");
+
+  S.tabs("#mode", function (m) { st.mode = m; cvB.redraw(); }, st.mode);
+  S.tabs("#win", function (m) { st.T = Number(m); updatePtr(); }, String(st.T));
+  applyLevel(); setPos(1, st.x1); updatePtr(); nextNote(); resetTheta(); refresh(true);
+
+  var rz = 0; window.addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(function () { cv1.redraw(); cvB.redraw(); cvS.redraw(); cvG.redraw(); cvC.redraw(); }, 120); });
+  $("#b-link").addEventListener("click", function () {
+    var url = location.href, ok = function () { $("#link-st").textContent = "Lien copié : il conserve la température et le niveau."; };
+    try { navigator.clipboard.writeText(url).then(ok, function () { $("#link-st").textContent = "Copie impossible ici : copie l’adresse de la page."; }); } catch (e) { $("#link-st").textContent = "Copie impossible ici : copie l’adresse de la page."; }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mesurer la vitesse de propagation du son · Fiche enseignant · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/vitesse-son.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Physique-chimie · Seconde</p>
+    <h1>Mesurer la vitesse de propagation du son</h1>
+    <p class="lead">L'élève part de la mesure historique du canon (1822), puis reproduit la mesure au laboratoire avec des ultrasons : il place deux récepteurs face à un émetteur, repère le début des salves sur une console d'acquisition, remplit un tableau de mesures et détermine la vitesse par deux méthodes (moyenne des d/Δt, graphe d = f(Δt)). Il compare enfin son résultat à la valeur de référence donnée par la température de la salle. Trois niveaux d'autonomie reprennent les démarches élémentaire, avancée et experte d'un TP de manuel.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Seconde, voie générale et technologique</li>
+      <li>Ondes et signaux · Émission et perception d'un son</li>
+      <li>45 à 55 min en tout, étapes séparables (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette, papier et crayon, calculatrice</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/vitesse-son.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Programme de physique-chimie de Seconde générale et technologique (BO spécial n° 1 du 22 janvier 2019, annexe) : thème « Ondes et signaux », partie « Émission et perception d'un son », rubrique « Vitesse de propagation d'un signal sonore » ; texte « Mesure et incertitudes » ; compétences de la démarche scientifique.</p>
+      <p class="note">Les capacités de la première colonne sont recopiées de l'annexe lue le 15/11/2026. L'attribution « où dans l'activité » est un choix de l'auteur de la simulation, à adapter.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>« Citer une valeur approchée de la vitesse de propagation d'un signal sonore dans l'air et la comparer à d'autres valeurs de vitesses couramment rencontrées. »</td><td>Étape 5 : tableau des ordres de grandeur, question de l'avion, transfert de l'orage.</td></tr>
+            <tr><td>« Mesurer la vitesse d'un signal sonore. »</td><td>Étapes 1 (mesure historique) et 3 (mesure avec les ultrasons).</td></tr>
+            <tr><td>« Expliquer le rôle joué par le milieu matériel dans le phénomène de propagation d'un signal sonore. »</td><td>Étape 5 : question sur les ondes sonores et ultrasonores (besoin d'un milieu matériel).</td></tr>
+            <tr><td>« Exploiter une série de mesures indépendantes d'une grandeur physique : histogramme, moyenne et écart-type. »</td><td>Étape 4, méthode 1 : moyenne, écart-type s. L'histogramme n'est pas construit (voir prolongements).</td></tr>
+            <tr><td>« Expliquer qualitativement la signification d'une incertitude-type et l'évaluer par une approche statistique. » <span class="verify">À vérifier : u = s / √n</span></td><td>Étape 4, méthode 1 : u(v) = s / √n affiché après la moyenne.</td></tr>
+            <tr><td>« Discuter de l'influence de l'instrument de mesure et du protocole. »</td><td>Étape 3 : durée d'acquisition (résolution = durée ÷ 500), mode salves ou continu. Étape 5 : question sur la dispersion aux petites distances.</td></tr>
+            <tr><td>« Écrire, avec un nombre adapté de chiffres significatifs, le résultat d'une mesure. » ; « Comparer qualitativement un résultat à une valeur de référence. »</td><td>Étape 4 (résultat v = valeur ± u) et étape 5 (graphe de comparaison avec la valeur théorique).</td></tr>
+            <tr><td>Compétences : s'approprier, analyser/raisonner (choisir, élaborer, justifier un protocole), réaliser, valider (identifier des sources d'erreur, comparer à une valeur de référence), communiquer.</td><td>Étape 2 (protocole, texte libre au niveau « Autonome »), étapes 3 à 5.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><b>À vérifier :</b> la ressource Éduscol « Mesure et incertitudes au lycée » (mai 2021) place l'évaluation statistique de type A au niveau de la Seconde et présente u = s / √n comme règle générale. Elle situerait la comparaison à une valeur de référence plutôt en Première et le critère de compatibilité (z &lt; 2) en Terminale, alors que l'annexe du programme de Seconde cite « Comparer qualitativement un résultat à une valeur de référence ». La simulation ne donne donc <b>aucun critère chiffré de compatibilité</b> : elle affiche les écarts relatifs et dit si la valeur théorique est dans l'intervalle v ± u. Relire ces deux textes avant d'évaluer cette partie.</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Cinq étapes, séparables : 1 (10 min), 2 (5 à 10 min), 3 (15 à 20 min), 4 (10 à 15 min), 5 (10 min). Le niveau d'autonomie se choisit en haut de la page (ou par le lien : <code>#niv=1</code>, <code>#niv=2</code>, <code>#niv=3</code>) et ne change que l'aide fournie, pas l'expérience.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Démarche</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. Mesure historique</td><td>Modélisation, hypothèse</td><td>Observe le tir de canon, justifie que la lumière est vue « aussitôt », calcule v = L / Δt.</td><td>v ≈ 341 m/s, phrase sur l'hypothèse.</td></tr>
+            <tr><td>2. Protocole</td><td>Élaborer un protocole</td><td>Niveaux 1 et 2 : lit le protocole et répond à deux questions (grandeurs à mesurer, intérêt de deux récepteurs). Niveau 3 : rédige son protocole.</td><td>Texte du protocole (niveau 3), schéma sur papier.</td></tr>
+            <tr><td>3. Mesurer</td><td>Expérience (prédire, observer)</td><td>Prédit ce qui se passe en mode continu, place R<sub>1</sub> et R<sub>2</sub>, acquiert, place le pointeur au début de chaque salve (tA, tB), ajoute la mesure au tableau pour six distances.</td><td>Tableau d, tA, tB, Δt, v ; export CSV possible.</td></tr>
+            <tr><td>4. Exploiter</td><td>Traitement des données</td><td>Méthode 1 : calcule v pour une ligne (conversions cm → m, µs → s), puis la moyenne, lit s et u(v). Méthode 2 : ajuste la droite d = k × Δt, compare à la modélisation, interprète le coefficient directeur.</td><td>v = valeur ± u (m/s) ; valeur de k.</td></tr>
+            <tr><td>5. Synthèse</td><td>Validation, transfert</td><td>Calcule la valeur théorique avec la température lue, compare les résultats, interprète la dispersion, distingue sons et ultrasons, compare à d'autres vitesses, applique à l'orage.</td><td>Valeur théorique ; phrase de comparaison ; distance de la foudre.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <p>La température de la salle (θ) est tirée au hasard entre 17 et 26 °C à chaque ouverture de la page, sauf si elle est fixée par le lien (<code>#theta=21</code>). La vitesse « vraie » de la simulation est v = 331,5 + 0,607 × θ. Exemple à θ = 20 °C : v = 343,6 m/s.</p>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>1, question 1</td><td>La lumière se propage pratiquement instantanément ; sa durée de propagation (6,2×10⁻⁵ s) est négligeable devant 54,6 s.</td><td>Environ un millionième de la durée mesurée.</td></tr>
+                <tr><td>1, question 2</td><td>v = 18 612 / 54,6 ≈ 341 m/s (340,9).</td><td>Tolérance de la page : 0,6 %. À 15,9 °C, la formule donne 341,2 m/s.</td></tr>
+                <tr><td>2, question 1</td><td>La distance parcourue par le signal et sa durée de propagation.</td><td>v = d / Δt.</td></tr>
+                <tr><td>2, question 2</td><td>On mesure la durée entre les deux détections : l'instant exact d'émission n'est pas repérable.</td><td>La simulation ajoute un retard inconnu de 45 µs à l'émission, identique pour les deux récepteurs : il disparaît dans tB − tA.</td></tr>
+                <tr><td>3, prédiction</td><td>En mode continu, il n'y a plus de début identifiable : on ne peut pas repérer tA.</td><td>La page refuse alors de noter tA et explique pourquoi.</td></tr>
+                <tr><td>3, mesures (θ = 20 °C)</td><td>Δt ≈ 146, 291, 437, 582, 728 et 873 µs pour d = 5, 10, 15, 20, 25 et 30 cm.</td><td>Valeurs idéales Δt = d / v. Lues sur la console, elles varient de quelques microsécondes : résolution du pointeur (durée ÷ 500, soit 10 µs à 5 ms) et bruit de 0,5 %.</td></tr>
+                <tr><td>4, méthode 1</td><td>Moyenne des v voisine de 340 à 350 m/s (à θ = 20 °C), u(v) de l'ordre de 1 à 6 m/s.</td><td>La dispersion est plus grande aux petites distances (Δt court). Tolérance de la page : 0,5 % sur le calcul de la moyenne à partir de la colonne v.</td></tr>
+                <tr><td>4, méthode 2</td><td>Droite passant par l'origine, d = v × Δt ; v voisin de la valeur théorique.</td><td>La modélisation est un ajustement par une droite passant par l'origine. Le coefficient directeur est la vitesse (m/s si Δt est en s).</td></tr>
+                <tr><td>5, valeur théorique</td><td>331,5 + 0,607 × θ (θ lue sur le thermomètre, à 0,1 °C près).</td><td>À 20 °C : 343,6 m/s (344 m/s).</td></tr>
+                <tr><td>5, sons et ultrasons</td><td>Fréquences différentes (ultrasons au-dessus de 20 kHz, inaudibles), même vitesse dans l'air, besoin d'un milieu matériel.</td><td></td></tr>
+                <tr><td>5, avion</td><td>900 km/h = 250 m/s : moins vite que le son.</td><td>Conversion km/h → m/s (÷ 3,6).</td></tr>
+                <tr><td>5, orage</td><td>d = 344 × 6,0 ≈ 2,1×10³ m, soit environ 2 km.</td><td>Tolérance de la page : 3 %.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Conversions d'unités</td><td>v = 0,05 / 148 = 3,4×10⁻⁴ ; v de l'ordre de 0,34 ou de 340 000.</td><td>Indice de l'exemple de calcul : rappel 1 cm = 10⁻² m et 1 µs = 10⁻⁶ s, puis calcul pas à pas dans le retour.</td></tr>
+            <tr><td>Confondre tA et Δt</td><td>« Le son met 476 µs pour aller de R<sub>1</sub> à R<sub>2</sub>. »</td><td>Les afficheurs séparent tA, tB et Δt = tB − tA ; la question 2 de l'étape 2 explique l'intérêt de la différence.</td></tr>
+            <tr><td>Mesurer d depuis l'émetteur</td><td>v = distance de R<sub>2</sub> à E divisée par Δt.</td><td>Le schéma représente d entre R<sub>1</sub> et R<sub>2</sub> ; l'afficheur donne d = x₂ − x₁.</td></tr>
+            <tr><td>Repérer le « maximum » plutôt que le début de la salve</td><td>tA et tB pris au milieu des salves.</td><td>Le pointeur est vérifié : trop tard, la page demande de reculer jusqu'au premier écart par rapport à zéro.</td></tr>
+            <tr><td>Croire que le mode continu est plus précis</td><td>Prédiction « oui » à l'étape 3.</td><td>La page refuse de noter tA en mode continu et explique l'absence de début identifiable.</td></tr>
+            <tr><td>Une mesure isolée, sans esprit critique</td><td>Un seul d, une seule acquisition.</td><td>Les mesures sont bruitées : refaire la même distance donne un Δt un peu différent. Le niveau 3 le suggère.</td></tr>
+            <tr><td>Confondre ondes sonores et ultrasons</td><td>« Les ultrasons vont plus vite. »</td><td>Question de l'étape 5 avec retour qui rappelle que la vitesse dans l'air ne dépend pas de la fréquence.</td></tr>
+            <tr><td>Interpréter le coefficient directeur</td><td>« C'est la durée. »</td><td>Retour de la question de l'étape 4 : rapport d / Δt, donc vitesse ; unités m / s.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>Prévu : toutes les commandes sont des boutons, curseurs ou boutons radio atteignables au clavier ; le pointeur de la console se déplace aussi avec les flèches (Maj pour dix points, Début, Fin) ; les récepteurs se règlent par curseur (le glisser sur le schéma est facultatif) ; cibles tactiles d'au moins 44 px ; thème clair et sombre ; mouvements réduits respectés (les animations sont alors remplacées par le résultat) ; chaque schéma a un texte alternatif ; l'information ne passe pas par la seule couleur (voies nommées, étiquettes, formes).</p>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> test avec un lecteur d'écran, audit d'accessibilité complet, test avec des élèves, notamment à besoins éducatifs particuliers. Sur téléphone, les schémas sont réduits : le texte est agrandi mais le banc reste petit, les curseurs et afficheurs portent l'information.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>Différenciation : « Pas à pas » pour les élèves qui ont besoin d'un protocole séquencé (consignes courtes, liste numérotée, bouton qui règle la distance suivante) ; « Autonome » pour les élèves à l'aise, avec rédaction d'un protocole.</li>
+        <li>En binôme, un élève manipule et l'autre note, avec échange des rôles à mi-parcours.</li>
+        <li>Avant ou après le TP réel : la simulation permet de préparer le geste (pointer le début d'un signal) ou de reprendre une mesure ratée.</li>
+        <li>Fixer la température par le lien (<code>#theta=18&amp;niv=2</code>) pour que toute la classe ait la même valeur de référence, ou la laisser tirer au hasard pour éviter les recopies. Le bouton « Copier le lien de cette situation » est dans « Pour aller plus loin ».</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>La simulation applique exactement v = 331,5 + 0,607 θ : les écarts viennent seulement de la lecture et du bruit simulé. Un banc réel ajoute des erreurs systématiques (position réelle du capteur dans son boîtier, réflexions, alignement) qui peuvent donner des valeurs plus éloignées de la référence.</li>
+        <li>La distance d est lue sur la règle sans incertitude (environ 1 mm au laboratoire). L'incertitude-type affichée ne tient compte que de la dispersion des valeurs de v.</li>
+        <li>Les v calculées à des distances différentes ne sont pas strictement des mesures répétées dans les mêmes conditions : la moyenne et u(v) sont ici une première approche statistique.</li>
+        <li>Le retard de l'électronique d'émission (45 µs) est un choix de la simulation pour justifier deux récepteurs.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Refaire une même distance dix fois, exporter en CSV et construire l'histogramme avec un tableur (capacité numérique du programme).</li>
+        <li>Comparer les durées d'acquisition (0,5 ms, 1 ms, 2 ms, 5 ms) pour discuter de la résolution et de l'incertitude.</li>
+        <li>Faire varier la température par le lien (<code>#theta=5</code>, <code>#theta=35</code>) et vérifier la formule.</li>
+        <li>Réaliser la même mesure sur un banc réel, puis comparer les résultats avec ceux de la simulation.</li>
+        <li>Évaluation : demander de décrire un protocole (niveau « Autonome ») avec texte et schémas.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> annexe du programme et ressource Éduscol lues le 15/11/2026 ; la ressource Éduscol a été lue par extraction automatique (formules en images non lues) ; le calcul de u(v) en Seconde et le niveau de la comparaison à une valeur de référence sont à confirmer (voir « Programme visé »).</p>
+      <ul class="plain">
+        <li><a href="https://cache.media.education.gouv.fr/file/SP1-MEN-22-1-2019/98/9/spe634_annexe_1062989.pdf">Programme de physique-chimie de seconde générale et technologique, annexe (BO spécial n° 1 du 22 janvier 2019), ministère de l'Éducation nationale</a></li>
+        <li><a href="https://eduscol.education.gouv.fr/sites/default/files/document/ra21lyceegt21tphychimesure-incertitudes-lyceepdf-70446.pdf">Mesure et incertitudes au lycée, Éduscol (mai 2021)</a></li>
+        <li>TP « C9 TP1 : Mesurer la valeur de la vitesse de propagation d'un signal sonore » (document de l'enseignant) et page « Vitesse de propagation du son » d'un manuel de Seconde (démarches différenciées), dont la simulation s'inspire pour le scénario. Les données de la mesure de 1822 (L = 18 612 m, Δt = 54,6 s, θ = 15,9 °C) viennent de ce TP.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 16/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
