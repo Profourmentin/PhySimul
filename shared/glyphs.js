@@ -271,6 +271,23 @@
     return s;
   });
 
+  /* Cristaux : maille cubique en perspective cavalière (arêtes cachées en pointillés), atomes pleins aux 8 sommets, atomes creux au centre des faces visibles, arête a cotée. */
+  add("cristal", function () {
+    var s = "", x0 = 56, y0 = 40, a = 60, dx = 22, dy = -18;     // face avant : carré de côté a ; fuyantes : décalage (dx, dy)
+    function P(u, v, w) { return [x0 + u * a + w * dx, y0 + a - v * a + w * dy]; }   // u : droite, v : haut, w : profondeur (0 ou 1)
+    function seg(p, q, cls) { return '<line class="' + cls + '" x1="' + p[0] + '" y1="' + p[1] + '" x2="' + q[0] + '" y2="' + q[1] + '"/>'; }
+    var fr = [P(0, 1, 0), P(1, 1, 0), P(1, 0, 0), P(0, 0, 0)], bk = [P(0, 1, 1), P(1, 1, 1), P(1, 0, 1), P(0, 0, 1)];
+    var i;
+    for (i = 0; i < 4; i++) s += seg(fr[i], fr[(i + 1) % 4], "s");                       // face avant
+    s += seg(bk[0], bk[1], "s") + seg(bk[1], bk[2], "s");                                // arrière : arêtes visibles
+    s += seg(fr[0], bk[0], "s") + seg(fr[1], bk[1], "s") + seg(fr[2], bk[2], "s");       // fuyantes visibles
+    s += seg(bk[0], bk[3], "s dash") + seg(bk[3], bk[2], "s dash") + seg(fr[3], bk[3], "s dash");   // arêtes cachées
+    fr.concat(bk).forEach(function (p) { s += '<circle class="f" cx="' + p[0] + '" cy="' + p[1] + '" r="5"/>'; });
+    [P(.5, .5, 0), P(1, .5, .5), P(.5, 1, .5)].forEach(function (p) { s += '<circle class="s" cx="' + p[0] + '" cy="' + p[1] + '" r="5"/>'; });
+    s += '<line class="v" x1="' + x0 + '" y1="112" x2="' + (x0 + a) + '" y2="112"/><line class="v" x1="' + x0 + '" y1="107" x2="' + x0 + '" y2="117"/><line class="v" x1="' + (x0 + a) + '" y1="107" x2="' + (x0 + a) + '" y2="117"/>';
+    return s;
+  });
+
   /* ---------- Noms génériques (anciens noms, à éviter pour une nouvelle simulation) ---------- */
   /* Générique : chronophotographie d'un lancer. */
   add("chrono", function () {

@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cristaux : de la maille au cristal · Simulabo PhCh</title>
+<meta name="description" content="Explore en 3D les mailles du polonium, de l'argent, du chrome et du sel : prévois le partage des atomes entre mailles voisines, compte les atomes par maille (multiplicité Z), puis prolonge avec la compacité et la masse volumique.">
+<!-- bruit : sans objet : aucune grandeur n'est lue sur un instrument ; les positions, les paramètres de maille et les masses molaires sont des données du modèle, et la multiplicité, la compacité et la masse volumique sont calculées par l'élève -->
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+:root { --guide: #B4236B; }
+@media (prefers-color-scheme: dark) { :root { --guide: #FF7AA8; } }
+
+body > .wrap { max-width: 1180px; }
+main.cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); align-items: start; }
+.col-stage, .col-steps { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+.col-stage > * { flex-shrink: 0; }
+@media (min-width: 900px) {
+  main.cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .col-stage { position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; }
+}
+
+.cv { max-width: min(100%, 62vh); margin: 0 auto; }
+@media (min-width: 900px) { .cv { max-width: min(100%, 50vh); } }
+.stagebar { align-items: flex-start; justify-content: flex-start; gap: 10px 20px; }
+.cv canvas { touch-action: pan-y; cursor: grab; }
+.cv canvas:active { cursor: grabbing; }
+
+.lab { display: block; margin: 0 0 4px; font: 600 13px var(--font-data); color: var(--muted); }
+.tabs.multi { flex-wrap: wrap; overflow: visible; }
+.tabs.multi .tab { flex: 0 1 auto; }
+.ctrl { display: grid; gap: 12px; }
+.sw-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--ink); display: inline-block; flex: none; }
+.info { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; font-size: 14px; }
+.info dt { color: var(--muted); }
+.info dd { margin: 0; font-weight: 600; }
+
+.step h2 { flex-wrap: wrap; }
+.step h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
+.num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 14px var(--font-body); flex: none; }
+.checks { border: 0; margin: 0; padding: 0; display: grid; gap: 2px; }
+.checks label { display: flex; align-items: center; gap: 10px; min-height: var(--tap); }
+.checks input[type="checkbox"], .checks input[type="radio"] { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+fieldset.plain { border: 0; margin: 0; padding: 0; min-width: 0; }
+.tablewrap table.mesures th[scope="row"] { font: 400 14px var(--font-body); color: var(--ink); background: transparent; text-align: left; white-space: normal; }
+.tablewrap table.mesures td { text-align: center; }
+select, input[type="text"], input[type="number"], textarea {
+  font: 500 15px var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); min-height: var(--tap); padding: 4px 8px;
+}
+input[type="number"], input[type="text"].num-in { width: 5.4em; text-align: center; }
+textarea { width: 100%; min-height: 84px; resize: vertical; }
+.fb:empty { display: none; }
+.fb[data-tone="info"] { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+.fb ul { margin: 6px 0 0; padding-left: 20px; }
+.problematique { font-size: 15px; }
+
+#print-carnet { display: none; }
+@media print {
+  body > .wrap { display: none !important; }
+  #print-carnet { display: block; white-space: pre-wrap; font: 14px/1.5 var(--font-body); color: #000; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="matiere">Constitution et transformations de la matière · Première</p>
+    <h1>Cristaux : de la maille au cristal</h1>
+    <p class="sub">Explore la maille de quelques cristaux, trouve comment compter les atomes qui lui appartiennent, puis applique la méthode au cristal de sel. Tourne la maille avec la souris, le doigt ou les curseurs de rotation.</p>
+  </header>
+
+  <main id="sim" class="cols">
+    <!-- ===== Colonne gauche : la maille ===== -->
+    <div class="col-stage">
+      <section class="stage" aria-label="Scène de la simulation">
+        <div class="stagebar">
+          <div><span class="lab" id="l-cr">Cristal</span>
+            <div class="tabs multi" id="g-cr" role="group" aria-labelledby="l-cr">
+              <button class="tab" data-mode="po">Polonium (Po)</button>
+              <button class="tab" data-mode="ag">Argent (Ag)</button>
+              <button class="tab" data-mode="cr">Chrome (Cr)</button>
+              <button class="tab" data-mode="nacl">Sel (NaCl)</button>
+            </div></div>
+          <div><span class="lab" id="l-mode">Affichage</span>
+            <div class="tabs multi" id="g-mode" role="group" aria-labelledby="l-mode">
+              <button class="tab" data-mode="full">Atomes entiers</button>
+              <button class="tab" data-mode="clip">Dans la maille</button>
+              <button class="tab" data-mode="nuclei">Positions seulement</button>
+              <button class="tab" data-mode="cav">Perspective cavalière</button>
+            </div></div>
+        </div>
+        <div class="cv">
+          <canvas id="cv" width="560" height="560" role="img" aria-label="Maille cristalline en 3D."></canvas>
+        </div>
+        <div class="legend" id="legend" aria-label="Légende des couleurs"></div>
+      </section>
+
+      <section class="obs" id="obs" aria-live="polite" data-tone="info">
+        <h2>Observation</h2>
+        <p data-obs-text></p>
+      </section>
+
+      <section class="card" aria-label="Réglages de la vue">
+        <details id="reglages">
+          <summary>Réglages de la vue : mailles côte à côte, couleurs, taille, rotation</summary>
+          <div class="ctrl" style="margin-top:12px;color:var(--ink);font-size:15px">
+            <div class="row">
+              <div><span class="lab" id="l-n">Mailles côte à côte</span>
+                <div class="tabs multi" id="g-n" role="group" aria-labelledby="l-n">
+                  <button class="tab" data-mode="1" aria-label="1 maille">1</button>
+                  <button class="tab" data-mode="2" aria-label="2 × 2 × 2 mailles">2×2×2</button>
+                  <button class="tab" data-mode="3" aria-label="3 × 3 × 3 mailles">3×3×3</button>
+                </div></div>
+              <div><span class="lab" id="l-color">Couleur des atomes</span>
+                <div class="tabs multi" id="g-color" role="group" aria-labelledby="l-color">
+                  <button class="tab" data-mode="species">Selon l’espèce</button>
+                  <button class="tab" data-mode="position">Selon la position</button>
+                </div></div>
+            </div>
+            <div id="sliders"></div>
+            <div class="row">
+              <span class="help">Point de vue :</span>
+              <button type="button" class="small" id="v-iso">Perspective</button>
+              <button type="button" class="small" id="v-front">Face</button>
+              <button type="button" class="small" id="v-top">Dessus</button>
+            </div>
+            <dl class="info" id="info"></dl>
+            <details>
+              <summary>Description écrite de la maille (alternative au dessin)</summary>
+              <div id="textdesc"></div>
+            </details>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <!-- ===== Colonne droite : l'activité ===== -->
+    <div class="col-steps">
+      <section class="card problematique">
+        <p>Problématique : <b>comment calculer le nombre d’atomes qui appartiennent en propre à une maille ?</b> Les étapes se suivent dans cet ordre conseillé, mais tu peux revenir en arrière à tout moment.</p>
+      </section>
+
+      <!-- Étape 1 -->
+      <section class="card step" id="s1" aria-labelledby="h1s">
+        <h2 id="h1s"><span class="num" aria-hidden="true">1</span> Se repérer dans la maille
+          <span class="comp" data-comp="app"><abbr title="S’approprier">APP</abbr> · Repérer</span></h2>
+        <p>Choisis un cristal, tourne la maille, puis coche les positions où se trouve le centre d’au moins un atome. Le mode « Positions seulement » t’aide à voir les centres.</p>
+        <fieldset class="checks">
+          <legend class="sr-only">Positions occupées par un atome</legend>
+          <label><input type="checkbox" id="rep-sommet"> aux sommets de la maille</label>
+          <label><input type="checkbox" id="rep-arete"> au milieu des arêtes</label>
+          <label><input type="checkbox" id="rep-face"> au centre des faces</label>
+          <label><input type="checkbox" id="rep-centre"> au centre de la maille (à l’intérieur du cube)</label>
+        </fieldset>
+        <div class="row"><button type="button" class="primary" id="rep-check">Vérifier mon repérage</button></div>
+        <div class="fb" id="fb1" role="status" aria-live="polite"></div>
+      </section>
+
+      <!-- Étape 2 -->
+      <section class="card step" id="s2" aria-labelledby="h2s">
+        <h2 id="h2s"><span class="num" aria-hidden="true">2</span> Trouver les règles de partage
+          <span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span></h2>
+        <p>Un atome placé sur un sommet, une arête ou une face de la maille touche aussi les mailles voisines : il est <b>partagé</b>. Avant de regarder, <b>prévois</b> combien de mailles identiques (la tienne comprise) se partagent un atome situé :</p>
+        <div class="tablewrap"><table class="mesures" id="pred-table"></table></div>
+        <fieldset class="plain">
+          <legend class="lab">Ton degré de certitude</legend>
+          <div class="tabs multi" id="g-cert" role="group" aria-label="Degré de certitude">
+            <button class="tab" data-mode="1">Je devine</button>
+            <button class="tab" data-mode="2">Assez sûr·e</button>
+            <button class="tab" data-mode="3">Sûr·e</button>
+          </div>
+        </fieldset>
+        <div class="row"><button type="button" class="primary" id="pred-save">Enregistrer ma prévision</button></div>
+        <div class="fb" id="fb2a" role="status" aria-live="polite"></div>
+
+        <div id="confront" hidden>
+          <h3><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Confronter</span> Ma prévision et la maille</h3>
+          <p>Regarde maintenant la maille de deux façons, puis compare avec ta prévision.</p>
+          <div class="row" style="margin-top:8px">
+            <button type="button" id="go-stack">Voir les mailles côte à côte</button>
+            <button type="button" id="go-clip">Voir ce qui est dans la maille</button>
+            <button type="button" class="primary" id="conf-btn">Confronter ma prévision</button>
+          </div>
+          <div class="tablewrap" id="conf-wrap" hidden style="margin-top:10px"><table class="mesures" id="conf-table"></table></div>
+          <div class="fb" id="fb2b" role="status" aria-live="polite" style="margin-top:10px"></div>
+          <div id="parts-box" hidden>
+            <h3 style="margin-top:14px"><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Appliquer</span> Quelle part de l’atome appartient à la maille ?</h3>
+            <p>Si un atome est partagé entre plusieurs mailles identiques, quelle fraction de cet atome revient à <em>ta</em> maille ?</p>
+            <div class="tablewrap" style="margin-top:8px"><table class="mesures" id="parts-table"></table></div>
+            <div class="row" style="margin-top:10px"><button type="button" class="primary" id="parts-check">Vérifier mes fractions</button></div>
+            <div class="fb" id="fb2c" role="status" aria-live="polite" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Étape 3 -->
+      <section class="card step" id="s3" aria-labelledby="h3s">
+        <h2 id="h3s"><span class="num" aria-hidden="true">3</span> Dénombrer les atomes d’une maille
+          <span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Dénombrer</span></h2>
+        <p>Pour le cristal affiché : compte combien d’atomes sont situés à chaque position, puis calcule le nombre d’atomes qui appartiennent en propre à la maille (la <b>multiplicité</b>, notée <em>Z</em>). Fais-le pour le polonium, l’argent et le chrome, puis pour le sel.</p>
+        <div class="tablewrap"><table class="mesures" id="count-table"></table></div>
+        <div class="row"><button type="button" class="primary" id="count-check">Vérifier mon dénombrement</button></div>
+        <div class="fb" id="fb3" role="status" aria-live="polite"></div>
+        <div id="val3" hidden></div>
+        <p class="help" id="progress"></p>
+      </section>
+
+      <!-- Étape 4 -->
+      <section class="card step" id="s4">
+        <details id="pro">
+          <summary>4 · Pour aller plus loin : contact, compacité et masse volumique</summary>
+          <div style="display:grid;gap:12px;margin-top:10px;color:var(--ink);font-size:15px">
+            <p class="help">Prolongement. Au programme d’enseignement scientifique : compacité et masse volumique pour les réseaux cubique simple et cubique à faces centrées. Le chrome (cubique centré) et le sel (deux sortes d’ions) vont au-delà.</p>
+            <h3><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir</span> Où les atomes se touchent-ils ?</h3>
+            <div class="row">
+              <label for="pro-dir">Direction de contact</label>
+              <select id="pro-dir">
+                <option value="">— choisir —</option>
+                <option value="arete">le long d’une arête</option>
+                <option value="diagface">le long de la diagonale d’une face</option>
+                <option value="diagcube">le long de la grande diagonale du cube</option>
+              </select>
+              <button type="button" id="pro-dir-check">Vérifier</button>
+            </div>
+            <p class="help">La droite choisie est tracée sur la maille. Mets la taille des atomes à 100 % pour voir si les sphères se touchent le long de cette droite.</p>
+            <div class="fb" id="fb4a" role="status" aria-live="polite"></div>
+
+            <div id="pro-compact" style="display:grid;gap:12px">
+              <h3><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span> Arête <em>a</em> et compacité</h3>
+              <div class="row">
+                <label for="pro-ratio">Rapport <em>a</em> / <em>r</em> =</label>
+                <input type="text" class="num-in" id="pro-ratio" inputmode="decimal" autocomplete="off">
+                <button type="button" id="pro-ratio-check">Vérifier</button>
+              </div>
+              <div class="fb" id="fb4b" role="status" aria-live="polite"></div>
+              <div class="row">
+                <label for="pro-c">Compacité <em>C</em> = <em>Z</em> × (4/3)π<em>r</em>³ / <em>a</em>³ =</label>
+                <input type="text" class="num-in" id="pro-c" inputmode="decimal" autocomplete="off">
+                <button type="button" id="pro-c-check">Vérifier</button>
+              </div>
+              <div class="fb" id="fb4c" role="status" aria-live="polite"></div>
+            </div>
+
+            <h3><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Confronter</span> Masse volumique</h3>
+            <p class="help" id="pro-rho-data"></p>
+            <div class="row">
+              <label for="pro-rho">ρ calculée (g/cm³) =</label>
+              <input type="text" class="num-in" id="pro-rho" inputmode="decimal" autocomplete="off">
+              <button type="button" id="pro-rho-check">Comparer à la valeur tabulée</button>
+            </div>
+            <div class="fb" id="fb4d" role="status" aria-live="polite"></div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Étape 5 -->
+      <section class="card step" id="s5" aria-labelledby="h5s">
+        <h2 id="h5s"><span class="num" aria-hidden="true">5</span> Conclure
+          <span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · Conclure</span></h2>
+        <p><label for="txt-regle">En une ou deux phrases, explique comment calculer le nombre d’atomes par maille, en fonction de la position des atomes.</label></p>
+        <textarea id="txt-regle" placeholder="Un atome situé à un sommet compte pour … parce que …"></textarea>
+        <p><label for="txt-nacl">Pour le cristal de sel : que représentent les résultats obtenus pour les ions Na⁺ et Cl⁻ ?</label></p>
+        <textarea id="txt-nacl"></textarea>
+        <div class="row">
+          <button type="button" class="primary" id="carnet-copy">Copier mon carnet</button>
+          <button type="button" id="carnet-print">Imprimer mon carnet</button>
+        </div>
+        <div class="fb" id="fb5" role="status" aria-live="polite"></div>
+      </section>
+
+      <details>
+        <summary>Hypothèses et limites du modèle</summary>
+        <ul>
+          <li>Les atomes ou ions sont des sphères dures tangentes : le modèle de sphères tangentes du programme. Dans la réalité, un atome n’a pas de bord net.</li>
+          <li>La maille représentée est un cube dont les sommets sont des centres d’atomes. Le choix de la maille n’est pas unique.</li>
+          <li>Les paramètres de maille et les masses volumiques sont des valeurs de tables usuelles, arrondies.</li>
+        </ul>
+      </details>
+    </div>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne. Aucune donnée n'est envoyée : ton carnet reste dans ton navigateur.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+<div id="print-carnet" aria-hidden="true"></div>
+
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+'use strict';
+var S = Simulabo;
+/*ENGINE-START*/
+const FOV = 30 * Math.PI / 180;
+const POS_TYPES = ['sommet','arete','face','centre'];
+const PART  = {sommet:1/8, arete:1/4, face:1/2, centre:1};
+const SHARE = {sommet:8,   arete:4,   face:2,   centre:1};
+const FRAC  = {sommet:'1/8', arete:'1/4', face:'1/2', centre:'1'};
+const POS_COLOR = {sommet:[213,94,0], arete:[230,159,0], face:[0,114,178], centre:[0,158,115]};
+const POS_NAME  = {sommet:'un sommet de la maille', arete:'le milieu d’une arête', face:'le centre d’une face', centre:'le centre de la maille'};
+const POS_PLUR  = {sommet:'sommets', arete:'arêtes', face:'faces', centre:'centre'};
+const FCC = [[0,0,0],[.5,.5,0],[.5,0,.5],[0,.5,.5]];
+const RCL = 181/564, RNA = 0.5 - 181/564;
+const CR = {
+  po:{id:'po', name:'Polonium', lattice:'cubique simple', a:336, M:209, rho:9.2, contact:'arete', ratio:2, rel:'a = 2 r',
+      species:[{id:'Po', label:'Po', color:[142,110,190], r:0.5}], basis:{Po:[[0,0,0]]}},
+  ag:{id:'ag', name:'Argent', lattice:'cubique à faces centrées', a:409, M:107.87, rho:10.5, contact:'diagface', ratio:2*Math.SQRT2, rel:'a = 2√2 · r',
+      species:[{id:'Ag', label:'Ag', color:[190,198,210], r:Math.SQRT2/4}], basis:{Ag:FCC}},
+  cr:{id:'cr', name:'Chrome', lattice:'cubique centré', a:288, M:52.00, rho:7.19, contact:'diagcube', ratio:4/Math.sqrt(3), rel:'a = 4r / √3',
+      species:[{id:'Cr', label:'Cr', color:[110,135,160], r:Math.sqrt(3)/4}], basis:{Cr:[[0,0,0],[.5,.5,.5]]}},
+  nacl:{id:'nacl', name:'Chlorure de sodium', lattice:'cristal ionique', a:564, M:58.44, rho:2.165, contact:'arete', ratio:null, rel:'a = 2 (r(Na⁺) + r(Cl⁻))',
+      species:[{id:'Cl', label:'Cl⁻', color:[122,154,58], r:RCL},{id:'Na', label:'Na⁺', color:[43,143,214], r:RNA}],
+      basis:{Cl:FCC, Na:[[.5,0,0],[0,.5,0],[0,0,.5],[.5,.5,.5]]}}
+};
+function buildSites(cr,n){
+  const eps=1e-6, out=[], seen=new Set();
+  for(const sp of cr.species){
+    for(const b of cr.basis[sp.id]){
+      for(let i=-1;i<=n;i++)for(let j=-1;j<=n;j++)for(let k=-1;k<=n;k++){
+        const x=b[0]+i,y=b[1]+j,z=b[2]+k;
+        if(x<-eps||y<-eps||z<-eps||x>n+eps||y>n+eps||z>n+eps)continue;
+        const key=sp.id+'|'+Math.round(x*2)+'|'+Math.round(y*2)+'|'+Math.round(z*2);
+        if(seen.has(key))continue; seen.add(key);
+        let type='out';
+        if(x<=1+eps&&y<=1+eps&&z<=1+eps){
+          let c=0; for(const v of [x,y,z]) if(Math.abs(v)<eps||Math.abs(v-1)<eps) c++;
+          type=['centre','face','arete','sommet'][c];
+        }
+        out.push({x,y,z,sp:sp.id,type});
+      }
+    }
+  }
+  return out;
+}
+function truth(cr){
+  const count={},Z={},occ={sommet:false,arete:false,face:false,centre:false};
+  for(const sp of cr.species){count[sp.id]={sommet:0,arete:0,face:0,centre:0};Z[sp.id]=0;}
+  for(const s of buildSites(cr,1)){count[s.sp][s.type]++;Z[s.sp]+=PART[s.type];occ[s.type]=true;}
+  return {count,Z,occ};
+}
+function camera(st,n){
+  const R=Math.sqrt(3)*n/2+0.6, dist=R/Math.sin(FOV/2)*1.04;
+  const cp=Math.cos(st.pitch),sp=Math.sin(st.pitch),cy=Math.cos(st.yaw),sy=Math.sin(st.yaw);
+  const eye=[dist*cp*sy,dist*sp,dist*cp*cy];
+  const fwd=[-eye[0]/dist,-eye[1]/dist,-eye[2]/dist];
+  let rx=-fwd[2],rz=fwd[0]; const rl=Math.hypot(rx,rz)||1; rx/=rl; rz/=rl;
+  const right=[rx,0,rz];
+  const up=[-rz*fwd[1], rz*fwd[0]-rx*fwd[2], rx*fwd[1]];
+  return {eye,fwd,right,up,f:Math.tan(FOV/2),dist};
+}
+function project(cam,p,W,H){
+  const rx=p[0]-cam.eye[0],ry=p[1]-cam.eye[1],rz=p[2]-cam.eye[2];
+  const zc=rx*cam.fwd[0]+ry*cam.fwd[1]+rz*cam.fwd[2];
+  const xc=rx*cam.right[0]+ry*cam.right[1]+rz*cam.right[2];
+  const yc=rx*cam.up[0]+ry*cam.up[1]+rz*cam.up[2];
+  return [((xc/zc)/cam.f+1)/2*W, (1-(yc/zc)/cam.f)/2*H];
+}
+function makeScene(st){
+  const cr=CR[st.cr], mode=st.mode;
+  const n=(mode==='full'||mode==='nuclei')?st.n:1;
+  const sites=buildSites(cr,n);
+  const rad={},col={}; for(const sp of cr.species){rad[sp.id]=sp.r;col[sp.id]=sp.color;}
+  const N=sites.length;
+  const sc={n,N,clip:mode==='clip',h:0.5,cam:camera(st,n),
+    cx:new Float64Array(N),cy:new Float64Array(N),cz:new Float64Array(N),r:new Float64Array(N),
+    cr:new Uint8Array(N),cg:new Uint8Array(N),cb:new Uint8Array(N),al:new Uint8Array(N)};
+  sites.forEach((s,i)=>{
+    sc.cx[i]=s.x-n/2; sc.cy[i]=s.y-n/2; sc.cz[i]=s.z-n/2;
+    sc.r[i]=(mode==='nuclei')?0.06:rad[s.sp]*st.scale;
+    let c=(st.color==='position')?(s.type==='out'?[150,150,150]:POS_COLOR[s.type]):col[s.sp];
+    sc.cr[i]=c[0];sc.cg[i]=c[1];sc.cb[i]=c[2];
+    sc.al[i]=(s.type==='out')?120:255;
+  });
+  return sc;
+}
+const _slab=[0,0,0];
+function slab(ox,oy,oz,dx,dy,dz,h){
+  let tmin=-Infinity,tmax=Infinity,ax=0;
+  const o=[ox,oy,oz],d=[dx,dy,dz];
+  for(let a=0;a<3;a++){
+    if(Math.abs(d[a])<1e-12){ if(Math.abs(o[a])>h){_slab[0]=1;_slab[1]=0;return false;} continue; }
+    let t0=(-h-o[a])/d[a],t1=(h-o[a])/d[a]; if(t0>t1){const t=t0;t0=t1;t1=t;}
+    if(t0>tmin){tmin=t0;ax=a;} if(t1<tmax)tmax=t1;
+  }
+  _slab[0]=tmin;_slab[1]=tmax;_slab[2]=ax;
+  return tmin<=tmax&&tmax>0;
+}
+function render(sc,W,H,buf){
+  buf.fill(0);
+  const depth=new Float32Array(W*H); depth.fill(Infinity);
+  const {eye,fwd,right,up,f}=sc.cam;
+  let L0=-fwd[0]*0.7+up[0]*0.55-right[0]*0.4, L1=-fwd[1]*0.7+up[1]*0.55-right[1]*0.4, L2=-fwd[2]*0.7+up[2]*0.55-right[2]*0.4;
+  const ll=Math.hypot(L0,L1,L2); L0/=ll;L1/=ll;L2/=ll;
+  for(let i=0;i<sc.N;i++){
+    const r=sc.r[i], rr=r*r;
+    const rx=sc.cx[i]-eye[0],ry=sc.cy[i]-eye[1],rz=sc.cz[i]-eye[2];
+    const zc=rx*fwd[0]+ry*fwd[1]+rz*fwd[2];
+    if(zc<=r*1.01)continue;
+    const d2=rx*rx+ry*ry+rz*rz;
+    const ang=r/Math.sqrt(Math.max(d2-rr,1e-9));
+    const pxc=(((rx*right[0]+ry*right[1]+rz*right[2])/zc)/f+1)/2*W;
+    const pyc=(1-((rx*up[0]+ry*up[1]+rz*up[2])/zc)/f)/2*H;
+    const prad=(ang/f)*0.5*W*1.25+2;
+    const x0=Math.max(0,Math.floor(pxc-prad)),x1=Math.min(W-1,Math.ceil(pxc+prad));
+    const y0=Math.max(0,Math.floor(pyc-prad)),y1=Math.min(H-1,Math.ceil(pyc+prad));
+    const ocx=-rx,ocy=-ry,ocz=-rz, c0=sc.cr[i],c1=sc.cg[i],c2=sc.cb[i], alpha=sc.al[i];
+    for(let y=y0;y<=y1;y++){
+      const v=(1-(y+.5)/H*2)*f;
+      for(let x=x0;x<=x1;x++){
+        const u=((x+.5)/W*2-1)*f;
+        let dx=fwd[0]+u*right[0]+v*up[0],dy=fwd[1]+u*right[1]+v*up[1],dz=fwd[2]+u*right[2]+v*up[2];
+        const il=1/Math.sqrt(dx*dx+dy*dy+dz*dz); dx*=il;dy*=il;dz*=il;
+        const b=ocx*dx+ocy*dy+ocz*dz, disc=b*b-(d2-rr);
+        if(disc<0)continue;
+        const sq=Math.sqrt(disc), t1=-b-sq, t2=-b+sq;
+        let t,cap=false,ax=0;
+        if(sc.clip){
+          if(!slab(eye[0],eye[1],eye[2],dx,dy,dz,sc.h))continue;
+          const te=_slab[0],tx=_slab[1];
+          if(t2<te||t1>tx)continue;
+          if(t1>=te){t=t1;}else{t=te;cap=true;ax=_slab[2];}
+        }else{ if(t1<=0)continue; t=t1; }
+        const idx=y*W+x; if(t>=depth[idx])continue; depth[idx]=t;
+        let nx,ny,nz;
+        if(cap){ nx=ny=nz=0; const dd=ax===0?dx:(ax===1?dy:dz); const sgn=dd>0?-1:1; if(ax===0)nx=sgn;else if(ax===1)ny=sgn;else nz=sgn; }
+        else{ nx=(eye[0]+t*dx-sc.cx[i])/r; ny=(eye[1]+t*dy-sc.cy[i])/r; nz=(eye[2]+t*dz-sc.cz[i])/r; }
+        const diff=Math.max(0,nx*L0+ny*L1+nz*L2);
+        let spec=0;
+        if(!cap){ let hx=L0-dx,hy=L1-dy,hz=L2-dz; const hl=Math.hypot(hx,hy,hz)||1; spec=Math.pow(Math.max(0,(nx*hx+ny*hy+nz*hz)/hl),40)*0.35; }
+        const k=0.36+0.7*diff;
+        let R=c0,G=c1,B=c2;
+        if(cap){R=R+(255-R)*0.45;G=G+(255-G)*0.45;B=B+(255-B)*0.45;}
+        const o=idx*4;
+        buf[o]=Math.min(255,R*k+255*spec); buf[o+1]=Math.min(255,G*k+255*spec); buf[o+2]=Math.min(255,B*k+255*spec); buf[o+3]=alpha;
+      }
+    }
+  }
+}
+/*ENGINE-END*/
+
+/* ================= Interface ================= */
+const $ = id => document.getElementById(id);
+const etat = S.shareState({ cristal: 'po', vue: 'full' });
+const init = etat.read();
+const MODES = ['full', 'clip', 'nuclei', 'cav'];
+const st = {
+  cr: CR[init.cristal] ? init.cristal : 'po',
+  mode: MODES.indexOf(init.vue) >= 0 ? init.vue : 'full',
+  n: 1, scale: 1, color: 'species', yaw: 0.75, pitch: 0.45, guide: false, dir: ''
+};
+const prog = { pred: null, cert: 0, confronted: false, parts: null, counted: {}, obs: {} };
+const cv = $('cv'), wrap = cv.parentNode;
+const off = document.createElement('canvas'), offCtx = off.getContext('2d'), bufs = {};
+let ready = false;
+
+const MODE_LABEL = { full: 'atomes entiers', clip: 'parties d’atomes dans la maille', nuclei: 'positions seulement', cav: 'perspective cavalière' };
+const MODE_CAP = {
+  full: 'Les atomes sont des sphères dures tangentes. Fais glisser pour tourner la maille, ou utilise les curseurs de rotation (dans « Réglages de la vue »).',
+  clip: 'Seule la partie de chaque atome située à l’intérieur de la maille est représentée ; les surfaces claires sont les coupes.',
+  nuclei: 'Seuls les centres des atomes sont représentés : pratique pour repérer les positions et les compter.',
+  cav: 'Perspective cavalière : face avant en vraie grandeur, fuyantes à 45° réduites de moitié, arêtes cachées en pointillés. C’est le modèle à reproduire sur ton cahier.'
+};
+const LEG_POS = { sommet: 'Aux sommets', arete: 'Aux milieux des arêtes', face: 'Aux centres des faces', centre: 'Au centre de la maille' };
+
+/* ----- Dessin ----- */
+function drawOverlay(ctx, Sz, sc) {
+  const cam = sc.cam, n = sc.n, o = -n / 2;
+  const P = (x, y, z) => project(cam, [o + x, o + y, o + z], Sz, Sz);
+  const cell = (i, j, k) => {
+    const c = []; for (const a of [0, 1]) for (const b of [0, 1]) for (const d of [0, 1]) c.push(P(i + a, j + b, k + d));
+    const pairs = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
+    ctx.beginPath(); for (const [a, b] of pairs) { ctx.moveTo(c[a][0], c[a][1]); ctx.lineTo(c[b][0], c[b][1]); } ctx.stroke();
+  };
+  ctx.lineCap = 'round'; ctx.strokeStyle = S.cssVar('--ink');
+  if (n > 1) { ctx.globalAlpha = .3; ctx.lineWidth = 1; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++) cell(i, j, k); ctx.globalAlpha = 1; }
+  ctx.lineWidth = 2.2; cell(0, 0, 0);
+  if (st.guide && st.dir) {
+    const E = { arete: [[0, 0, 0], [1, 0, 0]], diagface: [[0, 0, 0], [1, 1, 0]], diagcube: [[0, 0, 0], [1, 1, 1]] }[st.dir];
+    if (E) {
+      const a = P(...E[0]), b = P(...E[1]);
+      ctx.strokeStyle = S.cssVar('--guide'); ctx.lineWidth = 4; ctx.setLineDash([10, 6]);
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+}
+function drawCav(ctx, Sz) {
+  const cr = CR[st.cr], k = 0.5 * Math.SQRT1_2, side = Sz * 0.58;
+  const ox = (Sz - side * (1 + k)) / 2, oy = Sz - (Sz - side * (1 + k)) / 2;
+  const P = (x, y, z) => [ox + (x + k * z) * side, oy - (y + k * z) * side];
+  const edge = S.cssVar('--ink');
+  const corners = []; for (const z of [0, 1]) for (const y of [0, 1]) for (const x of [0, 1]) corners.push([x, y, z]);
+  const edges = [];
+  for (const c of corners) for (let a = 0; a < 3; a++) { if (c[a] === 0) { const d = c.slice(); d[a] = 1; edges.push([c, d]); } }
+  ctx.lineCap = 'round'; ctx.strokeStyle = edge;
+  for (const [a, b] of edges) {
+    const hidden = (a[0] === 0 && a[1] === 0 && a[2] === 1) || (b[0] === 0 && b[1] === 0 && b[2] === 1);
+    const p = P(...a), q = P(...b);
+    ctx.setLineDash(hidden ? [8, 6] : []); ctx.lineWidth = hidden ? 1.6 : 2.4;
+    ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  const sites = buildSites(cr, 1).sort((a, b) => (b.z - a.z) || (b.y - a.y));
+  const col = {}; for (const sp of cr.species) col[sp.id] = sp.color;
+  const rad = Sz * 0.022;
+  for (const s of sites) {
+    const c = st.color === 'position' ? POS_COLOR[s.type] : col[s.sp];
+    const p = P(s.x, s.y, s.z);
+    ctx.beginPath(); ctx.arc(p[0], p[1], rad, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; ctx.fill();
+    ctx.lineWidth = 1.6; ctx.strokeStyle = edge; ctx.stroke();
+  }
+  ctx.fillStyle = edge; ctx.font = Math.round(Sz * 0.04) + 'px sans-serif'; ctx.textAlign = 'center';
+  const m = P(.5, 0, 0); ctx.fillText('a', m[0], m[1] + Sz * 0.05);
+}
+function paint(low) {
+  const css = wrap.clientWidth || 400, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const Sz = Math.max(240, Math.round(css * dpr));
+  if (cv.width !== Sz || cv.height !== Sz) { cv.width = Sz; cv.height = Sz; }
+  const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, Sz, Sz);
+  if (st.mode === 'cav') { drawCav(ctx, Sz); return; }
+  const W = low ? 280 : 560;
+  if (!bufs[W]) bufs[W] = new Uint8ClampedArray(W * W * 4);
+  if (off.width !== W) { off.width = W; off.height = W; }
+  const sc = makeScene(st);
+  render(sc, W, W, bufs[W]);
+  offCtx.putImageData(new ImageData(bufs[W], W, W), 0, 0);
+  ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, Sz, Sz);
+  drawOverlay(ctx, Sz, sc);
+}
+let raf = 0, lowFlag = false, fullTimer = 0;
+function request(low) {
+  lowFlag = low;
+  if (!raf) raf = requestAnimationFrame(() => { raf = 0; paint(lowFlag); });
+  clearTimeout(fullTimer);
+  if (low) fullTimer = setTimeout(() => request(false), 160);
+}
+
+/* ----- Légende, infos, description ----- */
+function updateInfo() {
+  const cr = CR[st.cr], t = truth(cr);
+  const leg = $('legend'); leg.innerHTML = '';
+  const add = (c, txt) => { const s = document.createElement('span'); s.className = 'lg'; s.innerHTML = '<span class="sw-dot" style="background:rgb(' + c.join(',') + ')"></span>' + txt; leg.appendChild(s); };
+  if (st.color === 'species') {
+    cr.species.forEach(sp => add(sp.color, sp.label === 'Cl⁻' ? 'Ions chlorure Cl⁻' : (sp.label === 'Na⁺' ? 'Ions sodium Na⁺' : 'Atomes de ' + sp.label)));
+  } else {
+    POS_TYPES.forEach(p => { if (t.occ[p]) add(POS_COLOR[p], LEG_POS[p]); });
+  }
+  if (st.n > 1 && (st.mode === 'full' || st.mode === 'nuclei')) add([150, 150, 150], 'hors de la maille repérée (pâle)');
+  const pm = v => v.toLocaleString('fr-FR');
+  const rows = [['Type de cristal', cr.lattice], ['Arête a de la maille', '≈ ' + pm(cr.a) + ' pm (1 pm = 10⁻¹² m)']];
+  if (cr.id === 'nacl') rows.push(['Rayons des ions', 'Cl⁻ ≈ ' + pm(Math.round(RCL * cr.a)) + ' pm ; Na⁺ ≈ ' + pm(Math.round(RNA * cr.a)) + ' pm']);
+  else rows.push(['Rayon d’un atome (tangents)', '≈ ' + pm(Math.round(cr.species[0].r * cr.a)) + ' pm']);
+  $('info').innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
+  const where = { sommet: 'aux sommets', arete: 'aux milieux des arêtes', face: 'aux centres des faces', centre: 'au centre de la maille' };
+  const lines = cr.species.map(sp => '<li><b>' + sp.label + '</b> : ' + POS_TYPES.filter(p => t.count[sp.id][p] > 0).map(p => t.count[sp.id][p] + ' ' + where[p]).join(', ') + '.</li>');
+  $('textdesc').innerHTML = '<p class="help">' + cr.name + ' : maille cubique. Nombre de centres d’atomes à chaque position de la maille (cette description donne le dénombrement par position : l’étape 3 reste à faire, avec le calcul de Z).</p><ul>' + lines.join('') + '</ul>';
+  const mode = MODE_LABEL[st.mode];
+  const multi = (st.n > 1 && (st.mode === 'full' || st.mode === 'nuclei')) ? ', ' + st.n + ' × ' + st.n + ' × ' + st.n + ' mailles' : '';
+  cv.setAttribute('aria-label', cr.name + ', maille ' + cr.lattice + ', vue : ' + mode + multi + '. Une description écrite est disponible sous le dessin.');
+  S.observe('#obs', 'info', '<b>' + cr.name + '</b>, ' + cr.lattice + '. ' + MODE_CAP[st.mode]);
+}
+
+/* ----- Contrôles ----- */
+const tabCr = S.tabs('#g-cr', v => { if (!ready) return; st.cr = v; st.dir = $('pro-dir').value; onCrystalChange(); }, st.cr);
+const tabMode = S.tabs('#g-mode', v => { if (ready) setMode(v); }, st.mode);
+const tabN = S.tabs('#g-n', v => { if (!ready) return; st.n = +v; syncControls(); request(false); }, String(st.n));
+const tabColor = S.tabs('#g-color', v => { if (!ready) return; st.color = v; syncControls(); request(false); }, st.color);
+const size = S.slider('#sliders', { label: 'Taille des atomes', unit: '%', min: 30, max: 100, step: 5, value: 100, digits: 0, bounds: true,
+  onInput: v => { st.scale = v / 100; request(true); } });
+const yawS = S.slider('#sliders', { label: 'Rotation autour de la verticale', unit: '°', min: 0, max: 360, step: 1, value: 43, digits: 0, bounds: true,
+  onInput: v => { st.yaw = v * Math.PI / 180; request(true); } });
+const pitchS = S.slider('#sliders', { label: 'Inclinaison', unit: '°', min: -86, max: 86, step: 1, value: 26, digits: 0, bounds: true,
+  onInput: v => { st.pitch = Math.max(-1.5, Math.min(1.5, v * Math.PI / 180)); request(true); } });
+function syncView() {
+  yawS.set(Math.round(((st.yaw * 180 / Math.PI) % 360 + 360) % 360), true);
+  pitchS.set(Math.round(st.pitch * 180 / Math.PI), true);
+}
+function syncControls() {
+  tabCr.select(st.cr, true); tabMode.select(st.mode, true); tabColor.select(st.color, true); tabN.select(String(st.n), true);
+  S.$$('#g-n .tab').forEach(b => { b.disabled = (st.mode === 'clip' || st.mode === 'cav') && b.getAttribute('data-mode') !== '1'; });
+  size.set(Math.round(st.scale * 100), true);
+  const cav = st.mode === 'cav';
+  size.input.disabled = (st.mode === 'nuclei' || cav);
+  yawS.input.disabled = cav; pitchS.input.disabled = cav;
+  ['v-iso', 'v-front', 'v-top'].forEach(i => { $(i).disabled = cav; });
+  syncView();
+  updateInfo();
+}
+function writeState() { etat.write({ cristal: st.cr, vue: st.mode }); }
+function setMode(m) { st.mode = m; if (m === 'clip' || m === 'cav') st.n = 1; syncControls(); request(false); writeState(); }
+$('v-iso').onclick = () => { st.yaw = 0.75; st.pitch = 0.45; syncView(); request(false); };
+$('v-front').onclick = () => { st.yaw = 0; st.pitch = 0; syncView(); request(false); };
+$('v-top').onclick = () => { st.yaw = 0; st.pitch = 1.5; syncView(); request(false); };
+let drag = null;
+cv.addEventListener('pointerdown', e => { if (st.mode === 'cav') return; drag = { x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId); } catch (err) { } });
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  st.yaw -= (e.clientX - drag.x) * 0.01;
+  st.pitch = Math.max(-1.5, Math.min(1.5, st.pitch + (e.clientY - drag.y) * 0.01));
+  drag = { x: e.clientX, y: e.clientY }; syncView(); request(true);
+});
+const endDrag = () => { if (drag) { drag = null; request(false); } };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+window.addEventListener('resize', () => request(false));
+try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => request(false)); } catch (e) { }
+
+/* ----- Retours ----- */
+function fb(id, kind, html) {
+  const el = $(id);
+  if (!html) { el.removeAttribute('data-tone'); el.innerHTML = ''; return; }
+  el.setAttribute('data-tone', kind);
+  el.innerHTML = ({ ok: '✔ ', warn: '→ ', info: 'ℹ ' })[kind] + html;
+}
+const vir = x => String(x).replace('.', ',');
+const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+
+/* ----- Étape 1 ----- */
+$('rep-check').onclick = () => {
+  const cr = CR[st.cr], t = truth(cr), bad = [];
+  for (const p of POS_TYPES) {
+    const v = $('rep-' + p).checked;
+    if (v && !t.occ[p]) bad.push('« ' + POS_PLUR[p] + ' » : aucun centre d’atome n’est à cet endroit pour ce cristal.');
+    if (!v && t.occ[p]) bad.push('« ' + POS_PLUR[p] + ' » : il y a bien des atomes à cet endroit. Tourne la maille et passe en « Positions seulement ».');
+  }
+  if (!bad.length) { prog.obs[st.cr] = true; fb('fb1', 'ok', 'Repérage cohérent pour ' + esc(cr.name) + '. Passe à un autre cristal pour comparer.'); }
+  else fb('fb1', 'warn', 'Quelques positions à revoir :<ul>' + bad.map(b => '<li>' + b + '</li>').join('') + '</ul>');
+};
+
+/* ----- Étape 2 ----- */
+S.tabs('#g-cert', v => { prog.certChoice = +v; }, '');   // aucune certitude présélectionnée
+function buildStep2() {
+  $('pred-table').innerHTML = '<caption class="sr-only">Prévision du nombre de mailles qui se partagent un atome</caption><thead><tr><th scope="col">Un atome situé à…</th><th scope="col">est partagé par … mailles</th></tr></thead><tbody>' +
+    POS_TYPES.map(p => '<tr><th scope="row">' + esc(POS_NAME[p]) + '</th><td><select id="pred-' + p + '" aria-label="Nombre de mailles pour ' + esc(POS_NAME[p]) + '"><option value="">—</option><option>1</option><option>2</option><option>4</option><option>8</option></select></td></tr>').join('') + '</tbody>';
+  $('parts-table').innerHTML = '<caption class="sr-only">Part de l’atome qui appartient à la maille</caption><thead><tr><th scope="col">Atome situé à…</th><th scope="col">Part dans la maille</th></tr></thead><tbody>' +
+    POS_TYPES.map(p => '<tr><th scope="row">' + esc(POS_NAME[p]) + '</th><td><select id="part-' + p + '" aria-label="Part pour ' + esc(POS_NAME[p]) + '"><option value="">—</option><option>1</option><option>1/2</option><option>1/4</option><option>1/8</option></select></td></tr>').join('') + '</tbody>';
+}
+$('pred-save').onclick = () => {
+  const pred = {}; let miss = false;
+  for (const p of POS_TYPES) { const v = $('pred-' + p).value; if (!v) miss = true; pred[p] = +v; }
+  const cert = prog.certChoice || 0;
+  if (miss || !cert) { fb('fb2a', 'warn', 'Complète les quatre lignes et choisis ton degré de certitude avant d’enregistrer.'); return; }
+  prog.pred = pred; prog.cert = cert;
+  POS_TYPES.forEach(p => { $('pred-' + p).disabled = true; });
+  S.$$('#g-cert .tab').forEach(b => { b.disabled = true; });
+  $('pred-save').disabled = true;
+  $('confront').hidden = false;
+  fb('fb2a', 'ok', 'Prévision enregistrée. Elle ne peut plus être modifiée : elle va servir à la confrontation ci-dessous.');
+};
+$('go-stack').onclick = () => { st.mode = 'full'; st.n = 2; st.scale = 0.45; st.color = 'position'; syncControls(); request(false); writeState(); };
+$('go-clip').onclick = () => { st.mode = 'clip'; st.n = 1; st.scale = 1; st.color = 'position'; syncControls(); request(false); writeState(); };
+$('conf-btn').onclick = () => {
+  if (!prog.pred) return;
+  prog.confronted = true;
+  $('conf-wrap').hidden = false;
+  $('conf-table').innerHTML = '<caption class="sr-only">Prévision et observation</caption><thead><tr><th scope="col">Position</th><th scope="col">Ma prévision</th><th scope="col">Dans la maille</th><th scope="col">Comparaison</th></tr></thead><tbody>' +
+    POS_TYPES.map(p => { const ok = prog.pred[p] === SHARE[p]; return '<tr><th scope="row">' + esc(POS_NAME[p]) + '</th><td>' + prog.pred[p] + '</td><td>' + SHARE[p] + '</td><td>' + (ok ? '✔ identique' : '→ écart de ' + Math.abs(prog.pred[p] - SHARE[p])) + '</td></tr>'; }).join('') + '</tbody>';
+  const wrong = POS_TYPES.filter(p => prog.pred[p] !== SHARE[p]);
+  let msg;
+  if (!wrong.length) msg = prog.cert === 1 ? 'Tes quatre prévisions sont justes alors que tu disais deviner : ton intuition géométrique est meilleure que tu ne le pensais. Qu’est-ce qui t’a guidé·e ?' : 'Tes quatre prévisions sont justes. Peux-tu expliquer pourquoi, pour un sommet, ce nombre est le bon ?';
+  else {
+    msg = 'Un écart n’est pas une faute : c’est ce qui permet d’améliorer ton modèle. Pour ' + wrong.map(p => esc(POS_NAME[p])).join(' et ') + ', compte les mailles qui se touchent à cet endroit, dans « Mailles côte à côte ».';
+    if (prog.cert === 3) msg += ' Tu te disais sûr·e de toi : qu’est-ce que cet écart t’apprend sur la façon dont tu imaginais le partage ?';
+  }
+  fb('fb2b', wrong.length ? 'info' : 'ok', msg);
+  $('parts-box').hidden = false;
+};
+$('parts-check').onclick = () => {
+  const vals = {}; let miss = false; POS_TYPES.forEach(p => { vals[p] = $('part-' + p).value; if (!vals[p]) miss = true; });
+  if (miss) { fb('fb2c', 'warn', 'Choisis une fraction pour chaque position.'); return; }
+  const bad = POS_TYPES.filter(p => vals[p] !== FRAC[p]);
+  prog.parts = vals;
+  if (!bad.length) fb('fb2c', 'ok', 'Règle trouvée : un atome partagé entre <em>k</em> mailles identiques compte pour 1/<em>k</em> dans chacune. Tu peux l’utiliser à l’étape 3.');
+  else fb('fb2c', 'warn', 'À revoir pour ' + bad.map(p => esc(POS_NAME[p])).join(' ; ') + ' : si un atome est partagé par <em>k</em> mailles identiques, quelle fraction revient à chacune ?');
+};
+
+/* ----- Étape 3 ----- */
+function buildCount() {
+  const cr = CR[st.cr];
+  const head = '<thead><tr><th scope="col">' + (cr.species.length > 1 ? 'Ion' : 'Atome') + '</th>' + POS_TYPES.map(p => '<th scope="col">à ' + (p === 'centre' ? 'l’intérieur' : 'un ' + ({ sommet: 'sommet', arete: 'milieu d’arête', face: 'centre de face' })[p]) + '</th>').join('') + '<th scope="col">Z (par maille)</th></tr></thead>';
+  const rows = cr.species.map(sp => '<tr><th scope="row">' + sp.label + '</th>' + POS_TYPES.map(p => '<td><input type="number" min="0" step="1" inputmode="numeric" id="c-' + sp.id + '-' + p + '" aria-label="Nombre de ' + sp.label + ' ' + (p === 'centre' ? 'à l’intérieur de la maille' : 'situés sur ' + POS_PLUR[p]) + '"></td>').join('') + '<td><input type="text" class="num-in" inputmode="decimal" autocomplete="off" id="z-' + sp.id + '" aria-label="Multiplicité Z de ' + sp.label + '"></td></tr>').join('');
+  $('count-table').innerHTML = '<caption class="sr-only">Dénombrement des atomes de la maille</caption>' + head + '<tbody>' + rows + '</tbody>';
+  fb('fb3', '', ''); $('val3').hidden = true; $('val3').innerHTML = '';
+  updateProgress();
+}
+function updateProgress() {
+  const names = { po: 'polonium', ag: 'argent', cr: 'chrome', nacl: 'sel' };
+  $('progress').textContent = 'Dénombrements réussis : ' + Object.keys(names).map(k => names[k] + (prog.counted[k] ? ' ✔' : ' —')).join(' · ');
+}
+$('count-check').onclick = () => {
+  const cr = CR[st.cr], t = truth(cr), issues = []; let allCounts = true, allZ = true;
+  for (const sp of cr.species) {
+    for (const p of POS_TYPES) {
+      const v = S.parseNum($('c-' + sp.id + '-' + p).value);
+      if (isNaN(v) || v !== t.count[sp.id][p]) {
+        allCounts = false;
+        issues.push(cr.species.length > 1 ? sp.label + ', ' + POS_PLUR[p] + ' : recompte-les en mode « Positions seulement ».' : POS_PLUR[p].charAt(0).toUpperCase() + POS_PLUR[p].slice(1) + ' : recompte en mode « Positions seulement » (une case vide compte pour une erreur : écris 0 si besoin).');
+      }
+    }
+    const z = S.parseNum($('z-' + sp.id).value);
+    if (isNaN(z) || Math.abs(z - t.Z[sp.id]) > 1e-6) allZ = false;
+  }
+  const val = $('val3');
+  if (!allCounts) { fb('fb3', 'warn', 'Dénombrement à revoir :<ul>' + issues.map(i => '<li>' + i + '</li>').join('') + '</ul>'); val.hidden = true; return; }
+  if (!allZ) {
+    const calc = cr.species.map(sp => sp.label + ' : ' + POS_TYPES.filter(p => t.count[sp.id][p] > 0).map(p => t.count[sp.id][p] + ' × (part d’un atome ' + (p === 'centre' ? 'à l’intérieur' : 'situé sur ' + POS_NAME[p].replace(/^(un|le) /, '')) + ')').join(' + ')).join(' ; ');
+    fb('fb3', 'warn', 'Tes comptages sont justes. Il reste à calculer Z : additionne, pour chaque position, le nombre d’atomes × la part qui appartient à la maille (étape 2). Structure du calcul — ' + esc(calc) + '.');
+    val.hidden = true; return;
+  }
+  prog.counted[st.cr] = true; updateProgress();
+  const calc = cr.species.map(sp => sp.label + ' : Z = ' + POS_TYPES.filter(p => t.count[sp.id][p] > 0).map(p => t.count[sp.id][p] + ' × ' + FRAC[p]).join(' + ') + ' = ' + vir(t.Z[sp.id])).join(' ; ');
+  fb('fb3', 'ok', 'Dénombrement et multiplicité corrects — ' + calc + '.');
+  val.hidden = false;
+  if (cr.id === 'po' || cr.id === 'ag') {
+    const ref = cr.id === 'po' ? 1 : 4;
+    val.innerHTML = '<h3><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Comparer</span></h3><p>Compare ton résultat avec le Doc. 5 de la fiche : « ' + (cr.id === 'po' ? 'type cubique simple : 1 atome/maille' : 'type cubique à faces centrées : 4 atomes/maille') + ' ». Ton résultat (Z = ' + ref + ') est cohérent avec ce document.</p>';
+  } else if (cr.id === 'cr') {
+    val.innerHTML = '<h3><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Comparer</span></h3><p>Le Doc. 5 ne donne pas de valeur pour le chrome : tu ne peux pas comparer à un document. Comment vérifier ton résultat autrement ? Une piste est dans « Pour aller plus loin » : la masse volumique, qui dépend de <em>Z</em> et que l’on peut mesurer.</p>';
+  } else {
+    val.innerHTML = '<h3><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Comparer</span> Que peux-tu conclure en comparant Z(Na⁺) et Z(Cl⁻) ?</h3><fieldset class="checks"><legend class="sr-only">Conclusion</legend>' +
+      '<label><input type="radio" name="nacl-val" value="a"> Il y a autant d’ions Na⁺ que d’ions Cl⁻ : le cristal est électriquement neutre.</label>' +
+      '<label><input type="radio" name="nacl-val" value="b"> Il y a plus d’ions Cl⁻ que d’ions Na⁺.</label>' +
+      '<label><input type="radio" name="nacl-val" value="c"> Cette comparaison ne permet de rien vérifier.</label></fieldset>' +
+      '<div class="row"><button type="button" id="nacl-val-btn">Valider ma conclusion</button></div><div class="fb" id="fb3b" role="status" aria-live="polite" style="margin-top:10px"></div>';
+    $('nacl-val-btn').onclick = () => {
+      const c = document.querySelector('input[name=nacl-val]:checked');
+      if (!c) fb('fb3b', 'warn', 'Choisis une réponse.');
+      else if (c.value === 'a') fb('fb3b', 'ok', 'Oui : Z(Na⁺) = Z(Cl⁻) = 4, donc 4 charges + pour 4 charges −. La maille contient l’équivalent de 4 « motifs » NaCl, ce qui correspond à la formule du solide ionique.');
+      else fb('fb3b', 'warn', 'Compare tes deux valeurs de Z : un cristal doit être électriquement neutre. Que dit alors le rapport entre Na⁺ et Cl⁻ ?');
+    };
+  }
+};
+
+/* ----- Étape 4 ----- */
+function buildPro() {
+  const cr = CR[st.cr], single = cr.species.length === 1;
+  $('pro-compact').hidden = !single;
+  $('pro-dir').value = st.dir || '';
+  ['pro-ratio', 'pro-c', 'pro-rho'].forEach(i => { $(i).value = ''; });
+  ['fb4a', 'fb4b', 'fb4c', 'fb4d'].forEach(i => fb(i, '', ''));
+  $('pro-rho-data').innerHTML = 'Données pour ' + esc(cr.name) + ' : masse molaire ' + (cr.id === 'nacl' ? 'du motif NaCl ' : '') + '<em>M</em> = ' + vir(cr.M) + ' g/mol ; arête <em>a</em> ≈ ' + cr.a + ' pm (1 pm = 10⁻¹⁰ cm) ; constante d’Avogadro <em>N</em><sub>A</sub> = 6,022 × 10²³ mol⁻¹. Formule : ρ = <em>Z</em> × <em>M</em> / (<em>N</em><sub>A</sub> × <em>a</em>³)' + (cr.id === 'nacl' ? ', avec <em>Z</em> = nombre de motifs NaCl par maille.' : '.');
+}
+$('pro-dir').addEventListener('change', e => { st.dir = e.target.value; st.guide = !!st.dir; request(false); });
+$('pro-dir-check').onclick = () => {
+  const cr = CR[st.cr], v = $('pro-dir').value;
+  if (!v) { fb('fb4a', 'warn', 'Choisis d’abord une direction.'); return; }
+  const names = { arete: 'une arête', diagface: 'la diagonale d’une face', diagcube: 'la grande diagonale du cube' };
+  if (v === cr.contact) fb('fb4a', 'ok', 'Oui : les sphères sont tangentes le long de ' + names[v] + '. ' + (cr.id === 'nacl' ? 'Ici le contact est entre un ion Cl⁻ et un ion Na⁺ : <em>a</em> = 2 (<em>r</em>(Na⁺) + <em>r</em>(Cl⁻)).' : 'Relation : ' + cr.rel + '.'));
+  else fb('fb4a', 'warn', 'Mets la taille des atomes à 100 % et regarde si, le long de la droite tracée, des sphères se touchent vraiment sur toute la longueur.');
+};
+$('pro-ratio-check').onclick = () => {
+  const cr = CR[st.cr], v = S.parseNum($('pro-ratio').value);
+  if (isNaN(v)) { fb('fb4b', 'warn', 'Entre une valeur numérique.'); return; }
+  if (Math.abs(v - cr.ratio) < 0.02) fb('fb4b', 'ok', 'Correct : ' + cr.rel + ', soit <em>a</em>/<em>r</em> ≈ ' + S.fmt(cr.ratio, 2) + '.');
+  else fb('fb4b', 'warn', 'Écris la relation de tangence le long de la direction de contact (Pythagore si c’est une diagonale), puis isole <em>a</em>/<em>r</em>.');
+};
+$('pro-c-check').onclick = () => {
+  const cr = CR[st.cr], v = S.parseNum($('pro-c').value), r = cr.species[0].r, Z = truth(cr).Z[cr.species[0].id];
+  const C = Z * (4 / 3) * Math.PI * r * r * r;
+  if (isNaN(v)) { fb('fb4c', 'warn', 'Entre une valeur numérique.'); return; }
+  if (Math.abs(v - C) < 0.015) fb('fb4c', 'ok', 'Compacité ≈ ' + S.fmt(C, 2) + ' : environ ' + Math.round(C * 100) + ' % du volume de la maille est occupé par les atomes. Le cubique à faces centrées est le plus compact des trois.');
+  else fb('fb4c', 'warn', 'Vérifie ton <em>Z</em> et exprime <em>r</em> en fonction de <em>a</em> avant de calculer le rapport des volumes : la compacité ne dépend pas de la taille de la maille.');
+};
+$('pro-rho-check').onclick = () => {
+  const cr = CR[st.cr], v = S.parseNum($('pro-rho').value);
+  if (isNaN(v)) { fb('fb4d', 'warn', 'Entre une valeur numérique.'); return; }
+  const ecart = Math.abs(v - cr.rho) / cr.rho * 100;
+  if (ecart < 3) fb('fb4d', 'ok', 'Valeur tabulée : ' + vir(cr.rho) + ' g/cm³ ; écart de ' + S.fmt(ecart, 1) + ' %. Ce résultat valide ton nombre d’atomes par maille <em>Z</em> : avec un autre <em>Z</em>, l’écart serait d’au moins 25 %.');
+  else fb('fb4d', 'warn', 'Valeur tabulée : ' + vir(cr.rho) + ' g/cm³ ; ton écart est de ' + S.fmt(ecart, 0) + ' %. Vérifie <em>Z</em> et les unités (<em>a</em> en cm : 1 pm = 10⁻¹⁰ cm).');
+};
+
+/* ----- Étape 5 : carnet ----- */
+function carnet() {
+  const L = ['Carnet — Cristaux : de la maille au cristal'];
+  if (prog.pred) {
+    L.push('', 'Prévision (nombre de mailles qui se partagent un atome), certitude « ' + ['', 'je devine', 'assez sûr·e', 'sûr·e'][prog.cert] + ' » :');
+    POS_TYPES.forEach(p => L.push('- ' + POS_NAME[p] + ' : prévu ' + prog.pred[p] + (prog.confronted ? ', observé ' + SHARE[p] : '')));
+    if (prog.parts) L.push('Parts dans la maille notées : ' + POS_TYPES.map(p => POS_PLUR[p] + ' ' + prog.parts[p]).join(' ; '));
+  }
+  const done = Object.keys(prog.counted).filter(k => prog.counted[k]);
+  if (done.length) {
+    L.push('', 'Multiplicités trouvées :');
+    done.forEach(k => {
+      const cr = CR[k], t = truth(cr);
+      cr.species.forEach(sp => L.push('- ' + cr.name + ' (' + cr.lattice + '), ' + sp.label + ' : Z = ' + POS_TYPES.filter(p => t.count[sp.id][p] > 0).map(p => t.count[sp.id][p] + ' × ' + FRAC[p]).join(' + ') + ' = ' + vir(t.Z[sp.id])));
+    });
+  }
+  const r = $('txt-regle').value.trim(), n = $('txt-nacl').value.trim();
+  if (r) L.push('', 'Ma règle : ' + r);
+  if (n) L.push('', 'Conclusion sur le sel : ' + n);
+  if (L.length === 1) L.push('', '(Rien à copier pour l’instant : avance dans les étapes.)');
+  return L.join('\n');
+}
+$('carnet-copy').onclick = () => {
+  const txt = carnet();
+  const done = () => fb('fb5', 'ok', 'Carnet copié : colle-le dans ton compte rendu.');
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { fb('fb5', 'warn', 'Copie impossible : sélectionne et copie le texte à la main.'); }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+};
+$('carnet-print').onclick = () => { $('print-carnet').textContent = carnet(); window.print(); };
+
+/* ----- Changement de cristal ----- */
+function resetStep1() { POS_TYPES.forEach(p => { $('rep-' + p).checked = false; }); fb('fb1', '', ''); }
+function onCrystalChange() { syncControls(); resetStep1(); buildCount(); buildPro(); request(false); writeState(); }
+
+/* ----- Démarrage ----- */
+buildStep2();
+ready = true;
+syncControls(); resetStep1(); buildCount(); buildPro();
+paint(false);
+requestAnimationFrame(() => paint(false));
+})();
+</script>
+</body>
+</html>

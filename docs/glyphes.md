@@ -38,6 +38,7 @@ Les glyphes sont décoratifs (`aria-hidden`) : le titre de la carte porte le sen
 | `vitesse-son` | Émetteur et arcs sonores, deux récepteurs sur un rail, distance d entre eux, salve reçue | Mesurer la vitesse de propagation du son |
 | `equilibre` | 2 H₂ + 2 O₂ → 2 H₂O + O₂ en disques : mêmes atomes de chaque côté, dioxygène restant (réactif en excès) | Équilibrer une équation, réactif limitant |
 | `champ` | Deux plaques, équipotentielles pointillées, lignes de champ, sonde | Cartographier un champ : de la cuve à la pesanteur |
+| `cristal` | Maille cubique en perspective cavalière : atomes pleins aux sommets, atomes creux au centre des faces, arête a cotée | Cristaux : de la maille au cristal |
 | `graph` | Graphe de mesures (**repli** pour un nom inconnu) | — |
 | `chrono`, `beaker` | Anciens noms génériques, **à ne plus utiliser** | — |
 
