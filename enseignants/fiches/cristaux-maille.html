@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fiche enseignant : Cristaux, de la maille au cristal · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/cristaux-maille.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Enseignement scientifique · Première</p>
+    <h1>Cristaux : de la maille au cristal</h1>
+    <p class="lead">L'élève explore en 3D la maille de trois cristaux simples, découvre comment les atomes se partagent entre mailles voisines, calcule la multiplicité Z, puis applique la méthode au cristal de chlorure de sodium. La simulation remplace le logiciel Minusc dans la partie 3 de la fiche d'activité « À la découverte des cristaux ».</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale, enseignement scientifique</li>
+      <li>Thème 1 : Une longue histoire de la matière</li>
+      <li>25 à 35 min (à confirmer en classe ; 20 min prévues pour Minusc)</li>
+      <li>Ordinateur ou tablette, cahier pour la perspective cavalière</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/cristaux-maille.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#competences">Couverture des compétences</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Enseignement scientifique de la classe de Première, thème 1 « Une longue histoire de la matière », « Des édifices ordonnés : les cristaux » (BO spécial n° 1 du 22 janvier 2019). Les formulations ci-dessous sont celles de la ressource Éduscol « Les mathématiques de l'enseignement scientifique : les cristaux » (juin 2019), lue le 17/11/2026.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>« Les cristaux les plus simples peuvent être décrits par une maille cubique que la géométrie du cube permet de caractériser. La position des entités dans cette maille distingue les réseaux cubique simple et cubique à faces centrées. »</td><td>Étapes 1 et 3 : repérer les positions occupées, comparer polonium (cubique simple) et argent (cubique à faces centrées).</td></tr>
+            <tr><td>« Utiliser une représentation 3D informatisée du cristal de chlorure de sodium. »</td><td>Toute la page (maille tournante, mailles côte à côte, vue « Dans la maille »), avec NaCl à l'étape 3.</td></tr>
+            <tr><td>« Représenter la maille en perspective cavalière. »</td><td>Vue « Perspective cavalière » : modèle à reproduire sur le cahier (la page ne fait pas dessiner l'élève).</td></tr>
+            <tr><td>« Dénombrer les atomes par maille et calculer la masse volumique du cristal. »</td><td>Étape 3 (dénombrement, multiplicité Z) ; étape 4 (masse volumique, prolongement).</td></tr>
+            <tr><td>« Calculer la compacité dans le cas d'entités chimiques sphériques tangentes. »</td><td>Étape 4 (prolongement, optionnel).</td></tr>
+            <tr><td>Réseau cubique centré (chrome) : cité par Éduscol uniquement en « pour aller plus loin » <span class="verify">À vérifier dans le BO</span></td><td>Étapes 1 à 4 : présent parce que la fiche d'activité demande d'observer le chrome, mais hors programme exigible.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Parcours <b>guidé</b> : les étapes 1 à 3 se suivent dans cet ordre conseillé (le retour en arrière est libre), l'étape 4 est un prolongement facultatif, l'étape 5 produit la trace. Durée estimée : 25 à 35 min, <span class="verify">à confirmer en classe</span>. Les compétences sont celles de docs/specs/methode-scientifique.md.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Compétence</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. Se repérer dans la maille</td><td>APP</td><td>Choisit un cristal, tourne la maille, coche les positions où se trouve le centre d'un atome.</td><td>Cases cochées, vérifiées par la page.</td></tr>
+            <tr><td>2. Trouver les règles de partage</td><td>ANA, puis VAL et RÉA</td><td>Prévoit combien de mailles se partagent un atome (sommet, arête, face, centre) avec un degré de certitude ; la prévision est enregistrée, puis confrontée aux mailles côte à côte et à la vue « Dans la maille » ; associe à chaque position la fraction d'atome qui appartient à la maille.</td><td>Prévision et observation côte à côte ; fractions 1/8, 1/4, 1/2, 1.</td></tr>
+            <tr><td>3. Dénombrer les atomes d'une maille</td><td>RÉA, VAL</td><td>Compte les atomes à chaque position et calcule Z pour Po, Ag, Cr, puis les ions Cl⁻ et Na⁺ de NaCl ; compare aux valeurs du Doc. 5 et conclut sur la neutralité du sel.</td><td>Tableau de dénombrement ; Z de chaque cristal.</td></tr>
+            <tr><td>4. Pour aller plus loin</td><td>ANA, RÉA, VAL</td><td>Choisit la direction où les sphères se touchent, établit a en fonction de r, calcule la compacité, puis compare la masse volumique calculée à la valeur tabulée.</td><td>Relation a/r ; compacité ; écart relatif sur ρ.</td></tr>
+            <tr><td>5. Conclure</td><td>COM</td><td>Rédige la règle de calcul du nombre d'atomes par maille et ce que représentent les résultats pour NaCl ; copie ou imprime son carnet.</td><td>Carnet (prévision, parts, multiplicités, deux phrases rédigées).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="competences" aria-labelledby="h-competences">
+      <h2 id="h-competences">Couverture des compétences</h2>
+      <p>La simulation travaille les cinq compétences, avec deux limites que cette fiche dit franchement : l'appropriation est légère, et la validation face au Doc. 5 est annoncée par la page plutôt que jugée par l'élève.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Compétence</th><th scope="col">Dans la page</th><th scope="col">À prévoir hors page</th></tr></thead>
+          <tbody>
+            <tr><td>APP · S'approprier</td><td>Étape 1 (repérer les positions, vue en perspective cavalière) et problématique affichée. Travail léger.</td><td>Faire reformuler la problématique à l'oral, faire lire les Doc. 3 et 5 avant de commencer, faire dessiner la maille en perspective cavalière.</td></tr>
+            <tr><td>ANA · Analyser / Raisonner</td><td>Étape 2 : prévision avec degré de certitude, enregistrée puis relue. Étape 4 : choix de la direction de contact.</td><td>Demander de justifier la prévision par écrit avant de l'enregistrer.</td></tr>
+            <tr><td>RÉA · Réaliser</td><td>Étape 3 : dénombrement et calcul de Z. Étape 4 : calculs de a/r, de la compacité et de ρ.</td><td>Faire poser le calcul de Z sur le cahier.</td></tr>
+            <tr><td>VAL · Valider</td><td>Étape 2 : confrontation prévision et observation. Étape 3 : comparaison au Doc. 5 (Po, Ag), test de vraisemblance par la neutralité (NaCl). Étape 4 : écart relatif entre ρ calculée et valeur tabulée.</td><td>Faire écrire « mon résultat est (ou n'est pas) en accord avec le Doc. 5 parce que… » : la page affiche l'accord au lieu de le faire juger.</td></tr>
+            <tr><td>COM · Communiquer</td><td>Étape 5 : deux phrases rédigées, carnet copiable ou imprimable.</td><td>Mise en commun orale : chaque binôme énonce sa règle et la confronte à celle d'un autre.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><b>Bruit de mesure :</b> la page déroge à la règle 3 de la spécification (toute grandeur mesurée est bruitée), car aucune grandeur n'est lue sur un instrument. Les positions, les paramètres de maille et les masses molaires sont des données du modèle ; la multiplicité, la compacité et la masse volumique sont calculées par l'élève. L'écart sur ρ (étape 4) est un écart de modèle, pas une incertitude de mesure.</p>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>1. Positions occupées</td><td>Po : sommets. Ag : sommets et centres des faces. Cr : sommets et centre de la maille. NaCl : Cl⁻ aux sommets et aux centres des faces ; Na⁺ aux milieux des arêtes et au centre de la maille.</td><td>Les atomes « de coin » sont des centres situés sur les sommets du cube.</td></tr>
+                <tr><td>2. Partage</td><td>Sommet : 8 mailles, part 1/8. Milieu d'arête : 4 mailles, part 1/4. Centre de face : 2 mailles, part 1/2. Centre de la maille : 1 maille, part 1.</td><td>Le Doc. 5 donne déjà 1 et 4 atomes par maille : la prévision porte sur le partage, pas sur Z.</td></tr>
+                <tr><td>3. Multiplicité Z</td><td>Po : 8 × 1/8 = 1. Ag : 8 × 1/8 + 6 × 1/2 = 4. Cr : 8 × 1/8 + 1 = 2. NaCl : Cl⁻ 8 × 1/8 + 6 × 1/2 = 4 ; Na⁺ 12 × 1/4 + 1 × 1 = 4, soit 4 motifs NaCl par maille.</td><td>La page accepte la virgule ou le point pour Z. Les cases vides comptent pour une erreur : demander d'écrire 0.</td></tr>
+                <tr><td>3. Neutralité de NaCl</td><td>Autant d'ions Na⁺ que de Cl⁻ (4 et 4) : le cristal est électriquement neutre.</td><td>Test de vraisemblance, pas un calcul de plus.</td></tr>
+                <tr><td>4. Contact et a/r</td><td>Po : arête, a = 2r. Ag : diagonale d'une face, a = 2√2 r, a/r ≈ 2,83. Cr : grande diagonale du cube, a = 4r/√3, a/r ≈ 2,31. NaCl : arête, a = 2(r(Na⁺) + r(Cl⁻)).</td><td>Tolérance de 0,02 sur a/r.</td></tr>
+                <tr><td>4. Compacité</td><td>Po π/6 ≈ 0,52. Ag π/(3√2) ≈ 0,74. Cr √3·π/8 ≈ 0,68.</td><td>Tolérance de 0,015. Le chrome est hors programme exigible.</td></tr>
+                <tr><td>4. Masse volumique</td><td>Po ≈ 9,15 g/cm³ (tabulée 9,2). Ag ≈ 10,47 (10,5). Cr ≈ 7,23 (7,19). NaCl ≈ 2,16 (2,165).</td><td>Écart attendu inférieur à 1 % ; la page accepte jusqu'à 3 %. Avec un autre Z, l'écart dépasserait 25 %.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Compter les sphères visibles comme les atomes de la maille</td><td>« Z = 14 pour l'argent », « il y a 27 ions dans NaCl ».</td><td>L'étape 3 sépare le comptage par position du calcul de Z ; la vue « Dans la maille » montre que seule une part de chaque atome est dans le cube.</td></tr>
+            <tr><td>Oublier que les atomes de bord sont partagés</td><td>« Le cubique simple a 8 atomes par maille. »</td><td>Étape 2 : prévision enregistrée, puis confrontation avec les mailles côte à côte ; la page reprend la prévision de l'élève.</td></tr>
+            <tr><td>Confondre « partagé par 4 mailles » et « 4 fois plus »</td><td>Part de 4 au lieu de 1/4.</td><td>Tâche « Quelle part de l'atome appartient à la maille ? » et message qui rappelle 1/k.</td></tr>
+            <tr><td>Placer les ions Na⁺ de NaCl</td><td>Oublier le Na⁺ central ou ceux des arêtes.</td><td>Couleur selon la position, vue « Positions seulement », légende des positions.</td></tr>
+            <tr><td>Croire que la maille est « le » cristal, ou qu'elle est unique</td><td>« Le cristal de sel, c'est un cube. »</td><td>Affichage de 2×2×2 et 3×3×3 mailles ; la limite sur le choix de la maille est dite dans « Hypothèses et limites ».</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>Prévu : toutes les commandes sont des boutons, des listes, des champs ou des curseurs natifs, atteignables au clavier ; la rotation se fait aussi par deux curseurs (le glisser sur le dessin est facultatif) ; une description écrite de la maille est proposée ; cibles tactiles d'au moins 44 px ; thème clair et sombre ; mouvements réduits respectés ; le dessin a un texte alternatif qui change avec la vue ; les retours portent un symbole et un texte, pas seulement une couleur.</p>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> test avec un lecteur d'écran, audit d'accessibilité complet, test avec des élèves (notamment à besoins éducatifs particuliers), test de la palette en cas de daltonisme (la légende nomme les positions, mais le dessin les distingue par la couleur). La description écrite indique le dénombrement par position : c'est voulu pour les élèves qui ne peuvent pas lire le dessin, mais elle réduit la tâche de comptage à celle de calculer Z.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme, un élève manipule et l'autre note, avec échange des rôles à mi-parcours.</li>
+        <li>Demander la prévision de l'étape 2 sur papier avant d'ouvrir la page, puis la comparer à celle enregistrée.</li>
+        <li>Différenciation : l'étape 4 est facultative ; les élèves en difficulté s'arrêtent à l'étape 3 pour le polonium, l'argent et le sel, le chrome restant en option.</li>
+        <li>Lien partageable : <code>#cristal=nacl&amp;vue=clip</code> ouvre la page sur un cristal et une vue précis (cristal : <code>po</code>, <code>ag</code>, <code>cr</code>, <code>nacl</code> ; vue : <code>full</code>, <code>clip</code>, <code>nuclei</code>, <code>cav</code>).</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>Les atomes et les ions sont des sphères dures tangentes (modèle du programme) : un atome réel n'a pas de bord net.</li>
+        <li>La maille est un cube dont les sommets sont des centres d'atomes ; ce choix n'est pas unique.</li>
+        <li>Pour NaCl, les rayons Cl⁻ ≈ 181 pm et Na⁺ ≈ 101 pm sont choisis pour que a = 2(r(Na⁺) + r(Cl⁻)) = 564 pm soit vérifié. <span class="verify">À vérifier contre les données de la fiche</span></li>
+        <li>Les arêtes (Po 336 pm, Ag 409 pm, Cr 288 pm, NaCl 564 pm) et les masses volumiques sont des valeurs de tables usuelles, arrondies. <span class="verify">À vérifier contre les données de la fiche</span></li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Calculer la compacité du cubique centré et la comparer à celle du cubique à faces centrées (Éduscol, « pour aller plus loin »).</li>
+        <li>Construire la maille avec des boules de polystyrène ou des billes.</li>
+        <li>Exercice d'application : déterminer le nombre d'atomes par maille et la masse volumique de l'or (cubique à faces centrées) à partir de son paramètre de maille.</li>
+      </ul>
+      <p class="note"><b>Remarques sur la fiche d'activité (hors simulation) :</b> l'en-tête indique « TERMINALE » pour une activité de Première ; la page 2 contient encore l'encart « Schéma / Figure : mailles cubique simple et cubique à faces centrées » avec son texte de consigne (« Prompt : … »), à remplacer par un schéma (la vue « Perspective cavalière » de la simulation peut le fournir).</p>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> ressource Éduscol lue le 17/11/2026 par extraction automatique (formules en images non lues) ; le texte du BO spécial n° 1 du 22 janvier 2019 n'a pas été relu directement pour cette fiche ; données numériques de tables usuelles non recoupées avec la fiche d'activité.</p>
+      <ul class="plain">
+        <li><a href="https://eduscol.education.fr/document/25348/download">Les mathématiques de l'enseignement scientifique : les cristaux, Éduscol, juin 2019</a></li>
+        <li>Fiche d'activité « À la découverte des cristaux » (Enseignement scientifique, M. Fourmentin), parties 1 à 3, Doc. 3 et Doc. 5.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 17/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
