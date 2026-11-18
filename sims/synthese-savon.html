@@ -1,0 +1,887 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. D'après le protocole « TP14 : Synthèse d'un savon » (Première spé). -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Synthèse d'un savon · Simulabo PhCh</title>
+<meta name="description" content="Monte le chauffage à reflux, nomme chaque élément et justifie sa présence, suis le protocole de saponification, puis calcule le rendement avec un tableau d'avancement en option.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+/* Couleurs propres : liquides de la scène. Le nom de chaque espèce est toujours écrit en toutes lettres. */
+:root { --liq: #D9B13B; --liq-end: #F2EEDF; --verre: #7F95A3; --metal: #8A9BA6; --eau: #3B82C4; --vap: #9AA9B4; --flamme: #D4501B; }
+@media (prefers-color-scheme: dark) { :root { --liq: #E0B94A; --liq-end: #D8D3C0; --verre: #9DB3C1; --metal: #A9B8C2; --eau: #6BB4E8; --vap: #B7C4CD; --flamme: #F08A4B; } }
+
+.wrap, #sim, #sim > * { min-width: 0; }
+#sim { width: 100%; }
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.tab { flex: 1 1 auto; }
+sub, sup { font-size: .7em; line-height: 0; }
+.task { display: flex; flex-direction: column; gap: 16px; }
+.task[hidden] { display: none; }
+.lead { max-width: 74ch; font-size: 16px; line-height: 1.7; }
+.bo { font-size: 14px; color: var(--muted); }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.two { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+@media (min-width: 900px) { .two { grid-template-columns: minmax(340px, 440px) 1fr; } .sticky { position: sticky; top: 12px; } }
+.head-task { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+.head-task h2 { margin: 0; }
+.mchip { display: inline-flex; gap: 6px; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; background: var(--surface); color: var(--muted); }
+.mchip[data-done="true"] { border-color: var(--ok); color: var(--ok); background: var(--ok-bg); font-weight: 600; }
+.progress { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Scène (SVG) */
+.scene svg { display: block; width: 100%; height: auto; }
+.scene { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.scene text { font-family: var(--font-body); fill: var(--ink); font-size: 13px; }
+.scene .g { fill: none; stroke: var(--verre); stroke-width: 2.2; stroke-linejoin: round; }
+.scene .m { fill: var(--surface); stroke: var(--metal); stroke-width: 2; }
+.scene .ghost { fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 5 5; opacity: .7; }
+.scene .liq { fill: var(--liq); fill-opacity: .55; }
+.scene .eau { fill: var(--eau); fill-opacity: .35; }
+.scene .vap { fill: var(--vap); }
+.scene .lead-line { stroke: var(--muted); stroke-width: 1; }
+.scene .badge { fill: var(--accent); }
+.scene .badge-t { fill: var(--accent-ink); font: 700 12px var(--font-data); text-anchor: middle; }
+.scene .alert { fill: var(--bad); font-weight: 700; font-size: 14px; }
+.scene .flame { fill: var(--flamme); }
+@keyframes rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-46px); opacity: 0; } }
+@keyframes drip { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(40px); opacity: 0; } }
+@keyframes flow { to { stroke-dashoffset: -16; } }
+@keyframes bump { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.5); } }
+.heat .bub { animation: rise 1.4s linear infinite; }
+.heat .bub:nth-child(2n) { animation-delay: .5s; } .heat .bub:nth-child(3n) { animation-delay: .9s; }
+.heat .vp { animation: rise 1.8s linear infinite; } .heat .vp:nth-child(2n) { animation-delay: .7s; }
+.heat .dr { animation: drip 1.6s linear infinite; } .heat .dr:nth-child(2n) { animation-delay: .8s; }
+.heat .wflow { stroke-dasharray: 6 5; animation: flow .5s linear infinite; }
+.heat .bump { animation: bump .9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.bub, .vp, .dr { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .heat .bub, .heat .vp, .heat .dr, .heat .wflow, .heat .bump { animation: none; opacity: .85; } }
+
+/* Montage : étapes, options */
+.build { display: grid; gap: 12px; }
+.bstep { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; background: var(--surface); display: grid; gap: 8px; }
+.bstep[data-state="todo"] { opacity: .55; }
+.bstep[data-state="done"] { border-color: var(--ok); background: var(--ok-bg); }
+.bstep h3 { display: flex; gap: 8px; align-items: center; }
+.bnum { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 13px var(--font-data); flex: none; }
+.bstep[data-state="done"] .bnum { background: var(--ok); }
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.choices button { justify-content: flex-start; text-align: left; min-height: 44px; }
+.choices button[aria-pressed="true"] { border-color: var(--accent); background: var(--info-bg); }
+.fb { margin-top: 2px; }
+.fb[hidden] { display: none; }
+
+/* Questions, champs, tableaux */
+.nin, select.nin { min-height: 44px; font: 600 16px var(--font-data); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); max-width: 100%; }
+select.nin { font-family: var(--font-body); font-weight: 500; width: 100%; }
+textarea.nin { font-family: var(--font-body); font-weight: 400; width: 100%; min-height: 84px; resize: vertical; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; align-content: start; }
+.field label, fieldset.q legend { font-weight: 600; line-height: 1.45; }
+fieldset.q { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+fieldset.q legend { padding: 0; margin-bottom: 6px; font-size: 16px; }
+.opts { display: grid; gap: 6px; }
+.opt { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; line-height: 1.4; }
+.opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--info-bg); }
+.tablewrap { overflow-x: auto; }
+table.av { width: 100%; min-width: 560px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.av th, table.av td { padding: 8px; text-align: center; border-top: 1px solid var(--line); vertical-align: middle; }
+table.av thead th { font: 600 15px var(--font-body); background: var(--bg); border-top: 0; }
+table.av tbody th { text-align: left; font: 600 13px var(--font-body); background: var(--bg); white-space: nowrap; }
+table.av .nin { width: 92px; text-align: center; padding: 4px 6px; }
+table.av .coef { width: 64px; }
+table.av td[data-s="ok"] { background: var(--ok-bg); } table.av td[data-s="bad"] { background: var(--bad-bg); }
+.expr { font: 500 14px var(--font-data); }
+.eqline { font: 600 18px/1.5 var(--font-body); }
+.formula { font: 600 18px var(--font-body); text-align: center; padding: 8px; }
+.pill-ok { color: var(--ok); font-weight: 600; } .pill-bad { color: var(--bad); font-weight: 600; }
+.pict { display: inline-grid; place-items: center; gap: 4px; text-align: center; font-size: 13px; }
+.pict svg { width: 74px; height: 74px; }
+.flacons { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+.flacon { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; display: grid; gap: 8px; background: var(--surface); }
+.bal { display: grid; gap: 10px; }
+.checklist { margin: 6px 0 0; padding-left: 20px; }
+.checklist li[data-ok="true"] { color: var(--ok); font-weight: 600; }
+.checklist li[data-ok="false"] { color: var(--muted); }
+.hide-print { }
+@media print { .tabs, .hide-print, button { display: none !important; } .task[hidden] { display: flex !important; } }
+</style>
+<!-- bruit : la pesée du savon sur la balance est bruitée (Bruit.appliquer, voir docs/socle.md) ; volumes et durées sont réglés par l'élève, jamais bruités -->
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="matiere">Constitution et transformations de la matière · Première spé</p>
+    <h1>Synthèse d’un savon</h1>
+    <p class="sub">Saponification de l’huile par la soude : monte le chauffage à reflux, nomme chaque élément et justifie sa présence, réalise la synthèse, puis calcule le rendement.</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+    <div class="progress" id="progress" aria-label="Avancement des tâches"></div>
+    <div class="tabs" id="tabs" role="group" aria-label="Choisir une tâche">
+      <button class="tab" data-mode="1" type="button">1 · Sécurité</button>
+      <button class="tab" data-mode="2" type="button">2 · Le protocole</button>
+      <button class="tab" data-mode="3" type="button">3 · Le montage à reflux</button>
+      <button class="tab" data-mode="4" type="button">4 · Réaliser la synthèse</button>
+      <button class="tab" data-mode="5" type="button">5 · Rendement</button>
+      <button class="tab" data-mode="6" type="button">6 · Bilan</button>
+    </div>
+    <div class="task" id="t1" role="region" aria-label="Tâche 1 : sécurité"></div>
+    <div class="task" id="t2" role="region" aria-label="Tâche 2 : le protocole" hidden></div>
+    <div class="task" id="t3" role="region" aria-label="Tâche 3 : le montage à reflux" hidden></div>
+    <div class="task" id="t4" role="region" aria-label="Tâche 4 : réaliser la synthèse" hidden></div>
+    <div class="task" id="t5" role="region" aria-label="Tâche 5 : rendement" hidden></div>
+    <div class="task" id="t6" role="region" aria-label="Tâche 6 : bilan" hidden></div>
+
+    <details>
+      <summary>Pour aller plus loin : hypothèses et limites du modèle</summary>
+      <ul>
+        <li>Les données (masses molaires, masse volumique de l’huile, concentration de la soude) sont celles du protocole TP14. L’huile est assimilée à l’oléine (trioléine), le savon à l’oléate de sodium.</li>
+        <li>La masse de savon obtenue est calculée par un <b>modèle simplifié de la simulation</b> : avancement qui croît avec la durée de reflux, puis pertes au relargage et à la filtration. Il est calé sur la masse du TP (7,5 g de savon sec pour 30 min de reflux) ; ce n’est pas une loi mesurée.</li>
+        <li>La masse du savon encore humide est supposée 1,5 fois celle du savon sec : valeur indicative, pour montrer pourquoi on sèche avant de peser.</li>
+        <li>Les lavages (étape 5 du protocole) ne sont pas réalisés, comme dans le TP.</li>
+        <li>Les pictogrammes de danger (SGH05 corrosif, SGH02 inflammable) sont des dessins simplifiés ; sur les vrais flacons, relire l’étiquette (une solution de soude ou d’éthanol peut porter d’autres pictogrammes).</li>
+        <li>Lien avec le programme (BO spécial n° 1 du 22 janvier 2019, Première spécialité, « Synthèses d’espèces chimiques organiques ») : identifier les étapes d’un protocole, schématiser et légender les dispositifs, mettre en œuvre un montage à reflux, déterminer un rendement.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/bruit.js"></script>   <!-- bruit de mesure commun : à charger AVANT le socle -->
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = Simulabo, h = S.h, fmt = S.fmt, sig = S.sig;
+  function $(s, r) { return (r || document).querySelector(s); }
+
+  /* ================= Données et modèle chimique (protocole TP14) ================= */
+  var CH = { Mol: 884, Msav: 304, MNaOH: 40, rho: 0.9, c: 7.5 };            // g/mol, g/mol, g/mol, g/mL, mol/L
+  /* Modèle de la simulation : avancement croissant avec la durée de reflux, puis pertes (transferts, filtration).
+     Calé pour retrouver 7,5 g de savon sec avec le protocole (30 mL de soude, 15 mL d'huile, 30 min). */
+  var RECOV = 0.70;
+  var R_TP = (7.5 / CH.Msav) / (3 * 15 * CH.rho / CH.Mol);
+  var TAU = -30 / Math.log(1 - R_TP / RECOV);                                // minutes
+  var WET = 1.5;                                                             // masse humide / masse sèche (indicatif)
+
+  var ST = { epi: false, build: false, vOH: 30, vOil: 15, vEt: 15, t: 30, poured: false, refl: false, relarg: false,
+             filtre: false, mousse: false, dry: true, weighs: [], pred: null, cert: null, mExp: null, notes: {} };
+  var done = {};
+
+  function chem() {
+    var nOil = ST.vOil * CH.rho / CH.Mol, nOH = CH.c * ST.vOH / 1000;
+    var xOil = nOil, xOH = nOH / 3, xmax = Math.min(xOil, xOH);
+    var conv = 1 - Math.exp(-ST.t / TAU);
+    var nTh = 3 * xmax, mDry = nTh * conv * RECOV * CH.Msav;
+    return { nOil: nOil, nOH: nOH, xOil: xOil, xOH: xOH, xmax: xmax, lim: xOil <= xOH ? "oléine" : "hydroxyde de sodium",
+             nTh: nTh, mTh: nTh * CH.Msav, conv: conv, mDry: mDry, mWet: mDry * WET };
+  }
+
+  /* ================= Composants communs ================= */
+  var COMPS = { app: ["APP", "S’approprier"], ana: ["ANA", "Analyser / Raisonner"], rea: ["RÉA", "Réaliser"], val: ["VAL", "Valider"], com: ["COM", "Communiquer"] };
+  function chip(code, verb) {
+    var c = COMPS[code];
+    return '<span class="comp" data-comp="' + code + '"><abbr title="' + c[1] + '">' + c[0] + '</abbr> · ' + verb + '</span>';
+  }
+  function taskHead(title, chips) {
+    return '<div class="head-task"><h2>' + title + '</h2><span>' + chips.join(" ") + '</span></div>';
+  }
+  function markDone(n) { done[n] = true; paintProgress(); }
+  function paintProgress() {
+    var names = ["Sécurité", "Protocole", "Montage", "Synthèse", "Rendement", "Bilan"], box = $("#progress");
+    box.textContent = "";
+    names.forEach(function (nm, i) { box.appendChild(h("span", { class: "mchip", "data-done": done[i + 1] ? "true" : "false", text: (done[i + 1] ? "✓ " : "") + (i + 1) + " · " + nm })); });
+  }
+  function show(fb, tone, html) { fb.hidden = false; fb.setAttribute("data-tone", tone); fb.innerHTML = html; }
+  var uid = 0;
+
+  /* Question à choix unique : un retour propre à chaque réponse fausse (la conception erronée visée), jamais « Faux » seul.
+     o = {legend, options:[{t, ok, why}], explain, onOk} */
+  function mcq(host, o) {
+    var id = "q" + (++uid), tries = 0, finished = false;
+    var fs = h("fieldset", { class: "q" }, h("legend", { html: o.legend })), opts = h("div", { class: "opts" });
+    var inputs = o.options.map(function (op, i) {
+      var inp = h("input", { type: "radio", name: id, value: i });
+      opts.appendChild(h("label", { class: "opt" }, inp, h("span", { html: op.t })));
+      return inp;
+    });
+    var fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+    var btn = h("button", { type: "button", class: "primary small", text: "Vérifier" });
+    fs.appendChild(opts); fs.appendChild(h("div", { class: "row" }, btn)); fs.appendChild(fb);
+    btn.addEventListener("click", function () {
+      if (finished) return;
+      var k = inputs.findIndex(function (x) { return x.checked; });
+      if (k < 0) { show(fb, "warn", "<b>À faire :</b> choisis une réponse."); return; }
+      var op = o.options[k];
+      if (op.ok) { finished = true; inputs.forEach(function (x) { x.disabled = true; }); btn.disabled = true; show(fb, "ok", "<b>Bien vu.</b> " + (o.explain || "")); if (o.onOk) o.onOk(); return; }
+      tries += 1;
+      var good = o.options.filter(function (x) { return x.ok; })[0];
+      show(fb, "bad", "<b>Pas encore.</b> " + (op.why || "Relis la question.") + (tries >= 2 ? " <br><i>Réponse attendue :</i> " + good.t + "<br>" + (o.explain || "") : ""));
+    });
+    host.appendChild(fs);
+    return { el: fs, solved: function () { return finished; } };
+  }
+
+  /* Cases à cocher : toutes les bonnes, aucune mauvaise. o = {legend, options:[{t, ok, why}], explain, onOk} */
+  function checks(host, o) {
+    var id = "c" + (++uid), finished = false;
+    var fs = h("fieldset", { class: "q" }, h("legend", { html: o.legend })), opts = h("div", { class: "opts" });
+    var inputs = o.options.map(function (op) {
+      var inp = h("input", { type: "checkbox", name: id });
+      opts.appendChild(h("label", { class: "opt" }, inp, h("span", { html: op.t })));
+      return inp;
+    });
+    var fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+    var btn = h("button", { type: "button", class: "primary small", text: "Vérifier" });
+    fs.appendChild(opts); fs.appendChild(h("div", { class: "row" }, btn)); fs.appendChild(fb);
+    btn.addEventListener("click", function () {
+      if (finished) return;
+      var missing = [], wrong = [];
+      o.options.forEach(function (op, i) {
+        if (op.ok && !inputs[i].checked) missing.push(op.t);
+        if (!op.ok && inputs[i].checked) wrong.push(op.why || op.t);
+      });
+      if (!missing.length && !wrong.length) { finished = true; inputs.forEach(function (x) { x.disabled = true; }); btn.disabled = true; show(fb, "ok", "<b>Bien vu.</b> " + (o.explain || "")); if (o.onOk) o.onOk(); return; }
+      var m = "<b>Pas encore.</b>";
+      if (wrong.length) m += "<ul>" + wrong.map(function (w) { return "<li>" + w + "</li>"; }).join("") + "</ul>";
+      if (missing.length) m += " Il manque " + missing.length + " précaution" + (missing.length > 1 ? "s" : "") + " : relis les pictogrammes et pense à ce qui protège la peau, les yeux et les vêtements.";
+      show(fb, "bad", m);
+    });
+    host.appendChild(fs);
+  }
+
+  /* ================= Tâche 1 : sécurité ================= */
+  function pictSVG(kind) {
+    var d = '<path d="M37 4L70 37L37 70L4 37Z" fill="var(--surface)" stroke="#C62828" stroke-width="5" stroke-linejoin="round"/>';
+    if (kind === "corr") d += '<path d="M24 19L36 25L34 30L22 24Z" fill="var(--ink)"/><circle cx="35" cy="36" r="2.6" fill="var(--ink)"/><circle cx="42" cy="42" r="2.6" fill="var(--ink)"/><rect x="22" y="50" width="30" height="5" rx="1" fill="var(--ink)"/>';
+    else d += '<path d="M37 16C44 27 51 32 51 43A14 14 0 0 1 23 43C23 37 27 34 29 28C32 32 34 33 35 30C36 26 35 22 37 16Z" fill="var(--ink)"/>';
+    return '<svg viewBox="0 0 74 74" role="img" aria-label="Pictogramme de danger (losange à bordure rouge) : ' + (kind === "corr" ? "un tube qui verse des gouttes sur une surface" : "une flamme") + '">' + d + '</svg>';
+  }
+  function task1() {
+    var t = $("#t1");
+    t.innerHTML = taskHead("Sécurité et matières premières", [chip("app", "Lire"), chip("ana", "Raisonner")]) +
+      '<section class="card stack"><p class="lead">Pendant la guerre de 1939-1945, le savon était une denrée rare et les particuliers en fabriquaient souvent eux-mêmes. <b>Comment fabrique-t-on un savon ?</b></p>' +
+      '<p class="lead">L’huile (olive, tournesol, arachide) contient des <b>triesters</b>, dont l’<b>oléine</b>. Sous l’action de la <b>soude concentrée</b>, à chaud, les molécules d’oléine se fragmentent : il se forme du <b>glycérol</b> et de l’<b>oléate de sodium</b> (le savon). Cette réaction s’appelle la <b>saponification</b>.</p>' +
+      '<p class="bo">Programme : « Synthèses d’espèces chimiques organiques » (Première spécialité), parmi les exemples cités : l’ester et le savon.</p></section>' +
+      '<section class="card stack"><h3>Avant de manipuler : les flacons</h3><div class="flacons" id="flacons"></div><div class="fb" id="fb-pict" role="status" aria-live="polite" hidden></div><div class="row"><button type="button" class="primary small" id="b-pict">Vérifier les pictogrammes</button></div></section>' +
+      '<section class="card stack" id="epi"><h3>Précautions pour les prélèvements</h3></section>';
+    var OPT = ["Choisir…", "Corrosif", "Inflammable", "Toxique", "Comburant", "Dangereux pour l’environnement"], sels = {};
+    [["soude", "Solution d’hydroxyde de sodium (soude concentrée)", "corr"], ["etoh", "Éthanol", "flam"]].forEach(function (f) {
+      var id = "sel-" + f[0], sel = h("select", { id: id, class: "nin" });
+      OPT.forEach(function (o, i) { sel.appendChild(h("option", { value: i, text: o })); });
+      sels[f[0]] = sel;
+      $("#flacons").appendChild(h("div", { class: "flacon" }, h("b", { text: f[1] }), h("div", { class: "pict", html: pictSVG(f[2]) }),
+        h("label", { for: id, text: "Ce pictogramme signale un danger :" }), sel));
+    });
+    $("#b-pict").addEventListener("click", function () {
+      var fb = $("#fb-pict"), a = OPT[sels.soude.value], b = OPT[sels.etoh.value];
+      if (a === "Choisir…" || b === "Choisir…") { show(fb, "warn", "<b>À faire :</b> choisis un danger pour chaque flacon."); return; }
+      var m = [];
+      if (a !== "Corrosif") m.push("Pour la soude concentrée, pense à ce qu’elle ferait à la peau et aux yeux.");
+      if (b !== "Inflammable") m.push("Pour l’éthanol, pense à ce qui se passe s’il y a une flamme à proximité.");
+      if (!m.length) show(fb, "ok", "<b>Bien vu.</b> Corrosif pour la soude, inflammable pour l’éthanol.");
+      else show(fb, "bad", "<b>Pas encore.</b> " + m.join(" "));
+    });
+    checks($("#epi"), {
+      legend: "Coche toutes les précautions à prendre pour effectuer les prélèvements :",
+      options: [
+        { t: "Porter des gants", ok: true }, { t: "Porter des lunettes de protection", ok: true }, { t: "Porter une blouse", ok: true },
+        { t: "Travailler loin de toute flamme", ok: true },
+        { t: "Sentir le flacon d’éthanol de près pour le reconnaître", ok: false, why: "On ne sent jamais un produit chimique de près pour le reconnaître : on lit l’étiquette." },
+        { t: "Pipeter la soude à la bouche pour être plus précis", ok: false, why: "Ne jamais pipeter à la bouche, surtout un produit corrosif." },
+        { t: "Prélever les liquides à mains nues pour mieux sentir le verre", ok: false, why: "Une solution corrosive se manipule avec des gants." }],
+      explain: "Gants, lunettes et blouse contre la soude corrosive ; aucune flamme à proximité de l’éthanol inflammable.",
+      onOk: function () { ST.epi = true; markDone(1); }
+    });
+  }
+
+  /* ================= Tâche 2 : le protocole ================= */
+  var STEPS = [
+    ["1. Préparation du mélange réactionnel", "T", 0, "Verser dans le ballon 30 mL de soude, 15 mL d’huile, 15 mL d’éthanol et quelques grains de pierre ponce."],
+    ["2. Chauffage du mélange à reflux", "T", 1, "Fixer le réfrigérant, faire circuler l’eau, chauffer à reflux environ 30 minutes, ébullition douce."],
+    ["3. Extraction ou relargage", "I", 2, "Verser le mélange chaud dans environ 100 mL d’eau salée saturée et froide : le savon solide surnage."],
+    ["4. Filtration", "I", 3, "Filtrer sous vide sur Büchner le contenu du bécher."],
+    ["5. Lavages (non réalisés dans ce TP)", "P", 4, "Laver à l’eau salée saturée pour éliminer l’excès de soude, le glycérol et les impuretés."],
+    ["6. Test moussant", "A", 5, "Un peu de savon dans un tube à essais avec de l’eau distillée, boucher, agiter, observer."]];
+  var JUST = ["On met les réactifs en présence : la transformation chimique commence.", "Le chauffage accélère la transformation chimique.",
+              "Le savon solide apparaît parmi les liquides.", "Le savon est séparé des substances liquides (réactifs en excès et autre produit).",
+              "On élimine les impuretés encore présentes dans le savon : soude et oléine.", "On vérifie que le produit est un savon grâce à ses propriétés moussantes."];
+  var PERM = [3, 0, 5, 2, 4, 1], CATS = [["", "Choisir…"], ["T", "Transformation des réactifs"], ["I", "Isolement"], ["P", "Purification"], ["A", "Analyse"]];
+  function task2() {
+    var t = $("#t2");
+    t.innerHTML = taskHead("Lire le protocole", [chip("app", "Lire"), chip("ana", "Justifier")]) +
+      '<section class="card stack"><p class="lead">Un protocole de synthèse enchaîne quatre sortes d’étapes : <b>transformation</b> des réactifs, <b>isolement</b> du produit, <b>purification</b>, <b>analyse</b>. Pour chaque étape du protocole, choisis sa sorte et la phrase qui la justifie.</p><div id="steps" class="stack"></div><div class="fb" id="fb-steps" role="status" aria-live="polite" hidden></div><div class="row"><button type="button" class="primary small" id="b-steps">Vérifier mes réponses</button></div></section>';
+    var rows = [];
+    STEPS.forEach(function (st, i) {
+      var c = h("select", { class: "nin", id: "cat" + i, "aria-label": "Sorte d’étape pour : " + st[0] }), j = h("select", { class: "nin", id: "jus" + i, "aria-label": "Justification pour : " + st[0] });
+      CATS.forEach(function (x) { c.appendChild(h("option", { value: x[0], text: x[1] })); });
+      j.appendChild(h("option", { value: "", text: "Choisir la justification…" }));
+      PERM.forEach(function (k) { j.appendChild(h("option", { value: k, text: JUST[k] })); });
+      rows.push([c, j]);
+      $("#steps").appendChild(h("div", { class: "flacon" }, h("b", { text: st[0] }), h("span", { class: "help", text: st[3] }), h("div", { class: "fields" }, h("div", { class: "field" }, h("label", { for: "cat" + i, text: "Sorte d’étape" }), c), h("div", { class: "field" }, h("label", { for: "jus" + i, text: "Justification" }), j))));
+    });
+    $("#b-steps").addEventListener("click", function () {
+      var fb = $("#fb-steps"), bad = [], empty = false;
+      STEPS.forEach(function (st, i) {
+        var c = rows[i][0].value, j = rows[i][1].value;
+        if (!c || j === "") { empty = true; return; }
+        if (c !== st[1]) bad.push(st[0] + " : la sorte d’étape ne convient pas.");
+        else if (Number(j) !== st[2]) bad.push(st[0] + " : la justification ne correspond pas à cette étape.");
+      });
+      if (empty) { show(fb, "warn", "<b>À faire :</b> remplis les deux listes pour chaque étape."); return; }
+      if (!bad.length) { show(fb, "ok", "<b>Bien vu.</b> Le chauffage et le mélange <i>transforment</i> ; le relargage et la filtration <i>isolent</i> le savon ; les lavages <i>purifient</i> ; le test moussant <i>analyse</i>."); markDone(2); return; }
+      show(fb, "bad", "<b>Pas encore.</b><ul>" + bad.map(function (b) { return "<li>" + b + "</li>"; }).join("") + "</ul>Repère : « transformation » = les réactifs changent ; « isolement » = on sépare le produit du reste du milieu ; « purification » = on retire les impuretés du produit ; « analyse » = on vérifie ce qu’on a obtenu.");
+    });
+  }
+
+  /* ================= Tâche 3 : le montage à reflux ================= */
+  var SL = [
+    { k: "lift", t: "Support élévateur", q: "Que poses-tu en bas du montage pour pouvoir régler la hauteur du chauffage, et l’éloigner vite du ballon en fin de synthèse ?",
+      o: [["Un support élévateur", 1, "Il règle la hauteur du chauffe-ballon : on peut le descendre pour arrêter le chauffage sans toucher au ballon."],
+          ["Un bécher posé sur la paillasse", 0, "Un bécher ne règle pas la hauteur et peut basculer : le montage ne serait pas stable."],
+          ["Des cales en bois", 0, "Le bois est inflammable et n’est pas réglable : on ne le place pas sous une source de chaleur."]] },
+    { k: "heater", t: "Chauffe-ballon", q: "Que poses-tu sur le support pour chauffer le ballon de manière régulière, sans flamme (l’éthanol est inflammable) ?",
+      o: [["Un chauffe-ballon", 1, "Il enveloppe le ballon rond et le chauffe uniformément, sans flamme nue."],
+          ["Un bec Bunsen", 0, "Une flamme près de l’éthanol inflammable : danger. Le chauffage doit se faire sans flamme."],
+          ["Une plaque chauffante plane", 0, "Un ballon rond ne touche une plaque plane qu’en un point : chauffage inégal et ballon instable."]] },
+    { k: "flask", t: "Ballon", q: "Quel récipient reçoit le mélange réactionnel ?",
+      o: [["Un ballon à fond rond", 1, "Verrerie rodée, adaptée au réfrigérant, qui épouse le chauffe-ballon et supporte l’ébullition."],
+          ["Un erlenmeyer", 0, "Son col ne s’adapte pas au réfrigérant et son fond plat n’épouse pas le chauffe-ballon."],
+          ["Un bécher", 0, "Un bécher est ouvert : les vapeurs s’échapperaient et on ne peut pas y fixer de réfrigérant."]] },
+    { k: "pierre", t: "Pierre ponce", q: "Avant de chauffer, que ajoutes-tu dans le ballon avec les liquides ?",
+      o: [["Quelques grains de pierre ponce", 1, "Elle régule l’ébullition : pas de grosses bulles de vapeur formées de façon aléatoire."],
+          ["Rien : les liquides suffisent", 0, "Sans elle, l’ébullition peut devenir irrégulière, avec des à-coups. Tu pourras le tester plus bas (« Et si on retirait… ? »)."],
+          ["Un morceau de glace", 0, "On veut chauffer le mélange, pas le refroidir ; la glace ajouterait de l’eau."]] },
+    { k: "clamp", t: "Potence et pince", q: "Comment maintiens-tu le ballon et le réfrigérant verticaux et stables ?",
+      o: [["Une potence avec des pinces serrées sur le col du ballon et sur le réfrigérant", 1, "Le montage reste vertical et ne peut pas se renverser quand le liquide bout."],
+          ["On tient le réfrigérant à la main", 0, "On ne tient rien à la main pendant 30 minutes de chauffage : il faut un support fixe."],
+          ["On pose le réfrigérant sur le ballon sans le fixer", 0, "Un montage non fixé peut tomber ou se désaligner : verre cassé, mélange corrosif renversé."]] },
+    { k: "cond", t: "Réfrigérant à boules", q: "Que fixes-tu sur le ballon, à la verticale, pour que les vapeurs retombent dans le ballon ?",
+      o: [["Un réfrigérant à boules", 1, "Sa double paroi, parcourue par de l’eau froide, condense les vapeurs ; les boules augmentent la surface d’échange."],
+          ["Une ampoule à décanter", 0, "Elle sert à séparer deux liquides non miscibles, pas à condenser des vapeurs."],
+          ["Un tube droit en verre, sans eau", 0, "Sans eau froide qui l’entoure, il ne refroidit pas assez : les vapeurs s’échapperaient."]] },
+    { k: "eau", t: "Circulation de l’eau", q: "Dans quel sens fais-tu circuler l’eau froide dans la double paroi, avec un débit faible ?",
+      o: [["Entrée en bas, sortie en haut", 1, "La double paroi se remplit entièrement et l’eau la plus froide arrive là où les vapeurs sont condensées."],
+          ["Entrée en haut, sortie en bas", 0, "L’eau coulerait par gravité sans remplir la double paroi : des poches d’air refroidissent mal les vapeurs."],
+          ["Pas d’eau : le réfrigérant refroidit à l’air", 0, "À l’air seul, les vapeurs d’éthanol ne se condensent pas assez : elles s’échapperaient du montage."]] },
+    { k: "top", t: "Haut du réfrigérant", q: "Dernier choix : le haut du réfrigérant doit rester…",
+      o: [["Ouvert, à l’air libre", 1, "Les vapeurs formées au cours du chauffage augmenteraient fortement la pression dans le ballon si le montage était fermé."],
+          ["Fermé par un bouchon", 0, "Un montage fermé que l’on chauffe est sous pression : le bouchon peut sauter avec des projections brûlantes, voire faire exploser le ballon."],
+          ["Fermé par du papier aluminium", 0, "Même chose qu’un bouchon : un système fermé que l’on chauffe est dangereux."]] }];
+  var NAMES = ["Potence", "Sortie d’eau", "Réfrigérant à boules", "Entrée d’eau froide", "Ballon", "Mélange réactionnel", "Chauffe-ballon", "Support élévateur"];
+  var NAMES_OPT = ["Chauffe-ballon", "Thermomètre", "Entrée d’eau froide", "Ballon", "Bouchon", "Sortie d’eau", "Support élévateur", "Réfrigérant à boules", "Mélange réactionnel", "Potence", "Pince"];
+  var built = 0, heat = false, tags = null, wi = { cond: true, pierre: true, eau: "ok", sommet: "open" }, sceneHost;
+  var BADGES = [[30, 160, 80, 160], [412, 84, 330, 84], [412, 150, 244, 150], [412, 205, 330, 205], [412, 300, 288, 330], [412, 360, 262, 385], [412, 420, 308, 420], [412, 468, 290, 466]];
+
+  function sceneSVG() {
+    var n = built, s = "", i, a;
+    var aria = "Schéma du montage à reflux : " + (n === 0 ? "rien n’est encore monté, des emplacements en pointillés indiquent où placer chaque élément." : n + " étape" + (n > 1 ? "s" : "") + " sur 8 montée" + (n > 1 ? "s" : "") + ".");
+    s += '<svg viewBox="0 0 440 520" role="img" aria-label="' + aria + '" class="' + (heat ? "heat" : "") + '"><defs><clipPath id="clipB"><circle cx="220" cy="345" r="66"/></clipPath></defs>';
+    s += '<rect x="0" y="488" width="440" height="32" fill="var(--bg)"/>';
+    if (n < 1) s += '<rect class="ghost" x="150" y="446" width="140" height="40" rx="3"/>';
+    if (n < 2) s += '<path class="ghost" d="M132 446V396Q132 384 144 384H296Q308 384 308 396V446Z"/>';
+    if (n < 3) s += '<path class="ghost" d="M208 232V278.1A68 68 0 1 0 232 278.1V232"/>';
+    if (n < 5) s += '<rect class="ghost" x="76" y="30" width="8" height="456"/>';
+    if (n < 6) s += '<path class="ghost" d="M196 52V232H244V52Z"/>';
+    if (n >= 1) s += '<rect class="m" x="150" y="476" width="140" height="10" rx="2"/><rect class="m" x="150" y="446" width="140" height="10" rx="2"/><path class="m" style="fill:none" d="M166 456L274 476M274 456L166 476"/>';
+    if (n >= 2) s += '<path class="m" d="M132 446V396Q132 384 144 384H296Q308 384 308 396V446Z"/><circle cx="150" cy="430" r="5" fill="' + (heat ? "var(--flamme)" : "var(--muted)") + '"/>';
+    if (n >= 3) {
+      s += '<g clip-path="url(#clipB)"><rect class="liq" x="150" y="352" width="140" height="70"/></g><path class="g" d="M208 232V278.1A68 68 0 1 0 232 278.1V232"/>';
+      if (n >= 4 && wi.pierre) s += '<path d="M200 404l6-5 7 4-3 6z M226 406l6-4 6 5-5 4z M212 409l5-3 5 3-4 3z" fill="var(--muted)"/>';
+      if (heat) for (i = 0; i < 6; i++) s += '<circle class="bub' + (!wi.pierre && i % 2 === 0 ? " bump" : "") + '" cx="' + (186 + i * 14) + '" cy="' + (385 - (i % 3) * 8) + '" r="' + (!wi.pierre && i % 2 === 0 ? 9 : 3.4) + '" fill="var(--surface)" stroke="var(--vap)"/>';
+    }
+    var condOK = n >= 6 && wi.cond;
+    if (condOK) {
+      var Ld = "M212 52V72", Ru = "", y0 = 72;
+      for (i = 0; i < 5; i++) { Ld += "Q200 " + (y0 + 13) + " 212 " + (y0 + 26); y0 += 26; }
+      for (i = 4; i >= 0; i--) Ru += "Q240 " + (72 + 26 * i + 13) + " 228 " + (72 + 26 * i);
+      s += '<path class="g" d="M196 70V222H244V70Z"/>';
+      if (n >= 7 && wi.eau === "ok") s += '<rect class="eau" x="197" y="71" width="46" height="150"/>';
+      if (n >= 7 && wi.eau === "inv") s += '<rect class="eau" x="197" y="170" width="46" height="51"/>';
+      s += '<path class="g" style="fill:var(--surface)" d="' + Ld + "V232H228V202" + Ru + 'V52Z"/>';
+    }
+    if (n >= 5) {
+      s += '<rect class="m" x="76" y="30" width="8" height="456"/><rect class="m" x="40" y="482" width="82" height="7" rx="2"/>';
+      s += '<rect class="m" x="84" y="247" width="124" height="7"/><rect class="m" x="203" y="241" width="34" height="18" rx="3" style="fill:none"/>';
+      if (condOK) s += '<rect class="m" x="84" y="118" width="112" height="7"/><rect class="m" x="192" y="112" width="56" height="18" rx="3" style="fill:none"/>';
+    }
+    if (condOK && n >= 7) {
+      var inv = wi.eau === "inv", off = wi.eau === "off";
+      if (!off) {
+        s += '<path class="g wflow" style="stroke:var(--eau);stroke-width:5" d="M244 205H330V262"/><path class="g wflow" style="stroke:var(--eau);stroke-width:5" d="M244 84H330V40"/>';
+        s += '<path d="' + (inv ? "M312 84H296M302 79L296 84L302 89" : "M312 205H296M302 200L296 205L302 210") + '" fill="none" stroke="var(--eau)" stroke-width="2.4"/>';
+        s += '<path d="' + (inv ? "M296 205H312M306 200L312 205L306 210" : "M296 84H312M306 79L312 84L306 89") + '" fill="none" stroke="var(--eau)" stroke-width="2.4"/>';
+      }
+    }
+    if (n >= 8 && wi.sommet === "closed" && condOK) s += '<rect class="m" x="208" y="40" width="24" height="14" rx="2"/>';
+    if (heat && n >= 6) {
+      var escape = !condOK || wi.eau === "off" || wi.eau === "inv" || wi.sommet === "closed";
+      for (i = 0; i < 4; i++) s += '<circle class="vp" cx="' + (214 + (i % 2) * 12) + '" cy="' + (262 - i * 30) + '" r="4" fill="var(--vap)"/>';
+      if (condOK && !escape) for (i = 0; i < 3; i++) s += '<circle class="dr" cx="' + (216 + i * 6) + '" cy="' + (110 + i * 16) + '" r="2.6" fill="var(--eau)"/>';
+      if (escape) for (i = 0; i < 4; i++) s += '<circle class="vp" cx="' + (206 + i * 9) + '" cy="' + (38 - (i % 2) * 8) + '" r="5" fill="var(--vap)"/>';
+    }
+    if (heat && n >= 6) {
+      var msg = !condOK ? "Vapeurs perdues (éthanol inflammable)" : wi.sommet === "closed" ? "Surpression : le bouchon peut sauter !" : wi.eau === "off" ? "Sans eau froide : les vapeurs s’échappent" : wi.eau === "inv" ? "Eau mal répartie : condensation insuffisante" : !wi.pierre ? "Ébullition irrégulière : à-coups, projections" : "";
+      if (msg) s += '<text class="alert" x="14" y="22" style="fill:var(--bad)">' + msg + '</text>';
+    }
+    if (tags && n >= 8) BADGES.forEach(function (b, k) {
+      s += '<line class="lead-line" x1="' + b[2] + '" y1="' + b[3] + '" x2="' + (b[0] + (b[0] > 200 ? -13 : 13)) + '" y2="' + b[1] + '"/><circle class="badge" cx="' + b[0] + '" cy="' + b[1] + '" r="12"/><text class="badge-t" x="' + b[0] + '" y="' + (b[1] + 4.5) + '">' + (k + 1) + '</text>';
+      if (tags === "name") s += '<text x="' + (b[0] > 200 ? b[0] - 18 : b[0] + 18) + '" y="' + (b[1] - 12) + '" text-anchor="' + (b[0] > 200 ? "end" : "start") + '" style="font-size:12px">' + NAMES[k] + '</text>';
+    });
+    return s + "</svg>";
+  }
+  function redraw() { sceneHost.innerHTML = sceneSVG(); }
+
+  function task3() {
+    var t = $("#t3");
+    t.innerHTML = taskHead("Le montage à reflux", [chip("rea", "Monter"), chip("app", "Nommer"), chip("ana", "Justifier")]) +
+      '<div class="two"><div class="stack sticky"><div class="scene" id="scene"></div><div class="row"><button type="button" class="primary" id="b-heat" disabled>Chauffer</button><span class="help" id="heat-help">Termine d’abord le montage.</span></div>' +
+      '<div class="obs" id="obs3" aria-live="polite" data-tone="info"><h2>Observation</h2><p data-obs-text>Monte le dispositif étape par étape : à chaque étape, choisis la bonne pièce. Les pointillés montrent ce qui manque.</p></div></div>' +
+      '<div class="stack"><section class="card stack"><h3>Monter, du bas vers le haut</h3><div class="build" id="build"></div></section>' +
+      '<section class="card stack" id="s-name" hidden><div class="head-task"><h3>Légender le schéma</h3>' + chip("app", "Nommer") + '</div><p class="help">Les chiffres sont sur le schéma. Associe chaque numéro à son nom.</p><div class="fields" id="names"></div><div class="fb" id="fb-names" role="status" aria-live="polite" hidden></div><div class="row"><button type="button" class="primary small" id="b-names">Vérifier la légende</button></div></section>' +
+      '<section class="card stack" id="s-just" hidden><div class="head-task"><h3>Justifier chaque élément</h3>' + chip("ana", "Justifier") + '</div><div class="stack" id="just"></div></section>' +
+      '<section class="card stack" id="s-whatif" hidden><div class="head-task"><h3>Et si on retirait… ?</h3>' + chip("val", "Tester") + '</div><p class="help">Un élément est utile si son absence change quelque chose. Retire-le, chauffe, puis observe.</p><div class="opts" id="wi"></div></section></div></div>';
+    sceneHost = $("#scene"); redraw();
+    var box = $("#build"), steps = [];
+    SL.forEach(function (sl, i) {
+      var st = h("div", { class: "bstep", "data-state": i === 0 ? "active" : "todo" }), ch = h("div", { class: "choices" }), fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+      st.appendChild(h("h3", null, h("span", { class: "bnum", text: i + 1 }), h("span", { text: sl.t })));
+      st.appendChild(h("p", { text: sl.q }));
+      sl.o.forEach(function (o) {
+        var b = h("button", { type: "button", text: o[0] });
+        b.addEventListener("click", function () {
+          if (st.getAttribute("data-state") !== "active") return;
+          if (o[1]) {
+            show(fb, "ok", "<b>Bien vu.</b> " + o[2]); st.setAttribute("data-state", "done"); built = i + 1; ch.querySelectorAll("button").forEach(function (x) { x.disabled = true; }); b.setAttribute("aria-pressed", "true");
+            if (steps[i + 1]) steps[i + 1].setAttribute("data-state", "active"); else finishBuild();
+            redraw();
+          } else show(fb, "bad", "<b>Pas encore.</b> " + o[2]);
+        });
+        ch.appendChild(b);
+      });
+      st.appendChild(ch); st.appendChild(fb); steps.push(st); box.appendChild(st);
+    });
+  }
+
+  function finishBuild() {
+    ST.build = true; tags = "num"; $("#b-heat").disabled = false; $("#heat-help").textContent = "Le montage est complet : tu peux chauffer.";
+    S.observe("#obs3", "ok", "<b>Montage complet.</b> Nomme maintenant chaque élément, puis justifie sa présence.");
+    ["s-name", "s-just", "s-whatif"].forEach(function (id) { $("#" + id).hidden = false; });
+    redraw(); buildNaming(); buildJust(); buildWhatIf(); $("#b-heat").addEventListener("click", toggleHeat);
+  }
+  function toggleHeat() {
+    heat = !heat; $("#b-heat").textContent = heat ? "Arrêter le chauffage" : "Chauffer"; $("#b-heat").setAttribute("aria-pressed", String(heat)); redraw(); explain();
+  }
+  var need3 = { names: false, q: 0 };
+  function check3() { if (need3.names && need3.q >= 5) markDone(3); }
+
+  function buildNaming() {
+    var box = $("#names"), sels = [];
+    NAMES.forEach(function (nm, k) {
+      var id = "nm" + k, sel = h("select", { class: "nin", id: id });
+      sel.appendChild(h("option", { value: "", text: "Choisir…" }));
+      NAMES_OPT.forEach(function (o) { sel.appendChild(h("option", { value: o, text: o })); });
+      sels.push(sel); box.appendChild(h("div", { class: "field" }, h("label", { for: id, text: "Élément n° " + (k + 1) }), sel));
+    });
+    $("#b-names").addEventListener("click", function () {
+      var fb = $("#fb-names"), bad = [], empty = false;
+      sels.forEach(function (s, k) { if (!s.value) empty = true; else if (s.value !== NAMES[k]) bad.push(k + 1); });
+      if (empty) { show(fb, "warn", "<b>À faire :</b> nomme les 8 éléments."); return; }
+      if (!bad.length) { show(fb, "ok", "<b>Bien vu.</b> La légende est complète."); tags = "name"; redraw(); need3.names = true; check3(); return; }
+      show(fb, "bad", "<b>Pas encore.</b> Revois le(s) numéro(s) " + bad.join(", ") + ". Aide : l’eau entre par le bas du réfrigérant et sort par le haut ; la potence est la tige verticale qui tient la verrerie.");
+    });
+  }
+
+  function buildJust() {
+    var box = $("#just"), up = function () { need3.q += 1; check3(); };
+    mcq(box, { legend: "Quel est le rôle du <b>chauffage</b> ?", onOk: up,
+      explain: "Chauffer à la température d’ébullition du mélange augmente la vitesse de la réaction (cinétique).",
+      options: [{ t: "Il augmente la vitesse de la réaction", ok: true },
+        { t: "Il évapore l’huile pour la séparer", why: "On ne cherche pas à évaporer l’huile : on veut qu’elle réagisse avec la soude." },
+        { t: "Il permet d’obtenir davantage de savon", why: "Le chauffage agit sur la vitesse, pas sur la quantité maximale : celle-ci dépend de l’avancement maximal (réactif limitant)." },
+        { t: "Sans chauffage, aucune réaction n’aurait lieu", why: "Sans chauffage la transformation est très lente, elle n’est pas impossible : la température est un facteur cinétique." }] });
+    mcq(box, { legend: "Quel est le rôle de la <b>pierre ponce</b> ?", onOk: up,
+      explain: "Elle régule l’ébullition en évitant la formation aléatoire et incontrôlée de grosses bulles de vapeur.",
+      options: [{ t: "Elle régule l’ébullition", ok: true },
+        { t: "C’est un catalyseur : elle accélère la réaction", why: "La pierre ponce est un solide poreux inerte ; elle n’intervient pas dans la réaction." },
+        { t: "Elle absorbe l’excès de soude", why: "L’excès de soude reste dans le mélange : on l’élimine ensuite par relargage, filtration et lavages." },
+        { t: "C’est un réactif de la saponification", why: "Les réactifs sont l’huile (oléine) et la soude ; la pierre ponce ne figure pas dans l’équation." }] });
+    mcq(box, { legend: "Quel est l’intérêt d’un <b>chauffage à reflux</b> ?", onOk: up,
+      explain: "On chauffe un mélange en ébullition sans perdre de réactifs : les vapeurs se condensent dans le réfrigérant et retombent dans le ballon.",
+      options: [{ t: "Les vapeurs se condensent et retombent dans le ballon : on chauffe sans perdre de matière", ok: true },
+        { t: "Il évacue les vapeurs toxiques hors du ballon", why: "C’est l’inverse : le reflux garde les vapeurs dans le montage en les ramenant à l’état liquide." },
+        { t: "Il refroidit le mélange pour arrêter la réaction", why: "Le réfrigérant refroidit les vapeurs, pas le mélange : la réaction continue." },
+        { t: "Il distille le produit pour le récupérer", why: "Dans une distillation on récupère les vapeurs condensées à part ; ici elles retombent dans le ballon." }] });
+    mcq(box, { legend: "Pourquoi le réfrigérant doit-il rester <b>ouvert à son extrémité supérieure</b> ?", onOk: up,
+      explain: "Les vapeurs formées augmenteraient fortement la pression dans le ballon : le bouchon sauterait, avec projections brûlantes, voire explosion du ballon.",
+      options: [{ t: "Pour éviter une surpression dans le montage", ok: true },
+        { t: "Pour laisser entrer l’air qui alimente la réaction", why: "La réaction n’a pas besoin de dioxygène : les réactifs sont l’huile et la soude." },
+        { t: "Pour pouvoir observer les vapeurs", why: "L’observation n’est pas la raison : c’est une règle de sécurité." },
+        { t: "Pour que l’eau puisse s’évacuer", why: "L’eau circule dans la double paroi, qui est un circuit séparé de l’intérieur du montage." }] });
+    mcq(box, { legend: "Quel est l’intérêt d’utiliser l’<b>éthanol</b> comme solvant ?", onOk: up,
+      explain: "L’huile est plus soluble dans l’éthanol que dans l’eau : le contact entre les réactifs est favorisé et la transformation est plus rapide.",
+      options: [{ t: "Il dissout l’huile : les réactifs sont mieux en contact", ok: true },
+        { t: "C’est un réactif de la saponification", why: "L’éthanol ne figure pas dans l’équation : il ne fait que mettre les réactifs en contact." },
+        { t: "Il refroidit le mélange pendant le chauffage", why: "Ce n’est pas son rôle ; le refroidissement est assuré par l’eau du réfrigérant." },
+        { t: "Il neutralise la soude", why: "Il ne réagit pas avec la soude ici : la soude est consommée par l’huile." }] });
+    var ta = h("textarea", { class: "nin", id: "phrase", rows: 3, placeholder: "Écris ta phrase ici…" }), fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true });
+    var btn = h("button", { type: "button", class: "small", text: "Contrôler mes mots-clés" });
+    box.appendChild(h("div", { class: "field" }, h("label", { for: "phrase", html: "Écris <b>une phrase</b> qui explique le rôle d’un chauffage à reflux. " + chip("com", "Rédiger") }), ta, h("div", { class: "row" }, btn), fb));
+    btn.addEventListener("click", function () {
+      var t = ta.value.toLowerCase(), k = [["vapeur", /vapeur|gaz/], ["condensation", /condens|liquéf|refroidi/], ["retour dans le ballon", /retomb|reviennent|reviens|retour|ballon/], ["sans perte de matière", /perd|perte|sans/]];
+      if (t.trim().length < 15) { show(fb, "warn", "<b>À faire :</b> écris ta phrase d’abord."); return; }
+      show(fb, "info", "<b>Ta phrase contient-elle…</b><ul class='checklist'>" + k.map(function (x) { var ok = x[1].test(t); return "<li data-ok='" + ok + "'>" + (ok ? "✓ " : "○ ") + x[0] + "</li>"; }).join("") + "</ul>Modèle : « Le montage à reflux permet de chauffer un mélange réactionnel en évitant de perdre une partie des réactifs lorsqu’ils entrent en ébullition, car le réfrigérant condense les vapeurs qui retombent dans le ballon. »");
+      ST.notes.phrase = ta.value;
+    });
+  }
+
+  function buildWhatIf() {
+    var box = $("#wi");
+    function opt(type, name, text, val, chk, fn) {
+      var inp = h("input", { type: type, name: name, value: val }); if (chk) inp.checked = true;
+      inp.addEventListener("change", function () { fn(inp); redraw(); explain(); });
+      box.appendChild(h("label", { class: "opt" }, inp, h("span", { text: text })));
+    }
+    opt("checkbox", "wc", "Retirer le réfrigérant", "", false, function (i) { wi.cond = !i.checked; });
+    opt("checkbox", "wp", "Retirer la pierre ponce", "", false, function (i) { wi.pierre = !i.checked; });
+    opt("checkbox", "ws", "Boucher le haut du réfrigérant", "", false, function (i) { wi.sommet = i.checked ? "closed" : "open"; });
+    [["ok", "Eau : entrée en bas, sortie en haut", true], ["inv", "Eau : entrée en haut, sortie en bas", false], ["off", "Couper l’eau", false]].forEach(function (e) {
+      opt("radio", "we", e[1], e[0], e[2], function (i) { wi.eau = i.value; });
+    });
+  }
+  function explain() {
+    if (!ST.build) return;
+    var m, tone = "info";
+    if (!heat) m = "Règle les options puis clique sur <b>Chauffer</b> pour voir la conséquence.";
+    else if (!wi.cond) { m = "<b>Sans réfrigérant,</b> les vapeurs d’éthanol et d’eau quittent le ballon : on perd des réactifs et on répand des vapeurs inflammables. C’est ce que le reflux évite."; tone = "bad"; }
+    else if (wi.sommet === "closed") { m = "<b>Haut bouché :</b> la pression monte dans un système fermé que l’on chauffe. Danger : projection du bouchon, voire explosion du ballon."; tone = "bad"; }
+    else if (wi.eau === "off") { m = "<b>Sans eau froide,</b> le réfrigérant ne condense plus les vapeurs : elles s’échappent par le haut, comme sans réfrigérant."; tone = "bad"; }
+    else if (wi.eau === "inv") { m = "<b>Eau entrant par le haut :</b> la double paroi ne se remplit pas entièrement, des poches d’air refroidissent mal. Une partie des vapeurs peut s’échapper."; tone = "warn"; }
+    else if (!wi.pierre) { m = "<b>Sans pierre ponce,</b> l’ébullition devient irrégulière : de grosses bulles se forment par à-coups, avec risque de projections."; tone = "warn"; }
+    else m = "<b>Montage conforme :</b> la vapeur monte, se condense dans le réfrigérant (eau froide du bas vers le haut) et retombe dans le ballon. Le haut reste ouvert, la pierre ponce régule l’ébullition.";
+    S.observe("#obs3", tone === "info" && heat ? "ok" : tone, m);
+  }
+
+  /* ================= Tâche 4 : réaliser la synthèse ================= */
+  var tabsApi, t4Built = false, t4Ready = false, runNo = 0;
+  var LAB = { prep: "Trois éprouvettes graduées contenant la soude, l’huile et l’éthanol prélevés", reflux: "Ballon chauffé à reflux dont le mélange change d’aspect", relarg: "Bécher d’eau salée avec le savon solide qui surnage",
+              filtre: "Dispositif de filtration sous vide : Büchner posé sur une fiole à vide reliée à la trompe à eau", mousse: "Tube à essais contenant de l’eau et du savon, avec de la mousse", pesee: "Balance électronique portant le savon" };
+  function sc4(stage, p, lab) {
+    var s = '<svg viewBox="0 0 360 260" role="img" aria-label="' + LAB[stage] + '"><rect x="0" y="232" width="360" height="28" fill="var(--bg)"/>', i;
+    if (stage === "prep") {
+      [[ST.vOH, "Soude", "var(--eau)"], [ST.vOil, "Huile", "var(--liq)"], [ST.vEt, "Éthanol", "var(--vap)"]].forEach(function (c, k) {
+        var x = 40 + k * 110, hh = Math.max(2, c[0] / 50 * 150);
+        s += '<rect x="' + x + '" y="' + (230 - hh) + '" width="40" height="' + hh + '" style="fill:' + c[2] + ';fill-opacity:.5"/><path class="g" d="M' + x + ' 70V230H' + (x + 40) + 'V70"/>';
+        s += '<text x="' + (x + 20) + '" y="252" text-anchor="middle">' + c[1] + '</text><text x="' + (x + 20) + '" y="' + (222 - hh) + '" text-anchor="middle" style="font-weight:700">' + fmt(c[0], 0) + ' mL</text>';
+      });
+    } else if (stage === "reflux") {
+      s += '<path class="m" d="M100 232V196Q100 186 110 186H250Q260 186 260 196V232Z"/><circle cx="180" cy="140" r="52" style="fill:var(--surface)"/>';
+      s += '<g clip-path="inset(0)"><path d="M130 150A52 52 0 0 0 230 150Z" style="fill:color-mix(in srgb, var(--liq-end) ' + Math.round(p * 100) + '%, var(--liq));fill-opacity:.7"/></g>';
+      s += '<path class="g" d="M170 40V89A52 52 0 1 0 190 89V40"/><text x="180" y="22" text-anchor="middle">Reflux : ' + fmt(lab || 0, 0) + ' min</text>';
+      if (p < 1) for (i = 0; i < 4; i++) s += '<circle cx="' + (155 + i * 16) + '" cy="' + (165 - (i % 2) * 10) + '" r="3" fill="var(--surface)" stroke="var(--vap)"/>';
+    } else if (stage === "relarg") {
+      s += '<path class="g" d="M90 80V230H270V80"/><rect class="eau" x="92" y="130" width="176" height="100"/><text x="180" y="200" text-anchor="middle">Eau salée saturée</text>';
+      s += '<ellipse cx="180" cy="124" rx="' + (60 * p) + '" ry="' + (11 * p) + '" style="fill:var(--liq-end);stroke:var(--muted)"/>' + (p > 0.9 ? '<text x="180" y="104" text-anchor="middle" style="font-weight:700">Savon solide (surnage)</text>' : "");
+    } else if (stage === "filtre") {
+      s += '<path class="g" d="M110 50H250L205 98H155Z"/><line x1="130" y1="62" x2="230" y2="62" stroke="var(--muted)" stroke-width="3"/><rect class="g" x="165" y="98" width="30" height="24"/><rect class="m" x="160" y="120" width="40" height="10" rx="2"/><path class="g" d="M170 130V150L115 225Q110 232 120 232H240Q250 232 245 225L190 150V130"/><path class="g" d="M236 160H290" style="stroke-width:5"/>';
+      [[60, 62], [60, 112], [60, 195], [330, 160]].forEach(function (b, k) { s += '<circle class="badge" cx="' + b[0] + '" cy="' + b[1] + '" r="12"/><text class="badge-t" x="' + b[0] + '" y="' + (b[1] + 4.5) + '">' + (k + 1) + '</text><line class="lead-line" x1="' + (b[0] + (k < 3 ? 12 : -12)) + '" y1="' + b[1] + '" x2="' + [128, 160, 170, 290][k] + '" y2="' + b[1] + '"/>'; });
+      if (p > 0) s += '<ellipse cx="180" cy="58" rx="' + (40 * p) + '" ry="' + (6 * p) + '" style="fill:var(--liq-end);stroke:var(--muted)"/>';
+    } else if (stage === "mousse") {
+      s += '<path class="g" d="M150 40V220Q150 232 180 232Q210 232 210 220V40"/><rect class="eau" x="152" y="130" width="56" height="98"/>';
+      for (i = 0; i < 14 * p; i++) s += '<circle cx="' + (158 + (i * 17) % 44) + '" cy="' + (124 - Math.floor(i / 3) * 12) + '" r="' + (6 + (i % 3)) + '" style="fill:var(--surface);stroke:var(--vap)"/>';
+    } else if (stage === "pesee") {
+      s += '<rect class="m" x="70" y="196" width="220" height="30" rx="6"/><rect class="m" x="110" y="184" width="140" height="10" rx="2"/><rect x="200" y="204" width="76" height="16" rx="3" style="fill:var(--lcd-bg)"/><text x="238" y="217" text-anchor="middle" style="fill:var(--lcd-fg);font:600 12px var(--font-data)">' + (lab || "0,00 g") + '</text>';
+      s += '<ellipse cx="180" cy="176" rx="40" ry="13" style="fill:var(--liq-end);stroke:var(--muted)"/>';
+    }
+    return s + "</svg>";
+  }
+
+  function task4() {
+    var t = $("#t4"); t.textContent = ""; t4Built = true; runNo += 1;
+    var run = runNo, localT = ST.t, stage = "prep", sceneEl, gate;
+    t.innerHTML = taskHead("Réaliser la synthèse", [chip("rea", "Manipuler"), chip("ana", "Prévoir"), chip("val", "Mesurer")]);
+    var wrap = h("div", { class: "two" }), left = h("div", { class: "stack sticky" }), right = h("div", { class: "stack" });
+    sceneEl = h("div", { class: "scene" }); left.appendChild(sceneEl);
+    var obs = h("div", { class: "obs", id: "obs4", "aria-live": "polite", "data-tone": "info" }, h("h2", { text: "Observation" }), h("p", { "data-obs-text": "", text: "Suis le protocole étape par étape." }));
+    left.appendChild(obs); wrap.appendChild(left); wrap.appendChild(right); t.appendChild(wrap);
+    function paint(st, p, lab) { stage = st; sceneEl.innerHTML = sc4(st, p, lab); }
+    function say(tone, m) { S.observe(obs, tone, m); }
+    paint("prep", 0);
+
+    gate = h("div", { class: "obs", "data-tone": "warn" }, h("p", { html: "<b>Avant de commencer :</b> il faut avoir " + (ST.epi ? "" : "répondu aux questions de sécurité (tâche 1) et ") + (ST.build ? "" : "terminé le montage à reflux (tâche 3). ") }), h("div", { class: "row" }, h("button", { type: "button", class: "small", text: "Aller à la tâche " + (ST.epi ? 3 : 1), onclick: function () { tabsApi.select(ST.epi ? "3" : "1"); } })));
+    var ready = ST.epi && ST.build; t4Ready = ready; if (!ready) right.appendChild(gate);
+    var steps = [];
+    function bstep(n, title, node) {
+      var st = h("div", { class: "bstep", "data-state": "todo" }, h("h3", null, h("span", { class: "bnum", text: n }), h("span", { html: title })));
+      st.inert = true; st.appendChild(node); steps.push(st); right.appendChild(st); return st;
+    }
+    function unlock(i) { if (steps[i]) { steps[i].setAttribute("data-state", "active"); steps[i].inert = false; if (i === 3) paint("filtre", 0); } }
+    function finish(i) { steps[i].setAttribute("data-state", "done"); steps[i].querySelectorAll("button,input,select").forEach(function (x) { x.disabled = true; }); }
+
+    /* A. Prélever */
+    var a = h("div", { class: "stack" }), sl = h("div", { class: "stack" });
+    a.appendChild(sl);
+    S.slider(sl, { label: "Soude concentrée (7,5 mol·L⁻¹)", unit: "mL", min: 10, max: 40, step: 1, value: ST.vOH, digits: 0, onInput: function (v) { ST.vOH = v; paint("prep", 0); } });
+    S.slider(sl, { label: "Huile alimentaire (ρ = 0,9 g·mL⁻¹)", unit: "mL", min: 5, max: 25, step: 1, value: ST.vOil, digits: 0, onInput: function (v) { ST.vOil = v; paint("prep", 0); } });
+    S.slider(sl, { label: "Éthanol (solvant)", unit: "mL", min: 5, max: 25, step: 1, value: ST.vEt, digits: 0, onInput: function (v) { ST.vEt = v; paint("prep", 0); } });
+    a.appendChild(h("p", { class: "help", text: "Protocole : 30 mL de soude, 15 mL d’huile, 15 mL d’éthanol, mesurés à l’éprouvette graduée. Tu peux t’en écarter : le rendement sera calculé avec tes volumes." }));
+    var pf = h("fieldset", { class: "q" }, h("legend", { html: "Avant de chauffer, <b>prévois</b> le rendement de ta synthèse. " + chip("ana", "Prévoir") }));
+    var po = h("div", { class: "opts" });
+    [["lt50", "Moins de 50 %"], ["mid", "Entre 50 % et 80 %"], ["gt80", "Plus de 80 %"]].forEach(function (o) {
+      var inp = h("input", { type: "radio", name: "pred" + run, value: o[0] }); po.appendChild(h("label", { class: "opt" }, inp, h("span", { text: o[1] })));
+    });
+    var cs = h("select", { class: "nin", "aria-label": "Degré de certitude" }); [["", "Mon degré de certitude…"], ["sur", "Plutôt sûr·e"], ["moyen", "Moyennement sûr·e"], ["pas", "Je devine"]].forEach(function (o) { cs.appendChild(h("option", { value: o[0], text: o[1] })); });
+    pf.appendChild(po); pf.appendChild(cs); a.appendChild(pf);
+    var bPour = h("button", { type: "button", class: "primary", text: "Verser dans le ballon (avec la pierre ponce)" }), fbA = h("div", { class: "fb", hidden: true, role: "status", "aria-live": "polite" });
+    a.appendChild(h("div", { class: "row" }, bPour)); a.appendChild(fbA);
+    bPour.addEventListener("click", function () {
+      var pr = po.querySelector("input:checked");
+      if (!pr || !cs.value) { show(fbA, "warn", "<b>À faire :</b> fais ta prévision et indique ta certitude avant de verser."); return; }
+      ST.pred = pr.value; ST.cert = cs.value; ST.poured = true; finish(0);
+      show(fbA, "ok", "Mélange préparé : les trois liquides et la pierre ponce sont dans le ballon.");
+      say("info", "Le montage est prêt. Règle la durée de reflux puis lance le chauffage."); unlock(1);
+    });
+    bstep(1, "Prélever et préparer le mélange réactionnel", a);
+
+    /* B. Chauffer à reflux */
+    var b = h("div", { class: "stack" }), bSl = h("div");
+    S.slider(bSl, { label: "Durée du chauffage à reflux", unit: "min", min: 5, max: 45, step: 5, value: ST.t, digits: 0, onInput: function (v) { ST.t = v; localT = v; } });
+    var bGo = h("button", { type: "button", class: "primary", text: "Chauffer à reflux" }), fbB = h("div", { class: "fb", hidden: true, role: "status", "aria-live": "polite" });
+    b.appendChild(bSl); b.appendChild(h("p", { class: "help", text: "Protocole : environ 30 minutes, ébullition douce (thermostat au maximum puis baissé à l’ébullition). La simulation accélère le temps." })); b.appendChild(h("div", { class: "row" }, bGo)); b.appendChild(fbB);
+    bGo.addEventListener("click", function () {
+      bGo.disabled = true; var T = ST.t, t0 = performance.now(), dur = S.reducedMotion ? 10 : 2600;
+      function tick(now) {
+        var p = Math.min(1, (now - t0) / dur), cv = chem().conv; paint("reflux", p * cv, p * T);
+        if (p < 1) requestAnimationFrame(tick);
+        else { ST.refl = true; finish(1); show(fbB, "ok", "Reflux terminé après " + fmt(T, 0) + " min. Le mélange est devenu plus trouble : du savon s’est formé."); say("info", "Cesse le chauffage, laisse refroidir, puis passe au relargage."); unlock(2); }
+      }
+      requestAnimationFrame(tick);
+    });
+    bstep(2, "Chauffer à reflux", b);
+
+    /* C. Relargage */
+    var c = h("div", { class: "stack" }), bRel = h("button", { type: "button", class: "primary", text: "Verser avec précaution dans l’eau salée froide (≈ 100 mL)" });
+    c.appendChild(h("div", { class: "row" }, bRel)); var cq = h("div"); c.appendChild(cq);
+    bRel.addEventListener("click", function () {
+      bRel.disabled = true; var t0 = performance.now();
+      (function tk(now) { var p = Math.min(1, (now - t0) / (S.reducedMotion ? 10 : 1500)); paint("relarg", p); if (p < 1) requestAnimationFrame(tk); })(t0);
+      say("ok", "Le savon apparaît à la surface de l’eau salée, à l’état solide.");
+      mcq(cq, { legend: "Le savon (masse volumique 0,99 g·mL⁻¹) apparaît à la surface, solide. Pourquoi ? " + chip("ana", "Expliquer"),
+        explain: "Le savon n’est pas (ou très peu) soluble dans l’eau salée : il précipite sous forme de solide, et sa masse volumique est inférieure à celle de l’eau salée : il surnage.",
+        onOk: function () { finish(2); unlock(3); },
+        options: [{ t: "Il est peu soluble dans l’eau salée (il précipite) et moins dense qu’elle : il surnage", ok: true },
+          { t: "Il est très soluble dans l’eau salée et remonte en se dissolvant", why: "D’après les données, le savon est peu soluble dans l’eau salée : c’est pour cela qu’il apparaît sous forme solide." },
+          { t: "Il est plus dense que l’eau salée mais la soude le pousse vers le haut", why: "La masse volumique du savon (0,99 g·mL⁻¹) est inférieure à celle d’une eau salée saturée : c’est la différence de densité qui le fait surnager." },
+          { t: "Il flotte parce qu’il est chaud", why: "La température n’explique pas ce qu’on observe : pense à la solubilité et à la masse volumique." }] });
+    });
+    bstep(3, "Relargage", c);
+
+    /* D. Filtration */
+    var d = h("div", { class: "stack" }), dn = h("div", { class: "fields" }), dsels = [];
+    [["Filtre (papier filtre)", "Papier filtre"], ["Entonnoir", "Büchner"], ["Récipient", "Fiole à vide"], ["Branchement", "Aspiration (trompe à eau)"]].forEach(function (x, k) {
+      var id = "fl" + run + k, sel = h("select", { class: "nin", id: id }); sel.appendChild(h("option", { value: "", text: "Choisir…" }));
+      ["Fiole à vide", "Papier filtre", "Aspiration (trompe à eau)", "Büchner", "Erlenmeyer", "Ampoule à décanter"].forEach(function (o) { sel.appendChild(h("option", { value: o, text: o })); });
+      dsels.push([sel, x[1]]); dn.appendChild(h("div", { class: "field" }, h("label", { for: id, text: "Élément n° " + (k + 1) }), sel));
+    });
+    var fbD = h("div", { class: "fb", hidden: true, role: "status", "aria-live": "polite" }), bLeg = h("button", { type: "button", class: "primary small", text: "Vérifier la légende" }), bFil = h("button", { type: "button", class: "primary", text: "Filtrer sous vide", disabled: true });
+    d.appendChild(h("p", { html: "Légende le dispositif de <b>filtration sous vide</b> (numéros sur le schéma). " + chip("app", "Légender") })); d.appendChild(dn); d.appendChild(h("div", { class: "row" }, bLeg, bFil)); d.appendChild(fbD);
+    bLeg.addEventListener("click", function () {
+      if (dsels.some(function (x) { return !x[0].value; })) { show(fbD, "warn", "<b>À faire :</b> nomme les 4 éléments."); return; }
+      var bad = dsels.map(function (x, k) { return x[0].value === x[1] ? 0 : k + 1; }).filter(Boolean);
+      if (bad.length) show(fbD, "bad", "<b>Pas encore.</b> Revois le(s) numéro(s) " + bad.join(", ") + ". Le papier filtre retient le solide ; le Büchner le porte ; l’aspiration est reliée à la trompe à eau.");
+      else { show(fbD, "ok", "<b>Bien vu.</b> Le Büchner, garni d’un papier filtre, est posé sur la fiole à vide reliée à la trompe à eau."); bFil.disabled = false; bLeg.disabled = true; }
+    });
+    bFil.addEventListener("click", function () {
+      bFil.disabled = true; var t0 = performance.now();
+      (function tk(now) { var p = Math.min(1, (now - t0) / (S.reducedMotion ? 10 : 1500)); paint("filtre", p); if (p < 1) requestAnimationFrame(tk); else { ST.filtre = true; finish(3); say("ok", "Le liquide passe dans la fiole ; le savon reste sur le filtre. Les lavages (étape 5) ne sont pas réalisés dans ce TP."); unlock(4); } })(t0);
+    });
+    bstep(4, "Filtration sous vide", d);
+
+    /* E. Test moussant */
+    var e = h("div", { class: "stack" }), bMou = h("button", { type: "button", class: "primary", text: "Mettre un peu de savon dans l’eau distillée, boucher, agiter" }), eq = h("div");
+    e.appendChild(h("p", { class: "help", text: "Étape 5 du protocole, les lavages, n’est pas réalisée : le savon contient encore beaucoup de soude, donc il est corrosif. On ne s’en lave pas les mains (test au papier pH possible)." }));
+    e.appendChild(h("div", { class: "row" }, bMou)); e.appendChild(eq);
+    bMou.addEventListener("click", function () {
+      bMou.disabled = true; var t0 = performance.now();
+      (function tk(now) { var p = Math.min(1, (now - t0) / (S.reducedMotion ? 10 : 1200)); paint("mousse", p); if (p < 1) requestAnimationFrame(tk); })(t0);
+      say("ok", "Après agitation, une mousse abondante se forme.");
+      mcq(eq, { legend: "Qu’observes-tu, et que peux-tu en conclure ? " + chip("val", "Conclure"),
+        explain: "On observe la formation de mousse : cela confirme que la substance synthétisée est un savon, car il a des propriétés moussantes.",
+        onOk: function () { ST.mousse = true; finish(4); unlock(5); },
+        options: [{ t: "Une mousse se forme : cela confirme qu’on a synthétisé un savon", ok: true },
+          { t: "Une mousse se forme : cela prouve que le rendement est de 100 %", why: "La mousse renseigne sur la nature du produit, pas sur la quantité obtenue : c’est le rôle du rendement." },
+          { t: "Le savon se dissout sans mousse : la synthèse a échoué", why: "Regarde le tube : une mousse s’est formée. Relis ce que l’on cherche à vérifier avec un test d’analyse." },
+          { t: "Une mousse se forme : cela montre qu’il reste de l’huile", why: "L’huile ne mousse pas dans l’eau : la mousse est une propriété caractéristique du savon." }] });
+    });
+    bstep(5, "Test moussant (analyse)", e);
+
+    /* F. Séchage et pesée */
+    var f = h("div", { class: "bal" }), drySel = h("fieldset", { class: "q" }, h("legend", { text: "État du savon au moment de peser" })), dOpt = h("div", { class: "opts" });
+    [["1", "Après séchage à l’étuve (une semaine)"], ["0", "Tout de suite, encore humide"]].forEach(function (o, k) {
+      var inp = h("input", { type: "radio", name: "dry" + run, value: o[0] }); if (k === 0) inp.checked = true; dOpt.appendChild(h("label", { class: "opt" }, inp, h("span", { text: o[1] })));
+    });
+    drySel.appendChild(dOpt); f.appendChild(drySel);
+    var lcdHost = h("div", { class: "readouts" }), lcd = S.readout(lcdHost, { label: "Balance : masse de savon", unit: "g", digits: 2 }); f.appendChild(lcdHost);
+    var bWeigh = h("button", { type: "button", class: "primary", text: "Peser le savon" }), bruitHost = h("div"); f.appendChild(h("div", { class: "row" }, bWeigh)); f.appendChild(bruitHost);
+    var tblHost = h("div"); f.appendChild(tblHost);
+    var tbl = S.measureTable(tblHost, { caption: "Pesées du savon", filename: "pesees-savon", max: 12, columns: [{ key: "run", label: "Essai", digits: 0 }, { key: "t", label: "Reflux", unit: "min", digits: 0 }, { key: "etat", label: "État" }, { key: "m", label: "m", unit: "g", digits: 2 }] });
+    f.appendChild(h("p", { class: "help", text: "Chaque pesée est une nouvelle mesure : la balance fluctue légèrement, comme au laboratoire. Tu peux peser plusieurs fois, ou refaire la synthèse avec une autre durée de reflux." }));
+    f.appendChild(h("div", { class: "row" }, h("button", { type: "button", class: "small", text: "Refaire la synthèse (autre durée ou autres volumes)", onclick: function () { ST.refl = ST.relarg = ST.filtre = ST.mousse = ST.poured = false; task4(); } })));
+    bWeigh.addEventListener("click", function () {
+      var dry = dOpt.querySelector("input:checked").value === "1", C = chem(), m0 = dry ? C.mDry : C.mWet, m = Bruit.appliquer(m0);
+      lcd.set(m); paint("pesee", 1, fmt(m, 2) + " g");
+      ST.weighs.push({ run: run, t: ST.t, dry: dry, m: m, nTh: C.nTh }); ST.mExp = m; ST.dry = dry;
+      tbl.add({ run: run, t: ST.t, etat: dry ? "sec" : "humide", m: m });
+      say(dry ? "info" : "warn", dry ? "Masse de savon sec : <b>" + fmt(m, 2) + " g</b>. Tu peux la peser encore, ou calculer le rendement (tâche 5)." : "Masse de savon <b>humide</b> : " + fmt(m, 2) + " g. Elle contient encore de l’eau : le rendement calculé avec elle sera trop optimiste.");
+      markDone(4);
+    });
+    Bruit.bascule(bruitHost, { onChange: function () {} });
+    bstep(6, "Séchage et pesée", f);
+    if (ready) unlock(0);
+  }
+
+  /* ================= Tâche 5 : rendement ================= */
+  var t5sig = "", need5 = { R: false, c: false };
+  function lastW() { return ST.weighs[ST.weighs.length - 1]; }
+  function rr(m) { return Math.round(m * 100) / 100; }
+  function ok5() { if (need5.R && need5.c) markDone(5); }
+  function numOK(v, e) { return !isNaN(v) && Math.abs(v - e) <= Math.max(1e-4, 0.03 * Math.abs(e)); }
+
+  function avTable(host, C) {
+    var inner = h("div", { class: "stack" }), tw = h("div", { class: "tablewrap" });
+    var fmtx = function (k) { return ["C<sub>57</sub>H<sub>104</sub>O<sub>6</sub> (oléine)", "Na<sup>+</sup> + HO<sup>−</sup> (soude)", "savon (oléate de sodium)", "C<sub>3</sub>H<sub>8</sub>O<sub>3</sub> (glycérol)"][k]; };
+    var html = '<table class="av"><thead><tr><th scope="col">Équation</th>';
+    for (var k = 0; k < 4; k++) html += '<th scope="col"><label class="sr-only" for="co' + k + '">Coefficient</label><input class="nin coef" id="co' + k + '" data-k="co' + k + '" inputmode="numeric" aria-label="Coefficient stœchiométrique de ' + ["l’oléine", "la soude", "le savon", "le glycérol"][k] + '"> ' + fmtx(k) + (k === 1 ? " →" : "") + '</th>';
+    html += '</tr></thead><tbody><tr><th scope="row">État initial<br><small>x = 0</small></th>';
+    for (k = 0; k < 4; k++) html += '<td><input class="nin" data-k="ei' + k + '" inputmode="decimal" aria-label="Quantité de matière initiale en mol, colonne ' + (k + 1) + '"></td>';
+    html += '</tr><tr><th scope="row">État intermédiaire<br><small>x</small></th>';
+    var EX = ["nᵢ − x", "nᵢ − 3x", "3x", "x", "nᵢ + x"];
+    for (k = 0; k < 4; k++) { html += '<td><select class="nin" data-k="ec' + k + '" aria-label="Expression à l’état intermédiaire, colonne ' + (k + 1) + '"><option value="">…</option>' + EX.map(function (e) { return '<option>' + e + '</option>'; }).join("") + '</select></td>'; }
+    html += '</tr><tr><th scope="row">État final<br><small>x<sub>f</sub> = x<sub>max</sub></small></th>';
+    for (k = 0; k < 4; k++) html += '<td><input class="nin" data-k="ef' + k + '" inputmode="decimal" aria-label="Quantité de matière finale en mol, colonne ' + (k + 1) + '"></td>';
+    html += '</tr></tbody></table>';
+    tw.innerHTML = html;
+    var fb = h("div", { class: "fb", role: "status", "aria-live": "polite", hidden: true }), btn = h("button", { type: "button", class: "primary small", text: "Vérifier le tableau" });
+    inner.appendChild(h("p", { class: "help", html: "Complète le tableau (quantités en mol, écris 0,0153 ou 1,53e-2). Coefficients : à toi de les trouver pour que l’équation soit juste. Le tableau t’aide à trouver x<sub>max</sub>." }));
+    inner.appendChild(tw); inner.appendChild(h("div", { class: "row" }, btn)); inner.appendChild(fb);
+    btn.addEventListener("click", function () {
+      var g = function (k) { return tw.querySelector('[data-k="' + k + '"]'); }, bad = { co: 0, ei: 0, ec: 0, ef: 0 }, filled = 0;
+      var coefs = [1, 3, 3, 1], EC = ["nᵢ − x", "nᵢ − 3x", "3x", "x"], EI = [C.nOil, C.nOH, 0, 0], EF = [C.nOil - C.xmax, C.nOH - 3 * C.xmax, 3 * C.xmax, C.xmax];
+      for (var k = 0; k < 4; k++) {
+        [["co", coefs[k], function (v) { return Number(v) === coefs[k]; }], ["ei", EI[k], function (v) { return numOK(S.parseNum(v), EI[k]); }],
+         ["ec", EC[k], function (v) { return v === EC[k]; }], ["ef", EF[k], function (v) { return numOK(S.parseNum(v), EF[k]); }]].forEach(function (x) {
+          var el = g(x[0] + k), v = el.value.trim(), cell = el.closest("th,td"); if (v !== "") filled++;
+          var ok = v !== "" && x[2](v); if (cell.tagName === "TD") cell.setAttribute("data-s", v === "" ? "" : ok ? "ok" : "bad"); if (v !== "" && !ok) bad[x[0]]++;
+        });
+      }
+      if (!filled) { show(fb, "warn", "<b>À faire :</b> remplis le tableau avant de le vérifier."); return; }
+      var msg = [];
+      if (bad.co) msg.push("les <b>coefficients</b> (équation ajustée : 1 oléine, 3 soude, 3 savon, 1 glycérol)");
+      if (bad.ei) msg.push("l’<b>état initial</b> (n = m/M pour l’huile, n = c·V pour la soude ; 0 pour les produits)");
+      if (bad.ec) msg.push("l’<b>état intermédiaire</b> (chaque espèce varie de son coefficient × x)");
+      if (bad.ef) msg.push("l’<b>état final</b> (x<sub>max</sub> annule le réactif limitant)");
+      show(fb, msg.length ? "bad" : "ok", msg.length ? "<b>À revoir :</b> " + msg.join(" ; ") + "." : "<b>Bien vu.</b> Le réactif limitant est l’espèce dont la quantité finale est nulle : " + C.lim + ". Dans la colonne du savon, tu lis la quantité maximale n<sub>th</sub> = 3x<sub>max</sub>.");
+    });
+    host.appendChild(inner);
+  }
+
+  function task5() {
+    var C = chem(), w = lastW(), sg = [ST.vOH, ST.vOil, ST.weighs.length, w && w.m].join("|");
+    if (sg === t5sig) return; t5sig = sg; need5 = { R: false, c: false };
+    var t = $("#t5"); t.innerHTML = taskHead("Calculer le rendement", [chip("rea", "Calculer"), chip("val", "Commenter")]);
+    if (!w) { t.insertAdjacentHTML("beforeend", '<div class="obs" data-tone="warn"><p><b>Il faut une pesée.</b> Réalise la synthèse et pèse le savon (tâche 4).</p></div>'); t5sig = ""; return; }
+    var m = rr(w.m), Rv = (m / CH.Msav) / C.nTh * 100;
+    t.insertAdjacentHTML("beforeend",
+      '<section class="card stack"><p class="eqline">C<sub>57</sub>H<sub>104</sub>O<sub>6</sub> + 3 (Na<sup>+</sup> + HO<sup>−</sup>) → 3 (Na<sup>+</sup> + C<sub>17</sub>H<sub>33</sub>CO<sub>2</sub><sup>−</sup>) + C<sub>3</sub>H<sub>8</sub>O<sub>3</sub></p>' +
+      '<p class="help">Huile (oléine) + soude → savon (oléate de sodium) + glycérol. Ce sont des quantités de matière : une mole de réactif ne donne pas une mole de chaque produit.</p>' +
+      '<div class="formula" aria-label="Rendement R égale n expérimentale sur n théorique fois 100">R = <span style="display:inline-block;text-align:center;vertical-align:middle"><span style="display:block;border-bottom:2px solid var(--ink);padding:0 6px">n<sub>exp</sub></span><span style="display:block">n<sub>th</sub></span></span> × 100</div>' +
+      '<p class="help">n<sub>exp</sub> : quantité de savon obtenue (en mol). n<sub>th</sub> : quantité de savon obtenue si le réactif limitant était entièrement consommé.</p></section>' +
+      '<section class="card stack"><h3>Tes données</h3><div class="tablewrap"><table class="mesures"><thead><tr><th scope="col">Grandeur</th><th scope="col">Oléine</th><th scope="col">Hydroxyde de sodium</th><th scope="col">Savon</th></tr></thead><tbody>' +
+      '<tr><td>Masse molaire (g·mol⁻¹)</td><td>884</td><td>40</td><td>304</td></tr><tr><td>Masse volumique (g·mL⁻¹)</td><td>0,9</td><td></td><td>0,99</td></tr><tr><td>Concentration (mol·L⁻¹)</td><td></td><td>7,5</td><td></td></tr></tbody></table></div>' +
+      '<p>Tu as versé <b>' + fmt(ST.vOH, 0) + ' mL</b> de soude et <b>' + fmt(ST.vOil, 0) + ' mL</b> d’huile. Dernière pesée : <b>m = ' + fmt(m, 2) + ' g</b> de savon ' + (w.dry ? "sec" : "<b>humide</b>") + ' (essai ' + w.run + ', reflux ' + fmt(w.t, 0) + ' min).</p>' +
+      (w.dry ? "" : '<div class="obs" data-tone="warn"><p>Cette masse est celle d’un savon humide. Tu verras ce que cela change au rendement.</p></div>') + '</section><div class="stack" id="calc"></div>');
+    var calc = $("#calc"), box = function (title, chips) { var c = h("section", { class: "card stack" }); c.appendChild(h("div", { class: "head-task", html: "<h3>" + title + "</h3>" + chips })); calc.appendChild(c); return c; };
+    var q1 = box("1. Quantités de matière initiales", chip("rea", "Calculer"));
+    S.defi(q1, { question: "Masse d’oléine versée, <b>m = ρ × V</b>", unit: "g", answer: CH.rho * ST.vOil, tolerance: 0.02, hint: "m = ρ × V avec ρ = 0,9 g·mL⁻¹.", explain: "m = 0,9 × " + fmt(ST.vOil, 0) + " = " + fmt(CH.rho * ST.vOil, 2) + " g." });
+    S.defi(q1, { question: "Quantité de matière d’oléine, <b>n = m / M</b> (écris 1,53e-2 ou 0,0153)", unit: "mol", answer: C.nOil, tolerance: 0.02, hint: "M(oléine) = 884 g·mol⁻¹.", explain: "n = m/M = " + fmt(CH.rho * ST.vOil, 2) + " / 884 = " + sig(C.nOil, 3) + " mol." });
+    S.defi(q1, { question: "Quantité de matière de soude, <b>n = c × V</b> (V en litres)", unit: "mol", answer: C.nOH, tolerance: 0.02, hint: "30 mL = 30·10⁻³ L ; c = 7,5 mol·L⁻¹.", explain: "n = 7,5 × " + fmt(ST.vOH / 1000, 3) + " = " + sig(C.nOH, 3) + " mol." });
+    var sw = h("label", { class: "opt" }, h("input", { type: "checkbox", id: "sw-av" }), h("span", { html: "Je veux utiliser le <b>tableau d’avancement</b> (facultatif) pour m’aider" }));
+    var q2 = box("2. Avancement maximal et réactif limitant", chip("ana", "Raisonner")); q2.appendChild(sw);
+    var avHost = h("div", { hidden: true }); q2.appendChild(avHost); var avBuilt = false;
+    sw.querySelector("input").addEventListener("change", function (e) { avHost.hidden = !e.target.checked; if (e.target.checked && !avBuilt) { avBuilt = true; avTable(avHost, C); } });
+    mcq(q2, { legend: "Quel est le <b>réactif limitant</b> ?",
+      explain: "On compare n(oléine) / 1 = " + sig(C.xOil, 3) + " mol et n(soude) / 3 = " + sig(C.xOH, 3) + " mol : le plus petit désigne le réactif limitant, ici l’" + (C.lim === "oléine" ? "oléine" : "hydroxyde de sodium") + ".",
+      options: [{ t: "L’oléine", ok: C.lim === "oléine", why: C.lim === "oléine" ? "" : "Compare n(oléine)/1 et n(soude)/3 : le plus petit rapport désigne le réactif limitant." },
+        { t: "L’hydroxyde de sodium", ok: C.lim !== "oléine", why: C.lim !== "oléine" ? "" : "Compare n(oléine)/1 et n(soude)/3 : le plus petit rapport désigne le réactif limitant." },
+        { t: "L’éthanol", why: "L’éthanol est un solvant : il ne figure pas dans l’équation de la réaction." }] });
+    S.defi(q2, { question: "Avancement maximal <b>x<sub>max</sub></b> (le réactif limitant est entièrement consommé)", unit: "mol", answer: C.xmax, tolerance: 0.02, hint: "n(oléine) − x = 0 et n(soude) − 3x = 0 : garde la plus petite valeur de x.", explain: "x<sub>max</sub> = " + sig(C.xmax, 3) + " mol." });
+    var q3 = box("3. Quantité théorique et quantité obtenue", chip("rea", "Calculer"));
+    S.defi(q3, { question: "Quantité théorique de savon, <b>n<sub>th</sub> = 3 x<sub>max</sub></b>", unit: "mol", answer: C.nTh, tolerance: 0.02, hint: "Le coefficient du savon dans l’équation est 3.", explain: "n<sub>th</sub> = 3 × " + sig(C.xmax, 3) + " = " + sig(C.nTh, 3) + " mol." });
+    S.defi(q3, { question: "Quantité de savon obtenue, <b>n<sub>exp</sub> = m / M</b> avec m = " + fmt(m, 2) + " g", unit: "mol", answer: m / CH.Msav, tolerance: 0.02, hint: "M(savon) = 304 g·mol⁻¹.", explain: "n<sub>exp</sub> = " + fmt(m, 2) + " / 304 = " + sig(m / CH.Msav, 3) + " mol." });
+    var q4 = box("4. Rendement", chip("rea", "Calculer") + " " + chip("val", "Commenter"));
+    S.defi(q4, { question: "Rendement <b>R = n<sub>exp</sub> / n<sub>th</sub> × 100</b>", unit: "%", answer: Rv, tolerance: 0.02, hint: "Divise n(exp) par n(th), puis multiplie par 100.", explain: "R = " + sig(m / CH.Msav, 3) + " / " + sig(C.nTh, 3) + " × 100 = " + fmt(Rv, 1) + " %.", onResult: function (ok) { if (ok) { need5.R = true; ok5(); } } });
+    var bins = Rv > 100.5 ? 3 : Rv >= 80 ? 0 : Rv >= 40 ? 1 : 2;
+    mcq(q4, { legend: "Ce rendement est-il plausible ? Comment le commenter ?", onOk: function () { need5.c = true; ok5(); },
+      explain: bins === 3 ? "Un rendement supérieur à 100 % est impossible : on ne peut pas obtenir plus que la quantité théorique. Le savon pesé contient encore de l’eau (il faut le sécher)." : bins === 1 ? "Un rendement d’environ " + fmt(Rv, 0) + " % n’est pas très élevé : une partie du savon a été perdue ou la réaction n’était pas totale." : bins === 0 ? "Un rendement élevé : peu de pertes." : "Un rendement faible : beaucoup de savon n’a pas été récupéré.",
+      options: [["Élevé (supérieur à 80 %)", 0], ["Moyen (entre 40 % et 80 %)", 1], ["Faible (inférieur à 40 %)", 2], ["Impossible : supérieur à 100 %", 3]].map(function (o) { return { t: o[0], ok: o[1] === bins, why: "Compare ton R à 100 % (rendement maximal possible) et à 50 % : où se situe-t-il ?" }; }) });
+  }
+
+  /* ================= Tâche 6 : bilan ================= */
+  var PRED = { lt50: "moins de 50 %", mid: "entre 50 % et 80 %", gt80: "plus de 80 %" }, CERT = { sur: "plutôt sûr·e", moyen: "moyennement sûr·e", pas: "je devinais" };
+  function task6() {
+    var t = $("#t6"), w = lastW(); t.innerHTML = taskHead("Bilan : valider et communiquer", [chip("val", "Comparer"), chip("com", "Conclure")]);
+    if (!w) { t.insertAdjacentHTML("beforeend", '<div class="obs" data-tone="warn"><p><b>Il faut au moins une pesée</b> pour faire le bilan (tâche 4).</p></div>'); return; }
+    var Rf = function (x) { return rr(x.m) / CH.Msav / x.nTh * 100; }, R = Rf(w), bin = R < 50 ? "lt50" : R <= 80 ? "mid" : "gt80";
+    var rows = ST.weighs.map(function (x, i) { return "<tr><td>" + x.run + "</td><td>" + fmt(x.t, 0) + "</td><td>" + (x.dry ? "sec" : "humide") + "</td><td>" + fmt(x.m, 2) + "</td><td>" + (Rf(x) > 100 ? "<b class='pill-bad'>" + fmt(Rf(x), 1) + " (impossible)</b>" : fmt(Rf(x), 1)) + "</td></tr>"; }).join("");
+    t.insertAdjacentHTML("beforeend",
+      '<section class="card stack"><h3>Ta prévision et ton résultat</h3><div class="obs" data-tone="' + (ST.pred === bin ? "ok" : "warn") + '"><p>Tu avais prévu un rendement <b>' + (PRED[ST.pred] || "(non précisé)") + '</b> (' + (CERT[ST.cert] || "certitude non indiquée") + '). Tu obtiens <b>R = ' + fmt(R, 1) + ' %</b>. ' + (ST.pred === bin ? "Ta prévision est confirmée." : "Ta prévision n’est pas confirmée : qu’est-ce qui t’a surpris·e ?") + '</p></div>' +
+      '<div class="tablewrap"><table class="mesures"><caption>Toutes tes pesées</caption><thead><tr><th scope="col">Essai</th><th scope="col">Reflux (min)</th><th scope="col">État</th><th scope="col">m (g)</th><th scope="col">R (%)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="help">Au laboratoire, une même synthèse ne donne jamais exactement la même masse : la balance elle-même fluctue. Compare tes essais.</p></section><section class="card stack" id="vq"><h3>Interpréter l’écart à 100 %</h3></section><section class="card stack" id="cq"><h3>Rédiger ta conclusion</h3></section>');
+    var vq = $("#vq"), cq = $("#cq");
+    checks(vq, { legend: "Coche toutes les causes qui peuvent expliquer un rendement <b>inférieur</b> à 100 % :",
+      options: [{ t: "Des pertes de savon lors des transferts et de la filtration", ok: true }, { t: "Une partie du savon reste dissoute (il est peu soluble, pas insoluble, dans l’eau salée)", ok: true },
+        { t: "Une durée de chauffage à reflux trop courte (réaction incomplète)", ok: true },
+        { t: "Un savon encore humide au moment de la pesée", ok: false, why: "Un savon humide pèse plus : cela ferait augmenter le rendement, pas le diminuer." },
+        { t: "La masse totale ne se conserve pas pendant une synthèse", ok: false, why: "La masse se conserve : c’est la masse de savon récupérée qui est plus faible que prévu." }],
+      explain: "Pertes de matière, solubilité résiduelle et réaction inachevée expliquent R < 100 %. Un savon humide, lui, fausse la mesure vers le haut." });
+    mcq(vq, { legend: "Pourquoi sèche-t-on le savon avant de le peser ?",
+      explain: "L’eau restante augmente la masse pesée : le rendement serait surestimé, voire supérieur à 100 %.",
+      options: [{ t: "Pour ne peser que le savon : l’eau restante fausserait n_exp et donc R", ok: true }, { t: "Pour accélérer la saponification", why: "La saponification est terminée avant la filtration : le séchage n’intervient pas sur la réaction." }, { t: "Pour transformer le savon en glycérol", why: "Le glycérol est l’autre produit de la réaction ; le séchage ne transforme rien." }] });
+    var ta = h("textarea", { class: "nin", id: "concl", rows: 4, placeholder: "Mon rendement est de … %. Il est … car … Pour l’améliorer, je pourrais …" }); ta.value = ST.notes.concl || "";
+    ta.addEventListener("input", function () { ST.notes.concl = ta.value; });
+    var bCp = h("button", { type: "button", class: "primary", text: "Copier mon carnet" }), st = h("p", { class: "status", "aria-live": "polite" });
+    cq.appendChild(h("div", { class: "field" }, h("label", { for: "concl", html: "Rédige ta conclusion : rendement obtenu, jugement, deux causes possibles de perte, une amélioration. " + chip("com", "Rédiger") }), ta));
+    cq.appendChild(h("div", { class: "row" }, bCp)); cq.appendChild(st);
+    bCp.addEventListener("click", function () {
+      var C = chem(), txt = "Synthèse d’un savon : mon carnet\n\nMontage à reflux : " + (ST.build ? NAMES.join(", ") : "non terminé") + "\nVolumes : soude " + ST.vOH + " mL, huile " + ST.vOil + " mL, éthanol " + ST.vEt + " mL ; reflux " + w.t + " min\n" +
+        "n(oléine) = " + sig(C.nOil, 3) + " mol ; n(soude) = " + sig(C.nOH, 3) + " mol ; réactif limitant : " + C.lim + " ; x_max = " + sig(C.xmax, 3) + " mol\nn_th = " + sig(C.nTh, 3) + " mol ; m = " + fmt(rr(w.m), 2) + " g (" + (w.dry ? "sec" : "humide") + ") ; n_exp = " + sig(rr(w.m) / CH.Msav, 3) + " mol\nR = " + fmt(R, 1) + " %\n" +
+        "Prévision : " + (PRED[ST.pred] || "—") + "\nPhrase sur le reflux : " + (ST.notes.phrase || "—") + "\nConclusion : " + (ta.value || "—") + "\n";
+      var done_ = function () { st.textContent = "Carnet copié : colle-le dans ton document."; if (ta.value.trim().length > 20) markDone(6); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done_, function () { st.textContent = "Copie impossible ici : sélectionne et copie ta conclusion à la main."; });
+      else { var tmp = h("textarea", { style: "position:fixed;left:-999px" }); tmp.value = txt; document.body.appendChild(tmp); tmp.select(); try { document.execCommand("copy"); done_(); } catch (e) { st.textContent = "Copie impossible ici."; } tmp.remove(); }
+    });
+  }
+
+  /* ================= Démarrage ================= */
+  paintProgress(); task1(); task2(); task3();
+  tabsApi = S.tabs("#tabs", function (v) {
+    ["1", "2", "3", "4", "5", "6"].forEach(function (n) { $("#t" + n).hidden = n !== v; });
+    if (v === "4" && (!t4Built || (!t4Ready && ST.epi && ST.build && !ST.poured))) task4();
+    if (v === "5") task5();
+    if (v === "6") task6();
+  }, "1");
+})();
+</script>
+</body>
+</html>

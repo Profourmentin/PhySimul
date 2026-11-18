@@ -161,6 +161,16 @@
       s += '<path class="water" d="M80 104H120L130 113H70Z"/><path class="s" d="M92 90V98L70 113H130L108 98V90"/>';
       return s;
   });
+  /* Synthèse organique : montage à reflux (réfrigérant, eau entrante en bas et sortante en haut, ballon, mélange, chauffe-ballon, support élévateur). */
+  add("reflux", function () {
+      var s = "";
+      s += '<path class="s" d="M96 6V56M104 6V56"/><path class="s" d="M88 16V48M112 16V48M88 16H96M104 16H112M88 48H96M104 48H112"/>';
+      s += '<path class="v" d="M134 44H116M121 40L115 44L121 48"/><path class="v" d="M114 20H132M127 16L133 20L127 24"/>';
+      s += '<path class="s" d="M96 56V60.4A20 20 0 1 0 104 60.4V56"/><path class="water" d="M80.2 82A20 20 0 0 0 119.8 82Z"/>';
+      s += '<circle class="f" cx="93" cy="90" r="2.4"/><circle class="f" cx="104" cy="86" r="1.8"/><circle class="f" cx="99" cy="94" r="1.6"/>';
+      s += '<path class="s" d="M72 94H128L121 106H79Z"/><path class="s" d="M86 106L114 116M114 106L86 116"/><line class="s" x1="76" y1="116" x2="124" y2="116"/>';
+      return s;
+  });
   /* Loi d'Ohm : circuit avec générateur et conducteur ohmique. */
   add("circuit", function () {
       var s = "";
