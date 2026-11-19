@@ -93,6 +93,22 @@
     return s;
   });
 
+  /* Lewis et géométrie des entités : molécule coudée (type eau), doublets non liants du centre, angle entre les liaisons mesuré. */
+  add("lewis", function () {
+    var s = "", cx = 100, cy = 48, ax = 52, ay = 84, bx = 148, by = 84, k, a, px, py, ux, uy;
+    s += '<line class="s" style="stroke-width:3" x1="' + cx + '" y1="' + cy + '" x2="' + ax + '" y2="' + ay + '"/>';
+    s += '<line class="s" style="stroke-width:3" x1="' + cx + '" y1="' + cy + '" x2="' + bx + '" y2="' + by + '"/>';
+    s += '<circle class="f" cx="' + ax + '" cy="' + ay + '" r="9"/><circle class="f" cx="' + bx + '" cy="' + by + '" r="9"/>';
+    s += '<circle class="water s" cx="' + cx + '" cy="' + cy + '" r="15"/>';
+    for (k = 0; k < 2; k++) {
+      a = (k ? 55 : 125) * Math.PI / 180;
+      px = cx + 26 * Math.cos(a); py = cy - 26 * Math.sin(a); ux = -Math.sin(a) * 7; uy = -Math.cos(a) * 7;
+      s += '<line class="s" style="stroke-width:3.2;stroke-linecap:round" x1="' + pt(px - ux) + '" y1="' + pt(py - uy) + '" x2="' + pt(px + ux) + '" y2="' + pt(py + uy) + '"/>';
+    }
+    s += '<path class="v" style="stroke-width:2.4" d="M' + pt(cx - 14) + ' ' + pt(cy + 26) + 'Q' + cx + ' ' + (cy + 36) + ' ' + pt(cx + 14) + ' ' + pt(cy + 26) + '"/>';
+    return s;
+  });
+
   /* Oxydoréduction : le réducteur cède des électrons à l'oxydant. */
   add("redox", function () {
     var s = "";

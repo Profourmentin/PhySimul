@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Du schéma de Lewis à la géométrie des entités</title>
+<style>
+:root,[data-theme=light]{--bg:#f4f6f9;--card:#fff;--ink:#1c2430;--mute:#596577;--line:#d8dee7;--accent:#2d5bd1;--accent-ink:#fff;--ok:#1b7a47;--warn:#9a5a00;--stage:#eef2f8;--stick:#8a93a3;--lp:#d98e04;--lpbg:#fff4d6}
+@media (prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#0f141b;--card:#171d27;--ink:#e8ecf2;--mute:#9aa7b9;--line:#2b3443;--accent:#7ba3ff;--accent-ink:#0b1220;--ok:#5fd493;--warn:#f0b35a;--stage:#0d1219;--stick:#7d889b;--lp:#f2b43c;--lpbg:#3a2f12}}
+[data-theme=dark]{--bg:#0f141b;--card:#171d27;--ink:#e8ecf2;--mute:#9aa7b9;--line:#2b3443;--accent:#7ba3ff;--accent-ink:#0b1220;--ok:#5fd493;--warn:#f0b35a;--stage:#0d1219;--stick:#7d889b;--lp:#f2b43c;--lpbg:#3a2f12}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1120px;margin:0 auto;padding:10px 14px 50px}
+.top{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+h1{font-size:1.35rem;margin:.3rem 0 .1rem;line-height:1.25}
+h2{font-size:1.12rem;margin:.2rem 0 .5rem}
+h3{font-size:1rem;margin:.9rem 0 .3rem}
+.sub{color:var(--mute);font-size:.88rem}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-top:6px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.88rem;white-space:nowrap}
+.tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:840px){.grid2{grid-template-columns:1fr}}
+.two{display:flex;gap:12px;flex-wrap:wrap}
+.two>div{flex:1 1 220px;text-align:center}
+.comp{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 8px;font-size:.78rem;color:var(--mute);background:var(--stage);margin:0 6px 4px 0}
+.comp abbr{text-decoration:none;font-weight:700;color:var(--ink)}
+.btn{font:inherit;font-size:.92rem;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:7px 14px;border-radius:8px;cursor:pointer}
+.btn.sec{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.tab:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.seg button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:6px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:.86rem;border:0;background:var(--card);color:var(--ink);padding:6px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+select,input[type=text],input[type=number],textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+textarea{width:100%;min-height:84px;resize:vertical}
+input.n{width:64px}
+label{font-size:.92rem}
+.mute{color:var(--mute)}
+.small{font-size:.86rem}
+.fb{margin:8px 0;padding:9px 11px;border-radius:8px;border-left:4px solid var(--line);background:var(--stage);font-size:.93rem}
+.fb.ok{border-left-color:var(--ok)}
+.fb.warn{border-left-color:var(--warn)}
+.fb:empty{display:none}
+.okc{color:var(--ok);font-weight:600}
+.wc{color:var(--warn);font-weight:600}
+table.t{border-collapse:collapse;width:100%;font-size:.88rem}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+table.t th{color:var(--mute);font-weight:600}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+canvas.cv{display:block;width:100%;height:340px;touch-action:none;cursor:grab}
+canvas.cv:active{cursor:grabbing}
+svg.lewis{display:block;width:100%;height:auto;max-height:420px;background:var(--stage);border:1px solid var(--line);border-radius:12px}
+svg.lewis .hit{cursor:pointer;outline:none}
+svg.lewis .hit:focus-visible circle.ring,svg.lewis .hit:focus-visible line.ring{stroke:var(--accent);stroke-width:3}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.82rem;color:var(--mute);margin:6px 0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid var(--line);vertical-align:-1px;margin-right:4px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;border:1px solid var(--line);font-size:.8rem;background:var(--stage);color:var(--mute)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.opts button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 11px;border-radius:8px;cursor:pointer}
+.opts button[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opts button.good{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.map{display:grid;gap:6px;margin:8px 0}
+.map .node{display:grid;grid-template-columns:28px 1fr 26px;gap:8px;align-items:center}
+.map .node b{display:inline-block;width:26px;height:26px;border-radius:50%;background:var(--stage);border:1px solid var(--line);text-align:center;line-height:24px;font-size:.8rem}
+.map select{width:100%}
+.arrow{text-align:center;color:var(--mute);line-height:1}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+#toast.on{opacity:1}
+pre.copy{white-space:pre-wrap;background:var(--stage);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.84rem;max-height:300px;overflow:auto}
+sub,sup{line-height:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="top">
+    <div>
+      <a href="../index.html" class="small" style="color:var(--accent)">← Catalogue des simulations</a>
+      <h1>Du schéma de Lewis à la géométrie des entités</h1>
+      <div class="sub">Première spécialité · Constitution et transformations de la matière · en lien avec le TP « Géométrie des entités chimiques »</div>
+    </div>
+    <button id="themeBtn" class="btn sec" type="button" aria-label="Changer le thème d'affichage">Thème : auto</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Parcours de la simulation" id="tabs">
+  <button class="tab" role="tab" data-tab="app" aria-selected="true">1 · Situation</button>
+  <button class="tab" role="tab" data-tab="lewis" aria-selected="false">2 · Schéma de Lewis</button>
+  <button class="tab" role="tab" data-tab="lab" aria-selected="false">3 · Répulsion des doublets</button>
+  <button class="tab" role="tab" data-tab="mol" aria-selected="false">4 · Modèle 3D et angles</button>
+  <button class="tab" role="tab" data-tab="who" aria-selected="false">5 · Qui est-ce ?</button>
+  <button class="tab" role="tab" data-tab="plus" aria-selected="false">6 · Molécules complexes</button>
+  <button class="tab" role="tab" data-tab="carnet" aria-selected="false">7 · Carnet</button>
+</nav>
+
+<main>
+<!-- ============ 1. SITUATION ============ -->
+<section id="p-app" role="tabpanel">
+  <div class="card">
+    <span class="comp"><abbr title="S'approprier">APP</abbr> · Lire la situation</span>
+    <h2>Deux schémas qui se ressemblent</h2>
+    <p>Voici les schémas de Lewis de l'eau et du dioxyde de carbone : dans les deux cas, un atome central et deux atomes liés à lui.</p>
+    <div class="two" id="appSvgs"></div>
+    <p>Pourtant, ces deux entités n'ont pas la même forme dans l'espace. Le schéma de Lewis décrit <b>l'enchaînement des atomes</b> et la répartition des électrons de valence, mais il ne dit rien de leur <b>disposition dans l'espace</b>.</p>
+    <label for="q"><b>Problématique.</b> Écris, avec tes mots, la question à laquelle on va répondre.</label>
+    <textarea id="q" placeholder="Comment peut-on prévoir…"></textarea>
+    <div class="btns">
+      <button class="btn" data-go="lewis" type="button">Commencer par le schéma de Lewis</button>
+      <button class="btn sec" data-go="mol" type="button">Observer d'abord les entités en 3D</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Ce que le programme demande</h2>
+    <p class="small mute">Programme de physique-chimie de Première, enseignement de spécialité : « Constitution et transformations de la matière », partie 2 (de la structure des entités aux propriétés physiques de la matière).</p>
+    <ul class="small">
+      <li>Établir le schéma de Lewis de molécules et d'ions, à partir du tableau périodique (H<sub>2</sub>O, CO<sub>2</sub>, NH<sub>3</sub>, CH<sub>4</sub>, HO<sup>−</sup> en exemples).</li>
+      <li>Interpréter la géométrie d'une entité à partir de son schéma de Lewis.</li>
+      <li>Utiliser des modèles moléculaires ou un logiciel pour visualiser la géométrie d'une entité.</li>
+    </ul>
+    <p class="small mute">Parcours : les étapes ne sont pas verrouillées. Tu peux revenir en arrière (par exemple retourner au schéma de Lewis si ton modèle ne colle pas aux mesures).</p>
+  </div>
+</section>
+
+<!-- ============ 2. LEWIS ============ -->
+<section id="p-lewis" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Compter</span>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Construire</span>
+    <h2>Établir le schéma de Lewis</h2>
+    <p class="small mute">Choisis une entité, compte ses électrons de valence, puis construis son schéma. Clique sur une liaison pour changer son ordre (simple, double, triple), et sur un atome pour ajouter un doublet non liant.</p>
+  </div>
+  <div id="lewisHost"></div>
+</section>
+
+<!-- ============ 3. LAB ============ -->
+<section id="p-lab" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span>
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Confronter la prévision au modèle</span>
+    <h2>Les doublets se repoussent</h2>
+    <p class="small mute">Autour de l'atome central, les doublets liants et non liants exercent des forces électriques répulsives. Ils se placent de façon à minimiser cette répulsion. Une liaison multiple compte pour <b>une seule direction</b>.</p>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="cv" id="cv-lab" aria-label="Modèle 3D des directions des doublets autour de l'atome central. Glisser pour tourner."></canvas></div>
+        <div class="row small">
+          <label><input type="checkbox" id="lab-auto" checked> Rotation automatique</label>
+          <label><input type="checkbox" id="lab-hidelp"> Masquer les doublets non liants (voir seulement les atomes)</label>
+        </div>
+        <div class="legend"><span><span class="dot" style="background:var(--lp)"></span>doublet non liant</span><span><span class="dot" style="background:#9aa3b2"></span>atome lié (doublet liant)</span></div>
+      </div>
+      <div id="labPanel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. MODÈLE 3D ============ -->
+<section id="p-mol" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Mesurer un angle</span>
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Comparer au modèle</span>
+    <h2>Modèle moléculaire 3D</h2>
+    <p class="small mute">Comme avec Avogadro : fais tourner la molécule, puis clique sur deux atomes liés au même atome central pour lire l'angle entre les liaisons.</p>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="cv" id="cv-mol" aria-label="Modèle moléculaire 3D. Glisser pour tourner, cliquer sur deux atomes pour mesurer un angle."></canvas></div>
+        <div class="row small">
+          <label>Doublets non liants :
+            <select id="mol-lp"><option value="none">aucun</option><option value="center" selected>atome central</option><option value="all">tous</option></select></label>
+          <label><input type="checkbox" id="mol-auto" checked> Rotation</label>
+          <label><input type="checkbox" id="mol-labels" checked> Symboles</label>
+        </div>
+      </div>
+      <div id="molPanel"></div>
+    </div>
+  </div>
+  <div class="card" id="valCard"></div>
+</section>
+
+<!-- ============ 5. WHO ============ -->
+<section id="p-who" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Identifier et justifier</span>
+    <h2>Qui est-ce ?</h2>
+    <p class="small mute">Un modèle apparaît, sans nom. Retrouve l'entité à partir de ce que tu vois. Tu peux faire apparaître les doublets non liants pour t'aider.</p>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Niveau"><button type="button" data-wm="color" aria-pressed="true">Atomes colorés</button><button type="button" data-wm="shape" aria-pressed="false">Forme seule</button></div>
+      <label class="small"><input type="checkbox" id="who-lp"> Montrer les doublets non liants</label>
+      <label class="small"><input type="checkbox" id="who-auto" checked> Rotation</label>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="cv" id="cv-who" aria-label="Entité mystère en 3D. Glisser pour tourner."></canvas></div>
+        <div class="legend" id="whoLegend"></div>
+      </div>
+      <div id="whoPanel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. PLUS ============ -->
+<section id="p-plus" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Compléter</span>
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Appliquer atome par atome</span>
+    <h2>Prolongement : molécules complexes</h2>
+    <p class="small mute">Dans une grosse molécule, il n'y a pas d'atome central unique. On regarde la géométrie <b>autour de chaque atome</b>. Les liaisons sont données : ajoute les doublets non liants manquants, puis analyse la géométrie locale.</p>
+  </div>
+  <div id="plusHost"></div>
+</section>
+
+<!-- ============ 7. CARNET ============ -->
+<section id="p-carnet" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Communiquer">COM</abbr> · Présenter la démarche</span>
+    <h2>Carte mentale à compléter</h2>
+    <p class="small mute">Dans quel ordre passe-t-on de la représentation de Lewis à la géométrie dans l'espace ? Place chaque étape à sa position.</p>
+    <div class="map" id="mapHost"></div>
+    <div class="btns"><button class="btn" id="mapCheck" type="button">Vérifier ma carte</button></div>
+    <div class="fb" id="mapFb" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <h2>Mon explication</h2>
+    <label for="expl">Explique, sur l'exemple d'une entité de ton choix, comment la répulsion des paires d'électrons de la couche de valence permet de prévoir sa géométrie.</label>
+    <textarea id="expl" placeholder="Pour l'entité …, l'atome central est entouré de … doublets …"></textarea>
+    <div class="small mute" id="vocab"></div>
+  </div>
+  <div class="card">
+    <h2>Mon carnet</h2>
+    <p class="small mute">Il se remplit tout seul avec ce que tu fais dans les étapes. Copie-le pour le coller dans ton compte rendu.</p>
+    <div class="btns"><button class="btn" id="copyNb" type="button">Copier mon carnet</button></div>
+    <pre class="copy" id="nbPre"></pre>
+  </div>
+</section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script src="../shared/bruit.js"></script>
+<script>
+(()=>{
+'use strict';
+/* ======================= Utilitaires ======================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const fr=(x,d=1)=>Number(x).toFixed(d).replace('.',',');
+const RAD=Math.PI/180, DEG=180/Math.PI;
+const reduceMotion=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const vadd=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const vsub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const vscl=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+const vdot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const vcross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const vlen=a=>Math.hypot(a[0],a[1],a[2]);
+const vnrm=a=>{const l=vlen(a)||1;return [a[0]/l,a[1]/l,a[2]/l]};
+const angleBetween=(a,b)=>Math.acos(Math.max(-1,Math.min(1,vdot(vnrm(a),vnrm(b)))))*DEG;
+const mmul=(A,B)=>A.map(r=>[0,1,2].map(j=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+const rotX=a=>[[1,0,0],[0,Math.cos(a),-Math.sin(a)],[0,Math.sin(a),Math.cos(a)]];
+const rotY=a=>[[Math.cos(a),0,Math.sin(a)],[0,1,0],[-Math.sin(a),0,Math.cos(a)]];
+const mapp=(R,p)=>[R[0][0]*p[0]+R[0][1]*p[1]+R[0][2]*p[2],R[1][0]*p[0]+R[1][1]*p[1]+R[1][2]*p[2],R[2][0]*p[0]+R[2][1]*p[1]+R[2][2]*p[2]];
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]};
+const mixc=(h,t,k)=>{const a=hex2rgb(h),b=hex2rgb(t);return 'rgb('+a.map((v,i)=>Math.round(v+(b[i]-v)*k)).join(',')+')'};
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800)}
+const plural=(n,s,p)=>n+' '+(n>1?(p||s+'s'):s);
+
+/* ======================= Données chimiques ======================= */
+const EL={
+  H:{n:'hydrogène',z:1,v:1,col:'#eef1f5',r:.30,conf:'1s¹',val:'1s¹'},
+  B:{n:'bore',z:5,v:3,col:'#f0a8a8',r:.48,conf:'1s² 2s² 2p¹',val:'2s² 2p¹'},
+  C:{n:'carbone',z:6,v:4,col:'#5d6676',r:.44,conf:'1s² 2s² 2p²',val:'2s² 2p²'},
+  N:{n:'azote',z:7,v:5,col:'#4a78e0',r:.44,conf:'1s² 2s² 2p³',val:'2s² 2p³'},
+  O:{n:'oxygène',z:8,v:6,col:'#e0503f',r:.42,conf:'1s² 2s² 2p⁴',val:'2s² 2p⁴'},
+  F:{n:'fluor',z:9,v:7,col:'#5cc16a',r:.40,conf:'1s² 2s² 2p⁵',val:'2s² 2p⁵'}
+};
+const GEO={
+  lineaire:'Linéaire', coudee:'Coudée', triplane:'Triangulaire (plane)', pyramide:'Pyramide à base triangulaire', tetra:'Tétraédrique', aucune:'Pas de géométrie (un seul atome lié)'
+};
+const GEO_CHOICES=['lineaire','coudee','triplane','pyramide','tetra'];
+
+/* Entités simples : a = atomes (symbole, x, y dans le plan du schéma), b = liaisons, o = ordres, lp = doublets non liants */
+const SIMPLE_RAW=[
+ {id:'H2O',name:'Eau',f:'H<sub>2</sub>O',t:'H2O',Q:0,a:[['O',0,0],['H',-1,0],['H',0,1]],b:[[0,1],[0,2]],o:[1,1],lp:[2,0,0],c:0,geom:'coudee',L:0.96,theta:104.5},
+ {id:'NH3',name:'Ammoniac',f:'NH<sub>3</sub>',t:'NH3',Q:0,a:[['N',0,0],['H',-1,0],['H',1,0],['H',0,1]],b:[[0,1],[0,2],[0,3]],o:[1,1,1],lp:[1,0,0,0],c:0,geom:'pyramide',L:1.01,theta:107.0},
+ {id:'CH4',name:'Méthane',f:'CH<sub>4</sub>',t:'CH4',Q:0,a:[['C',0,0],['H',-1,0],['H',1,0],['H',0,-1],['H',0,1]],b:[[0,1],[0,2],[0,3],[0,4]],o:[1,1,1,1],lp:[0,0,0,0,0],c:0,geom:'tetra',L:1.09,theta:109.5},
+ {id:'CO2',name:'Dioxyde de carbone',f:'CO<sub>2</sub>',t:'CO2',Q:0,a:[['C',0,0],['O',-1,0],['O',1,0]],b:[[0,1],[0,2]],o:[2,2],lp:[0,2,2],c:0,geom:'lineaire',L:1.16,theta:180},
+ {id:'CH2O',name:'Méthanal',f:'CH<sub>2</sub>O',t:'CH2O',Q:0,a:[['C',0,0],['O',0,-1],['H',-1,0],['H',1,0]],b:[[0,1],[0,2],[0,3]],o:[2,1,1],lp:[0,2,0,0],c:0,geom:'triplane',L:1.10,LCO:1.21,thetaHCO:121.8},
+ {id:'NH4+',name:'Ion ammonium',f:'NH<sub>4</sub><sup>+</sup>',t:'NH4+',Q:1,a:[['N',0,0],['H',-1,0],['H',1,0],['H',0,-1],['H',0,1]],b:[[0,1],[0,2],[0,3],[0,4]],o:[1,1,1,1],lp:[0,0,0,0,0],c:0,geom:'tetra',L:1.03,theta:109.5},
+ {id:'H3O+',name:'Ion oxonium',f:'H<sub>3</sub>O<sup>+</sup>',t:'H3O+',Q:1,a:[['O',0,0],['H',-1,0],['H',1,0],['H',0,1]],b:[[0,1],[0,2],[0,3]],o:[1,1,1],lp:[1,0,0,0],c:0,geom:'pyramide',L:0.98,theta:113.0},
+ {id:'OH-',name:'Ion hydroxyde',f:'HO<sup>−</sup>',t:'HO-',Q:-1,a:[['O',-0.5,0],['H',0.5,0]],b:[[0,1]],o:[1],lp:[3,0],c:0,geom:'aucune',L:0.96,extra:'Entité diatomique : pas d\'angle à définir.'},
+ {id:'BF3',name:'Trifluorure de bore',f:'BF<sub>3</sub>',t:'BF3',Q:0,a:[['B',0,0],['F',0,-1],['F',-1,0],['F',1,0]],b:[[0,1],[0,2],[0,3]],o:[1,1,1],lp:[0,3,3,3],c:0,geom:'triplane',L:1.31,theta:120,lacune:[0],extra:'Prolongement : l\'atome de bore a une lacune électronique (6 e⁻ seulement autour de lui).'}
+];
+const COMPLEX_RAW=[
+ {id:'methanamine',name:'Méthanamine',f:'CH<sub>3</sub>NH<sub>2</sub>',t:'CH3NH2',Q:0,fixed:true,k:.9,
+  a:[['C',0,0],['N',1,0],['H',0,-1],['H',-1,0],['H',0,1],['H',1,1],['H',2,0]],
+  b:[[0,1],[0,2],[0,3],[0,4],[1,5],[1,6]],o:[1,1,1,1,1,1],lp:[0,1,0,0,0,0,0]},
+ {id:'paracetamol',name:'Paracétamol',f:'C<sub>8</sub>H<sub>9</sub>NO<sub>2</sub>',t:'C8H9NO2',Q:0,fixed:true,k:.62,
+  a:[['C',-1,0],['C',-.5,-.866],['C',.5,-.866],['C',1,0],['C',.5,.866],['C',-.5,.866],['O',-2,0],['H',-2.5,.866],['H',-1,-1.732],['H',1,-1.732],['H',1,1.732],['H',-1,1.732],['N',2,0],['H',2,1],['C',2.866,-.5],['O',2.866,-1.5],['C',3.732,0],['H',3.732,1],['H',4.598,-.5],['H',4.598,.5]],
+  b:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[6,7],[1,8],[2,9],[4,10],[5,11],[3,12],[12,13],[12,14],[14,15],[14,16],[16,17],[16,18],[16,19]],
+  o:[2,1,2,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+  lp:[0,0,0,0,0,0,2,0,0,0,0,0,1,0,0,2,0,0,0,0]}
+];
+function prep(e){
+  const m=Object.assign({},e);
+  m.atoms=e.a.map(([s,x,y])=>({s,x,y}));
+  m.bonds=e.b; m.sol={o:e.o.slice(),lp:e.lp.slice()};
+  m.nbr=m.atoms.map(()=>[]);
+  m.bonds.forEach(([i,j],k)=>{m.nbr[i].push({j,k});m.nbr[j].push({j:i,k})});
+  m.Q=e.Q||0; m.k=e.k||1; m.fixed=!!e.fixed; m.lac=e.lacune||[];
+  m.ne=m.atoms.reduce((s,a)=>s+EL[a.s].v,0)-m.Q;
+  return m;
+}
+const SIMPLE=SIMPLE_RAW.map(prep);
+const COMPLEX=COMPLEX_RAW.map(prep);
+const SIM3D=SIMPLE.filter(e=>e.id!=='OH-'); // entités qui ont une géométrie à mesurer
+const SEVEN=SIMPLE.filter(e=>['H2O','NH3','CH4','CO2','CH2O','NH4+','H3O+'].includes(e.id));
+const byId=id=>SIMPLE.find(e=>e.id===id);
+const centerSym=e=>e.atoms[e.c].s;
+
+/* Géométrie 3D (angles de référence arrondis, de type optimisation moléculaire) */
+function pyramidPos(L,theta){
+  const ca=Math.sqrt((2*Math.cos(theta*RAD)+1)/3), sa=Math.sqrt(1-ca*ca), out=[[0,0,0]];
+  for(let k=0;k<3;k++){const ph=(90+120*k)*RAD;out.push([L*sa*Math.cos(ph),-L*ca,L*sa*Math.sin(ph)])}
+  return out;
+}
+function build3D(e){
+  const L=e.L;
+  switch(e.id){
+    case 'H2O':{const s=Math.sin(e.theta*RAD/2),c=Math.cos(e.theta*RAD/2);return [[0,0,0],[L*s,-L*c,0],[-L*s,-L*c,0]]}
+    case 'NH3':case 'H3O+':return pyramidPos(L,e.theta);
+    case 'CH4':case 'NH4+':{const k=L/Math.sqrt(3);return [[0,0,0],[k,k,k],[k,-k,-k],[-k,k,-k],[-k,-k,k]]}
+    case 'CO2':return [[0,0,0],[-L,0,0],[L,0,0]];
+    case 'CH2O':{const t=e.thetaHCO*RAD;return [[0,0,0],[0,e.LCO,0],[-L*Math.sin(t),L*Math.cos(t),0],[L*Math.sin(t),L*Math.cos(t),0]]}
+    case 'BF3':return [[0,0,0],[0,L,0],[L*Math.cos(210*RAD),L*Math.sin(210*RAD),0],[L*Math.cos(330*RAD),L*Math.sin(330*RAD),0]];
+    case 'OH-':return [[0,0,0],[L,0,0]];
+  }
+  return e.atoms.map(a=>[a.x,-a.y,0]);
+}
+function lpDirs(e,pos,which){ // which : 'center' | 'all'
+  const res=[];
+  e.atoms.forEach((a,i)=>{
+    const n=e.sol.lp[i]; if(!n) return;
+    if(which==='center'&&i!==e.c) return;
+    const nb=e.nbr[i].map(x=>vnrm(vsub(pos[x.j],pos[i])));
+    if(nb.length===0) return;
+    if(nb.length===1){
+      const out=vscl(nb[0],-1);
+      let p1=vcross([0,0,1],out); if(vlen(p1)<1e-3) p1=vcross([0,1,0],out); p1=vnrm(p1);
+      const p2=vnrm(vcross(out,p1));
+      if(n===1) res.push({a:i,d:out});
+      else if(n===2){const c=Math.cos(60*RAD),s=Math.sin(60*RAD);res.push({a:i,d:vadd(vscl(out,c),vscl(p1,s))},{a:i,d:vadd(vscl(out,c),vscl(p1,-s))})}
+      else {const c=Math.cos(70.5*RAD),s=Math.sin(70.5*RAD);for(let k=0;k<3;k++){const ph=(90+120*k)*RAD;res.push({a:i,d:vadd(vscl(out,c),vscl(vadd(vscl(p1,Math.cos(ph)),vscl(p2,Math.sin(ph))),s))})}}
+    } else {
+      const sum=nb.reduce((s,v)=>vadd(s,v),[0,0,0]); const out=vscl(vnrm(sum),-1);
+      if(n===1) res.push({a:i,d:out});
+      else {const nrmv=vnrm(vcross(nb[0],nb[1]));const c=Math.cos(54.75*RAD),s=Math.sin(54.75*RAD);res.push({a:i,d:vadd(vscl(out,c),vscl(nrmv,s))},{a:i,d:vadd(vscl(out,c),vscl(nrmv,-s))})}
+    }
+  });
+  return res;
+}
+const idealAngle=nDir=>nDir<=2?180:(nDir===3?120:109.5);
+function geomFromNL(nn,nl){
+  if(nn<=1) return 'aucune';
+  if(nn===2) return nl===0?'lineaire':'coudee';
+  if(nn===3) return nl===0?'triplane':'pyramide';
+  return 'tetra';
+}
+
+/* Répulsion des doublets : minimisation de E = Σ wi·wj / rij sur la sphère unité */
+function randDirs(n){return Array.from({length:n},()=>vnrm([gauss(),gauss(),gauss()]))}
+function repEnergy(P,w){let E=0;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++)E+=w[i]*w[j]/Math.max(1e-3,vlen(vsub(P[i],P[j])));return E}
+function relaxStep(P,w,eta){
+  const n=P.length,F=P.map(()=>[0,0,0]);
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+    const d=vsub(P[i],P[j]);const r=Math.max(1e-3,vlen(d));const k=w[i]*w[j]/(r*r*r);
+    for(let c=0;c<3;c++){F[i][c]+=k*d[c];F[j][c]-=k*d[c]}
+  }
+  let mx=0;
+  for(let i=0;i<n;i++){
+    const f=F[i],dd=vdot(f,P[i]),t=[f[0]-dd*P[i][0],f[1]-dd*P[i][1],f[2]-dd*P[i][2]];
+    let m=vlen(t);mx=Math.max(mx,m);const s=m>3?3/m:1;
+    P[i]=vnrm(vadd(P[i],vscl(t,eta*s)));
+  }
+  return mx;
+}
+function relaxFull(w,tries=3){
+  let best=null,bestE=Infinity;
+  for(let k=0;k<tries;k++){
+    const P=randDirs(w.length);
+    for(let it=0;it<3000;it++){if(relaxStep(P,w,.15)<1e-7)break}
+    const E=repEnergy(P,w); if(E<bestE-1e-9){bestE=E;best=P}
+  }
+  return {P:best,E:bestE};
+}
+const W_LP=1.25;
+function modelAngle(b,l,weighted){ // angle entre deux directions de liaison
+  const w=[...Array(b).fill(1),...Array(l).fill(weighted?W_LP:1)];
+  const r=relaxFull(w);return angleBetween(r.P[0],r.P[1]);
+}
+
+/* ======================= Viewer 3D (canvas 2D) ======================= */
+const viewers=[];
+class Viewer{
+  constructor(cv,opt={}){
+    this.cv=cv;this.ctx=cv.getContext('2d');this.R=mmul(rotX(-.32),rotY(.55));
+    this.scene={atoms:[],bonds:[],lobes:[],lines:[]};this.auto=!reduceMotion;this.labels=true;this.sel=[];this.hit=[];this.fit=2.2;
+    this.onPick=opt.onPick||null;this.dirty=true;this.drag=null;
+    cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);this.drag={x:e.clientX,y:e.clientY,moved:0,id:e.pointerId}});
+    cv.addEventListener('pointermove',e=>{
+      if(!this.drag)return;const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y;this.drag.x=e.clientX;this.drag.y=e.clientY;this.drag.moved+=Math.abs(dx)+Math.abs(dy);
+      this.R=mmul(rotX(dy*.01),mmul(rotY(dx*.01),this.R));this.dirty=true;
+    });
+    const up=e=>{
+      if(!this.drag)return;const moved=this.drag.moved;this.drag=null;
+      if(moved<5&&this.onPick){const r=cv.getBoundingClientRect(),dpr=cv.width/r.width;this.onPick(this.pick((e.clientX-r.left)*dpr,(e.clientY-r.top)*dpr))}
+    };
+    cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',()=>{this.drag=null});
+    viewers.push(this);
+  }
+  setScene(s,fit){this.scene=Object.assign({atoms:[],bonds:[],lobes:[],lines:[]},s);if(fit)this.fit=fit;this.dirty=true}
+  pick(x,y){let best=null;for(const h of this.hit){const d=Math.hypot(h.x-x,h.y-y);if(d<=h.r*1.15&&(!best||h.z>best.z))best=h}return best?best.i:null}
+  draw(){
+    const cv=this.cv,ctx=this.ctx,dpr=window.devicePixelRatio||1,cw=Math.round(cv.clientWidth*dpr),ch=Math.round(cv.clientHeight*dpr);
+    if(cw<10||ch<10)return;if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
+    ctx.clearRect(0,0,cw,ch);
+    const css=getComputedStyle(document.documentElement),stick=css.getPropertyValue('--stick').trim()||'#888',lpc=css.getPropertyValue('--lp').trim()||'#e8a317',ink=css.getPropertyValue('--ink').trim()||'#000',acc=css.getPropertyValue('--accent').trim()||'#26f';
+    const sc=Math.min(cw,ch)/(2*this.fit)*.95,D=this.fit*5;
+    const P=p=>{const q=mapp(this.R,p),f=D/(D-q[2]);return {x:cw/2+q[0]*sc*f,y:ch/2-q[1]*sc*f,z:q[2],f}};
+    const S=this.scene,pr=S.atoms.map(a=>P(a.p)),items=[];this.hit=[];
+    S.bonds.forEach(b=>{const A=pr[b.a],B=pr[b.b];items.push({z:Math.min(A.z,B.z)-.001,fn:()=>{
+      const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len,f=(A.f+B.f)/2,o=b.order||1;
+      const offs=o===1?[0]:(o===2?[-.075,.075]:[-.13,0,.13]),wd=(o===1?.11:o===2?.07:.055)*sc*f;
+      ctx.lineCap='round';ctx.strokeStyle=stick;ctx.lineWidth=wd;
+      offs.forEach(of=>{ctx.beginPath();ctx.moveTo(A.x+nx*of*sc*f,A.y+ny*of*sc*f);ctx.lineTo(B.x+nx*of*sc*f,B.y+ny*of*sc*f);ctx.stroke()});
+    }})});
+    S.lobes.forEach(lb=>{
+      const o3=lb.o||[0,0,0],len=lb.len||1,c3=vadd(o3,vscl(lb.d,len*.55)),C=P(c3),q=mapp(this.R,lb.d);
+      const proj=Math.hypot(q[0],q[1]),minor=.30*len*sc*C.f,major=minor+.5*len*sc*C.f*proj*.95,ang=Math.atan2(-q[1],q[0]);
+      items.push({z:C.z,fn:()=>{
+        ctx.save();ctx.translate(C.x,C.y);ctx.rotate(ang);
+        const g=ctx.createRadialGradient(0,0,0,0,0,major);g.addColorStop(0,lpc);g.addColorStop(1,'rgba(255,200,60,0.10)');
+        ctx.globalAlpha=.62;ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,major,minor,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.55;ctx.strokeStyle=lpc;ctx.lineWidth=1.2;ctx.stroke();
+        ctx.globalAlpha=1;ctx.fillStyle=ink;const dd=Math.min(major*.35,minor*.9),r=Math.max(1.6,sc*.03);
+        [-dd,dd].forEach(x=>{ctx.beginPath();ctx.arc(x,0,r,0,Math.PI*2);ctx.fill()});
+        ctx.restore();
+      }});
+    });
+    S.atoms.forEach((a,i)=>{
+      const p=pr[i],r=Math.max(4,(a.r||.4)*sc*p.f);
+      this.hit.push({i,x:p.x,y:p.y,r,z:p.z});
+      items.push({z:p.z,fn:()=>{
+        const g=ctx.createRadialGradient(p.x-r*.35,p.y-r*.35,r*.1,p.x,p.y,r);
+        g.addColorStop(0,mixc(a.col,'#ffffff',.55));g.addColorStop(.6,a.col);g.addColorStop(1,mixc(a.col,'#000000',.4));
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
+        if(this.sel.includes(i)){ctx.strokeStyle=acc;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r+3,0,Math.PI*2);ctx.stroke()}
+        if(this.labels&&a.label&&r>9){const light=a.col==='#eef1f5';ctx.fillStyle=light?'#1c2430':'#fff';ctx.font='600 '+Math.round(r*.9)+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.label,p.x,p.y+.5)}
+      }});
+    });
+    items.sort((u,v)=>u.z-v.z).forEach(it=>it.fn());
+    (S.lines||[]).forEach(l=>{const A=P(l.a),B=P(l.b);ctx.setLineDash([6,5]);ctx.strokeStyle=acc;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();ctx.setLineDash([])});
+  }
+}
+let lastT=0;
+function loop(t){
+  const dt=Math.min(50,t-lastT);lastT=t;
+  for(const v of viewers){
+    if(!v.cv.offsetParent)continue;
+    if(v.auto&&!v.drag){v.R=mmul(rotY(dt*.0006),v.R);v.dirty=true}
+    if(v.tick)v.tick();
+    if(v.dirty){v.draw();v.dirty=false}
+  }
+  requestAnimationFrame(loop);
+}
+window.addEventListener('resize',()=>viewers.forEach(v=>v.dirty=true));
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener&&matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>viewers.forEach(v=>v.dirty=true));
+
+/* Scène d'une entité (géométrie « réelle ») */
+function sceneOf(e,opt){
+  const pos=build3D(e);
+  const atoms=e.atoms.map((a,i)=>({p:pos[i],r:EL[a.s].r,col:EL[a.s].col,label:opt.labels===false?'':a.s}));
+  const bonds=e.bonds.map(([i,j],k)=>({a:i,b:j,order:e.sol.o[k]}));
+  let lobes=[];
+  if(opt.lp&&opt.lp!=='none'){lobes=lpDirs(e,pos,opt.lp).map(x=>({o:pos[x.a],d:x.d,len:.95}))}
+  return {atoms,bonds,lobes,pos};
+}
+
+/* ======================= État de l'élève ======================= */
+const S={question:'',lewisDone:{},counts:{},pred:{},meas:[],valChoice:null,valNum:'',who:{n:0,ok:0,cur:null,mode:'color',hints:0},locDone:{},explain:'',map:[],mapOk:false};
+const lewisInst={};
+
+/* ======================= Schéma de Lewis : diagnostic pur ======================= */
+function diagnose(m,orders,lps){
+  const tgt=i=>m.atoms[i].s==='H'?2:(m.lac.includes(i)?6:8);
+  const per=m.atoms.map((a,i)=>{
+    const bsum=m.nbr[i].reduce((s,x)=>s+orders[x.k],0),e=2*(bsum+lps[i]);
+    return {i,s:a.s,bsum,lp:lps[i],e,t:tgt(i),fc:EL[a.s].v-lps[i]*2-bsum};
+  });
+  const elecRep=2*(orders.reduce((s,o)=>s+o,0)+lps.reduce((s,x)=>s+x,0));
+  const fcSum=per.reduce((s,p)=>s+p.fc,0);
+  const msgs=[];
+  per.forEach(p=>{
+    if(p.e!==p.t){
+      const sym=m.atoms[p.i].s;
+      if(p.e<p.t)msgs.push(`L'atome ${sym} est entouré de ${p.e} e⁻ ; il lui en faut ${p.t} (${plural(p.t/2,'doublet')}). Il manque ${plural((p.t-p.e)/2,'doublet')}.`);
+      else msgs.push(`L'atome ${sym} est entouré de ${p.e} e⁻ ; c'est trop : ${p.t} suffisent (${plural(p.t/2,'doublet')}).`);
+    }
+  });
+  const sameSol=orders.every((o,k)=>o===m.sol.o[k])&&lps.every((x,i)=>x===m.sol.lp[i]);
+  if(!m.fixed&&elecRep!==m.ne)msgs.push(`Ton schéma représente ${elecRep} e⁻, alors que l'entité en possède ${m.ne} (somme des électrons de valence${m.Q?', en tenant compte de la charge':''}).`);
+  const atomsOk=per.every(p=>p.e===p.t);
+  if(atomsOk&&(m.fixed||elecRep===m.ne)&&!sameSol)msgs.push('Chaque atome respecte la règle, mais ce schéma n\'est pas celui attendu : regarde les charges qui apparaissent et cherche une autre répartition des liaisons ou des doublets.');
+  return {ok:sameSol&&atomsOk,per,elecRep,fcSum,msgs,atomsOk,sameSol};
+}
+function slotAngles(bondAngs,n){
+  if(n<=0)return [];
+  const out=[],mod=a=>((a%360)+360)%360;
+  if(bondAngs.length===0){for(let i=0;i<n;i++)out.push(mod(270+i*360/n));return out}
+  if(bondAngs.length===1){const st=360/(n+1);for(let i=1;i<=n;i++)out.push(mod(bondAngs[0]+st*i));return out}
+  const occ=bondAngs.map(mod);
+  for(let t=0;t<n;t++){
+    const s=[...occ].sort((a,b)=>a-b);let best=-1,mid=0;
+    for(let i=0;i<s.length;i++){const a=s[i],b=i+1<s.length?s[i+1]:s[0]+360,g=b-a;if(g>best+1e-9){best=g;mid=a+g/2}}
+    mid=mod(mid);occ.push(mid);out.push(mid);
+  }
+  return out;
+}
+function lewisSVG(m,st,o){
+  o=o||{};const k=m.k,L=70*k,R=15*k;
+  const xs=m.atoms.map(a=>a.x*L),ys=m.atoms.map(a=>a.y*L);
+  const pad=48*k,minX=Math.min(...xs)-pad,maxX=Math.max(...xs)+pad,minY=Math.min(...ys)-pad,maxY=Math.max(...ys)+pad;
+  let s=`<svg class="lewis" viewBox="${minX} ${minY} ${maxX-minX} ${maxY-minY}" role="img" aria-label="Schéma de Lewis de ${m.name}">`;
+  const bg='var(--stage)';
+  // liaisons
+  m.bonds.forEach(([i,j],kk)=>{
+    const A=m.atoms[i],B=m.atoms[j],x1=A.x*L,y1=A.y*L,x2=B.x*L,y2=B.y*L,dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,nx=-uy,ny=ux,ord=st.o[kk];
+    const sx=x1+ux*(R+3*k),sy=y1+uy*(R+3*k),ex=x2-ux*(R+3*k),ey=y2-uy*(R+3*k),gap=5.5*k;
+    const offs=ord===1?[0]:(ord===2?[-.5,.5]:[-1,0,1]);
+    const sel=st.sel&&st.sel.t==='b'&&st.sel.i===kk;
+    const lab=`Liaison ${A.s}–${B.s}`;
+    if(o.interactive)s+=`<g class="hit" data-b="${kk}" tabindex="0" role="button" aria-label="${lab} : ordre ${ord}. Activer pour changer l'ordre"><line class="ring" x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="transparent" stroke-width="${22*k}" pointer-events="stroke"/>`;
+    else s+='<g>';
+    offs.forEach(of=>{s+=`<line x1="${sx+nx*of*gap}" y1="${sy+ny*of*gap}" x2="${ex+nx*of*gap}" y2="${ey+ny*of*gap}" stroke="${sel?'var(--accent)':'var(--ink)'}" stroke-width="${2.4*k+(sel?1:0)}" stroke-linecap="round"/>`});
+    s+='</g>';
+  });
+  // atomes, doublets
+  m.atoms.forEach((a,i)=>{
+    const x=a.x*L,y=a.y*L,n=st.lp[i];
+    const angs=m.nbr[i].map(nb=>{const B=m.atoms[nb.j];return Math.atan2((B.y-a.y),(B.x-a.x))*DEG});
+    slotAngles(angs,n).forEach(ang=>{
+      const cx=x+Math.cos(ang*RAD)*26*k,cy=y+Math.sin(ang*RAD)*26*k,px=-Math.sin(ang*RAD),py=Math.cos(ang*RAD),hl=8*k;
+      s+=`<line x1="${cx-px*hl}" y1="${cy-py*hl}" x2="${cx+px*hl}" y2="${cy+py*hl}" stroke="var(--lp)" stroke-width="${3.6*k}" stroke-linecap="round"/>`;
+    });
+    const sel=st.sel&&st.sel.t==='a'&&st.sel.i===i,done=o.done&&o.done[i];
+    if(o.interactive)s+=`<g class="hit" data-a="${i}" tabindex="0" role="button" aria-label="Atome ${a.s} : ${plural(n,'doublet non liant','doublets non liants')}. Activer pour agir"><circle class="ring" cx="${x}" cy="${y}" r="${(R+6*k)}" fill="transparent" stroke="${sel?'var(--accent)':'transparent'}" stroke-width="${sel?3:0}" pointer-events="all"/>`;
+    else s+='<g>';
+    s+=`<circle cx="${x}" cy="${y}" r="${R}" fill="${bg}" stroke="${EL[a.s].col==='#eef1f5'?'var(--stick)':EL[a.s].col}" stroke-width="${2*k}"/>`;
+    s+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${19*k}" font-weight="700" fill="var(--ink)" font-family="system-ui,sans-serif">${a.s}</text>`;
+    const fc=EL[a.s].v-2*n-m.nbr[i].reduce((q,nb)=>q+st.o[nb.k],0);
+    if(o.showCharge!==false&&fc!==0){
+      const cx=x+16*k,cy=y-17*k;
+      s+=`<circle cx="${cx}" cy="${cy}" r="${7*k}" fill="var(--card)" stroke="var(--ink)" stroke-width="${1.2*k}"/><text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${11*k}" font-weight="700" fill="var(--ink)">${fc>0?(fc>1?fc+'+':'+'):(fc<-1?(-fc)+'−':'−')}</text>`;
+    }
+    if(done)s+=`<text x="${x+17*k}" y="${y+22*k}" font-size="${13*k}" fill="var(--ok)" font-weight="700">✓</text>`;
+    s+='</g>';
+  });
+  return s+'</svg>';
+}
+
+/* ======================= Constructeur de schéma de Lewis ======================= */
+class Lewis{
+  constructor(root,list,opt){
+    this.root=root;this.list=list;this.opt=opt||{};this.m=list[0];this.live=true;this.mode='complete';this.states={};this.fb='';this.fbCls='';
+    this.sel=null;this.build();
+  }
+  st(){
+    const m=this.m;if(!this.states[m.id]){this.states[m.id]={o:m.fixed?m.sol.o.slice():m.bonds.map(()=>1),lp:m.atoms.map(()=>0),sel:null,helped:false,tried:false}}
+    return this.states[m.id];
+  }
+  build(){
+    const c=!!this.opt.complex;
+    this.root.innerHTML=`
+    <div class="card"><div class="row">
+      <label>Entité : <select class="l-sel">${this.list.map(e=>`<option value="${e.id}">${e.name} (${e.t})</option>`).join('')}</select></label>
+      <span class="seg l-live" role="group" aria-label="Aide"><button type="button" data-l="1" aria-pressed="true">Bilan en direct</button><button type="button" data-l="0" aria-pressed="false">Je vérifie moi-même</button></span>
+      ${c?'<span class="seg l-mode" role="group" aria-label="Mode"><button type="button" data-md="complete" aria-pressed="true">Compléter les doublets</button><button type="button" data-md="analyse" aria-pressed="false">Analyser une géométrie locale</button></span>':''}
+    </div><div class="small mute l-extra"></div></div>
+    ${c?'':'<div class="card l-count"></div>'}
+    <div class="grid2">
+      <div class="card"><div class="l-svgbox"></div>
+        <p class="small mute l-help"></p>
+        <div class="btns"><button class="btn l-check" type="button">Vérifier mon schéma</button><button class="btn sec l-reset" type="button">Recommencer</button><button class="btn sec l-sol" type="button">Afficher une aide</button></div>
+        <div class="fb l-fb" aria-live="polite"></div></div>
+      <div class="card"><div class="l-bilan"></div>${c?'<div class="l-local"></div>':''}</div>
+    </div>`;
+    const r=this.root;
+    $('.l-sel',r).addEventListener('change',e=>{this.m=this.list.find(x=>x.id===e.target.value);this.sel=null;this.fb='';this.fbCls='';this.mode='complete';this.refresh(true)});
+    $$('.l-live button',r).forEach(b=>b.addEventListener('click',()=>{this.live=b.dataset.l==='1';$$('.l-live button',r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));this.drawBilan()}));
+    if(c)$$('.l-mode button',r).forEach(b=>b.addEventListener('click',()=>{this.mode=b.dataset.md;$$('.l-mode button',r).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));this.refresh()}));
+    $('.l-check',r).addEventListener('click',()=>this.check());
+    $('.l-reset',r).addEventListener('click',()=>{const s=this.st();s.o=this.m.fixed?this.m.sol.o.slice():this.m.bonds.map(()=>1);s.lp=this.m.atoms.map(()=>0);s.helped=false;this.fb='';this.refresh()});
+    $('.l-sol',r).addEventListener('click',()=>{const s=this.st();s.lp=this.m.sol.lp.slice();if(!this.m.fixed)s.o=this.m.sol.o.slice();s.helped=true;this.fb='Aide affichée : compare avec ce que tu avais, et explique-toi pourquoi chaque atome est ainsi entouré.';this.fbCls='';this.refresh()});
+    const box=$('.l-svgbox',r);
+    box.addEventListener('click',ev=>{const t=ev.target.closest('[data-a],[data-b]');if(t)this.act(t)});
+    box.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){const t=ev.target.closest('[data-a],[data-b]');if(t){ev.preventDefault();this.act(t)}}});
+    this.refresh(true);
+  }
+  act(t){
+    const m=this.m,s=this.st();
+    if(t.dataset.a!==undefined){
+      const i=+t.dataset.a;s.sel={t:'a',i};
+      if(this.mode==='complete'){s.lp[i]=(s.lp[i]+1)%5}
+    } else {
+      const k=+t.dataset.b;s.sel={t:'b',i:k};
+      if(m.fixed){this.fb='Dans cette molécule, les liaisons sont données : ajoute seulement les doublets non liants.';this.fbCls='';this.keepFb=true}
+      else s.o[k]=s.o[k]%3+1;
+    }
+    this.afterChange();
+  }
+  afterChange(){if(!this.keepFb){this.fb='';this.fbCls=''}this.keepFb=false;this.refresh()}
+  refresh(full){
+    const r=this.root,m=this.m,s=this.st();
+    $('.l-extra',r).innerHTML=m.extra?m.extra:(m.lac.length?'':'');
+    $('.l-sel',r).value=m.id;
+    if(!this.opt.complex&&full)this.drawCount();
+    const done=this.opt.complex&&this.mode==='analyse'?this.localDoneMap():null;
+    $('.l-svgbox',r).innerHTML=lewisSVG(m,s,{interactive:true,done});
+    $('.l-help',r).textContent=m.fixed?(this.mode==='complete'?'Clique sur un atome pour ajouter un doublet non liant (0 à 4). Les liaisons sont données.':'Clique sur un atome (hors hydrogène) pour analyser la géométrie autour de lui.'):'Clic sur une liaison : simple → double → triple. Clic sur un atome : ajoute un doublet non liant (de 0 à 4).';
+    $('.l-fb',r).className='fb l-fb '+(this.fbCls||'');$('.l-fb',r).textContent=this.fb||'';
+    this.drawBilan();if(this.opt.complex)this.drawLocal();
+  }
+  drawCount(){
+    const m=this.m,box=$('.l-count',this.root);if(!box)return;
+    const syms=[...new Set(m.atoms.map(a=>a.s))];const cs=S.counts[m.id]=S.counts[m.id]||{el:{},tot:'',dbl:''};
+    box.innerHTML=`<span class="comp"><abbr title="Réaliser">RÉA</abbr> · Compter les électrons de valence</span>
+    <div>${syms.map(sy=>`<div class="row"><label>${sy} (${EL[sy].n}, Z = ${EL[sy].z}) : <input class="n" type="text" inputmode="numeric" data-el="${sy}" value="${cs.el[sy]||''}" aria-label="Électrons de valence de ${EL[sy].n}"> électron(s) de valence</label><span class="small" data-st="${sy}"></span><button class="btn sec" type="button" data-hint="${sy}" style="padding:2px 9px;font-size:.8rem">Indice</button></div>`).join('')}</div>
+    <div class="row"><label>Total d'électrons de valence de l'entité : <input class="n" type="text" inputmode="numeric" data-tot value="${cs.tot}"></label><span class="small" data-st-tot></span></div>
+    <div class="row"><label>Nombre de doublets à répartir : <input class="n" type="text" inputmode="numeric" data-dbl value="${cs.dbl}"></label><span class="small" data-st-dbl></span></div>
+    ${m.Q?`<p class="small mute">${m.Q>0?'Un ion positif a perdu '+plural(m.Q,'électron')+' : on les retire du total.':'Un ion négatif a gagné '+plural(-m.Q,'électron')+' : on les ajoute au total.'}</p>`:''}`;
+    const num=v=>Number(String(v).replace(',','.').trim());
+    const val=()=>{
+      syms.forEach(sy=>{const inp=$(`[data-el="${sy}"]`,box),st=$(`[data-st="${sy}"]`,box),v=inp.value.trim();cs.el[sy]=v;
+        if(!v){st.textContent='';return}
+        if(num(v)===EL[sy].v){st.innerHTML=`<span class="okc">✓ ${EL[sy].conf} → couche de valence : ${EL[sy].val}</span>`}
+        else st.innerHTML=`<span class="wc">À revoir : écris la configuration électronique de ${sy} ; les électrons de valence sont ceux de la dernière couche.</span>`});
+      const t=$('[data-tot]',box).value.trim(),d=$('[data-dbl]',box).value.trim();cs.tot=t;cs.dbl=d;
+      const st=$('[data-st-tot]',box),sd=$('[data-st-dbl]',box);
+      if(!t)st.textContent='';else if(num(t)===m.ne)st.innerHTML='<span class="okc">✓</span>';
+      else if(m.Q&&num(t)===m.ne+m.Q)st.innerHTML='<span class="wc">Tu as oublié la charge de l\'ion.</span>';
+      else st.innerHTML='<span class="wc">Additionne les électrons de valence de tous les atomes de la formule.</span>';
+      if(!d)sd.textContent='';else if(num(d)===m.ne/2)sd.innerHTML='<span class="okc">✓ (deux électrons par doublet)</span>';
+      else sd.innerHTML='<span class="wc">Un doublet, ce sont deux électrons.</span>';
+    };
+    box.oninput=val;val();
+    $$('[data-hint]',box).forEach(b=>b.addEventListener('click',()=>{const sy=b.dataset.hint;$(`[data-st="${sy}"]`,box).innerHTML=`<span class="mute">${sy} : ${EL[sy].conf}. Dernière couche occupée : ${EL[sy].val} → à toi de compter.</span>`}));
+  }
+  drawBilan(){
+    const m=this.m,s=this.st(),box=$('.l-bilan',this.root),d=diagnose(m,s.o,s.lp),live=this.live||s.tried;
+    const rows=d.per.filter(p=>!(m.atoms[p.i].s==='H'&&m.fixed));
+    const lab={};const cnt={};d.per.forEach(p=>{cnt[p.s]=(cnt[p.s]||0)+1});const seen={};
+    d.per.forEach(p=>{seen[p.s]=(seen[p.s]||0)+1;lab[p.i]=cnt[p.s]>1?p.s+seen[p.s]:p.s});
+    const state=p=>!live?'?':(p.e===p.t?'<span class="okc">✓</span>':(m.lac.includes(p.i)&&p.e===6?'<span class="okc">✓ lacune</span>':'<span class="wc">à revoir</span>'));
+    let hH='';
+    if(m.fixed){const hs=d.per.filter(p=>p.s==='H');hH=`<p class="small mute">Atomes d'hydrogène (${hs.length}) : ${live?(hs.every(p=>p.e===2)?'<span class="okc">tous entourés de 2 e⁻ (duet) ✓</span>':'<span class="wc">certains ne sont pas entourés de 2 e⁻</span>'):'à vérifier'}</p>`}
+    box.innerHTML=`<h3 style="margin-top:0">Bilan électronique</h3><div style="overflow-x:auto"><table class="t"><thead><tr><th>Atome</th><th>Liaisons</th><th>Doublets non liants</th><th>e⁻ autour</th><th>Visé</th><th>État</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${lab[p.i]}</td><td>${p.bsum}</td><td>${p.lp}</td><td>${p.e}</td><td>${p.t}</td><td>${state(p)}</td></tr>`).join('')}</tbody></table></div>${hH}
+    ${m.fixed?'':`<p class="small">Électrons représentés : <b>${d.elecRep}</b> sur <b>${m.ne}</b> disponibles ${live?(d.elecRep===m.ne?'<span class="okc">✓</span>':'<span class="wc">à revoir</span>'):''}</p>`}
+    <p class="small mute">Un atome portant une charge (cercle + ou −) a un nombre d'électrons différent de celui de l'atome neutre.</p>`;
+  }
+  check(){
+    const m=this.m,s=this.st(),d=diagnose(m,s.o,s.lp);s.tried=true;
+    if(d.ok){
+      this.fbCls='ok';
+      if(!this.opt.complex){
+        S.lewisDone[m.id]=true;
+        const c=m.c,nn=m.nbr[c].length,nl=m.sol.lp[c];
+        this.fb=`Schéma correct ✓. Autour de l'atome central (${m.atoms[c].s}) : ${plural(nn,'atome lié','atomes liés')} et ${plural(nl,'doublet non liant','doublets non liants')}, soit ${nn+nl} directions.`+(m.id!=='OH-'?' Passe à l\'étape 3 pour prévoir ce que cela donne dans l\'espace.':'');
+      } else {S.lewisDone[m.id]=true;this.fb='Schéma complet ✓. Passe en mode « Analyser une géométrie locale » pour étudier chaque atome.'}
+    } else {this.fbCls='warn';this.fb='À revoir : '+(d.msgs.length?d.msgs.join(' '):'compare avec le bilan.')}
+    this.refresh();
+  }
+  complete(){const m=this.m,s=this.st();return diagnose(m,s.o,s.lp).ok}
+  localDoneMap(){const o={};const d=S.locDone[this.m.id]||{};Object.keys(d).forEach(k=>{if(d[k])o[k]=true});return o}
+  drawLocal(){
+    const m=this.m,s=this.st(),box=$('.l-local',this.root);if(!box)return;
+    if(this.mode!=='analyse'){box.innerHTML='';return}
+    const nonH=m.atoms.map((a,i)=>i).filter(i=>m.atoms[i].s!=='H'),dn=S.locDone[m.id]||{},nd=nonH.filter(i=>dn[i]).length;
+    let h=`<h3>Géométrie locale</h3><p class="small mute">Atomes analysés : ${nd} / ${nonH.length} (hors hydrogène).</p>`;
+    if(!this.complete()){h+='<div class="fb warn">Complète d\'abord les doublets non liants de la molécule (bouton « Afficher une aide » si tu bloques).</div>';box.innerHTML=h;return}
+    const sel=s.sel&&s.sel.t==='a'?s.sel.i:null;
+    if(sel===null||m.atoms[sel].s==='H'){h+='<p class="small">Clique sur un atome autre que l\'hydrogène pour étudier la géométrie autour de lui.</p>'}
+    else{
+      const nn=m.nbr[sel].length,nl=m.sol.lp[sel],g=geomFromNL(nn,nl),sym=m.atoms[sel].s;
+      const opts=['aucune',...GEO_CHOICES];
+      h+=`<p><b>Atome ${sym}</b> (${EL[sym].n}) : ${plural(nn,'atome lié','atomes liés')}, ${plural(nl,'doublet non liant','doublets non liants')}, donc <b>${nn+nl} directions</b> (une liaison multiple compte pour une direction).</p>
+      <div class="small">Quelle géométrie autour de cet atome ?</div><div class="opts" data-loc>${opts.map(o=>`<button type="button" data-g="${o}" aria-pressed="false">${GEO[o]}</button>`).join('')}</div><div class="fb" data-locfb aria-live="polite"></div>`;
+      box.innerHTML=h;
+      $$('[data-g]',box).forEach(b=>b.addEventListener('click',()=>{
+        const ch=b.dataset.g,fb=$('[data-locfb]',box);
+        const arr=nn+nl===2?'opposées':(nn+nl===3?'dans un plan, à 120° les unes des autres':'aux sommets d\'un tétraèdre, à 109,5°');
+        $$('[data-g]',box).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+        if(ch===g){
+          (S.locDone[m.id]=S.locDone[m.id]||{})[sel]=true;fb.className='fb ok';
+          fb.textContent=nn<=1?'✓ Un seul atome est lié à cet atome : on ne peut pas définir d\'angle entre liaisons.':`✓ ${nn+nl} directions qui se repoussent : elles se placent ${arr}. Les atomes liés dessinent une géométrie ${GEO[g].toLowerCase()}.`;
+          if(m.id==='paracetamol'&&sel===12)fb.textContent+=' Remarque (au-delà du programme) : dans la vraie molécule, cet azote est presque plan à cause de son interaction avec la liaison C=O voisine. Le modèle des doublets, appliqué atome par atome, ne le voit pas : c\'est une limite du modèle.';
+          this.fbKeepLocal=true;
+          const prog=$('.small.mute',box);if(prog)prog.textContent=`Atomes analysés : ${nonH.filter(i=>(S.locDone[m.id]||{})[i]).length} / ${nonH.length} (hors hydrogène).`;
+          $('.l-svgbox',this.root).innerHTML=lewisSVG(m,s,{interactive:true,done:this.localDoneMap()});
+        } else {
+          fb.className='fb warn';
+          fb.textContent=nn<=1?'À revoir : combien d\'atomes sont liés à celui-ci ? Peut-on parler d\'un angle entre liaisons ?':`À revoir : compte les directions (${nn} atomes liés + ${nl} doublets non liants = ${nn+nl}). Place-les le plus loin possible les unes des autres, puis ne garde que la position des atomes.`;
+        }
+      }));
+      return;
+    }
+    box.innerHTML=h;
+  }
+}
+
+/* ======================= ONGLET 1 : situation ======================= */
+function initApp(){
+  const h2o=byId('H2O'),co2=byId('CO2');
+  $('#appSvgs').innerHTML=[h2o,co2].map(e=>`<div>${lewisSVG(e,{o:e.sol.o,lp:e.sol.lp},{interactive:false})}<div class="small mute">${e.name} (${e.f})</div></div>`).join('');
+  $$('#appSvgs svg').forEach(s=>{s.style.maxHeight='190px'});
+  $('#q').addEventListener('input',e=>{S.question=e.target.value;nbRefresh()});
+  $$('[data-go]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.go)));
+}
+
+/* ======================= ONGLET 3 : répulsion des doublets ======================= */
+const Lab=(()=>{
+  const v=new Viewer($('#cv-lab'));let mode='ent',ent=byId('H2O'),b=2,l=2,orders=[1,1],P=[],w=[],iter=0,running=false,E=0,weighted=false,hide=false,ranOnce=false;
+  const box=$('#labPanel');
+  const arrText=n=>n===2?'opposées l\'une de l\'autre (180°)':(n===3?'dans un plan, à 120° l\'une de l\'autre':(n===4?'aux sommets d\'un tétraèdre (109,5°)':'—'));
+  function dirs(){
+    if(mode==='ent'){b=ent.nbr[ent.c].length;l=ent.sol.lp[ent.c];orders=ent.nbr[ent.c].map(x=>ent.sol.o[x.k])}
+    else orders=Array(b).fill(1);
+  }
+  function weights(){return [...Array(b).fill(1),...Array(l).fill(weighted?W_LP:1)]}
+  function scene(){
+    const atoms=[{p:[0,0,0],r:.45,col:mode==='ent'?EL[centerSym(ent)].col:'#c7ccd6',label:mode==='ent'?centerSym(ent):'X'}],bonds=[],lobes=[];
+    const Lb=1.35;
+    for(let i=0;i<b+l;i++){
+      if(i<b){
+        const nbr=mode==='ent'?ent.atoms[ent.nbr[ent.c][i].j]:null;
+        atoms.push({p:vscl(P[i],Lb),r:nbr?EL[nbr.s].r*.9:.3,col:nbr?EL[nbr.s].col:'#9aa3b2',label:nbr?nbr.s:'A'});
+        bonds.push({a:0,b:atoms.length-1,order:orders[i]});
+      } else if(!hide){lobes.push({o:[0,0,0],d:P[i],len:1.15})}
+    }
+    return {atoms,bonds,lobes};
+  }
+  function setup(){
+    dirs();P=randDirs(b+l);w=weights();iter=0;running=true;ranOnce=true;v.setScene(scene(),1.9);
+  }
+  v.tick=function(){
+    if(!running)return;
+    let mx=0;for(let k=0;k<10;k++)mx=relaxStep(P,w,.15);iter+=10;E=repEnergy(P,w);v.setScene(scene());
+    if(mx<1e-5||iter>2500){running=false;finish()}
+    renderReadout();
+  };
+  function anglesInfo(){
+    const bb=[],all=[];
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=angleBetween(P[i],P[j]);all.push(a);if(i<b&&j<b)bb.push(a)}
+    const r=(arr)=>arr.length?[Math.min(...arr),Math.max(...arr)]:null;
+    return {bb:r(bb),all:r(all)};
+  }
+  const fmtR=r=>!r?'—':(Math.abs(r[1]-r[0])<.15?fr((r[0]+r[1])/2)+'°':fr(r[0])+'° à '+fr(r[1])+'°');
+  function renderReadout(){
+    const rd=$('#labRead');if(!rd)return;const a=anglesInfo();
+    rd.innerHTML=`<table class="t"><tbody><tr><td>Énergie de répulsion (u.a.)</td><td><b>${fr(E,3)}</b>${running?' · diminue…':' · minimale ✓'}</td></tr>
+    <tr><td>Angle entre directions de doublets</td><td>${fmtR(a.all)}</td></tr>
+    <tr><td>Angle entre deux liaisons</td><td>${b>=2?fmtR(a.bb):'—'}</td></tr></tbody></table>`;
+  }
+  function finish(){
+    const g=geomFromNL(b,l),fb=$('#labFb');if(!fb)return;
+    let t=`${b+l} directions : elles se placent ${arrText(b+l)}. `;
+    t+=l?`${l>1?'Les '+l+' doublets non liants ne se voient':'Le doublet non liant ne se voit'} pas : les atomes dessinent une géométrie « ${GEO[g].toLowerCase()} ».`:`Aucun doublet non liant : la géométrie de l'entité est « ${GEO[g].toLowerCase()} ».`;
+    if(g==='aucune')t=`${b+l} directions, mais un seul atome lié : on ne peut pas définir d'angle (entité diatomique).`;
+    let cls='';
+    const p=mode==='ent'?S.pred[ent.id]:null;
+    if(p){
+      if(p.geom===g){t+=` Ta prévision (${GEO[p.geom].toLowerCase()}, certitude ${p.cert}/5) concorde avec le modèle ✓.`;cls='ok'}
+      else {t+=` Ta prévision était « ${GEO[p.geom].toLowerCase()} » (certitude ${p.cert}/5). Le modèle donne autre chose : reprends le décompte autour de l'atome central (${plural(b,'atome lié','atomes liés')}, ${plural(l,'doublet non liant','doublets non liants')}). Si tu étais très sûr·e, demande-toi ce que cela t'apprend sur ta méthode.`;cls='warn'}
+    }
+    fb.className='fb '+cls;fb.textContent=t;
+  }
+  function panel(){
+    const ents=SIMPLE.filter(e=>e.id!=='OH-');
+    box.innerHTML=`<div class="row"><label>Entité : <select id="labSel">${ents.map(e=>`<option value="${e.id}">${e.name} (${e.t})</option>`).join('')}<option value="free">Exploration libre</option></select></label></div>
+    <div id="labForm"></div>
+    <div class="row small"><label><input type="checkbox" id="labW"> Les doublets non liants repoussent un peu plus (amélioration du modèle)</label></div>
+    <div id="labRead"></div><div class="fb" id="labFb" aria-live="polite"></div>`;
+    $('#labSel').value=mode==='free'?'free':ent.id;$('#labW').checked=weighted;
+    $('#labSel').addEventListener('change',e=>{if(e.target.value==='free')mode='free';else{mode='ent';ent=byId(e.target.value)}form();$('#labFb').textContent='';$('#labFb').className='fb';dirs();P=randDirs(b+l);w=weights();ranOnce=false;running=false;v.setScene({atoms:[],bonds:[],lobes:[]});$('#labRead').innerHTML=''});
+    $('#labW').addEventListener('change',e=>{weighted=e.target.checked;if(ranOnce){setup()}});
+    form();
+  }
+  function form(){
+    const f=$('#labForm');
+    if(mode==='ent'){
+      const p=S.pred[ent.id]||{dirs:'',geom:'',cert:3};
+      f.innerHTML=`<h3>Prévoir avant de lancer</h3>
+      <div class="row small"><label>Nombre de directions autour de l'atome central (${centerSym(ent)}) : <select id="pDirs"><option value="">—</option>${[2,3,4].map(n=>`<option value="${n}" ${+p.dirs===n?'selected':''}>${n}</option>`).join('')}</select></label></div>
+      <div class="small">Géométrie de l'entité, selon toi :</div><div class="opts" id="pGeo">${GEO_CHOICES.map(g=>`<button type="button" data-g="${g}" aria-pressed="${p.geom===g}">${GEO[g]}</button>`).join('')}</div>
+      <div class="row small"><label>Ma certitude : <input type="range" id="pCert" min="1" max="5" value="${p.cert}" aria-describedby="pCertV"> <b id="pCertV">${p.cert}/5</b></label></div>
+      <div class="btns"><button class="btn" id="pGo" type="button">${S.pred[ent.id]?'Relancer la répulsion':'Valider ma prévision et lancer'}</button></div>
+      <div class="small mute">Pense au schéma de Lewis de ${ent.name.toLowerCase()} (étape 2).</div>`;
+      let geom=p.geom;
+      $$('#pGeo button').forEach(bt=>bt.addEventListener('click',()=>{geom=bt.dataset.g;$$('#pGeo button').forEach(x=>x.setAttribute('aria-pressed',String(x===bt)))}));
+      $('#pCert').addEventListener('input',e=>{$('#pCertV').textContent=e.target.value+'/5'});
+      $('#pGo').addEventListener('click',()=>{
+        const d=$('#pDirs').value;
+        if(!d||!geom){$('#labFb').className='fb warn';$('#labFb').textContent='Avant de lancer, choisis un nombre de directions et une géométrie : c\'est ta prévision.';return}
+        S.pred[ent.id]={dirs:+d,geom,cert:+$('#pCert').value};nbRefresh();molRefresh();$('#pGo').textContent='Relancer la répulsion';setup();
+      });
+    } else {
+      f.innerHTML=`<h3>Exploration libre</h3><div class="row small"><label>Atomes liés (directions de liaison) : <input type="range" id="fB" min="1" max="4" value="${b}"> <b id="fBv">${b}</b></label></div>
+      <div class="row small"><label>Doublets non liants : <input type="range" id="fL" min="0" max="3" value="${l}"> <b id="fLv">${l}</b></label></div>
+      <div class="small mute">Au plus 4 directions au total dans ce modèle. Essaie différentes combinaisons et note la géométrie obtenue.</div>
+      <div class="btns"><button class="btn" id="fGo" type="button">Lancer la répulsion</button></div>`;
+      const upd=ev=>{const id=ev&&ev.target?ev.target.id:'';b=+$('#fB').value;l=+$('#fL').value;if(b+l>4){if(id==='fB'){l=4-b;$('#fL').value=l}else{b=4-l;$('#fB').value=b}}$('#fBv').textContent=b;$('#fLv').textContent=l};
+      $('#fB').addEventListener('input',upd);$('#fL').addEventListener('input',upd);
+      $('#fGo').addEventListener('click',()=>{upd();setup()});
+    }
+  }
+  panel();
+  $('#lab-auto').addEventListener('change',e=>v.auto=e.target.checked);
+  $('#lab-hidelp').addEventListener('change',e=>{hide=e.target.checked;if(P.length)v.setScene(scene())});
+  return {v,setEntity(id){if(id){mode='ent';ent=byId(id)}panel()},setWeighted(x){weighted=x;const c=$('#labW');if(c)c.checked=x},_state:()=>({b,l,P,E,running}),run:setup,anglesInfo};
+})();
+
+/* ======================= ONGLET 4 : modèle 3D et angles ======================= */
+const Mol=(()=>{
+  let ent=byId('H2O'),sel=[],reading=null;
+  const v=new Viewer($('#cv-mol'),{onPick:i=>{if(i===null){sel=[];reading=null}else{if(sel.length>=2)sel=[];if(!sel.includes(i))sel.push(i);if(sel.length===2)computeReading()}v.sel=sel;draw();panel()}});
+  const box=$('#molPanel');
+  function neighbors(i){return ent.nbr[i].map(x=>x.j)}
+  function computeReading(){
+    const [i,j]=sel,common=neighbors(i).filter(x=>neighbors(j).includes(x));
+    if(!common.length){reading={err:true};return}
+    const c=common[0],pos=build3D(ent),tr=angleBetween(vsub(pos[i],pos[c]),vsub(pos[j],pos[c]));
+    const val=Math.max(0,Math.min(180,Bruit.appliquer(tr,tr)));
+    reading={c,i,j,val:Math.round(val*10)/10,tr,label:`${ent.atoms[i].s}–${ent.atoms[c].s}–${ent.atoms[j].s}`};
+  }
+  function draw(){
+    const lp=$('#mol-lp').value,sc=sceneOf(ent,{lp,labels:$('#mol-labels').checked});
+    sc.lines=[];
+    if(reading&&!reading.err){sc.lines=[{a:sc.pos[reading.c],b:sc.pos[reading.i]},{a:sc.pos[reading.c],b:sc.pos[reading.j]}]}
+    v.setScene(sc,ent.id==='CO2'?1.95:1.65);v.sel=sel;
+  }
+  function panel(){
+    const idealN=ent.nbr[ent.c].length+ent.sol.lp[ent.c],ideal=idealAngle(idealN);
+    const p=S.pred[ent.id];
+    let rd='<p class="small">Clique sur deux atomes liés au même atome central.</p>';
+    if(sel.length===1)rd=`<p class="small">Atome ${ent.atoms[sel[0]].s} sélectionné. Clique sur un second atome.</p>`;
+    if(reading&&reading.err)rd='<p class="small wc">Ces deux atomes n\'ont pas de voisin commun. Choisis deux atomes liés au même atome central.</p>';
+    if(reading&&!reading.err)rd=`<p><b>Angle ${reading.label} : ${fr(reading.val)}°</b> <span class="small mute">${Bruit.actif()?'(lecture, ±0,5 %)':'(valeur du modèle)'}</span></p><div class="btns"><button class="btn" id="mRel" type="button">Relever cet angle dans le tableau</button></div>`;
+    box.innerHTML=`<div class="row"><label>Entité : <select id="mSel">${SIM3D.map(e=>`<option value="${e.id}" ${e.id===ent.id?'selected':''}>${e.name} (${e.t})</option>`).join('')}</select></label></div>
+    <div class="small mute">${p?`Ta prévision (étape 3) : ${GEO[p.geom].toLowerCase()}, certitude ${p.cert}/5.`:'Tu n\'as pas encore fait de prévision pour cette entité (étape 3).'}</div>
+    <div class="row small"><label><input type="checkbox" id="mTh" ${Bruit.actif()?'':'checked'}> Modèle théorique (sans bruit de lecture)</label></div>
+    ${rd}
+    <h3>Tableau de mesures</h3>${tableHtml()}<div class="btns"><button class="btn sec" id="mClr" type="button">Effacer le tableau</button></div>`;
+    $('#mSel').addEventListener('change',e=>{ent=byId(e.target.value);sel=[];reading=null;draw();panel()});
+    $('#mTh').addEventListener('change',e=>{Bruit.theorique(e.target.checked);if(sel.length===2)computeReading();draw();panel()});
+    const rel=$('#mRel');if(rel)rel.addEventListener('click',()=>{
+      const row={id:ent.id,name:ent.name,t:ent.t,label:reading.label,val:reading.val,ideal,geomPred:p?p.geom:null,theory:!Bruit.actif()};
+      const k=S.meas.findIndex(r=>r.id===ent.id&&r.label===row.label);if(k>=0)S.meas[k]=row;else S.meas.push(row);
+      toast('Angle relevé');panel();renderVal();nbRefresh();
+    });
+    $('#mClr').addEventListener('click',()=>{S.meas=[];panel();renderVal();nbRefresh()});
+  }
+  function tableHtml(){
+    if(!S.meas.length)return '<p class="small mute">Aucune mesure pour l\'instant.</p>';
+    return `<div style="overflow-x:auto"><table class="t"><thead><tr><th>Entité</th><th>Angle</th><th>Mesuré</th><th>Modèle idéal</th><th>Écart</th></tr></thead><tbody>${S.meas.map(r=>`<tr><td>${r.t}</td><td>${r.label}</td><td>${fr(r.val)}°</td><td>${fr(r.ideal)}°</td><td>${fr(r.val-r.ideal)}°</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  $('#mol-lp').addEventListener('change',draw);$('#mol-labels').addEventListener('change',draw);$('#mol-auto').addEventListener('change',e=>v.auto=e.target.checked);
+  draw();panel();
+  return {v,setEntity(id){ent=byId(id);sel=[];reading=null;draw();panel()},refresh(){panel()},pick(i){v.onPick(i)},_state:()=>({ent,sel,reading})};
+})();
+function molRefresh(){Mol.refresh()}
+
+/* VAL : confronter le modèle aux mesures */
+function renderVal(){
+  const box=$('#valCard');
+  const ang=renderVal.ang||(renderVal.ang=modelAngle(2,2,true));
+  if(!S.meas.length){box.innerHTML=`<span class="comp"><abbr title="Valider">VAL</abbr> · Juger un écart</span><h2>Le modèle idéal colle-t-il aux mesures ?</h2><p class="small mute">Relève au moins un angle dans le tableau (par exemple celui de l'eau) : tu pourras ensuite comparer la mesure à la prédiction du modèle.</p>`;return}
+  const rows=S.meas.map(r=>{const d=r.val-r.ideal,u=Math.max(.1,Math.abs(r.val)*.005),big=Math.abs(d)>2*u+.05;return `<tr><td>${r.t} (${r.label})</td><td>${fr(r.val)}°</td><td>${fr(r.ideal)}°</td><td>${fr(d)}° (${fr(100*d/r.ideal)} %)</td><td>${big?'<span class="wc">plus grand que l\'incertitude de lecture (≈ ±'+fr(u)+'°)</span>':'<span class="okc">compatible avec l\'incertitude de lecture</span>'}</td></tr>`}).join('');
+  box.innerHTML=`<span class="comp"><abbr title="Valider">VAL</abbr> · Juger un écart</span><span class="comp"><abbr title="Communiquer">COM</abbr> · Argumenter</span>
+  <h2>Le modèle idéal colle-t-il aux mesures ?</h2>
+  <div style="overflow-x:auto"><table class="t"><thead><tr><th>Mesure</th><th>Mesuré</th><th>Modèle idéal</th><th>Écart</th><th>Verdict</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <h3>Comment interpréter les écarts ?</h3>
+  <div class="opts" id="vOpts">
+    <button type="button" data-v="A" aria-pressed="${S.valChoice==='A'}">A · Les écarts viennent seulement des erreurs de lecture</button>
+    <button type="button" data-v="B" aria-pressed="${S.valChoice==='B'}">B · Les doublets non liants (et les liaisons multiples) prennent un peu plus de place : ils « serrent » les angles entre liaisons</button>
+    <button type="button" data-v="C" aria-pressed="${S.valChoice==='C'}">C · Le modèle est faux, il faut l'abandonner</button></div>
+  <div class="fb" id="vFb" aria-live="polite"></div>
+  <h3>Améliorer le modèle</h3>
+  <p class="small">À l'étape 3, coche « Les doublets non liants repoussent un peu plus ». Pour l'eau, quel angle entre les deux liaisons O–H le modèle donne-t-il alors ?</p>
+  <div class="row"><label>Angle H–O–H du modèle amélioré : <input class="n" type="text" inputmode="decimal" id="vNum" value="${S.valNum}"> °</label><button class="btn sec" id="vNumGo" type="button">Vérifier</button><button class="btn sec" id="vGoLab" type="button">Aller à l'étape 3</button></div>
+  <div class="fb" id="vNumFb" aria-live="polite"></div>`;
+  const msgs={
+    A:['warn','Compare l\'écart à l\'incertitude de lecture : pour l\'eau, la lecture varie d\'environ ±0,5° et l\'écart avec le modèle idéal est de 5°. Les erreurs de lecture ne suffisent pas à l\'expliquer : il y a autre chose.'],
+    B:['ok','Oui ✓. Le modèle prévoit bien la forme (coudée, pyramidale…), mais un doublet non liant est plus « étalé » qu\'un doublet liant : il repousse davantage ses voisins et referme un peu les angles. On peut donc améliorer le modèle sans l\'abandonner.'],
+    C:['warn','Le modèle prévoit correctement la forme et l\'ordre de grandeur des angles (à quelques degrés près). Un modèle se critique et s\'améliore plutôt qu\'on ne l\'abandonne : qu\'est-ce qu\'il ne prend pas en compte ?']
+  };
+  $$('#vOpts button').forEach(b=>b.addEventListener('click',()=>{S.valChoice=b.dataset.v;$$('#vOpts button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));const m=msgs[S.valChoice];$('#vFb').className='fb '+m[0];$('#vFb').textContent=m[1];nbRefresh()}));
+  if(S.valChoice){const m=msgs[S.valChoice];$('#vFb').className='fb '+m[0];$('#vFb').textContent=m[1]}
+  $('#vGoLab').addEventListener('click',()=>{Lab.setEntity('H2O');showTab('lab')});
+  $('#vNumGo').addEventListener('click',()=>{
+    const x=Number($('#vNum').value.replace(',','.'));S.valNum=$('#vNum').value;const fb=$('#vNumFb');
+    if(!isFinite(x)||!$('#vNum').value.trim()){fb.className='fb warn';fb.textContent='Écris un nombre (en degrés).';return}
+    if(Math.abs(x-ang)<=1.3){fb.className='fb ok';fb.textContent=`✓ Avec ce réglage, le modèle donne environ ${fr(ang)}° : très proche de la valeur mesurée (104,5°).`}
+    else{fb.className='fb warn';fb.textContent='Pas encore : lance la répulsion pour l\'eau avec la case cochée et lis « Angle entre deux liaisons ».'}
+    nbRefresh();
+  });
+}
+
+/* ======================= ONGLET 5 : qui est-ce ? ======================= */
+const Who=(()=>{
+  const v=new Viewer($('#cv-who'));let cur=null,done=false,chosen=new Set();const box=$('#whoPanel');
+  const lpSel=$('#who-lp');
+  function scene(){
+    const lp=lpSel.checked?'all':'none',sc=sceneOf(cur,{lp,labels:S.who.mode==='color'});
+    if(S.who.mode==='shape'){sc.atoms.forEach(a=>{a.col='#aab2c0';a.r=.38})}
+    v.setScene(sc,cur.id==='CO2'?2.0:1.7);
+  }
+  function legend(){
+    $('#whoLegend').innerHTML=S.who.mode==='color'?['H','C','N','O'].map(s=>`<span><span class="dot" style="background:${EL[s].col}"></span>${s} (${EL[s].n})</span>`).join('')+'<span><span class="dot" style="background:var(--lp)"></span>doublet non liant</span>':'<span>Tous les atomes sont gris : seule la forme est visible.</span><span><span class="dot" style="background:var(--lp)"></span>doublet non liant</span>';
+  }
+  function compat(a){return SEVEN.filter(x=>x.atoms.length===a.atoms.length&&x.geom===a.geom)}
+  function next(){
+    let n;do{n=SEVEN[Math.floor(Math.random()*SEVEN.length)]}while(cur&&n.id===cur.id&&SEVEN.length>1);
+    cur=n;done=false;chosen=new Set();S.who.cur=n.id;lpSel.checked=false;scene();legend();panel();
+  }
+  function panel(){
+    const m=S.who.mode;
+    box.innerHTML=`<p class="small mute">${m==='color'?'Quelle est cette entité ?':'Coche toutes les formules compatibles avec cette forme (nombre d\'atomes et géométrie).'}</p>
+    <div class="opts" id="wOpts">${SEVEN.map(e=>`<button type="button" data-id="${e.id}" aria-pressed="${chosen.has(e.id)}">${e.f}</button>`).join('')}</div>
+    <div class="btns">${m==='shape'?'<button class="btn" id="wCheck" type="button">Vérifier ma sélection</button>':''}<button class="btn sec" id="wNext" type="button">Nouvelle entité</button></div>
+    <div class="fb" id="wFb" aria-live="polite"></div>
+    <div id="wLewis"></div>
+    <p class="small mute">Réussites : ${S.who.ok} / ${S.who.n} tentative${S.who.n>1?'s':''}.</p>`;
+    $$('#wOpts button').forEach(b=>b.addEventListener('click',()=>{
+      if(done)return;
+      if(m==='color'){choose(b.dataset.id)}
+      else{const id=b.dataset.id;chosen.has(id)?chosen.delete(id):chosen.add(id);b.setAttribute('aria-pressed',String(chosen.has(id)))}
+    }));
+    const c=$('#wCheck');if(c)c.addEventListener('click',checkShape);
+    $('#wNext').addEventListener('click',next);
+  }
+  function revealLewis(){
+    const e=cur,nn=e.nbr[e.c].length,nl=e.sol.lp[e.c];
+    $('#wLewis').innerHTML=`<div class="two" style="margin-top:8px"><div>${lewisSVG(e,{o:e.sol.o,lp:e.sol.lp},{interactive:false})}</div><div class="small" style="text-align:left"><b>${e.name} (${e.f})</b><br>Atome central ${centerSym(e)} : ${plural(nn,'atome lié','atomes liés')} + ${plural(nl,'doublet non liant','doublets non liants')} = ${nn+nl} directions → ${GEO[e.geom].toLowerCase()}.</div></div>`;
+    $$('#wLewis svg').forEach(s=>s.style.maxHeight='160px');
+    lpSel.checked=true;scene();
+  }
+  function choose(id){
+    S.who.n++;const fb=$('#wFb'),A=cur,C=byId(id);
+    if(id===A.id){S.who.ok++;done=true;fb.className='fb ok';fb.textContent=`✓ C'est bien ${A.name.toLowerCase()}.`;revealLewis();panel2()}
+    else{
+      let t='Pas encore. ';
+      if(A.atoms.length!==C.atoms.length)t+=`Compte les atomes : il y en a ${A.atoms.length} sur la figure, la formule choisie en compte ${C.atoms.length}.`;
+      else if(centerSym(A)!==centerSym(C))t+='Regarde la couleur de l\'atome central : ce n\'est pas celui de la formule choisie.';
+      else t+='Compare les atomes périphériques.';
+      if(!lpSel.checked)t+=' Tu peux aussi montrer les doublets non liants.';
+      fb.className='fb warn';fb.textContent=t;panel2(true);
+    }
+  }
+  function panel2(keep){ // mise à jour du score sans effacer le feedback
+    const fb=$('#wFb'),cls=fb.className,txt=fb.textContent,lew=$('#wLewis').innerHTML;
+    panel();$('#wFb').className=cls;$('#wFb').textContent=txt;$('#wLewis').innerHTML=lew;
+    if(done)$$('#wOpts button').forEach(b=>{if(b.dataset.id===cur.id)b.classList.add('good')});
+  }
+  function checkShape(){
+    S.who.n++;const A=cur,good=new Set(compat(A).map(x=>x.id)),fb=$('#wFb');
+    const miss=[...good].filter(x=>!chosen.has(x)),extra=[...chosen].filter(x=>!good.has(x));
+    if(!miss.length&&!extra.length&&chosen.size){S.who.ok++;done=true;fb.className='fb ok';fb.textContent=`✓ Ces formules ont toutes ${A.atoms.length} atomes et une géométrie ${GEO[A.geom].toLowerCase()}. L'entité cachée était ${A.name.toLowerCase()} : la forme seule ne permet pas de distinguer les entités qui ont le même nombre d'atomes et la même géométrie.`;revealLewis();panel2()}
+    else{
+      let t='Pas encore. ';
+      if(extra.length)t+=`${plural(extra.length,'formule cochée ne correspond','formules cochées ne correspondent')} pas : vérifie le nombre d'atomes et la forme (plane, pyramidale, tétraédrique…). `;
+      if(miss.length)t+='Il en manque au moins une : plusieurs entités peuvent avoir la même forme. ';
+      if(!lpSel.checked)t+='Les doublets non liants peuvent t\'aider à raisonner.';
+      fb.className='fb warn';fb.textContent=t;panel2(true);
+    }
+  }
+  $$('[data-wm]').forEach(b=>b.addEventListener('click',()=>{S.who.mode=b.dataset.wm;$$('[data-wm]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));next()}));
+  lpSel.addEventListener('change',()=>cur&&scene());
+  $('#who-auto').addEventListener('change',e=>v.auto=e.target.checked);
+  next();
+  return {v,_cur:()=>cur,next,choose,compat};
+})();
+
+/* ======================= ONGLET 7 : carnet ======================= */
+const MAP_STEPS=[
+  'La formule de l\'entité (et sa charge éventuelle)',
+  'Le nombre d\'électrons de valence de chaque atome (tableau périodique), puis le nombre de doublets',
+  'Le schéma de Lewis : doublets liants et doublets non liants',
+  'Autour de l\'atome central : atomes liés (une liaison multiple compte pour une direction) et doublets non liants',
+  'Les doublets se repoussent : ils s\'éloignent le plus possible les uns des autres',
+  'Disposition des directions : 2 opposées, 3 dans un plan, 4 en tétraèdre',
+  'La géométrie de l\'entité : position des seuls atomes (les doublets non liants ne se voient pas)'
+];
+function initCarnet(){
+  const order=MAP_STEPS.map((_,i)=>i);let sh=0;
+  do{for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}sh++}while(order.every((x,i)=>x===i)&&sh<10);
+  S.map=MAP_STEPS.map(()=>-1);
+  $('#mapHost').innerHTML=MAP_STEPS.map((_,p)=>`<div class="node"><b>${p+1}</b><select data-p="${p}" aria-label="Étape ${p+1}"><option value="-1">Choisir l'étape…</option>${order.map(i=>`<option value="${i}">${MAP_STEPS[i]}</option>`).join('')}</select><span data-mk="${p}"></span></div>${p<MAP_STEPS.length-1?'<div class="arrow" aria-hidden="true">↓</div>':''}`).join('');
+  $$('#mapHost select').forEach(s=>s.addEventListener('change',()=>{S.map[+s.dataset.p]=+s.value;$(`[data-mk="${s.dataset.p}"]`).textContent='';nbRefresh()}));
+  $('#mapCheck').addEventListener('click',()=>{
+    let ok=0;S.map.forEach((v,p)=>{const mk=$(`[data-mk="${p}"]`);if(v===p){ok++;mk.innerHTML='<span class="okc">✓</span>'}else mk.innerHTML=v<0?'':'<span class="wc">?</span>'});
+    const fb=$('#mapFb');S.mapOk=ok===MAP_STEPS.length;
+    if(S.mapOk){fb.className='fb ok';fb.textContent='Carte complète ✓. Tu peux maintenant rédiger ton explication.'}
+    else{fb.className='fb warn';fb.textContent=`${ok} étape${ok>1?'s':''} bien placée${ok>1?'s':''} sur ${MAP_STEPS.length}. Pour celles marquées « ? », demande-toi : qu\'est-ce qu\'il faut savoir avant ? qu\'est-ce que cela permet ensuite ?`}
+    nbRefresh();
+  });
+  $('#expl').addEventListener('input',e=>{S.explain=e.target.value;vocab();nbRefresh()});
+  $('#copyNb').addEventListener('click',()=>copyNb());
+  vocab();nbRefresh();
+}
+function vocab(){
+  const t=norm(S.explain||''),words=[['doublet','doublet'],['liant','liant'],['non liant','non liant'],['repuls','répulsion'],['eloign','éloignés'],['angle','angle'],['geometrie','géométrie'],['atome central','atome central']];
+  $('#vocab').innerHTML='Mots utiles : '+words.map(([k,w])=>t.includes(k)?`<span class="okc">✓ ${w}</span>`:`<span>${w}</span>`).join(' · ');
+}
+function notebook(){
+  const L=[];L.push('CARNET — Du schéma de Lewis à la géométrie des entités','');
+  L.push('Problématique : '+(S.question.trim()||'(à écrire)'),'');
+  const ld=Object.keys(S.lewisDone).filter(k=>S.lewisDone[k]);
+  const ldS=ld.filter(k=>byId(k));
+  L.push('Schémas de Lewis réussis : '+(ld.length?ld.map(k=>byId(k)?byId(k).t:(COMPLEX.find(x=>x.id===k)||{name:k}).name).join(', '):'aucun pour l\'instant'));
+  ld.forEach(k=>{const e=byId(k);if(!e){const c=COMPLEX.find(x=>x.id===k);if(c)L.push(`  - ${c.name} : doublets non liants complétés`);return}const nn=e.nbr[e.c].length,nl=e.sol.lp[e.c];L.push(`  - ${e.t} : atome central ${centerSym(e)}, ${plural(nn,'atome lié','atomes liés')} et ${plural(nl,'doublet non liant','doublets non liants')}`)});
+  L.push('');
+  const pk=Object.keys(S.pred);L.push('Mes prévisions de géométrie :'+(pk.length?'':' aucune'));
+  pk.forEach(k=>{const p=S.pred[k],e=byId(k);L.push(`  - ${e.t} : ${p.dirs} directions → ${GEO[p.geom].toLowerCase()} (certitude ${p.cert}/5) ; modèle : ${GEO[e.geom].toLowerCase()}`)});
+  L.push('');
+  L.push('Mes mesures d\'angles :'+(S.meas.length?'':' aucune'));
+  S.meas.forEach(r=>L.push(`  - ${r.t} ${r.label} : ${fr(r.val)}° (modèle idéal ${fr(r.ideal)}°, écart ${fr(r.val-r.ideal)}°)`));
+  if(S.valChoice)L.push('Interprétation retenue : '+{A:'écarts dus aux erreurs de lecture',B:'les doublets non liants occupent plus de place que les doublets liants',C:'le modèle est abandonné'}[S.valChoice]);
+  if(S.valNum)L.push('Angle H–O–H du modèle amélioré : '+S.valNum+'°');
+  L.push('');
+  const lk=Object.keys(S.locDone);if(lk.length){lk.forEach(k=>{const n=Object.values(S.locDone[k]).filter(Boolean).length;L.push(`Molécule complexe ${k} : ${n} atome(s) analysé(s)`)});L.push('')}
+  L.push('Mon explication :');L.push(S.explain.trim()||'(à rédiger)');
+  return L.join('\n');
+}
+function nbRefresh(){const p=$('#nbPre');if(p)p.textContent=notebook()}
+async function copyNb(){
+  const t=notebook();
+  try{await navigator.clipboard.writeText(t);toast('Carnet copié')}
+  catch(e){const r=document.createRange();r.selectNodeContents($('#nbPre'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Sélectionné : copie-le avec Ctrl+C')}
+}
+
+/* ======================= Navigation ======================= */
+const TABS=['app','lewis','lab','mol','who','plus','carnet'];
+function showTab(id){
+  if(!TABS.includes(id))id='app';
+  TABS.forEach(t=>{const p=$('#p-'+t);p.hidden=t!==id;const b=$(`.tab[data-tab="${t}"]`);b.setAttribute('aria-selected',String(t===id))});
+  viewers.forEach(v=>v.dirty=true);
+  try{if(location.hash!=='#'+id)history.replaceState(null,'','#'+id)}catch(e){}
+  window.scrollTo({top:0});
+  if(id==='carnet')nbRefresh();
+}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+(function theme(){
+  const modes=['auto','light','dark'],lab={auto:'auto',light:'clair',dark:'sombre'};let i=0;
+  $('#themeBtn').addEventListener('click',()=>{i=(i+1)%3;document.documentElement.dataset.theme=modes[i];$('#themeBtn').textContent='Thème : '+lab[modes[i]];viewers.forEach(v=>v.dirty=true)});
+})();
+
+/* ======================= Initialisation ======================= */
+initApp();
+lewisInst.simple=new Lewis($('#lewisHost'),SIMPLE,{complex:false});
+lewisInst.complex=new Lewis($('#plusHost'),COMPLEX,{complex:true});
+renderVal();initCarnet();
+requestAnimationFrame(loop);
+{const h=(location.hash||'').slice(1);if(TABS.includes(h))showTab(h)}
+
+/* ======================= Auto-tests (?selftest) ======================= */
+window.__sim={SIMPLE,COMPLEX,diagnose,build3D,lpDirs,relaxFull,modelAngle,angleBetween,idealAngle,geomFromNL,S,Lab,Mol,Who,lewisInst,showTab,slotAngles,notebook};
+})();
+</script>
+</body>
+</html>
