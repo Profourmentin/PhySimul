@@ -281,6 +281,17 @@
     return s;
   });
 
+  /* Charges ponctuelles : dipôle (charge + pleine marquée « + », charge − creuse marquée « − »), lignes de champ de + vers −, capteur de champ. */
+  add("charges", function () {
+    var s = "";
+    s += '<line class="v" style="stroke-width:2" x1="72" y1="60" x2="128" y2="60"/><path class="v" style="stroke-width:2" d="M118 54L128 60L118 66"/>';
+    s += '<path class="v" style="stroke-width:2" d="M70 52C78 22 122 22 130 52"/><path class="v" style="stroke-width:2" d="M118 33L120 40L113 38"/>';
+    s += '<path class="v" style="stroke-width:2" d="M70 68C78 98 122 98 130 68"/><path class="v" style="stroke-width:2" d="M118 87L120 80L113 82"/>';
+    s += '<circle class="f" cx="56" cy="60" r="14"/><path d="M49 60H63M56 53V67" stroke="#fff" stroke-width="3" stroke-linecap="round"/>';
+    s += '<circle class="s" cx="144" cy="60" r="14" style="stroke-width:3"/><path class="s" style="stroke-width:3" d="M137 60H151"/>';
+    return s;
+  });
+
   /* Cristaux : maille cubique en perspective cavalière (arêtes cachées en pointillés), atomes pleins aux 8 sommets, atomes creux au centre des faces visibles, arête a cotée. */
   add("cristal", function () {
     var s = "", x0 = 56, y0 = 40, a = 60, dx = 22, dy = -18;     // face avant : carré de côté a ; fuyantes : décalage (dx, dy)

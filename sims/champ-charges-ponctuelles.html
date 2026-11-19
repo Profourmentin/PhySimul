@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Champ électrique créé par des charges ponctuelles</title>
+<style>
+:root{
+  --bg:#f4f6f9;--card:#ffffff;--ink:#1c2430;--muted:#5a6676;--line:#d8dee7;--soft:#eef2f7;
+  --pos:#d6322e;--neg:#2563c9;--E:#b45309;--F:#7c3aed;--V:#0f8a5f;--accent:#1d4ed8;--accent-ink:#fff;
+  --stage:#fcfcfd;--grid:#e4e9f0;--halo:#ffffff;--sensor:#facc15;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f141b;--card:#171e28;--ink:#e8edf4;--muted:#9aa6b6;--line:#2b3544;--soft:#1e2733;
+  --pos:#ff6b64;--neg:#6ea2ff;--E:#f5a524;--F:#b794f6;--V:#34d399;--accent:#7aa2ff;--accent-ink:#0b1220;
+  --stage:#0d1218;--grid:#1d2631;--halo:#0d1218;--sensor:#facc15;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.top{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+h1{font-size:1.15rem;margin:0}
+.sub{margin:2px 0 0;color:var(--muted);font-size:.85rem}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:14px;padding:14px;max-width:1440px;margin:0 auto;align-items:start}
+@media(max-width:920px){.layout{grid-template-columns:1fr}}
+.stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:12px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;cursor:default}
+.hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;color:var(--muted);font-size:.95rem;pointer-events:none;max-width:70%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 2px 0;color:var(--muted);font-size:.82rem}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--soft)}
+.tabs button{flex:1;padding:10px 6px;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);background:var(--card)}
+.pane{padding:12px 14px 16px}
+.pane[hidden]{display:none}
+h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+h2:first-child{margin-top:0}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tool{border:1px solid var(--line);border-radius:10px;padding:8px 4px 6px;text-align:center;background:var(--soft);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:.76rem;line-height:1.2;color:var(--ink)}
+.tool:active{cursor:grabbing}
+.tool svg{display:block;margin:0 auto 4px}
+.row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+.row label{flex:1;min-width:0}
+input[type=range]{width:100%}
+.chk{display:flex;gap:8px;align-items:flex-start;margin:6px 0;cursor:pointer}
+.chk input{margin-top:3px}
+select,button.btn,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button.btn{cursor:pointer}
+button.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.btn:disabled{opacity:.5;cursor:not-allowed}
+button.btn.sm{padding:3px 8px;font-size:.82rem}
+.note{color:var(--muted);font-size:.82rem}
+table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:.78rem}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
+.val{font-weight:700;font-variant-numeric:tabular-nums}
+.cE{color:var(--E)}.cF{color:var(--F)}.cV{color:var(--V)}
+.comp{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:0 8px;font-size:.74rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.comp abbr{text-decoration:none;color:var(--ink);font-weight:700}
+.mission{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--card)}
+.mission>button{width:100%;text-align:left;border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.mission .body{padding:0 12px 12px}
+.mission .body[hidden]{display:none}
+.step{display:flex;gap:8px;margin:8px 0;align-items:flex-start}
+.step .comp{flex:none;margin-top:2px}
+.opt{display:block;width:100%;text-align:left;margin:5px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.opt[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.cert{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.cert button{padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:.82rem;cursor:pointer}
+.cert button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.retour{border-left:4px solid var(--accent);background:var(--soft);padding:8px 10px;margin:8px 0;border-radius:0 8px 8px 0}
+textarea{width:100%;min-height:64px;resize:vertical}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a href="../index.html" style="font-size:.85rem;color:var(--accent)">← Catalogue des simulations</a>
+    <h1>Champ électrique créé par des charges ponctuelles</h1>
+    <p class="sub">Première spécialité · Mouvement et interactions · Loi de Coulomb et champ électrostatique</p>
+  </div>
+</header>
+
+<main class="layout">
+  <section>
+    <div class="stage" id="stage">
+      <canvas id="cv" role="img" aria-label="Zone de simulation : charges électriques, capteurs de champ et vecteurs champ électrique"></canvas>
+      <div class="hint" id="hint">Glisse une charge depuis le panneau « Outils » pour commencer,<br>ou ouvre l'onglet « Défis » pour une situation guidée.</div>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--pos)"></i>charge positive</span>
+      <span><i style="background:var(--neg)"></i>charge négative</span>
+      <span><i style="background:var(--sensor)"></i>capteur de champ</span>
+      <span><i style="background:var(--E)"></i>champ E</span>
+      <span><i style="background:var(--F)"></i>force F</span>
+      <span><i style="background:var(--V)"></i>potentiel V</span>
+    </div>
+    <p class="note" style="margin:6px 2px">Zone de 8 m × 5 m. Pour retirer un objet : glisse-le hors de la zone, ou sélectionne-le puis « Retirer » (touche Suppr). Flèches du clavier : déplacer l'objet sélectionné.</p>
+  </section>
+
+  <aside class="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabT" aria-selected="true" data-pane="paneT">Outils</button>
+      <button role="tab" id="tabM" aria-selected="false" data-pane="paneM">Mesures</button>
+      <button role="tab" id="tabD" aria-selected="false" data-pane="paneD">Défis</button>
+    </div>
+
+    <!-- OUTILS -->
+    <div class="pane" id="paneT">
+      <h2>Glisse sur la zone</h2>
+      <div class="tools">
+        <div class="tool" data-kind="pos"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="13" fill="var(--pos)"/><path d="M10 17h14M17 10v14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>Charge<br>positive</div>
+        <div class="tool" data-kind="neg"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="13" fill="var(--neg)"/><path d="M10 17h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>Charge<br>négative</div>
+        <div class="tool" data-kind="sensor"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="9" cy="25" r="6" fill="var(--sensor)" stroke="#111" stroke-width="1.5"/><path d="M9 25L27 8" stroke="var(--E)" stroke-width="3" stroke-linecap="round"/><path d="M29 6l-8 1 6 6z" fill="var(--E)"/></svg>Capteur<br>de champ E</div>
+        <div class="tool" data-kind="test"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="9" fill="var(--card)" stroke="var(--F)" stroke-width="3"/><path d="M12.5 17h9M17 12.5v9" stroke="var(--F)" stroke-width="2.5" stroke-linecap="round"/></svg>Charge<br>d'essai</div>
+        <div class="tool" data-kind="probe"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="11" fill="var(--V)"/><text x="17" y="22" text-anchor="middle" font-size="15" font-weight="700" fill="#fff" font-family="system-ui">V</text></svg>Voltmètre<br>(prolongement)</div>
+      </div>
+
+      <div id="selBox" hidden>
+        <h2>Objet sélectionné</h2>
+        <div class="card">
+          <div class="row"><label for="qSlider">Charge : <span class="val" id="qVal"></span></label></div>
+          <input type="range" id="qSlider" min="-5" max="5" step="0.5" value="1" aria-label="Valeur de la charge en nanocoulombs">
+          <div class="row" style="margin-bottom:0"><button class="btn sm" id="btnRemove">Retirer</button><span class="note" id="selInfo"></span></div>
+        </div>
+      </div>
+
+      <h2>Affichage</h2>
+      <label class="chk"><input type="checkbox" id="oVec"><span>Vecteurs champ <b class="cE">E</b> (grille de points)</span></label>
+      <div class="row" id="vecModeRow" style="margin-left:26px" hidden>
+        <select id="oVecMode" aria-label="Mode d'affichage des flèches">
+          <option value="norm">Même longueur (direction)</option>
+          <option value="log">Longueur ↔ intensité (échelle log)</option>
+        </select>
+      </div>
+      <label class="chk"><input type="checkbox" id="oLines"><span>Lignes de champ</span></label>
+      <label class="chk"><input type="checkbox" id="oDecomp"><span>Décomposer <b class="cE">E</b> en une contribution par charge (superposition)</span></label>
+      <label class="chk"><input type="checkbox" id="oGrid" checked><span>Grille de 1 m</span></label>
+
+      <h2>Échelle des flèches de mesure</h2>
+      <div class="row"><label for="oScale">1 m de flèche ↔ <span class="val" id="scaleVal"></span></label></div>
+      <input type="range" id="oScale" min="0" max="6" step="1" value="1">
+      <p class="note" style="margin:2px 0 0">Valable pour les flèches des capteurs et de la force : longueur proportionnelle à l'intensité.</p>
+
+      <h2>Mesures</h2>
+      <label class="chk"><input type="checkbox" id="oTheory"><span>Modèle théorique (sans bruit de mesure)</span></label>
+      <p class="note" style="margin:0">Par défaut, les valeurs affichées par les instruments sont entachées d'une dispersion de l'ordre de 0,5 %, comme au laboratoire.</p>
+
+      <h2>Potentiel (prolongement, lien avec le TP de la cuve)</h2>
+      <div class="row">
+        <button class="btn sm" id="btnEqui">Tracer l'équipotentielle du voltmètre</button>
+        <button class="btn sm" id="btnEquiClear">Effacer</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="oEquiAuto"><span>Équipotentielles automatiques (tous les 10 V)</span></label>
+
+      <h2>Scène</h2>
+      <div class="row"><button class="btn sm" id="btnClear">Tout effacer</button></div>
+    </div>
+
+    <!-- MESURES -->
+    <div class="pane" id="paneM" hidden>
+      <div id="mBody"></div>
+    </div>
+
+    <!-- DEFIS -->
+    <div class="pane" id="paneD" hidden>
+      <p class="note" style="margin-top:0">Six situations guidées. Chaque défi te fait <b>prévoir avant de manipuler</b>, puis confronter ta prévision à la simulation. Les puces indiquent la compétence travaillée à chaque étape.</p>
+      <div id="missions"></div>
+      <div class="row" style="margin-top:12px"><button class="btn pri" id="btnCarnet">Copier mon carnet</button><span class="note">prévisions, relevés et conclusions</span></div>
+    </div>
+  </aside>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= Constantes physiques et géométrie ================= */
+const K = 8.99e9;            // N·m²·C⁻²
+const EPS = 0.04;           // adoucissement numérique près d'une charge (m)
+const WORLD_W = 8, WORLD_H = 5;
+const NOISE = 0.005;        // dispersion relative des instruments
+const VEC_SCALES = [10, 20, 40, 80, 160, 320, 640]; // V/m pour 1 m de flèche
+
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d'), stage = $('stage');
+let W = 800, H = 500, scale = 100, dpr = 1;
+
+/* ================= État ================= */
+const st = {
+  charges: [], sensors: [], test: null, probe: null,
+  opts: {vec:false, vecMode:'norm', lines:false, grid:true, decomp:false, equiAuto:false, theory:false},
+  vecScale: 20, sel: null, active: null, equis: [], nid: 1,
+  releves: [], coulomb: false, notes: {}, preds: {}, open: null
+};
+let drag = null, dirty = true, cache = {lines: [], auto: [], user: []};
+
+/* ================= Utilitaires ================= */
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const supMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+const sup = n => String(n).split('').map(c => supMap[c] || c).join('');
+const fr = (x, d) => x.toFixed(d).replace('.', ',').replace('-', '−');
+function sig(x, n = 3) {
+  if (!isFinite(x)) return '—';
+  if (x === 0) return '0';
+  const a = Math.abs(x);
+  if (a >= 1e4 || a < 1e-2) { const e = Math.floor(Math.log10(a)); return fr(x / Math.pow(10, e), n - 1) + '×10' + sup(e); }
+  const d = Math.max(0, n - 1 - Math.floor(Math.log10(a)));
+  return fr(x, Math.min(d, 6));
+}
+const signed = (x, d = 1) => (x > 0 ? '+' : x < 0 ? '−' : '') + fr(Math.abs(x), d);
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+const renoise = o => { o.nz = 1 + NOISE * gauss(); };
+const mes = (x, o) => st.opts.theory ? x : x * (o && o.nz ? o.nz : 1);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const toS = (x, y) => [x * scale, H - y * scale];
+const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1800); };
+
+/* ================= Physique ================= */
+function Eat(x, y) {
+  let ex = 0, ey = 0;
+  for (const c of st.charges) {
+    const dx = x - c.x, dy = y - c.y, r2 = dx * dx + dy * dy + EPS * EPS;
+    const f = K * c.q * 1e-9 / (r2 * Math.sqrt(r2));
+    ex += f * dx; ey += f * dy;
+  }
+  return {x: ex, y: ey};
+}
+function Eone(c, x, y) {
+  const dx = x - c.x, dy = y - c.y, r2 = dx * dx + dy * dy + EPS * EPS;
+  const f = K * c.q * 1e-9 / (r2 * Math.sqrt(r2));
+  return {x: f * dx, y: f * dy};
+}
+function Vat(x, y) {
+  let v = 0;
+  for (const c of st.charges) v += K * c.q * 1e-9 / Math.sqrt((x - c.x) ** 2 + (y - c.y) ** 2 + EPS * EPS);
+  return v;
+}
+
+/* ---- lignes de champ ---- */
+function traceLine(x, y, dir) {
+  const pts = [[x, y]], ds = 0.04;
+  for (let i = 0; i < 2500; i++) {
+    let e = Eat(x, y), m = Math.hypot(e.x, e.y);
+    if (m < 1e-6) break;
+    e = Eat(x + dir * e.x / m * ds / 2, y + dir * e.y / m * ds / 2); m = Math.hypot(e.x, e.y);
+    if (m < 1e-6) break;
+    x += dir * e.x / m * ds; y += dir * e.y / m * ds;
+    pts.push([x, y]);
+    if (x < -0.1 || x > WORLD_W + 0.1 || y < -0.1 || y > WORLD_H + 0.1) break;
+    let hit = null;
+    for (const c of st.charges) if (dir * c.q < 0 && Math.hypot(x - c.x, y - c.y) < 0.1) { hit = c; break; }
+    if (hit) { pts.push([hit.x, hit.y]); break; }
+  }
+  return pts;
+}
+function buildLines() {
+  const out = [];
+  const P = st.charges.filter(c => c.q > 0).reduce((s, c) => s + c.q, 0);
+  const N = st.charges.filter(c => c.q < 0).reduce((s, c) => s - c.q, 0);
+  const dir = (N > P) ? -1 : 1;                       // on part de l'espèce dominante
+  for (const c of st.charges) {
+    if (dir * c.q <= 0) continue;
+    const n = clamp(Math.round(8 * Math.abs(c.q)), 4, 40);
+    const off = (c.id * 0.37) % 1 * Math.PI / n;
+    for (let k = 0; k < n; k++) {
+      const a = off + 2 * Math.PI * k / n;
+      const pts = traceLine(c.x + 0.08 * Math.cos(a), c.y + 0.08 * Math.sin(a), dir);
+      if (pts.length < 3) continue;
+      // flèches : une toutes les ~1,3 m de longueur d'arc (au moins une, au milieu)
+      const arrows = []; let acc = 0, next = 0.7;
+      const total = pts.reduce((s, p, i) => i ? s + Math.hypot(p[0] - pts[i-1][0], p[1] - pts[i-1][1]) : 0, 0);
+      if (total < 1.4) next = total / 2;
+      for (let i = 1; i < pts.length; i++) {
+        acc += Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]);
+        if (acc >= next && i < pts.length - 1) {
+          arrows.push({x: pts[i][0], y: pts[i][1], dx: dir * (pts[i][0] - pts[i-1][0]), dy: dir * (pts[i][1] - pts[i-1][1])});
+          next += 1.3;
+        }
+      }
+      out.push({pts, arrows});
+    }
+  }
+  return out;
+}
+
+/* ---- équipotentielles (marching squares) ---- */
+const GX = 160, GY = 100;
+function vgrid() {
+  const g = new Float32Array((GX + 1) * (GY + 1));
+  for (let j = 0; j <= GY; j++) for (let i = 0; i <= GX; i++)
+    g[j * (GX + 1) + i] = clamp(Vat(i * WORLD_W / GX, j * WORLD_H / GY), -1e5, 1e5);
+  return g;
+}
+function contour(g, L) {
+  const segs = [], S = GX + 1;
+  const px = (i, j) => [i * WORLD_W / GX, j * WORLD_H / GY];
+  for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) {
+    const a = g[j*S+i], b = g[j*S+i+1], c = g[(j+1)*S+i+1], d = g[(j+1)*S+i];
+    const idx = (a > L ? 1 : 0) | (b > L ? 2 : 0) | (c > L ? 4 : 0) | (d > L ? 8 : 0);
+    if (idx === 0 || idx === 15) continue;
+    const t = (u, v) => (v === u) ? 0.5 : (L - u) / (v - u);
+    const E = {
+      B: () => px(i + t(a, b), j),
+      R: () => px(i + 1, j + t(b, c)),
+      T: () => px(i + t(d, c), j + 1),
+      L: () => px(i, j + t(a, d))
+    };
+    const center = (a + b + c + d) / 4 > L;
+    let pairs;
+    switch (idx) {
+      case 1: case 14: pairs = [['L','B']]; break;
+      case 2: case 13: pairs = [['B','R']]; break;
+      case 3: case 12: pairs = [['L','R']]; break;
+      case 4: case 11: pairs = [['R','T']]; break;
+      case 6: case 9: pairs = [['B','T']]; break;
+      case 7: case 8: pairs = [['L','T']]; break;
+      case 5: pairs = center ? [['B','R'],['T','L']] : [['L','B'],['R','T']]; break;
+      case 10: pairs = center ? [['L','B'],['R','T']] : [['B','R'],['L','T']]; break;
+    }
+    for (const [p, q] of pairs) segs.push([E[p](), E[q]()]);
+  }
+  return segs;
+}
+function buildEquis() {
+  cache.auto = []; cache.user = [];
+  if (!st.opts.equiAuto && !st.equis.length) return;
+  const g = vgrid();
+  if (st.opts.equiAuto) for (let k = -20; k <= 20; k++) {
+    const L = k * 10, segs = contour(g, L);
+    if (segs.length) cache.auto.push({L, segs});
+  }
+  for (const L of st.equis) cache.user.push({L, segs: contour(g, L)});
+}
+function rebuild() {
+  cache.lines = st.opts.lines ? buildLines() : [];
+  buildEquis();
+}
+function invalidate() { dirty = true; }
+
+/* ================= Rendu ================= */
+function resize() {
+  const w = stage.clientWidth || 800;
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = w; H = w * WORLD_H / WORLD_W; scale = W / WORLD_W;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  cv.style.height = H + 'px';
+  invalidate();
+}
+function arrow(x0, y0, x1, y1, color, lw, head = 9, dash) {
+  const len = Math.hypot(x1 - x0, y1 - y0); if (len < 1.5) return;
+  const a = Math.atan2(y1 - y0, x1 - x0), h = Math.min(head, len * 0.6);
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round';
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - Math.cos(a) * h * 0.6, y1 - Math.sin(a) * h * 0.6); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 - h * Math.cos(a - 0.4), y1 - h * Math.sin(a - 0.4));
+  ctx.lineTo(x1 - h * Math.cos(a + 0.4), y1 - h * Math.sin(a + 0.4)); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function label(txt, x, y, color, align = 'left', size = 13) {
+  ctx.save(); ctx.font = `600 ${size}px system-ui,sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 4; ctx.strokeStyle = css('--halo'); ctx.lineJoin = 'round'; ctx.strokeText(txt, x, y);
+  ctx.fillStyle = color; ctx.fillText(txt, x, y); ctx.restore();
+}
+const chargeR = q => 10 + 5 * Math.sqrt(Math.abs(q));
+
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const cE = css('--E'), cF = css('--F'), cV = css('--V'), cPos = css('--pos'), cNeg = css('--neg'), cG = css('--grid'), cInk = css('--ink'), cSens = css('--sensor');
+
+  // grille 1 m
+  if (st.opts.grid) {
+    ctx.strokeStyle = cG; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = 1; x < WORLD_W; x++) { ctx.moveTo(x * scale, 0); ctx.lineTo(x * scale, H); }
+    for (let y = 1; y < WORLD_H; y++) { ctx.moveTo(0, H - y * scale); ctx.lineTo(W, H - y * scale); }
+    ctx.stroke();
+  }
+  // barre d'échelle 1 m
+  ctx.strokeStyle = css('--muted'); ctx.lineWidth = 2; ctx.beginPath();
+  ctx.moveTo(12, H - 14); ctx.lineTo(12 + scale, H - 14); ctx.moveTo(12, H - 19); ctx.lineTo(12, H - 9); ctx.moveTo(12 + scale, H - 19); ctx.lineTo(12 + scale, H - 9); ctx.stroke();
+  label('1 m', 12 + scale / 2, H - 26, css('--muted'), 'center', 12);
+
+  // équipotentielles
+  const drawContours = (list, lw, alpha) => {
+    for (const {L, segs} of list) {
+      if (!segs.length) continue;
+      ctx.save(); ctx.strokeStyle = cV; ctx.globalAlpha = alpha; ctx.lineWidth = L === 0 ? lw + 0.8 : lw;
+      ctx.setLineDash(L < 0 ? [6, 4] : []);
+      ctx.beginPath();
+      for (const [p, q] of segs) { const a = toS(p[0], p[1]), b = toS(q[0], q[1]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+      ctx.stroke(); ctx.restore();
+    }
+  };
+  drawContours(cache.auto, 1.2, 0.6);
+  drawContours(cache.user, 2.4, 1);
+  for (const {L, segs} of cache.user) if (segs.length) {
+    const s = segs[Math.floor(segs.length / 2)], p = toS((s[0][0] + s[1][0]) / 2, (s[0][1] + s[1][1]) / 2);
+    label('V = ' + sig(L, 3) + ' V', p[0] + 6, p[1] - 8, cV, 'left', 12);
+  }
+
+  // lignes de champ
+  if (st.opts.lines) {
+    ctx.save(); ctx.strokeStyle = cE; ctx.globalAlpha = 0.75; ctx.lineWidth = 1.4;
+    for (const l of cache.lines) {
+      ctx.beginPath(); l.pts.forEach((p, i) => { const s = toS(p[0], p[1]); i ? ctx.lineTo(s[0], s[1]) : ctx.moveTo(s[0], s[1]); }); ctx.stroke();
+    }
+    ctx.fillStyle = cE; ctx.globalAlpha = 0.95;
+    for (const l of cache.lines) for (const a of l.arrows) {
+      const s = toS(a.x, a.y), ang = Math.atan2(-a.dy, a.dx);
+      ctx.beginPath(); ctx.moveTo(s[0] + 6 * Math.cos(ang), s[1] + 6 * Math.sin(ang));
+      ctx.lineTo(s[0] - 5 * Math.cos(ang - 0.55), s[1] - 5 * Math.sin(ang - 0.55));
+      ctx.lineTo(s[0] - 5 * Math.cos(ang + 0.55), s[1] - 5 * Math.sin(ang + 0.55)); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // grille de vecteurs champ
+  if (st.opts.vec && st.charges.length) {
+    for (let gx = 0.25; gx < WORLD_W; gx += 0.5) for (let gy = 0.25; gy < WORLD_H; gy += 0.5) {
+      if (st.charges.some(c => Math.hypot(gx - c.x, gy - c.y) < 0.24)) continue;
+      const e = Eat(gx, gy), m = Math.hypot(e.x, e.y); if (m < 1e-3) continue;
+      const t = clamp(Math.log10(Math.max(m, 1)) / Math.log10(3000), 0, 1);
+      const L = (st.opts.vecMode === 'log' ? 0.12 + 0.30 * t : 0.32) * scale / 2;
+      const ux = e.x / m, uy = -e.y / m, c = toS(gx, gy);
+      ctx.save(); ctx.globalAlpha = 0.3 + 0.7 * t;
+      arrow(c[0] - ux * L, c[1] - uy * L, c[0] + ux * L, c[1] + uy * L, cE, 2, 8);
+      ctx.restore();
+    }
+  }
+
+  // charges
+  for (const c of st.charges) {
+    const p = toS(c.x, c.y), r = chargeR(c.q);
+    ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 7);
+    ctx.fillStyle = c.q > 0 ? cPos : c.q < 0 ? cNeg : '#8a94a3'; ctx.fill();
+    if (st.sel && st.sel.obj === c) { ctx.lineWidth = 3; ctx.strokeStyle = cInk; ctx.stroke(); }
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.beginPath();
+    if (c.q !== 0) { ctx.moveTo(p[0] - r * 0.45, p[1]); ctx.lineTo(p[0] + r * 0.45, p[1]); }
+    if (c.q > 0) { ctx.moveTo(p[0], p[1] - r * 0.45); ctx.lineTo(p[0], p[1] + r * 0.45); }
+    ctx.stroke();
+    label(signed(c.q) + ' nC', p[0], p[1] + r + 10, cInk, 'center', 12);
+  }
+
+  // capteurs de champ
+  const vs = st.vecScale;
+  st.sensors.forEach((s, i) => {
+    const e = Eat(s.x, s.y), m = Math.hypot(e.x, e.y), p = toS(s.x, s.y);
+    const lenM = Math.min(3, m / vs), trunc = m / vs > 3;
+    if (m > 1e-6) {
+      const ux = e.x / m, uy = -e.y / m;
+      if (st.opts.decomp && st.charges.length > 1) {
+        let cx = p[0], cy = p[1];
+        for (const c of st.charges) {
+          const ei = Eone(c, s.x, s.y), mi = Math.hypot(ei.x, ei.y);
+          if (mi < 1e-9) continue;
+          const l = Math.min(3, mi / vs) * scale, nx = cx + ei.x / mi * l, ny = cy - ei.y / mi * l;
+          arrow(cx, cy, nx, ny, c.q > 0 ? cPos : cNeg, 2, 8, [5, 3]); cx = nx; cy = ny;
+        }
+      }
+      arrow(p[0], p[1], p[0] + ux * lenM * scale, p[1] + uy * lenM * scale, cE, 3.4, 12);
+      label(`E = ${sig(mes(m, s))} V/m` + (trunc ? ' (flèche tronquée)' : ''), p[0] + 12, p[1] - 18, cE, 'left');
+    } else label('E ≈ 0', p[0] + 14, p[1] - 12, cE);
+    ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, 7); ctx.fillStyle = cSens; ctx.fill();
+    ctx.lineWidth = st.active === s ? 3 : 1.6; ctx.strokeStyle = st.active === s ? cInk : '#111'; ctx.stroke();
+    label(String(i + 1), p[0], p[1] + 20, cInk, 'center', 11);
+  });
+
+  // charge d'essai
+  if (st.test) {
+    const t = st.test, p = toS(t.x, t.y), e = Eat(t.x, t.y), m = Math.hypot(e.x, e.y);
+    if (m > 1e-6 && t.q !== 0) {
+      const sg = Math.sign(t.q), l = Math.min(3, Math.abs(t.q) * m / vs) * scale;
+      arrow(p[0], p[1], p[0] + sg * e.x / m * l, p[1] - sg * e.y / m * l, cF, 3.4, 12);
+      const tx = p[0] + sg * e.x / m * l, ty = p[1] - sg * e.y / m * l;
+      label(`F = ${sig(Math.abs(t.q) * mes(m, t))} nN`, tx + (tx >= p[0] ? 8 : -8), ty + 12, cF, tx >= p[0] ? 'left' : 'right');
+    }
+    ctx.beginPath(); ctx.arc(p[0], p[1], 10, 0, 7); ctx.fillStyle = css('--card'); ctx.fill();
+    ctx.lineWidth = st.sel && st.sel.obj === t ? 4 : 3; ctx.strokeStyle = cF; ctx.stroke();
+    ctx.lineWidth = 2.2; ctx.beginPath();
+    if (t.q !== 0) { ctx.moveTo(p[0] - 4.5, p[1]); ctx.lineTo(p[0] + 4.5, p[1]); }
+    if (t.q > 0) { ctx.moveTo(p[0], p[1] - 4.5); ctx.lineTo(p[0], p[1] + 4.5); }
+    ctx.stroke();
+    label(`q = ${signed(t.q)} nC`, p[0], p[1] + 24, cF, 'center', 12);
+  }
+
+  // voltmètre
+  if (st.probe) {
+    const o = st.probe, p = toS(o.x, o.y), v = Vat(o.x, o.y);
+    ctx.beginPath(); ctx.arc(p[0], p[1], 11, 0, 7); ctx.fillStyle = cV; ctx.fill();
+    if (st.sel && st.sel.obj === o) { ctx.lineWidth = 3; ctx.strokeStyle = cInk; ctx.stroke(); }
+    ctx.fillStyle = '#fff'; ctx.font = '700 13px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('V', p[0], p[1] + 1);
+    label(`V = ${sig(mes(v, o))} V`, p[0] + 16, p[1] - 12, cV, 'left');
+  }
+
+  $('hint').hidden = !!(st.charges.length || st.sensors.length || st.test || st.probe);
+}
+function loop() { if (dirty) { dirty = false; rebuild(); draw(); renderSide(); } requestAnimationFrame(loop); }
+
+/* ================= Objets et interactions ================= */
+const DEFAULTS = [[2,2.5],[6,2.5],[4,3.8],[4,1.2],[2,4],[6,4],[1,1],[7,1]];
+const allObjs = () => [...st.charges, ...st.sensors, ...(st.test ? [st.test] : []), ...(st.probe ? [st.probe] : [])];
+function freeSpot() {
+  for (const [x, y] of DEFAULTS) if (!allObjs().some(o => Math.hypot(o.x - x, o.y - y) < 0.7)) return [x, y];
+  return [1 + Math.random() * 6, 1 + Math.random() * 3];
+}
+function addObj(kind, x, y) {
+  let o;
+  if (kind === 'pos' || kind === 'neg') { o = {type: 'charge', id: st.nid++, q: kind === 'pos' ? 1 : -1, x, y}; st.charges.push(o); }
+  else if (kind === 'sensor') { if (st.sensors.length >= 6) { toast('6 capteurs au maximum'); return null; } o = {type: 'sensor', x, y}; renoise(o); st.sensors.push(o); st.active = o; }
+  else if (kind === 'test') { if (st.test) { toast('Une seule charge d\'essai'); return null; } o = st.test = {type: 'test', q: 1, x, y}; renoise(o); }
+  else if (kind === 'probe') { if (st.probe) { toast('Un seul voltmètre'); return null; } o = st.probe = {type: 'probe', x, y}; renoise(o); }
+  st.sel = {obj: o}; if (o.type === 'sensor') st.active = o;
+  return o;
+}
+function removeObj(o) {
+  if (!o) return;
+  st.charges = st.charges.filter(c => c !== o); st.sensors = st.sensors.filter(s => s !== o);
+  if (st.test === o) st.test = null; if (st.probe === o) st.probe = null;
+  if (st.active === o) st.active = st.sensors[st.sensors.length - 1] || null;
+  if (st.sel && st.sel.obj === o) st.sel = null;
+  invalidate();
+}
+function worldFromEvent(e) {
+  const r = cv.getBoundingClientRect(), s = r.width / WORLD_W;
+  return {x: (e.clientX - r.left) / s, y: WORLD_H - (e.clientY - r.top) / s, inside: e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom};
+}
+function hitTest(w) {
+  const px = 1 / scale * (14);
+  const order = [...(st.probe ? [st.probe] : []), ...(st.test ? [st.test] : []), ...[...st.sensors].reverse(), ...[...st.charges].reverse()];
+  for (const o of order) {
+    const rad = o.type === 'charge' ? chargeR(o.q) / scale : px;
+    if (Math.hypot(o.x - w.x, o.y - w.y) <= rad + 4 / scale) return o;
+  }
+  return null;
+}
+cv.addEventListener('pointerdown', e => {
+  const w = worldFromEvent(e), o = hitTest(w);
+  if (!o) { st.sel = null; invalidate(); return; }
+  st.sel = {obj: o}; if (o.type === 'sensor') st.active = o;
+  drag = {obj: o, ox: o.x - w.x, oy: o.y - w.y, moved: false, sx: e.clientX, sy: e.clientY, bucket: false};
+  cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
+  invalidate();
+});
+document.querySelectorAll('.tool').forEach(t => t.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  const w = worldFromEvent(e), kind = t.dataset.kind;
+  const o = addObj(kind, clamp(w.x, 0.3, WORLD_W - 0.3), clamp(w.y, 0.3, WORLD_H - 0.3));
+  if (!o) return;
+  drag = {obj: o, ox: 0, oy: 0, moved: false, sx: e.clientX, sy: e.clientY, bucket: true};
+  invalidate();
+}));
+window.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4) drag.moved = true;
+  if (!drag.moved) return;
+  const w = worldFromEvent(e);
+  drag.obj.x = clamp(w.x + drag.ox, 0.05, WORLD_W - 0.05);
+  drag.obj.y = clamp(w.y + drag.oy, 0.05, WORLD_H - 0.05);
+  drag.outside = !w.inside;
+  invalidate();
+});
+window.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag; drag = null;
+  const w = worldFromEvent(e);
+  if (d.bucket && !d.moved) { const [x, y] = freeSpot(); d.obj.x = x; d.obj.y = y; }
+  else if (!w.inside && d.moved) { removeObj(d.obj); return; }
+  if (d.obj.type !== 'charge') renoise(d.obj); else [...st.sensors, st.test, st.probe].forEach(o => o && renoise(o));
+  invalidate();
+});
+window.addEventListener('keydown', e => {
+  if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName || '')) return;
+  const o = st.sel && st.sel.obj; if (!o) return;
+  if (e.key === 'Delete' || e.key === 'Backspace') { removeObj(o); e.preventDefault(); return; }
+  const step = e.shiftKey ? 0.5 : 0.1, m = {ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, step], ArrowDown: [0, -step]}[e.key];
+  if (!m) return;
+  o.x = clamp(o.x + m[0], 0.05, WORLD_W - 0.05); o.y = clamp(o.y + m[1], 0.05, WORLD_H - 0.05);
+  if (o.type !== 'charge') renoise(o);
+  e.preventDefault(); invalidate();
+});
+
+/* ================= Panneau latéral ================= */
+function setTab(id) {
+  for (const b of document.querySelectorAll('.tabs button')) { const on = b.dataset.pane === id; b.setAttribute('aria-selected', on); $(b.dataset.pane).hidden = !on; }
+  invalidate();
+}
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.pane)));
+
+function bindOpts() {
+  const map = {oVec: 'vec', oLines: 'lines', oDecomp: 'decomp', oGrid: 'grid', oEquiAuto: 'equiAuto', oTheory: 'theory'};
+  for (const [id, key] of Object.entries(map)) $(id).addEventListener('change', e => { st.opts[key] = e.target.checked; if (key === 'theory') [...st.sensors, st.test, st.probe].forEach(o => o && renoise(o)); invalidate(); });
+  $('oVecMode').addEventListener('change', e => { st.opts.vecMode = e.target.value; invalidate(); });
+  $('oScale').addEventListener('input', e => { st.vecScale = VEC_SCALES[+e.target.value]; invalidate(); });
+  $('btnClear').addEventListener('click', () => { clearScene(); invalidate(); });
+  $('btnRemove').addEventListener('click', () => { if (st.sel) removeObj(st.sel.obj); });
+  $('btnEqui').addEventListener('click', () => {
+    if (!st.probe) { toast('Place d\'abord le voltmètre'); return; }
+    const v = Vat(st.probe.x, st.probe.y);
+    if (Math.abs(v) > 1e4) { toast('Potentiel trop élevé ici'); return; }
+    if (!st.equis.some(l => Math.abs(l - v) < 0.5)) st.equis.push(v);
+    invalidate();
+  });
+  $('btnEquiClear').addEventListener('click', () => { st.equis = []; invalidate(); });
+  $('qSlider').addEventListener('input', e => { const o = st.sel && st.sel.obj; if (o && (o.type === 'charge' || o.type === 'test')) { o.q = +e.target.value; invalidate(); } });
+}
+function setOpt(key, val) {
+  st.opts[key] = val;
+  const ids = {vec: 'oVec', lines: 'oLines', decomp: 'oDecomp', grid: 'oGrid', equiAuto: 'oEquiAuto', theory: 'oTheory'};
+  if (ids[key]) $(ids[key]).checked = val;
+}
+function fresh() { clearScene(); ['vec','lines','decomp','equiAuto'].forEach(k => setOpt(k, false)); }
+function clearScene() { st.charges = []; st.sensors = []; st.test = null; st.probe = null; st.sel = null; st.active = null; st.equis = []; }
+
+function renderSide() {
+  // sélection
+  const o = st.sel && st.sel.obj, editable = o && (o.type === 'charge' || o.type === 'test');
+  $('selBox').hidden = !o;
+  if (o) {
+    $('qSlider').hidden = !editable; $('qSlider').previousElementSibling.hidden = !editable;
+    if (editable) { $('qSlider').value = o.q; $('qVal').textContent = signed(o.q) + ' nC'; }
+    $('selInfo').textContent = `position (${fr(o.x, 2)} ; ${fr(o.y, 2)}) m`;
+  }
+  $('vecModeRow').hidden = !st.opts.vec;
+  $('scaleVal').textContent = `${st.vecScale} V/m`;
+  if (!$('paneM').hidden) renderMeasures();
+}
+
+function renderMeasures() {
+  const s = st.active, out = [];
+  out.push('<h2>Capteur de champ</h2>');
+  if (!st.sensors.length) out.push('<p class="note">Glisse un capteur de champ sur la zone pour mesurer le champ électrique en un point.</p>');
+  else {
+    out.push('<div class="row">' + st.sensors.map((x, i) => `<button class="btn sm" data-act="${i}" aria-pressed="${x === s}" style="${x === s ? 'border-color:var(--accent);font-weight:700' : ''}">Capteur ${i + 1}</button>`).join('') + '</div>');
+    if (s) {
+      const e = Eat(s.x, s.y), m = Math.hypot(e.x, e.y), f = st.opts.theory || !s.nz ? 1 : s.nz;
+      const th = Math.atan2(e.y, e.x) * 180 / Math.PI;
+      out.push(`<div class="card"><div>Position : (${fr(s.x, 2)} ; ${fr(s.y, 2)}) m</div>
+        <div>Valeur mesurée : <span class="val cE">E = ${sig(m * f)} V/m</span> <span class="note">(= N/C)</span></div>
+        <div class="note">Direction : θ = ${fr(th, 0)}° par rapport à l'axe horizontal orienté vers la droite</div></div>`);
+      const rows = st.charges.map((c, i) => {
+        const r = Math.hypot(s.x - c.x, s.y - c.y), Ei = Math.abs(K * c.q * 1e-9 / (r * r));
+        return `<tr><td>${i + 1}</td><td>${signed(c.q)}</td><td>${fr(r, 2)}</td>${st.coulomb ? `<td>${sig(Ei)}</td>` : ''}</tr>`;
+      }).join('');
+      if (rows) out.push(`<table><tr><th>Charge</th><th>q (nC)</th><th>r (m)</th>${st.coulomb ? '<th>kq/r² (V/m)</th>' : ''}</tr>${rows}</table>`);
+      out.push(`<label class="chk"><input type="checkbox" id="oCoulomb" ${st.coulomb ? 'checked' : ''}><span>Afficher le calcul de la loi de Coulomb (k = 8,99×10⁹ N·m²·C⁻²) pour vérifier le mien</span></label>`);
+      if (st.coulomb) {
+        const sx = st.charges.reduce((a, c) => a + Eone(c, s.x, s.y).x, 0), sy = st.charges.reduce((a, c) => a + Eone(c, s.x, s.y).y, 0);
+        const mod = Math.hypot(sx, sy), ec = mod > 1e-9 ? Math.abs(m * f - mod) / mod * 100 : 0;
+        out.push(`<div class="card"><div>Somme vectorielle (modèle) : <span class="val">${sig(mod)} V/m</span></div><div>Écart relatif mesure / modèle : <span class="val">${fr(ec, 2)} %</span></div></div>`);
+      }
+      out.push('<div class="row"><button class="btn sm pri" id="btnReleve">Relever cette mesure</button><span class="note">r = distance à la charge la plus proche</span></div>');
+    }
+  }
+  if (st.test) {
+    const t = st.test, e = Eat(t.x, t.y), m = Math.hypot(e.x, e.y), f = st.opts.theory || !t.nz ? 1 : t.nz;
+    out.push(`<h2>Charge d'essai</h2><div class="card"><div>q = <span class="val cF">${signed(t.q)} nC</span></div>
+      <div>Champ au point : <span class="val cE">E = ${sig(m * f)} V/m</span></div>
+      <div>Force subie : <span class="val cF">F = ${sig(Math.abs(t.q) * m * f)} nN</span> <span class="note">(${t.q > 0 ? 'même sens que E' : t.q < 0 ? 'sens opposé à E' : 'nulle'})</span></div></div>`);
+  }
+  if (st.probe) {
+    const v = Vat(st.probe.x, st.probe.y), f = st.opts.theory || !st.probe.nz ? 1 : st.probe.nz;
+    out.push(`<h2>Voltmètre</h2><div class="card">Potentiel au point : <span class="val cV">V = ${sig(v * f)} V</span></div>`);
+  }
+  out.push('<h2>Relevés</h2>');
+  if (!st.releves.length) out.push('<p class="note">Aucun relevé. Place un capteur puis « Relever cette mesure ».</p>');
+  else {
+    out.push('<table><tr><th>n°</th><th>r (m)</th><th>E (V/m)</th><th>E·r² (V·m)</th><th></th></tr>' +
+      st.releves.map((r, i) => `<tr><td>${i + 1}</td><td>${fr(r.r, 2)}</td><td>${sig(r.E)}</td><td>${sig(r.E * r.r * r.r)}</td><td><button class="btn sm" data-del="${i}" aria-label="Supprimer le relevé ${i + 1}">×</button></td></tr>`).join('') + '</table>');
+    out.push('<div class="row"><button class="btn sm" id="btnRelClear">Effacer les relevés</button></div>');
+  }
+  out.push('<div class="row" style="margin-top:12px"><button class="btn pri" id="btnCarnet2">Copier mon carnet</button></div>');
+  const body = $('mBody'), key = out.join('');
+  if (body.dataset.key === key) return;
+  body.dataset.key = key; body.innerHTML = key;
+  body.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => { st.active = st.sensors[+b.dataset.act]; invalidate(); }));
+  const c = $('oCoulomb'); if (c) c.addEventListener('change', e => { st.coulomb = e.target.checked; invalidate(); });
+  const rl = $('btnReleve'); if (rl) rl.addEventListener('click', () => {
+    if (!st.charges.length) { toast('Aucune charge'); return; }
+    if (st.releves.length >= 14) { toast('14 relevés au maximum'); return; }
+    const s2 = st.active, near = st.charges.reduce((a, c) => Math.hypot(s2.x - c.x, s2.y - c.y) < Math.hypot(s2.x - a.x, s2.y - a.y) ? c : a);
+    const E = Math.hypot(Eat(s2.x, s2.y).x, Eat(s2.x, s2.y).y);
+    st.releves.push({r: Math.hypot(s2.x - near.x, s2.y - near.y), E: mes(E, s2)}); renoise(s2); invalidate();
+  });
+  body.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { st.releves.splice(+b.dataset.del, 1); invalidate(); }));
+  const rc = $('btnRelClear'); if (rc) rc.addEventListener('click', () => { st.releves = []; invalidate(); });
+  $('btnCarnet2').addEventListener('click', copyCarnet);
+}
+
+/* ================= Défis ================= */
+const C = {
+  app: ['APP', "S'approprier"], ana: ['ANA', 'Analyser / Raisonner'], rea: ['RÉA', 'Réaliser'], val: ['VAL', 'Valider'], com: ['COM', 'Communiquer']
+};
+const chip = (k, verb) => `<span class="comp" data-comp="${k}"><abbr title="${C[k][1]}">${C[k][0]}</abbr> · ${verb}</span>`;
+const MISSIONS = [
+  {
+    id: 'm1', titre: 'Le champ d\'une charge isolée',
+    setup() { fresh(); addObj('pos', 4, 2.5); addObj('sensor', 5, 2.5); st.sel = null; },
+    steps: [
+      ['app', 'Problématiser', 'Comment le champ électrique créé par une charge ponctuelle dépend-il de la distance à cette charge ? Représente la situation par un schéma sur ton cahier.'],
+      ['ana', 'Prévoir', 'Avant de toucher à la simulation, choisis ce que tu prévois pour le sens du vecteur champ <b>E</b> mesuré à droite de la charge positive.'],
+      ['rea', 'Mesurer', 'Dans l\'onglet « Mesures », déplace le capteur et relève <b>E</b> pour r = 0,5 ; 1,0 ; 1,5 ; 2,0 m (« Relever cette mesure »).'],
+      ['val', 'Comparer', 'Confronte ta prévision à la simulation. Regarde la colonne <b>E·r²</b> : que remarques-tu ? Est-ce compatible avec la loi de Coulomb et avec la dispersion de 0,5 % des instruments ?'],
+      ['com', 'Conclure', 'Rédige une phrase qui relie la valeur de E à la charge q et à la distance r.']
+    ],
+    predict: {
+      q: 'Le capteur est à droite d\'une charge <b>positive</b>. Le vecteur champ E qu\'il indique sera…',
+      opts: [
+        ['dirigé vers la charge (vers la gauche)', 'Tu avais prévu un vecteur dirigé vers la charge. La simulation montre un vecteur qui s\'en éloigne. Rappelle-toi la définition : E = F/q, donc E a le sens de la force subie par une charge d\'essai <b>positive</b>. Une charge positive placée près d\'une autre charge positive est-elle attirée ou repoussée ? Vérifie avec la charge d\'essai.'],
+        ['dirigé en s\'éloignant de la charge (vers la droite)', 'Ta prévision correspond à l\'observation. Pour la généraliser : que devient le sens de E si la source est négative ? Teste-le avec le curseur de charge de l\'onglet « Outils ».'],
+        ['perpendiculaire à la droite qui joint la charge et le capteur', 'Tu avais prévu un vecteur perpendiculaire. La simulation montre un vecteur porté par la droite qui joint la charge et le capteur (champ <i>radial</i>). Quelle propriété de la situation (aucune direction privilégiée autour de la charge) interdit une direction perpendiculaire ?']
+      ]
+    }
+  },
+  {
+    id: 'm2', titre: 'Deux charges : superposition',
+    setup() { fresh(); addObj('pos', 3, 2.5); addObj('neg', 5, 2.5); addObj('sensor', 4, 2.5); setOpt('decomp', true); st.sel = null; },
+    steps: [
+      ['app', 'Problématiser', 'Comment trouver le champ créé en un point par plusieurs charges à la fois ? Note les grandeurs connues : q₁, q₂, distances au point M.'],
+      ['ana', 'Prévoir', 'Choisis ta prévision pour le champ au point M, milieu des deux charges (+1 nC et −1 nC).'],
+      ['rea', 'Calculer', 'Calcule à la main la valeur de E créé par chaque charge en M (coche « Décomposer E »), puis leur somme vectorielle.'],
+      ['val', 'Comparer', 'Compare ton calcul à la valeur du capteur (onglet « Mesures », coche « Afficher le calcul » pour vérifier). L\'écart est-il compatible avec 0,5 % ? Relis ta prévision.'],
+      ['com', 'Conclure', 'Énonce le principe de superposition avec tes mots, en t\'appuyant sur le schéma des vecteurs mis bout à bout.']
+    ],
+    predict: {
+      q: 'Au point M, milieu d\'une charge <b>+1 nC</b> (à gauche) et d\'une charge <b>−1 nC</b> (à droite), le vecteur champ sera…',
+      opts: [
+        ['nul : les effets des deux charges se compensent', 'Tu avais prévu un champ nul. Active la décomposition : en M, la charge + crée un champ qui s\'<i>éloigne</i> d\'elle (vers la droite) et la charge − crée un champ qui se dirige <i>vers</i> elle (vers la droite aussi). Que se passe-t-il quand deux vecteurs ont le même sens ? Où le champ serait-il nul pour deux charges de même signe ?'],
+        ['dirigé vers la charge négative, avec une norme double de celle d\'une seule charge', 'Ta prévision correspond à l\'observation. Vérifie la norme : E = E₊ + E₋ = 2·k|q|/r². Qu\'obtiendrais-tu avec deux charges de même signe au même endroit ?'],
+        ['dirigé vers la charge positive', 'Tu avais prévu un vecteur dirigé vers la charge positive. Regarde la décomposition : le champ créé par la charge + s\'éloigne d\'elle, donc il pointe vers la droite, côté charge −. Reprends le sens du champ créé par chacune des deux charges.']
+      ]
+    }
+  },
+  {
+    id: 'm3', titre: 'Force sur une charge d\'essai : F = qE',
+    setup() { fresh(); addObj('pos', 3.5, 2.5).q = 2; const t = addObj('test', 5, 2.5); t.q = 1; st.sel = null; },
+    steps: [
+      ['app', 'Problématiser', 'Le champ E est-il une propriété de la charge d\'essai ou de l\'endroit où on la place ? Relis la définition E = F/q.'],
+      ['ana', 'Prévoir', 'Choisis ta prévision pour la valeur du champ quand on double la charge d\'essai.'],
+      ['rea', 'Mesurer', 'Dans « Mesures », relève F et E pour q = +1 nC, puis +2 nC (curseur de charge), puis −1 nC, sans déplacer la charge d\'essai.'],
+      ['val', 'Comparer', 'Calcule F/q dans chaque cas. Que remarques-tu pour E ? Pour le sens de F selon le signe de q ?'],
+      ['com', 'Conclure', 'Rédige la relation entre F, q et E, avec la règle sur le sens de F.']
+    ],
+    predict: {
+      q: 'On passe la charge d\'essai de 1 nC à 2 nC <b>sans la déplacer</b>. Le champ E au même point…',
+      opts: [
+        ['double aussi', 'Tu avais prévu un champ doublé. Mesure : c\'est la <i>force</i> F qui double, pas le champ. Calcule F/q dans les deux cas : que trouves-tu ? Que décrit alors E : la charge d\'essai ou le point de l\'espace ?'],
+        ['est divisé par 2', 'Tu avais prévu un champ divisé par 2. Mesure E dans les deux cas : la force F double mais F/q reste identique. Qu\'est-ce qui, dans la situation, détermine la valeur de E ?'],
+        ['ne change pas', 'Ta prévision correspond à l\'observation : F est proportionnelle à q, mais E = F/q ne dépend que des charges sources et du point. Que devient le <i>sens</i> de F si q est négative ? Vérifie.']
+      ]
+    }
+  },
+  {
+    id: 'm4', titre: 'Lignes de champ',
+    setup() { fresh(); addObj('pos', 3, 2.5).q = 2; addObj('neg', 5, 2.5).q = -2; addObj('sensor', 4, 3.4); setOpt('lines', true); st.sel = null; },
+    steps: [
+      ['app', 'Problématiser', 'Comment représenter le champ dans toute une région de l\'espace, et pas seulement en quelques points ?'],
+      ['ana', 'Prévoir', 'Choisis ce que tu prévois pour l\'allure des lignes de champ de ces deux charges opposées.'],
+      ['rea', 'Explorer', 'Déplace le capteur sur plusieurs lignes : compare la direction du vecteur E à la tangente de la ligne, et son sens à celui des flèches.'],
+      ['val', 'Comparer', 'Repère les zones où les lignes sont resserrées, puis vérifie avec le capteur la valeur de E dans une zone resserrée et dans une zone espacée. Que conclus-tu ?'],
+      ['com', 'Conclure', 'Complète : « Une ligne de champ part de … et arrive sur … ; là où elles sont resserrées, … »']
+    ],
+    predict: {
+      q: 'Les lignes de champ de ces deux charges ( +2 nC à gauche, −2 nC à droite)…',
+      opts: [
+        ['partent de la charge négative et arrivent sur la charge positive', 'Tu avais prévu des lignes orientées de la charge négative vers la positive. Place un capteur sur une ligne : le vecteur E indique le sens des flèches. Dans quel sens le vecteur E pointe-t-il à partir d\'une charge positive ?'],
+        ['partent de la charge positive et arrivent sur la charge négative', 'Ta prévision correspond à l\'observation. Que deviendrait le dessin avec deux charges positives ? Fais l\'essai (change le signe de la charge de droite).'],
+        ['forment des cercles autour de chaque charge sans relier les deux charges', 'Tu avais prévu des cercles autour de chaque charge. Des lignes circulaires fermées n\'apparaissent pas ici : les lignes relient les charges. Place un capteur entre elles : dans quelle direction pointe E ? Une ligne fermée est-elle compatible avec cette direction ?']
+      ]
+    }
+  },
+  {
+    id: 'm5', titre: 'Où le champ est-il nul ?',
+    setup() { fresh(); addObj('pos', 2.5, 2.5); addObj('pos', 5.5, 2.5).q = 4; addObj('sensor', 4, 2.5); setOpt('lines', true); st.sel = null; },
+    steps: [
+      ['app', 'Problématiser', 'Deux charges positives de valeurs différentes (+1 nC et +4 nC, distantes de 3 m) : en quel point entre elles le champ total est-il nul ?'],
+      ['ana', 'Prévoir', 'Choisis ta prévision, puis écris l\'égalité que doivent vérifier les deux champs en ce point.'],
+      ['rea', 'Mesurer', 'Déplace le capteur sur la droite qui joint les charges et cherche le point où E est minimal. Relève sa distance à chaque charge (onglet « Mesures »).'],
+      ['val', 'Comparer', 'Compare à ta prévision et à ton calcul (k|q₁|/r₁² = k|q₂|/r₂²). La valeur affichée est-elle exactement nulle ? Pourquoi (dispersion de 0,5 %, position du capteur) ?'],
+      ['com', 'Conclure', 'Explique en une phrase pourquoi le point est plus proche de la plus petite charge.']
+    ],
+    predict: {
+      q: 'Le champ total s\'annule entre les deux charges. Ce point est…',
+      opts: [
+        ['au milieu des deux charges', 'Tu avais prévu le milieu. Place le capteur au milieu : E n\'est pas nul, il est dirigé vers la charge de gauche. Quelle charge domine au milieu ? Dans quel sens faut-il déplacer le capteur pour rééquilibrer les deux contributions ?'],
+        ['plus près de la plus petite charge (+1 nC)', 'Ta prévision correspond à l\'observation. Peux-tu retrouver la distance par le calcul : k·q₁/r₁² = k·q₂/r₂² avec r₁ + r₂ = 3 m ?'],
+        ['plus près de la plus grande charge (+4 nC)', 'Tu avais prévu un point proche de la grande charge. Place le capteur très près d\'elle : quelle charge domine alors ? Le champ créé par la grande charge peut-il être compensé par celui de la petite à cet endroit ?']
+      ]
+    }
+  },
+  {
+    id: 'm6', titre: 'Équipotentielles (prolongement)',
+    setup() { fresh(); addObj('pos', 3, 2.5).q = 2; addObj('neg', 5, 2.5).q = -2; const p = addObj('probe', 4, 3.4); addObj('sensor', 4, 1.6); setOpt('lines', true); st.sel = null; },
+    steps: [
+      ['app', 'Problématiser', 'Dans le TP de la cuve, tu cherchais des points de même potentiel. Quel lien y a-t-il entre ces lignes et les lignes de champ ?'],
+      ['ana', 'Prévoir', 'Choisis ce que tu prévois pour l\'angle entre une ligne de champ et une équipotentielle.'],
+      ['rea', 'Tracer', 'Place le voltmètre en plusieurs points et trace l\'équipotentielle de chacun (« Outils »). Place le capteur de champ sur une équipotentielle.'],
+      ['val', 'Comparer', 'Compare le vecteur E à la tangente de l\'équipotentielle au point du capteur. Vérifie ta prévision sur plusieurs points.'],
+      ['com', 'Conclure', 'Énonce la propriété que tu as constatée, comme dans ton compte rendu de TP.']
+    ],
+    predict: {
+      q: 'En un point donné, la ligne de champ et l\'équipotentielle qui passent par ce point sont…',
+      opts: [
+        ['tangentes l\'une à l\'autre (parallèles en ce point)', 'Tu avais prévu des courbes tangentes. Place le capteur sur une équipotentielle : le vecteur E est-il parallèle à la courbe ou la coupe-t-il ? Rappelle-toi la cuve : le long d\'une équipotentielle, la tension ne varie pas.'],
+        ['perpendiculaires', 'Ta prévision correspond à l\'observation. Dans quel sens le potentiel varie-t-il le long d\'une ligne de champ ? Observe les valeurs données par le voltmètre.'],
+        ['formant un angle qui dépend du point', 'Tu avais prévu un angle variable. Vérifie en plusieurs points, y compris près d\'une charge et loin : l\'angle change-t-il vraiment ?']
+      ]
+    }
+  }
+];
+
+function renderMissions() {
+  const host = $('missions'); host.innerHTML = '';
+  MISSIONS.forEach((m, mi) => {
+    const open = st.open === m.id, pr = st.preds[m.id] || {};
+    const div = document.createElement('div'); div.className = 'mission';
+    div.innerHTML = `<button aria-expanded="${open}"><span>${mi + 1}. ${m.titre}</span><span aria-hidden="true">${open ? '▾' : '▸'}</span></button><div class="body" ${open ? '' : 'hidden'}></div>`;
+    div.querySelector('button').addEventListener('click', () => { st.open = open ? null : m.id; renderMissions(); });
+    const body = div.querySelector('.body');
+    if (open) {
+      body.innerHTML = `<div class="row"><button class="btn pri sm" data-setup>Mettre en place la situation</button><span class="note">remplace la scène actuelle</span></div>
+        ${m.steps.map((s, i) => `<div class="step">${chip(s[0], s[1])}<div>${s[2]}</div></div>`).join('')}
+        <h2>Ma prévision</h2><div>${m.predict.q}</div>
+        <div data-opts>${m.predict.opts.map((o, i) => `<button class="opt" data-o="${i}" aria-pressed="${pr.o === i}">${o[0]}</button>`).join('')}</div>
+        <div class="note">Je suis…</div>
+        <div class="cert">${['sûr·e de moi', 'hésitant·e', 'je tente au hasard'].map((t, i) => `<button data-c="${i}" aria-pressed="${pr.c === i}">${t}</button>`).join('')}</div>
+        <button class="btn sm" data-confront ${pr.o != null && pr.c != null ? '' : 'disabled'}>Confronter ma prévision à la simulation</button>
+        <div data-retour>${pr.shown ? `<div class="retour"><b>Tu avais prévu :</b> ${m.predict.opts[pr.o][0]} <i>(${['sûr·e de toi', 'hésitant·e', 'au hasard'][pr.c]})</i><br><br>${m.predict.opts[pr.o][1]}<br><br><span class="note">Si ta prévision et la simulation ne coïncident pas : qu\'est-ce que cet écart t\'apprend, surtout si tu étais sûr·e de toi ?</span></div>` : ''}</div>
+        <h2>Ma conclusion</h2><textarea data-note placeholder="Rédige ta conclusion avec tes mots…">${(st.notes[m.id] || '').replace(/</g, '&lt;')}</textarea>`;
+      body.querySelector('[data-setup]').addEventListener('click', () => { m.setup(); invalidate(); toast('Situation en place'); });
+      body.querySelectorAll('[data-o]').forEach(b => b.addEventListener('click', () => { const p = st.preds[m.id] = st.preds[m.id] || {}; p.o = +b.dataset.o; p.shown = false; renderMissions(); }));
+      body.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => { const p = st.preds[m.id] = st.preds[m.id] || {}; p.c = +b.dataset.c; renderMissions(); }));
+      body.querySelector('[data-confront]').addEventListener('click', () => { st.preds[m.id].shown = true; renderMissions(); });
+      body.querySelector('[data-note]').addEventListener('input', e => { st.notes[m.id] = e.target.value; });
+    }
+    host.appendChild(div);
+  });
+}
+
+function carnetText() {
+  const L = ['CARNET : champ électrique créé par des charges ponctuelles', ''];
+  MISSIONS.forEach((m, i) => {
+    const p = st.preds[m.id], n = (st.notes[m.id] || '').trim();
+    if (!p && !n) return;
+    L.push(`Défi ${i + 1} : ${m.titre}`);
+    if (p && p.o != null) L.push(`  Prévision : ${m.predict.opts[p.o][0]}` + (p.c != null ? ` (${['sûr·e de moi', 'hésitant·e', 'au hasard'][p.c]})` : ''));
+    if (n) L.push(`  Conclusion : ${n}`);
+    L.push('');
+  });
+  if (st.releves.length) {
+    L.push('Relevés (r en m ; E en V/m ; E·r² en V·m)');
+    st.releves.forEach((r, i) => L.push(`  ${i + 1}\t${fr(r.r, 2)}\t${sig(r.E)}\t${sig(r.E * r.r * r.r)}`));
+  }
+  if (L.length <= 2) L.push('(carnet vide : réponds à un défi ou fais un relevé)');
+  return L.join('\n');
+}
+function copyCarnet() {
+  const txt = carnetText();
+  const done = () => toast('Carnet copié dans le presse-papiers');
+  const fallback = () => { const ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (_) { toast('Copie impossible : sélectionne le texte à la main'); } ta.remove(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+}
+$('btnCarnet').addEventListener('click', copyCarnet);
+
+/* ================= Démarrage ================= */
+bindOpts();
+renderMissions();
+window.addEventListener('resize', resize);
+resize();
+requestAnimationFrame(loop);
+// accès pour les tests automatisés
+window.__sim = {st, Eat, Vat, contour, vgrid, traceLine, K, addObj, clearScene, invalidate, MISSIONS, setOpt};
+})();
+</script>
+</body>
+</html>
