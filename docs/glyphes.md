@@ -28,6 +28,7 @@ Les glyphes sont décoratifs (`aria-hidden`) : le titre de la carte porte le sen
 | `orbit` | Astre, satellite, force d'attraction | Interaction gravitationnelle |
 | `pendulum` | Pendule écarté de sa position d'équilibre | Énergie d'un pendule |
 | `refraction` | Interface, normale, rayon dévié | Réfraction de la lumière |
+| `snell` | Demi-cylindre sur le disque gradué, normale, rayons incident, réfléchi et réfracté, angles i₁ et i₂ | Les lois de Snell-Descartes |
 | `spectrum` | Raies d'émission | Spectres lumineux |
 | `circuit` | Générateur et conducteur ohmique | Loi d'Ohm |
 | `gas` | Seringue, piston, molécules | Loi des gaz parfaits |

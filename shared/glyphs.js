@@ -230,6 +230,19 @@
       s += '<line class="s dash" x1="100" y1="10" x2="100" y2="112"/><line class="v" x1="44" y1="14" x2="100" y2="62"/><line class="v" x1="100" y1="62" x2="132" y2="110"/>';
       return s;
   });
+  /* Lois de Snell-Descartes : demi-cylindre sur le disque gradué, normale, rayons incident, réfléchi et réfracté, angles i1 et i2. */
+  add("snell", function () {
+      var s = "", cx = 100, cy = 56, i = 40 * Math.PI / 180, t = Math.asin(Math.sin(i) / 1.5);
+      s += '<path class="water" d="M42 56a58 58 0 0 0 116 0Z"/><path class="s" d="M42 56a58 58 0 0 0 116 0Z"/>';
+      s += '<line class="s" x1="10" y1="56" x2="190" y2="56"/><line class="s dash" x1="100" y1="6" x2="100" y2="114"/>';
+      s += '<line class="v" style="stroke-width:2.4" x1="' + pt(cx - 54 * Math.sin(i)) + '" y1="' + pt(cy - 54 * Math.cos(i)) + '" x2="' + cx + '" y2="' + cy + '"/>';
+      s += '<line class="v" style="stroke-width:2.4;opacity:.55" x1="' + cx + '" y1="' + cy + '" x2="' + pt(cx + 54 * Math.sin(i)) + '" y2="' + pt(cy - 54 * Math.cos(i)) + '"/>';
+      s += '<line class="v" style="stroke-width:2.4" x1="' + cx + '" y1="' + cy + '" x2="' + pt(cx + 54 * Math.sin(t)) + '" y2="' + pt(cy + 54 * Math.cos(t)) + '"/>';
+      s += '<circle class="f" cx="' + pt(cx - 54 * Math.sin(i)) + '" cy="' + pt(cy - 54 * Math.cos(i)) + '" r="3.2"/>';
+      s += '<path class="s" d="M' + cx + ' ' + (cy - 22) + 'A22 22 0 0 0 ' + pt(cx - 22 * Math.sin(i)) + ' ' + pt(cy - 22 * Math.cos(i)) + '"/>';
+      s += '<path class="s" d="M' + cx + ' ' + (cy + 24) + 'A24 24 0 0 0 ' + pt(cx + 24 * Math.sin(t)) + ' ' + pt(cy + 24 * Math.cos(t)) + '"/>';
+      return s;
+  });
   /* Spectres : raies d'émission. */
   add("spectrum", function () {
       var s = "";

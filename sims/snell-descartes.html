@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les lois de Snell-Descartes — Seconde</title>
+<link rel="stylesheet" href="../shared/fonts.css">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#17202e;--muted:#5a6577;--line:#d8dde6;--brand:#1d4ed8;--brand-ink:#fff;--soft:#eef2f9;
+--i1:#1f6feb;--r:#7c3aed;--i2:#d9640b;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--shadow:0 1px 2px rgba(15,23,42,.08),0 4px 14px rgba(15,23,42,.05)}
+:root[data-theme=dark]{--bg:#0f1521;--card:#171f2e;--ink:#e8edf5;--muted:#9aa6b8;--line:#2a3548;--brand:#6b9bff;--brand-ink:#0b1220;--soft:#1f2a3d;
+--i1:#6aa5ff;--r:#b79cff;--i2:#ff9a4d;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--shadow:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1521;--card:#171f2e;--ink:#e8edf5;--muted:#9aa6b8;--line:#2a3548;--brand:#6b9bff;--brand-ink:#0b1220;--soft:#1f2a3d;
+--i1:#6aa5ff;--r:#b79cff;--i2:#ff9a4d;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;font-weight:600}h1{font-size:1.5rem;margin:0}h2{font-size:1.3rem;margin:.2rem 0 .5rem}h3{font-size:1.1rem;margin:.2rem 0 .4rem}
+.top{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center;justify-content:space-between;padding:.8rem 1.2rem;background:var(--card);border-bottom:1px solid var(--line)}
+.top .sub{color:var(--muted);font-size:.88rem}
+.tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.tabs{display:flex;gap:.3rem;padding:.5rem 1.2rem 0;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;overflow-x:auto}
+.tabs button{border:1px solid transparent;border-bottom:none;background:none;color:var(--muted);padding:.55rem .9rem;border-radius:10px 10px 0 0;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink);border-color:var(--line)}
+.tabs button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,canvas:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+main{max-width:1240px;margin:0 auto;padding:1rem 1.2rem 3rem}
+.panel[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem;box-shadow:var(--shadow);margin-bottom:1rem}
+.grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:1rem;align-items:start}
+.grid-exp{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:1rem;align-items:start}
+@media (max-width:960px){.grid2,.grid-exp{grid-template-columns:1fr}}
+.comp{display:inline-flex;gap:.35rem;align-items:center;border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:.1rem .65rem;font-size:.8rem;font-weight:600;color:var(--muted);margin:0 .3rem .3rem 0}
+.comp abbr{text-decoration:none;color:var(--ink);letter-spacing:.04em}
+.probleme{border-left:4px solid var(--brand);background:var(--soft);padding:.6rem .9rem;border-radius:0 10px 10px 0;margin:.6rem 0}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+button,select,input,textarea{font:inherit;color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--card);padding:.45rem .8rem;border-radius:9px;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--soft)}.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.primary:hover{filter:brightness(1.08)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:.2rem .55rem;font-size:.85rem}
+select,input[type=text],input[type=number],textarea,.cell{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.35rem .5rem}
+textarea{width:100%;min-height:4.2rem;resize:vertical}
+label.row{display:flex;gap:.5rem;align-items:center;margin:.3rem 0}
+.field{margin:.55rem 0}.field>label{display:block;font-weight:600;font-size:.9rem;margin-bottom:.2rem}
+.rowflex{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input[type=range]{width:100%;accent-color:var(--brand)}
+.benchwrap{position:relative;background:#0b1020;border-radius:14px;padding:.4rem}
+#banc{width:100%;height:auto;display:block;border-radius:10px;touch-action:none;cursor:crosshair}
+.readout{display:flex;gap:.6rem;flex-wrap:wrap;margin:.5rem 0}
+.pill{border:1px solid var(--line);border-radius:999px;padding:.1rem .7rem;font-weight:700;background:var(--soft)}
+.pill.i1{color:var(--i1)}.pill.r{color:var(--r)}.pill.i2{color:var(--i2)}
+.tscroll{overflow-x:auto}
+table.data{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+table.data th,table.data td{border:1px solid var(--line);padding:.2rem .4rem;text-align:center;font-size:.92rem}
+table.data th{background:var(--soft)}
+.c-i1{color:var(--i1);font-weight:700}.c-r{color:var(--r)}.c-i2{color:var(--i2)}
+.cell{width:4.6rem;text-align:center;padding:.15rem .25rem}
+.cell.warn{border-color:var(--bad);background:rgba(185,28,28,.08)}
+td.calc{background:var(--soft)}
+.x{border:none;background:none;color:var(--muted);cursor:pointer;font-size:1.1rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.chip{border:1px solid var(--line);border-radius:999px;padding:.15rem .7rem;background:var(--card);cursor:pointer;font-weight:600;font-size:.88rem}
+.chip[aria-pressed=true]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.hint{border:1px dashed var(--line);border-radius:10px;padding:.5rem .8rem;margin:.5rem 0;background:var(--soft);font-size:.92rem}
+.verdict{border-radius:10px;padding:.5rem .8rem;margin:.5rem 0;border:1px solid var(--line);background:var(--soft)}
+.verdict.ok{border-color:var(--ok)}.verdict.warn{border-color:var(--warn)}.verdict.bad{border-color:var(--bad)}
+.h-g,.h-gi{display:none}
+body[data-niveau=guide] .h-g,body[data-niveau=guide] .h-gi,body[data-niveau=inter] .h-gi{display:block}
+svg text{fill:var(--ink);font-family:inherit}
+.gsvg{width:100%;height:auto;display:block}
+.sitcanvas{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line);background:#e8edf4}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin:.5rem 0}
+.metrics div{background:var(--soft);border-radius:10px;padding:.4rem .7rem}
+.metrics b{display:block;font-size:1.05rem}
+.toast{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.5rem 1rem;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.toast.on{opacity:1}
+.snap{display:flex;gap:.8rem;margin:.5rem 0;align-items:flex-start}.snap img{width:170px;border-radius:8px;border:1px solid var(--line)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:720px;width:92%}
+dialog textarea{min-height:16rem;font-family:ui-monospace,monospace;font-size:.85rem}
+#print-zone{display:none}
+@media print{body>*:not(#print-zone){display:none!important}#print-zone{display:block;color:#000;background:#fff}#print-zone table{border-collapse:collapse}#print-zone td,#print-zone th{border:1px solid #444;padding:2px 6px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body data-niveau="guide">
+<header class="top">
+ <div><h1>Les lois de Snell-Descartes</h1>
+  <div class="sub">Seconde · Ondes et signaux · TP 15 — réflexion, réfraction, indice optique</div></div>
+ <div class="tools">
+  <a class="btn sm" href="../index.html" style="text-decoration:none">← Catalogue des simulations</a>
+  <label class="small">Aide
+   <select id="niveau" aria-label="Niveau d'aide"><option value="guide">Guidé</option><option value="inter">Intermédiaire</option><option value="auto">Autonome</option></select></label>
+  <button class="btn sm" id="btn-theme" type="button">Thème</button>
+  <button class="btn sm" id="btn-lien" type="button">Copier le lien</button>
+  <button class="btn sm" id="btn-reset" type="button">Tout effacer</button>
+ </div>
+</header>
+<nav class="tabs" role="tablist" aria-label="Étapes">
+ <button role="tab" id="t-situation" data-tab="situation" aria-selected="true">1 · Situation</button>
+ <button role="tab" id="t-mesurer" data-tab="mesurer" aria-selected="false">2 · Mesurer</button>
+ <button role="tab" id="t-exploiter" data-tab="exploiter" aria-selected="false">3 · Exploiter</button>
+ <button role="tab" id="t-conclure" data-tab="conclure" aria-selected="false">4 · Conclure</button>
+</nav>
+<main>
+<!-- 1 SITUATION -->
+<section class="panel" id="tab-situation" role="tabpanel" aria-labelledby="t-situation">
+ <div class="card">
+  <span class="comp"><abbr title="S'approprier">APP</abbr> · Observer</span>
+  <h2>Un verre d'eau qui retourne la flèche</h2>
+  <p>Un verre contenant de l'eau permet d'inverser le sens d'une flèche observée par transparence. Sur le papier, deux flèches pointent dans le même sens : l'une est vue à travers la partie vide du verre, l'autre à travers le liquide.</p>
+  <div class="probleme"><b>Problématique.</b> Comment expliquer ce phénomène ? Qu'observerait-on si le verre contenait un liquide transparent autre que l'eau ?</div>
+  <div class="field"><label for="app-reformule">Reformule la question à résoudre avec tes mots</label>
+   <textarea id="app-reformule" placeholder="Pour répondre, je dois savoir…"></textarea></div>
+ </div>
+ <div class="grid2">
+  <div class="card">
+   <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Observer le montage</span>
+   <div class="rowflex">
+    <label>Liquide dans le verre <select id="sit-liquide"></select></label>
+    <label style="flex:1;min-width:220px">Distance verre → papier : <b id="sit-dval"></b>
+     <input type="range" id="sit-d" min="4" max="20" step="0.5" value="12"></label>
+   </div>
+   <p class="small muted" style="margin:.4rem 0 .2rem">Vue de dessus (coupe au niveau du liquide) : chemin de quelques rayons qui arrivent à l'œil.</p>
+   <canvas id="sit-top" class="sitcanvas" width="640" height="300" role="img" aria-label="Vue de dessus du verre, des rayons lumineux et du papier"></canvas>
+   <p class="small muted" style="margin:.6rem 0 .2rem">Ce que voit l'observateur :</p>
+   <canvas id="sit-strip" class="sitcanvas" width="640" height="240" role="img" aria-label="Les deux flèches vues par l'observateur"></canvas>
+   <div class="verdict" id="sit-lecture" aria-live="polite"></div>
+  </div>
+  <div class="card">
+   <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span>
+   <p>Avant de changer de liquide : à la même distance, avec de la <b>glycérine</b> à la place de l'eau, la flèche vue à travers le liquide sera…</p>
+   <label class="row"><input type="radio" name="prev" value="inv"> inversée, comme avec l'eau</label>
+   <label class="row"><input type="radio" name="prev" value="droite"> dans le même sens que l'autre flèche</label>
+   <label class="row"><input type="radio" name="prev" value="nsp"> je ne sais pas</label>
+   <div class="field"><label>Mon degré de certitude</label>
+    <label class="row"><input type="radio" name="cert" value="1"> pas sûr·e</label>
+    <label class="row"><input type="radio" name="cert" value="2"> assez sûr·e</label>
+    <label class="row"><input type="radio" name="cert" value="3"> très sûr·e</label></div>
+   <div class="field"><label for="prev-why">Mon hypothèse : qu'est-ce qui, dans le liquide, peut changer ce qu'on voit ?</label>
+    <textarea id="prev-why"></textarea></div>
+   <button class="btn primary" id="prev-save" type="button">Enregistrer ma prévision</button>
+   <p class="small muted" id="prev-msg">Éthanol et glycérine se débloquent après la prévision.</p>
+   <div class="hint h-gi">Pour répondre vraiment, il faut comprendre ce que devient la lumière quand elle passe de l'air à un liquide : c'est l'objet de l'onglet <b>Mesurer</b>.</div>
+  </div>
+ </div>
+</section>
+
+<!-- 2 MESURER -->
+<section class="panel" id="tab-mesurer" role="tabpanel" aria-labelledby="t-mesurer" hidden>
+ <div class="card">
+  <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span>
+  <h2>Protocole</h2>
+  <p>Fais tourner le laser autour du demi-cylindre (glisse-le, utilise le curseur ou les flèches du clavier). Pour une dizaine de valeurs de l'angle d'incidence <b style="color:var(--i1)">i₁</b>, lis sur la graduation l'angle de réflexion <b style="color:var(--r)">r</b> et l'angle de réfraction <b style="color:var(--i2)">i₂</b>. Milieu 1 : air, milieu 2 : eau. Recommence ensuite avec le liquide inconnu.</p>
+  <div class="hint h-g">① Choisis le matériau. ② Place i₁ = 10°, puis 20°, 25°, 30°… jusqu'à 70°. ③ Pour chaque angle, clique « Ajouter » et note r et i₂ en t'aidant de la loupe (survole le disque).</div>
+ </div>
+ <div class="grid2">
+  <div class="card">
+   <div class="benchwrap"><canvas id="banc" width="720" height="720" tabindex="0" role="img" aria-label="Disque gradué avec laser et demi-cylindre"></canvas></div>
+   <div class="readout"><span class="pill i1" id="ro-i1"></span><span class="small muted" id="ro-msg" aria-live="polite"></span></div>
+  </div>
+  <div>
+   <div class="card">
+    <div class="field"><label for="mat">Matériau du demi-cylindre</label><select id="mat"></select></div>
+    <div class="field"><label for="i1n">Angle d'incidence i₁ (°)</label>
+     <div class="rowflex"><button class="btn sm" id="i1minus" type="button" aria-label="Diminuer de 1 degré">−1°</button>
+      <input type="number" id="i1n" min="0" max="85" step="1" style="width:5rem">
+      <button class="btn sm" id="i1plus" type="button" aria-label="Augmenter de 1 degré">+1°</button></div>
+     <input type="range" id="i1" min="0" max="85" step="1" aria-label="Angle d'incidence"></div>
+    <label class="row small"><input type="checkbox" id="opt-loupe"> Loupe (survole le disque)</label>
+    <label class="row small"><input type="checkbox" id="opt-legende"> Légende du schéma (normale, angles)</label>
+    <div id="bruit-host"></div>
+    <label class="row small"><input type="checkbox" id="opt-aide"> Lecture assistée (pré-remplit r et i₂)</label>
+    <details class="small"><summary>Pour aller plus loin (hors programme)</summary>
+     <label class="row"><input type="radio" name="dir" value="in"> Lumière de l'air vers le milieu (protocole du TP)</label>
+     <label class="row"><input type="radio" name="dir" value="out"> Lumière du milieu vers l'air (réflexion totale possible)</label></details>
+    <div class="rowflex" style="margin-top:.6rem">
+     <button class="btn primary" id="btn-add" type="button">Ajouter cette mesure au tableau</button>
+     <button class="btn" id="btn-snap" type="button">Photographier le schéma</button></div>
+   </div>
+   <div class="card">
+    <h3 id="serie-titre">Tableau de mesures</h3>
+    <div class="chips" id="cols-mes"></div>
+    <div id="tbl-mes"></div>
+    <button class="btn sm" id="btn-clear" type="button">Effacer cette série</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- 3 EXPLOITER -->
+<section class="panel" id="tab-exploiter" role="tabpanel" aria-labelledby="t-exploiter" hidden>
+ <div class="card">
+  <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir un modèle</span>
+  <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Tracer, ajuster</span>
+  <span class="comp"><abbr title="Valider">VAL</abbr> · Confronter</span>
+  <p>Quelle relation mathématique relie les angles mesurés ? Trace un graphique, teste des modèles, compare les écarts.</p>
+  <div class="hint h-g">① Trace i₂ en fonction de i₁. ② Essaie le modèle proportionnel : les points suivent-ils la droite ? ③ Change de grandeurs (sin, tan…) jusqu'à ce que les points s'alignent sur une droite passant par l'origine. ④ Garde chaque essai dans le journal.</div>
+  <div class="hint h-gi">Observe les écarts (mesure − modèle) : se répartissent-ils au hasard, ou dessinent-ils une courbe ?</div>
+ </div>
+ <div class="grid-exp">
+  <div>
+   <div class="card"><h3>Séries de mesures</h3><div class="chips" id="series-chips"></div>
+    <div class="chips" id="cols-exp"></div><div id="tbl-exp"></div></div>
+  </div>
+  <div class="card">
+   <div class="rowflex">
+    <label>Ordonnée y <select id="gy"></select></label>
+    <label>Abscisse x <select id="gx"></select></label>
+   </div>
+   <div id="graph"></div>
+   <div class="field"><label>Modèle mathématique</label>
+    <label class="row"><input type="radio" name="model" value="none"> Aucun</label>
+    <label class="row"><input type="radio" name="model" value="prop"> Proportionnel : y = k · x</label>
+    <label class="row"><input type="radio" name="model" value="affine"> Affine : y = a · x + b</label></div>
+   <div id="sliders"></div>
+   <div class="rowflex"><button class="btn" id="btn-fit" type="button">Ajustement automatique</button>
+    <label class="row small"><input type="checkbox" id="opt-ecarts"> Voir les écarts</label>
+    <button class="btn primary" id="btn-journal" type="button">Garder cet essai</button></div>
+   <div class="metrics" id="metrics"></div>
+   <div id="resid"></div>
+   <div id="resid-msg" class="small muted"></div>
+  </div>
+ </div>
+ <div class="card"><h3>Journal des essais</h3><div id="journal"></div></div>
+ <div class="card"><span class="comp"><abbr title="Valider">VAL</abbr> · Indice de réfraction et incertitude</span><div id="stats"></div></div>
+</section>
+
+<!-- 4 CONCLURE -->
+<section class="panel" id="tab-conclure" role="tabpanel" aria-labelledby="t-conclure" hidden>
+ <div class="card">
+  <span class="comp"><abbr title="Valider">VAL</abbr> · Relire ma prévision</span>
+  <div id="concl-prev"></div>
+  <div class="field"><label for="c-prevana">Compare ta prévision et le résultat. Que t'apprend l'écart éventuel ?</label><textarea id="c-prevana"></textarea></div>
+ </div>
+ <div class="card">
+  <span class="comp"><abbr title="Communiquer">COM</abbr> · Conclure</span>
+  <div class="field"><label for="c-refl">Loi de la réflexion (avec tes mesures à l'appui)</label><textarea id="c-refl"></textarea></div>
+  <div class="field"><label for="c-refr">Loi de la réfraction : relation trouvée, signification de n</label><textarea id="c-refr"></textarea></div>
+  <div class="field"><label for="c-fleche">Réponds à la problématique : pourquoi la flèche s'inverse-t-elle ? Que se passe-t-il avec un autre liquide ?</label><textarea id="c-fleche"></textarea></div>
+  <div class="field"><label for="c-ident">Mon identification du liquide inconnu, argumentée</label><textarea id="c-ident"></textarea></div>
+  <h3>Mes schémas</h3><div id="snaps"><p class="muted small">Dans l'onglet Mesurer, « Photographier le schéma » ajoute une image ici : légende-la.</p></div>
+  <div class="rowflex"><button class="btn primary" id="btn-copy" type="button">Copier mon carnet</button>
+   <button class="btn" id="btn-print" type="button">Imprimer / PDF</button></div>
+ </div>
+</section>
+<details class="card small" id="notes"><summary><b>Notes pour l'enseignant</b></summary><div id="notes-body"></div></details>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<dialog id="dlg-copy"><p>Sélectionne et copie ce texte :</p><textarea id="dlg-text" readonly></textarea>
+ <form method="dialog"><button class="btn">Fermer</button></form></dialog>
+<div id="print-zone"></div>
+<script src="../shared/bruit.js"></script>
+<script>
+(function(){
+'use strict';
+const D2R=Math.PI/180,R2D=180/Math.PI;
+const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>Array.from(e.querySelectorAll(s));
+const fmt=(x,d=2)=>Number.isFinite(x)?x.toFixed(d).replace('.',','):'—';
+const num=s=>{if(s===null||s===undefined)return NaN;const t=String(s).trim().replace(/\s/g,'').replace(',','.');if(t==='')return NaN;const v=Number(t);return Number.isFinite(v)?v:NaN;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function hash(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}h^=h>>>16;h=Math.imul(h,0x85ebca6b);h^=h>>>13;h=Math.imul(h,0xc2b2ae35);h^=h>>>16;return h>>>0;}
+function gauss(s){const a=(hash(s+'a')+1)/4294967297,b=(hash(s+'b')+1)/4294967297;return Math.sqrt(-2*Math.log(a))*Math.cos(2*Math.PI*b);}
+
+/* Indices : valeurs du document 3 du TP, complétées pour les solides */
+const MEDIA=[
+ {id:'air',nom:'Air (demi-cylindre vide)',court:'Air',n:1.00,groupe:'Témoin',col:'#6b7280',fill:null},
+ {id:'eau',nom:'Eau',court:'Eau',n:1.33,groupe:'Liquides (demi-cylindre creux)',col:'#2563eb',fill:'rgba(96,165,250,.38)'},
+ {id:'ethanol',nom:'Éthanol',court:'Éthanol',n:1.36,groupe:'Liquides (demi-cylindre creux)',col:'#0d9488',fill:'rgba(45,212,191,.30)'},
+ {id:'glycerine',nom:'Glycérine',court:'Glycérine',n:1.47,groupe:'Liquides (demi-cylindre creux)',col:'#b45309',fill:'rgba(251,191,36,.34)'},
+ {id:'inconnu',nom:'Liquide inconnu',court:'Liquide inconnu',n:null,groupe:'Liquides (demi-cylindre creux)',col:'#7c3aed',fill:'rgba(167,139,250,.34)'},
+ {id:'plexi',nom:'Plexiglas (demi-cylindre plein)',court:'Plexiglas',n:1.49,groupe:'Solides',col:'#db2777',fill:'rgba(226,232,240,.28)'},
+ {id:'crown',nom:'Verre crown',court:'Verre crown',n:1.52,groupe:'Solides',col:'#65a30d',fill:'rgba(186,230,253,.26)'},
+ {id:'flint',nom:'Verre flint',court:'Verre flint',n:1.62,groupe:'Solides',col:'#0891b2',fill:'rgba(165,243,252,.24)'},
+ {id:'diamant',nom:'Diamant (démonstration)',court:'Diamant',n:2.42,groupe:'Solides',col:'#111827',fill:'rgba(255,255,255,.30)'}
+];
+const byId=id=>MEDIA.find(m=>m.id===id);
+const SECRET_POOL=['ethanol','glycerine'];
+const CANDIDATS=['eau','ethanol','glycerine'];
+const C_LIGHT=299792458;
+
+const KEY='simulabo-snell-descartes-v1';
+const defState=()=>({niveau:'guide',theme:null,tab:'situation',medium:'eau',dir:'in',i1:30,
+ bruit:true,loupe:true,legende:true,aide:false,seed:Math.floor(Math.random()*1e6),
+ secret:SECRET_POOL[Math.floor(Math.random()*2)],revealed:false,ident:null,
+ series:{},cols:{sin_i1:false,sin_i2:false,tan_i1:false,tan_i2:false,ratio:false},
+ graph:{x:'i1',y:'i2',over:{},ecarts:false},model:{type:'none',k:1,a:1,b:0},journal:[],
+ U:'',sources:'',prev:{choice:null,cert:null,why:'',d:null,saved:false},
+ app:'',sit:{liquide:'eau',d:12},snaps:[],concl:{prevana:'',refl:'',refr:'',fleche:'',ident:''}});
+let state=defState();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.v===1){const d=defState();state=Object.assign(d,s.state);state.graph=Object.assign(d.graph,s.state.graph||{});state.model=Object.assign(d.model,s.state.model||{});state.prev=Object.assign(d.prev,s.state.prev||{});state.concl=Object.assign(d.concl,s.state.concl||{});state.sit=Object.assign(d.sit,s.state.sit||{});state.cols=Object.assign(d.cols,s.state.cols||{});}}catch(e){}}
+let saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify({v:1,state}));}catch(e){}},250);}
+function wipe(){try{localStorage.removeItem(KEY);}catch(e){}}
+
+const nOf=m=>m.id==='inconnu'?byId(state.secret).n:m.n;
+const skey=(mid,dir)=>mid+(dir==='out'?'~out':'');
+const curKey=()=>skey(state.medium,state.dir);
+function curSeries(create){const k=curKey();if(!state.series[k]&&create)state.series[k]={mid:state.medium,dir:state.dir,rows:[]};return state.series[k];}
+const serieLabel=(s)=>{const m=byId(s.mid);return m.court+(s.dir==='out'?' (milieu → air)':' (air → milieu)');};
+
+/* Réfraction / réflexion */
+function fresnel(n1,n2,i){const s=Math.sin(i),c=Math.cos(i),st=n1/n2*s;if(st>=1)return{R:1,T:0,i2:null};
+ const ct=Math.sqrt(1-st*st),rs=Math.pow((n1*c-n2*ct)/(n1*c+n2*ct),2),rp=Math.pow((n1*ct-n2*c)/(n1*ct+n2*c),2);
+ const R=(rs+rp)/2;return{R,T:1-R,i2:Math.asin(st)};}
+function geom(){const m=byId(state.medium),n=nOf(m),dirIn=state.dir==='in';
+ const n1=dirIn?1:n,n2=dirIn?n:1,i1=state.i1,f=fresnel(n1,n2,i1*D2R);
+ const key=hash([state.seed,state.medium,state.dir,i1].join('|'));/* bruit commun du site : 0,5 % de 60° = 0,3° (shared/bruit.js), stable pour un même angle */
+ const r=Bruit.appliquer(i1,60,key);const tir=f.i2===null;const t=tir?null:Bruit.appliquer(f.i2*R2D,60,key+7919);
+ return{m,n,n1,n2,i1,r,t,tir,R:f.R,T:f.T,s:dirIn?1:-1};}
+
+/* Verre rempli de liquide : tracé de rayons 2D (vue de dessus) */
+const GR=3.5,LE=40;
+function refract(d,N,eta){const c=-(d[0]*N[0]+d[1]*N[1]),k=1-eta*eta*(1-c*c);if(k<0)return null;const a=eta*c-Math.sqrt(k);return[eta*d[0]+a*N[0],eta*d[1]+a*N[1]];}
+function traceGlass(th,n,D){const dx=Math.cos(th),dy=Math.sin(th),ex=-LE,b=ex*dx,c=ex*ex-GR*GR,disc=b*b-c;if(disc<0)return null;
+ const s1=-b-Math.sqrt(disc),p1=[ex+s1*dx,s1*dy],t=refract([dx,dy],[p1[0]/GR,p1[1]/GR],1/n);if(!t)return null;
+ const s2=-2*(p1[0]*t[0]+p1[1]*t[1]),p2=[p1[0]+s2*t[0],p1[1]+s2*t[1]],r2=refract(t,[-p2[0]/GR,-p2[1]/GR],n);
+ if(!r2||r2[0]<=1e-6)return null;const y=p2[1]+(D-p2[0])/r2[0]*r2[1];return{y,pts:[[ex,0],p1,p2,[D,y]]};}
+function magn(n,D){const h=1e-3,a=traceGlass(h,n,D),b=traceGlass(-h,n,D);if(!a||!b)return NaN;return(a.y-b.y)/(2*h)/(LE+D);}
+function seuilInversion(n){if(n<=1)return null;for(let D=3.6;D<=30;D+=0.1){const m=magn(n,D);if(m<0)return D;}return null;}
+/* ---------- Banc d'optique (canvas) ---------- */
+const cv=$('#banc'),cx2=cv.getContext('2d'),W=720,CX=360,CY=360,RD=310,RS=302,RC=250;
+let pointer=null,dragging=false;
+function drawScene(ctx,o){const g=geom(),k=o.loupe?0.45:1;
+ ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,W);
+ const gr=ctx.createRadialGradient(CX,CY,20,CX,CY,RD);gr.addColorStop(0,'#1d2638');gr.addColorStop(1,'#111827');
+ ctx.fillStyle=gr;ctx.beginPath();ctx.arc(CX,CY,RD,0,7);ctx.fill();
+ /* demi-cylindre (moitié inférieure) */
+ const m=g.m;ctx.beginPath();ctx.arc(CX,CY,RC,0,Math.PI,false);ctx.closePath();
+ if(m.fill){ctx.fillStyle=m.fill;ctx.fill();}
+ ctx.strokeStyle='rgba(226,232,240,.75)';ctx.lineWidth=3;ctx.stroke();
+ /* axes */
+ ctx.strokeStyle='rgba(148,163,184,.35)';ctx.lineWidth=1;ctx.setLineDash([]);
+ ctx.beginPath();ctx.moveTo(CX-RS,CY);ctx.lineTo(CX+RS,CY);ctx.stroke();
+ ctx.setLineDash([7,6]);ctx.strokeStyle='rgba(226,232,240,.6)';ctx.beginPath();ctx.moveTo(CX,CY-RS);ctx.lineTo(CX,CY+RS);ctx.stroke();ctx.setLineDash([]);
+ /* graduation */
+ ctx.strokeStyle='rgba(226,232,240,.85)';ctx.fillStyle='#e2e8f0';ctx.font='13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+ for(const sx of[-1,1])for(const sy of[1,-1])for(let a=0;a<=90;a++){
+  const L=a%10===0?16:a%5===0?11:6,s=Math.sin(a*D2R),c=Math.cos(a*D2R);
+  ctx.lineWidth=(a%10===0?1.6:1)*(o.loupe?0.6:1);ctx.beginPath();
+  ctx.moveTo(CX+sx*s*RS,CY-sy*c*RS);ctx.lineTo(CX+sx*s*(RS-L),CY-sy*c*(RS-L));ctx.stroke();
+  if(a%10===0&&!(a===90&&sy===-1)&&(a<90||sx===-1)){const rr=RS-L-12;ctx.fillText(String(a),CX+sx*s*rr,CY-sy*c*rr);}}
+ /* interface */
+ ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(CX-RC,CY);ctx.lineTo(CX+RC,CY);ctx.stroke();
+ /* rayons */
+ const sInc=g.s,ang=(a,sx,sy)=>({x:Math.sin(a*D2R)*sx,y:-Math.cos(a*D2R)*sy});
+ const beam=(x0,y0,x1,y1,al)=>{ctx.lineCap='round';
+  ctx.strokeStyle='rgba(255,30,30,'+0.18*al+')';ctx.lineWidth=10*k;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+  ctx.strokeStyle='rgba(255,70,60,'+0.5*al+')';ctx.lineWidth=4.5*k;ctx.stroke();
+  ctx.strokeStyle='rgba(255,236,230,'+0.95*al+')';ctx.lineWidth=1.6*k;ctx.stroke();};
+ const dI=ang(g.i1,-1,sInc);beam(CX+dI.x*(RD+2),CY+dI.y*(RD+2),CX,CY,1);
+ const al=x=>0.3+0.7*Math.sqrt(Math.max(0,Math.min(1,x)));
+ const dR=ang(g.r,1,sInc);beam(CX,CY,CX+dR.x*RD,CY+dR.y*RD,g.tir?1:al(g.R));
+ let dT=null;if(!g.tir){dT=ang(g.t,1,-sInc);beam(CX,CY,CX+dT.x*RD,CY+dT.y*RD,al(g.T));}
+ /* laser */
+ const px=CX+dI.x*(RD+4),py=CY+dI.y*(RD+4),ps=CX+dI.x*(RD+62),pt=CY+dI.y*(RD+62);
+ ctx.save();ctx.translate(px,py);ctx.rotate(Math.atan2(CY-py,CX-px)+Math.PI);
+ ctx.fillStyle='#334155';ctx.strokeStyle='#94a3b8';ctx.lineWidth=2*k;
+ ctx.beginPath();ctx.roundRect(0,-10,58,20,5);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#ef4444';ctx.fillRect(-2,-5,6,10);ctx.fillStyle='#94a3b8';ctx.fillRect(18,-10,4,20);ctx.restore();
+ if(o.loupe)return;
+ /* légende */
+ if(state.legende){
+  const nb=sInc>0?-Math.PI/2:Math.PI/2,nb2=-nb;
+  const arc=(a,sx,sy,nbase,rad,col,txt)=>{const d=ang(a,sx,sy),an=Math.atan2(d.y,d.x);let s0=Math.min(an,nbase),s1=Math.max(an,nbase);
+   if(Math.abs(s1-s0)<0.01)return;ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(CX,CY,rad,s0,s1,false);ctx.stroke();
+   const mid=(s0+s1)/2;ctx.fillStyle=col;ctx.font='bold 20px system-ui';ctx.fillText(txt,CX+Math.cos(mid)*(rad+22),CY+Math.sin(mid)*(rad+22));};
+  arc(g.i1,-1,sInc,nb,120,'#6aa5ff','i₁');arc(g.r,1,sInc,nb,150,'#b79cff','r');
+  if(!g.tir)arc(g.t,1,-sInc,nb2,120,'#ff9a4d','i₂');
+  ctx.font='600 15px system-ui';ctx.fillStyle='#cbd5e1';ctx.textAlign='left';
+  const top=state.dir==='in'?'Milieu 1 : air':'Milieu 2 : air',bot=state.dir==='in'?'Milieu 2 : '+g.m.court.toLowerCase():'Milieu 1 : '+g.m.court.toLowerCase();
+  ctx.fillText(top,14,26);ctx.fillText(bot,14,W-18);ctx.fillStyle='#94a3b8';ctx.font='13px system-ui';
+  ctx.fillText('normale',CX+8,CY-RC-12);ctx.fillText('dioptre (face plane)',CX+RC-130,CY-10);ctx.textAlign='center';}
+ if(state.aide){ctx.font='bold 17px system-ui';ctx.textAlign='left';
+  ctx.fillStyle='#b79cff';ctx.fillText('r ≈ '+Math.max(0,Math.round(g.r))+'°',W-130,26);
+  ctx.fillStyle='#ff9a4d';ctx.fillText(g.tir?'pas de rayon réfracté':'i₂ ≈ '+Math.max(0,Math.round(g.t))+'°',W-190,W-18);ctx.textAlign='center';}
+}
+function drawBench(){drawScene(cx2,{});
+ if(state.loupe&&pointer&&!dragging){const rad=92,z=3.2;let lx=pointer.x+115,ly=pointer.y-115;
+  lx=Math.max(rad+4,Math.min(W-rad-4,lx));ly=Math.max(rad+4,Math.min(W-rad-4,ly));
+  cx2.save();cx2.beginPath();cx2.arc(lx,ly,rad,0,7);cx2.clip();cx2.fillStyle='#0b1020';cx2.fillRect(lx-rad,ly-rad,2*rad,2*rad);
+  cx2.translate(lx,ly);cx2.scale(z,z);cx2.translate(-pointer.x,-pointer.y);drawScene(cx2,{loupe:true});cx2.restore();
+  cx2.strokeStyle='#f8fafc';cx2.lineWidth=4;cx2.beginPath();cx2.arc(lx,ly,rad,0,7);cx2.stroke();
+  cx2.strokeStyle='rgba(250,204,21,.9)';cx2.lineWidth=1;cx2.beginPath();cx2.moveTo(lx-10,ly);cx2.lineTo(lx+10,ly);cx2.moveTo(lx,ly-10);cx2.lineTo(lx,ly+10);cx2.stroke();}
+ cv.setAttribute('aria-label','Disque gradué. Angle d\'incidence '+state.i1+' degrés, milieu 2 : '+byId(state.medium).court);
+}
+let raf=0;const redraw=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;drawBench();});};
+function setI1(v){v=Math.round(Number(v));if(!Number.isFinite(v))return;state.i1=Math.max(0,Math.min(85,v));
+ $('#i1').value=state.i1;$('#i1n').value=state.i1;$('#ro-i1').textContent='i₁ = '+state.i1+'°';
+ const g=geom();$('#ro-msg').textContent=g.tir?'Plus de rayon réfracté : toute la lumière est réfléchie.':'Lis r et i₂ sur la graduation.';
+ save();redraw();}
+function ptr(e){const b=cv.getBoundingClientRect();return{x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top)*W/b.height};}
+function angleFrom(p){const sInc=state.dir==='in'?1:-1;const a=Math.atan2(-(p.x-CX),-(p.y-CY)*sInc)*R2D;return Math.max(0,Math.min(85,a));}
+cv.addEventListener('pointerdown',e=>{const p=ptr(e);const g=geom(),d=Math.sin(g.i1*D2R),c=Math.cos(g.i1*D2R);
+ const lx=CX-d*(RD+40),ly=CY-c*(RD+40)*g.s;
+ if(Math.hypot(p.x-lx,p.y-ly)<60||Math.hypot(p.x-CX,p.y-CY)>RD-10){dragging=true;cv.setPointerCapture(e.pointerId);setI1(angleFrom(p));}
+ else if(e.pointerType!=='mouse'){pointer=p;redraw();}});
+cv.addEventListener('pointermove',e=>{const p=ptr(e);if(dragging){setI1(angleFrom(p));}else{pointer=p;redraw();}});
+cv.addEventListener('pointerup',e=>{dragging=false;if(e.pointerType!=='mouse'){pointer=null;}redraw();});
+cv.addEventListener('pointerleave',()=>{if(!dragging){pointer=null;redraw();}});
+cv.addEventListener('keydown',e=>{const st=e.shiftKey?5:1;if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setI1(state.i1-st);e.preventDefault();}
+ if(e.key==='ArrowRight'||e.key==='ArrowUp'){setI1(state.i1+st);e.preventDefault();}});
+
+/* ---------- Mesures et tableau ---------- */
+const QTY={i1:{lab:'i₁ (°)',f:v=>v.i1},r:{lab:'r (°)',f:v=>v.r},i2:{lab:'i₂ (°)',f:v=>v.i2},
+ sin_i1:{lab:'sin i₁',f:v=>Math.sin(v.i1*D2R)},sin_i2:{lab:'sin i₂',f:v=>Math.sin(v.i2*D2R)},
+ cos_i1:{lab:'cos i₁',f:v=>Math.cos(v.i1*D2R)},cos_i2:{lab:'cos i₂',f:v=>Math.cos(v.i2*D2R)},
+ tan_i1:{lab:'tan i₁',f:v=>Math.tan(v.i1*D2R)},tan_i2:{lab:'tan i₂',f:v=>Math.tan(v.i2*D2R)}};
+const rowV=row=>({i1:row.i1,r:num(row.r),i2:row.tir?NaN:num(row.i2)});
+const COLS=[['sin_i1','sin i₁'],['sin_i2','sin i₂'],['tan_i1','tan i₁'],['tan_i2','tan i₂'],['ratio','sin i₁ ÷ sin i₂']];
+function colsChips(){return '<span class="small muted">Colonnes calculées (angles en degrés) :</span>'+COLS.map(c=>`<button type="button" class="chip" data-col="${c[0]}" aria-pressed="${!!state.cols[c[0]]}">${c[1]}</button>`).join('');}
+function tableHTML(s){if(!s||!s.rows.length)return '<p class="muted small">Aucune mesure pour l\'instant. Place le laser, puis « Ajouter cette mesure ».</p>';
+ const c=state.cols;let h='<div class="tscroll"><table class="data"><thead><tr><th>n°</th><th class="c-i1">i₁ (°)</th><th class="c-r">r (°)</th><th class="c-i2">i₂ (°)</th>';
+ COLS.forEach(x=>{if(c[x[0]])h+='<th>'+x[1]+'</th>';});h+='<th></th></tr></thead><tbody>';
+ s.rows.forEach((row,i)=>{h+=`<tr data-i="${i}"><td>${i+1}</td><td class="c-i1">${row.i1}</td>`+
+  `<td><input class="cell" inputmode="decimal" data-k="r" value="${esc(row.r)}" aria-label="r, ligne ${i+1}"></td>`+
+  (row.tir?'<td class="muted" title="Pas de rayon réfracté">—</td>':`<td><input class="cell" inputmode="decimal" data-k="i2" value="${esc(row.i2)}" aria-label="i2, ligne ${i+1}"></td>`);
+  COLS.forEach(x=>{if(c[x[0]])h+=`<td class="calc" data-c="${x[0]}"></td>`;});
+  h+=`<td><button class="x" data-del="${i}" aria-label="Supprimer la ligne ${i+1}" type="button">×</button></td></tr>`;});
+ return h+'</tbody></table></div>';}
+function calcCells(){const s=curSeries();if(!s)return;$$('#tbl-mes tr[data-i],#tbl-exp tr[data-i]').forEach(tr=>{const row=s.rows[+tr.dataset.i];if(!row)return;const v=rowV(row);
+  $$('td.calc',tr).forEach(td=>{const q=td.dataset.c;let x;
+   if(q==='ratio')x=Math.sin(v.i1*D2R)/Math.sin(v.i2*D2R);else x=QTY[q].f(v);
+   td.textContent=(Number.isFinite(x)&&Math.abs(x)<1e6)?fmt(x,q==='ratio'?2:3):'';});
+  $$('input.cell',tr).forEach(inp=>{const x=num(inp.value);inp.classList.toggle('warn',inp.value.trim()!==''&&(!Number.isFinite(x)||x<-5||x>90));});});}
+function syncInputs(){const s=curSeries();if(!s)return;$$('#tbl-mes tr[data-i],#tbl-exp tr[data-i]').forEach(tr=>{const row=s.rows[+tr.dataset.i];if(!row)return;
+  $$('input.cell',tr).forEach(inp=>{if(document.activeElement!==inp&&inp.value!==String(row[inp.dataset.k]))inp.value=row[inp.dataset.k];});});}
+function renderTables(){const s=curSeries();const t=s?'Série : '+serieLabel(s):'Tableau de mesures';
+ $('#serie-titre').textContent=state.medium==='inconnu'||!s?'Tableau de mesures — '+byId(state.medium).court:'Tableau de mesures — '+serieLabel(s);
+ $('#cols-mes').innerHTML=colsChips();$('#cols-exp').innerHTML=colsChips();
+ $('#tbl-mes').innerHTML=tableHTML(s);$('#tbl-exp').innerHTML=tableHTML(s);calcCells();}
+function tableEvents(box){box.addEventListener('input',e=>{const inp=e.target.closest('input.cell');if(!inp)return;const tr=inp.closest('tr'),s=curSeries();if(!s)return;
+  s.rows[+tr.dataset.i][inp.dataset.k]=inp.value;save();syncInputs();calcCells();refreshAnalysis();});
+ box.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(!d)return;const s=curSeries();s.rows.splice(+d.dataset.del,1);save();renderTables();refreshAnalysis();});}
+['#tbl-mes','#tbl-exp'].forEach(id=>tableEvents($(id)));
+['#cols-mes','#cols-exp'].forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('[data-col]');if(!b)return;
+  state.cols[b.dataset.col]=!state.cols[b.dataset.col];save();renderTables();}));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2200);}
+function addMeasure(){const s=curSeries(true);if(s.rows.some(r=>r.i1===state.i1)){toast('Cet angle est déjà dans le tableau.');return;}
+ const g=geom(),row={i1:state.i1,r:'',i2:'',tir:g.tir};
+ if(state.aide){row.r=String(Math.max(0,Math.round(g.r)));row.i2=g.tir?'':String(Math.max(0,Math.round(g.t)));}
+ s.rows.push(row);s.rows.sort((a,b)=>a.i1-b.i1);save();renderTables();refreshAnalysis();
+ if(!state.aide){const tr=$(`#tbl-mes tr[data-i="${s.rows.indexOf(row)}"] input`);if(tr)tr.focus();}
+ toast(g.tir?'Mesure ajoutée (pas de rayon réfracté).':'Mesure ajoutée : lis r et i₂.');}
+function snapshot(){drawScene(cx2,{});const url=cv.toDataURL('image/jpeg',0.82);drawBench();
+ if(state.snaps.length>=4)state.snaps.shift();state.snaps.push({img:url,legende:'',info:byId(state.medium).court+', i₁ = '+state.i1+'°'});save();renderSnaps();toast('Schéma ajouté à l\'onglet Conclure.');}
+/* ---------- Onglet 1 : le verre et la flèche ---------- */
+const topC=$('#sit-top'),topX=topC.getContext('2d'),stC=$('#sit-strip'),stX=stC.getContext('2d');
+const LIQ=['air','eau','ethanol','glycerine'];
+function arrowIn(yp,v){/* flèche pointant vers −y ; v dans [−1,1] (demi-hauteur normalisée) */
+ const L=2.4,t=(yp+L)/(2*L);if(t<0||t>1)return false;const hw=t<0.35?0.95*(t/0.35):0.34;return Math.abs(v)<hw;}
+function drawSituation(){
+ const m=byId(state.sit.liquide),n=m.n,D=state.sit.d;
+ /* vue de dessus */
+ const sc=Math.min(24,600/(D+10)),x0=30+5*sc,y0=150,X=x=>x0+x*sc,Y=y=>y0-y*sc;
+ topX.fillStyle='#e8edf4';topX.fillRect(0,0,640,300);
+ topX.strokeStyle='#94a3b8';topX.lineWidth=1;topX.setLineDash([4,5]);topX.beginPath();topX.moveTo(0,y0);topX.lineTo(640,y0);topX.stroke();topX.setLineDash([]);
+ topX.beginPath();topX.arc(X(0),y0,GR*sc,0,7);topX.fillStyle=m.fill?m.fill.replace(/[\d.]+\)$/,'.55)'):'rgba(255,255,255,.7)';topX.fill();
+ topX.strokeStyle='#334155';topX.lineWidth=2.5;topX.stroke();
+ topX.fillStyle='#fff';topX.fillRect(X(D),Y(9),8,18*sc);topX.strokeStyle='#64748b';topX.lineWidth=1;topX.strokeRect(X(D),Y(9),8,18*sc);
+ topX.fillStyle='#111';topX.beginPath();topX.moveTo(X(D)+4,Y(-2.4));topX.lineTo(X(D)-6,Y(-0.9));topX.lineTo(X(D)+14,Y(-0.9));topX.closePath();topX.fill();
+ topX.fillRect(X(D)+1,Y(2.4),6,3.3*sc);
+ const rl=Math.asin(GR/LE)*0.92;
+ topX.strokeStyle='rgba(220,38,38,.8)';topX.lineWidth=1.6;
+ for(let i=0;i<=10;i++){const th=rl*(1-2*i/10),xs=-5,ys=(LE+xs)*Math.tan(th);let tr=n>1?traceGlass(th,n,D):null;topX.beginPath();topX.moveTo(X(xs),Y(ys));
+  if(tr){tr.pts.slice(1).forEach(p=>topX.lineTo(X(p[0]),Y(p[1])));}else{topX.lineTo(X(D),Y((LE+D)*Math.tan(th)));}topX.stroke();}
+ topX.fillStyle='#334155';topX.font='14px system-ui';topX.textAlign='left';
+ topX.fillText('← vers l\'œil (40 cm)',8,20);topX.fillText('verre',X(0)-16,y0-GR*sc-8);topX.fillText('papier',X(D)-14,Y(9)-8);
+ /* vue de l'observateur */
+ const Wd=640,Hd=240,img=stX.createImageData(Wd,Hd),thv=Math.asin(GR/LE)*1.8,thg=Math.asin(GR/LE);
+ const set=(x,y,r,g,b)=>{const o=(y*Wd+x)*4;img.data[o]=r;img.data[o+1]=g;img.data[o+2]=b;img.data[o+3]=255;};
+ for(let c=0;c<Wd;c++){const th=thv*(1-2*c/(Wd-1)),ys=(LE+D)*Math.tan(th);let yl=ys;
+  if(n>1&&Math.abs(th)<thg){const tr=traceGlass(th,n,D);yl=tr?tr.y:null;}
+  for(let r=0;r<Hd;r++){const top=r<Hd/2,yp=top?ys:yl;let rgb=[255,255,255];
+   if(yp===null||Math.abs(yp)>9)rgb=[148,163,184];
+   else{const v=((top?Hd*0.25:Hd*0.75)-r)/38;if(Math.abs(v)<1&&arrowIn(yp,v*1.0))rgb=[20,20,25];}
+   set(c,r,rgb[0],rgb[1],rgb[2]);}}
+ stX.putImageData(img,0,0);
+ stX.setLineDash([6,5]);stX.strokeStyle='rgba(51,65,85,.9)';stX.lineWidth=1.5;
+ for(const s of[-1,1]){const xx=(1-s*thg/thv)/2*(Wd-1);stX.beginPath();stX.moveTo(xx,0);stX.lineTo(xx,Hd);stX.stroke();}
+ stX.beginPath();stX.moveTo(0,Hd/2);stX.lineTo(Wd,Hd/2);stX.stroke();stX.setLineDash([]);
+ stX.fillStyle='#0f172a';stX.font='bold 14px system-ui';stX.textAlign='left';
+ stX.fillText('à travers la partie vide du verre',8,18);stX.fillText('à travers '+(n>1?'le liquide ('+m.court.toLowerCase()+')':'l\'air (verre vide)'),8,Hd/2+18);
+ const mg=n>1?magn(n,D):1,sens=mg<0?'inversée':'dans le même sens',seuil=seuilInversion(n);
+ const el=$('#sit-lecture');
+ el.innerHTML=n<=1?'Verre vide : les deux flèches sont vues de la même façon.':
+  `À travers ${esc(m.court.toLowerCase())}, à ${fmt(D,1)} cm : flèche <b>${sens}</b>${Math.abs(mg)<0.12?' (très déformée : le papier est près du foyer)':''}.`+
+  (state.prev.saved&&seuil?` Elle s'inverse à partir de ≈ ${fmt(seuil,1)} cm.`:'');
+ $('#sit-dval').textContent=fmt(D,1)+' cm';}
+function buildLiquids(){const sel=$('#sit-liquide');sel.innerHTML=LIQ.map(id=>{const m=byId(id),lock=!state.prev.saved&&(id==='ethanol'||id==='glycerine');
+  return `<option value="${id}"${lock?' disabled':''}>${id==='air'?'Aucun (verre vide)':m.court}${lock?' (après prévision)':''}</option>`;}).join('');sel.value=state.sit.liquide;}
+function savePrevision(){const ch=$('input[name=prev]:checked'),ce=$('input[name=cert]:checked');
+ if(!ch||!ce){toast('Choisis une réponse et ton degré de certitude.');return;}
+ state.prev={choice:ch.value,cert:ce.value,why:$('#prev-why').value,d:state.sit.d,saved:true};save();buildLiquids();drawSituation();updatePrevMsg();toast('Prévision enregistrée.');}
+function updatePrevMsg(){$('#prev-msg').textContent=state.prev.saved?'Prévision enregistrée : tu peux tester tous les liquides. Tu la relis dans l\'onglet Conclure.':'Éthanol et glycérine se débloquent après la prévision.';
+ $('#prev-save').disabled=state.prev.saved;$$('input[name=prev],input[name=cert]').forEach(i=>i.disabled=state.prev.saved);$('#prev-why').disabled=state.prev.saved;}
+/* ---------- Onglet 3 : graphique et modèles ---------- */
+const SHAPES=['circle','square','triangle','diamond','cross','star'];
+function marker(shape,x,y,col,op,t){const s=5.5,a=`fill="${col}" fill-opacity="${op}" stroke="var(--card)" stroke-width="1"`;let e;
+ if(shape==='square')e=`<rect x="${x-s}" y="${y-s}" width="${2*s}" height="${2*s}" ${a}/>`;
+ else if(shape==='triangle')e=`<polygon points="${x},${y-s-1} ${x+s+1},${y+s} ${x-s-1},${y+s}" ${a}/>`;
+ else if(shape==='diamond')e=`<polygon points="${x},${y-s-1} ${x+s+1},${y} ${x},${y+s+1} ${x-s-1},${y}" ${a}/>`;
+ else if(shape==='cross')e=`<path d="M${x-s} ${y-s}L${x+s} ${y+s}M${x-s} ${y+s}L${x+s} ${y-s}" stroke="${col}" stroke-width="3" stroke-opacity="${op}"/>`;
+ else if(shape==='star')e=`<polygon points="${x},${y-s-2} ${x+2},${y-2} ${x+s+2},${y} ${x+2},${y+2} ${x},${y+s+2} ${x-2},${y+2} ${x-s-2},${y} ${x-2},${y-2}" ${a}/>`;
+ else e=`<circle cx="${x}" cy="${y}" r="${s}" ${a}/>`;return `<g>${e}<title>${esc(t)}</title></g>`;}
+function niceAxis(lo,hi){const span=Math.max(hi-lo,1e-9),raw=span/6,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p,step=(m<=1?1:m<=2?2:m<=5?5:10)*p;
+ return{lo:Math.floor(lo/step+1e-9)*step,hi:Math.ceil(hi/step-1e-9)*step,step};}
+function pointsFor(s,xq,yq){const out=[];s.rows.forEach((row,i)=>{if(row.tir)return;const v=rowV(row),x=QTY[xq].f(v),y=QTY[yq].f(v);if(Number.isFinite(x)&&Number.isFinite(y))out.push({x,y,i});});return out;}
+function activePts(){const s=curSeries();return s?pointsFor(s,state.graph.x,state.graph.y):[];}
+function modelFn(){const m=state.model;if(m.type==='prop')return x=>m.k*x;if(m.type==='affine')return x=>m.a*x+m.b;return null;}
+function fitLS(p){if(p.length<2)return null;const n=p.length,sx=p.reduce((a,q)=>a+q.x,0),sy=p.reduce((a,q)=>a+q.y,0),sxx=p.reduce((a,q)=>a+q.x*q.x,0),sxy=p.reduce((a,q)=>a+q.x*q.y,0);
+ const k=sxy/sxx,den=n*sxx-sx*sx,a=den?(n*sxy-sx*sy)/den:0;return{k,a,b:(sy-a*sx)/n};}
+function ranges(){const ap=activePts();let ratioMax=1,ymax=1;ap.forEach(q=>{if(Math.abs(q.x)>1e-9)ratioMax=Math.max(ratioMax,Math.abs(q.y/q.x));ymax=Math.max(ymax,Math.abs(q.y));});
+ return{kmax:Math.max(2,Math.ceil(ratioMax*1.5*10)/10),bmax:Math.ceil(ymax*10)/10};}
+function drawGraph(){const g=state.graph,xq=QTY[g.x],yq=QTY[g.y];const shown=[];
+ Object.keys(state.series).forEach(k=>{const s=state.series[k];if(k===curKey()||g.over[k]){const p=pointsFor(s,g.x,g.y);if(p.length)shown.push({k,s,p});}});
+ const all=shown.flatMap(o=>o.p);let xh=Math.max(...all.map(q=>q.x),0.1),yh=Math.max(...all.map(q=>q.y),0.1),xl=Math.min(0,...all.map(q=>q.x)),yl=Math.min(0,...all.map(q=>q.y));
+ if(!all.length){xh=1;yh=1;}
+ const ax=niceAxis(xl,xh*1.06),ay=niceAxis(yl,yh*1.06);
+ const Wd=640,Hd=420,ml=64,mr=16,mt=14,mb=54,px=x=>ml+(x-ax.lo)/(ax.hi-ax.lo)*(Wd-ml-mr),py=y=>Hd-mb-(y-ay.lo)/(ay.hi-ay.lo)*(Hd-mt-mb);
+ let h=`<svg class="gsvg" viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Graphique ${esc(yq.lab)} en fonction de ${esc(xq.lab)}">`;
+ for(let v=ax.lo;v<=ax.hi+1e-9;v+=ax.step){h+=`<line x1="${px(v)}" x2="${px(v)}" y1="${mt}" y2="${Hd-mb}" stroke="var(--line)"/><text x="${px(v)}" y="${Hd-mb+18}" font-size="12" text-anchor="middle">${fmt(v,v%1?2:0)}</text>`;}
+ for(let v=ay.lo;v<=ay.hi+1e-9;v+=ay.step){h+=`<line y1="${py(v)}" y2="${py(v)}" x1="${ml}" x2="${Wd-mr}" stroke="var(--line)"/><text x="${ml-8}" y="${py(v)+4}" font-size="12" text-anchor="end">${fmt(v,v%1?2:0)}</text>`;}
+ h+=`<line x1="${px(0)}" x2="${px(0)}" y1="${mt}" y2="${Hd-mb}" stroke="var(--ink)" stroke-width="1.5"/><line x1="${ml}" x2="${Wd-mr}" y1="${py(0)}" y2="${py(0)}" stroke="var(--ink)" stroke-width="1.5"/>`;
+ h+=`<text x="${(ml+Wd-mr)/2}" y="${Hd-12}" font-size="14" font-weight="700" text-anchor="middle">${esc(xq.lab)}</text><text transform="translate(16 ${(mt+Hd-mb)/2}) rotate(-90)" font-size="14" font-weight="700" text-anchor="middle">${esc(yq.lab)}</text>`;
+ const f=modelFn();
+ if(f){const xa=ax.lo,xb=ax.hi;let y1=f(xa),y2=f(xb);h+=`<clipPath id="clipg"><rect x="${ml}" y="${mt}" width="${Wd-ml-mr}" height="${Hd-mt-mb}"/></clipPath><line clip-path="url(#clipg)" x1="${px(xa)}" y1="${py(y1)}" x2="${px(xb)}" y2="${py(y2)}" stroke="var(--brand)" stroke-width="2.5"/>`;
+  if(g.ecarts)(shown.find(o=>o.k===curKey())||{p:[]}).p.forEach(q=>{h+=`<line x1="${px(q.x)}" x2="${px(q.x)}" y1="${py(q.y)}" y2="${py(f(q.x))}" stroke="var(--bad)" stroke-width="2" stroke-dasharray="3 2"/>`;});}
+ shown.forEach((o,si)=>{const m=byId(o.s.mid),act=o.k===curKey();o.p.forEach(q=>{h+=marker(SHAPES[si%6],px(q.x),py(q.y),m.col,act?1:.55,`${serieLabel(o.s)} : ${xq.lab} = ${fmt(q.x,3)} ; ${yq.lab} = ${fmt(q.y,3)}`);});});
+ if(!all.length)h+=`<text x="${Wd/2}" y="${Hd/2}" text-anchor="middle" font-size="14" fill="var(--muted)">Complète le tableau (r et i₂) pour voir les points.</text>`;
+ if(shown.length>1){shown.forEach((o,si)=>{h+=marker(SHAPES[si%6],ml+14,mt+14+si*20,byId(o.s.mid).col,1,'')+`<text x="${ml+28}" y="${mt+19+si*20}" font-size="12">${esc(serieLabel(o.s))}</text>`;});}
+ $('#graph').innerHTML=h+'</svg>';return{px,py,ax,ay};}
+function drawResid(){const s=curSeries(),f=modelFn(),box=$('#resid');const p=activePts();
+ if(!f||p.length<2){box.innerHTML='';$('#resid-msg').textContent='';return;}
+ const e=p.map(q=>({x:q.x,e:q.y-f(q.x)})).sort((a,b)=>a.x-b.x),em=Math.max(...e.map(q=>Math.abs(q.e)),1e-9)*1.25,
+  ax=niceAxis(0,Math.max(...p.map(q=>q.x))*1.06),Wd=640,Hd=170,ml=64,mr=16,mt=10,mb=30,px=x=>ml+(x-ax.lo)/(ax.hi-ax.lo)*(Wd-ml-mr),py=v=>mt+(1-(v+em)/(2*em))*(Hd-mt-mb);
+ let h=`<svg class="gsvg" viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Écarts entre mesures et modèle"><line x1="${ml}" x2="${Wd-mr}" y1="${py(0)}" y2="${py(0)}" stroke="var(--ink)" stroke-width="1.5"/>`;
+ h+=`<text x="${ml-8}" y="${py(em)+4}" font-size="11" text-anchor="end">+${fmt(em,2)}</text><text x="${ml-8}" y="${py(-em)+4}" font-size="11" text-anchor="end">−${fmt(em,2)}</text><text x="${ml-8}" y="${py(0)+4}" font-size="11" text-anchor="end">0</text>`;
+ h+=`<text x="${(ml+Wd-mr)/2}" y="${Hd-6}" font-size="12" text-anchor="middle">${esc(QTY[state.graph.x].lab)} — écart = y mesuré − y du modèle</text>`;
+ e.forEach(q=>{h+=`<line x1="${px(q.x)}" x2="${px(q.x)}" y1="${py(0)}" y2="${py(q.e)}" stroke="var(--line)" stroke-width="2"/><circle cx="${px(q.x)}" cy="${py(q.e)}" r="5" fill="${q.e>=0?'var(--i1)':'var(--i2)'}"><title>écart = ${fmt(q.e,3)}</title></circle>`;});
+ box.innerHTML=h+'</svg>';
+ let run=1,best=1;for(let i=1;i<e.length;i++){if(Math.sign(e[i].e)===Math.sign(e[i-1].e)&&e[i].e!==0){run++;best=Math.max(best,run);}else run=1;}
+ $('#resid-msg').textContent=`Plus longue série d'écarts de même signe : ${best} points sur ${e.length}. Des écarts qui dessinent une courbe plutôt que de se répartir au hasard indiquent que le modèle est mal choisi.`;}
+function metricsHTML(){const p=activePts(),f=modelFn();if(!f||p.length<2){$('#metrics').innerHTML='<div class="muted">Choisis un modèle pour mesurer l\'écart avec tes points.</div>';return null;}
+ const e=p.map(q=>q.y-f(q.x)),eqm=Math.sqrt(e.reduce((a,b)=>a+b*b,0)/e.length),ys=p.map(q=>q.y),ext=Math.max(...ys)-Math.min(...ys),eps=ext>0?100*eqm/ext:NaN,m=state.model;
+ const eq=m.type==='prop'?`y = ${fmt(m.k,3)} · x`:`y = ${fmt(m.a,3)} · x ${m.b<0?'−':'+'} ${fmt(Math.abs(m.b),3)}`;
+ $('#metrics').innerHTML=`<div>Modèle<b>${eq}</b></div><div>Écart quadratique moyen<b>${fmt(eqm,3)}</b></div><div>Écart / étendue des mesures<b>${fmt(eps,1)} %</b></div>`;return{eqm,eps,eq};}
+function slidersHTML(){const m=state.model,r=ranges();if(m.type==='none'){$('#sliders').innerHTML='';return;}
+ const row=(id,lab,val,lo,hi,st)=>`<div class="field"><label for="${id}">${lab} = <b id="${id}-v">${fmt(val,3)}</b></label><input type="range" id="${id}" min="${lo}" max="${hi}" step="${st}" value="${val}"></div>`;
+ $('#sliders').innerHTML=m.type==='prop'?row('s-k','k',m.k,0,r.kmax,0.01):row('s-a','a',m.a,0,r.kmax,0.01)+row('s-b','b',m.b,-r.bmax,r.bmax,Math.max(0.001,r.bmax/200));}
+function refreshGraph(){drawGraph();drawResid();metricsHTML();}
+function refreshAnalysis(){refreshGraph();renderStats();renderJournal();}
+function renderSeriesChips(){const ks=Object.keys(state.series).filter(k=>state.series[k].rows.length||k===curKey());
+ $('#series-chips').innerHTML=ks.length?ks.map(k=>{const s=state.series[k],cur=k===curKey();
+  return `<button type="button" class="chip" data-s="${k}" aria-pressed="${cur}">${esc(serieLabel(s))}</button>`+(cur?'':`<label class="small row"><input type="checkbox" data-over="${k}" ${state.graph.over[k]?'checked':''}> superposer</label>`);}).join(''):'<span class="muted small">Aucune série pour l\'instant (onglet Mesurer).</span>';}
+function renderJournal(){const j=state.journal;$('#journal').innerHTML=j.length?'<div class="tscroll"><table class="data"><thead><tr><th>Série</th><th>y en fonction de x</th><th>Modèle</th><th>Écart / étendue</th><th></th></tr></thead><tbody>'+
+ j.map((t,i)=>`<tr><td>${esc(t.serie)}</td><td>${esc(t.yl)} = f(${esc(t.xl)})</td><td>${esc(t.eq)}</td><td>${fmt(t.eps,1)} %</td><td><button class="x" data-jdel="${i}" aria-label="Supprimer l'essai" type="button">×</button></td></tr>`).join('')+'</tbody></table></div><p class="small muted">Quel essai donne de petits écarts, répartis sans forme, avec une droite qui passe par l\'origine ?</p>':'<p class="muted small">Aucun essai gardé pour l\'instant.</p>';}
+function bindGraph(){
+ const opts=Object.keys(QTY).map(k=>`<option value="${k}">${QTY[k].lab}</option>`).join('');$('#gx').innerHTML=opts;$('#gy').innerHTML=opts;$('#gx').value=state.graph.x;$('#gy').value=state.graph.y;
+ $('#gx').onchange=e=>{state.graph.x=e.target.value;slidersHTML();save();refreshGraph();};$('#gy').onchange=e=>{state.graph.y=e.target.value;slidersHTML();save();refreshGraph();};
+ $$('input[name=model]').forEach(r=>{r.checked=r.value===state.model.type;r.onchange=()=>{state.model.type=r.value;const ft=fitLS(activePts());if(r.value==='prop'&&state.model.k===1&&ft)state.model.k=1;slidersHTML();save();refreshGraph();};});
+ $('#sliders').addEventListener('input',e=>{const id=e.target.id;if(!id)return;const v=Number(e.target.value);const mm={'s-k':'k','s-a':'a','s-b':'b'}[id];state.model[mm]=v;$('#'+id+'-v').textContent=fmt(v,3);save();refreshGraph();});
+ $('#btn-fit').onclick=()=>{const ft=fitLS(activePts());if(!ft||state.model.type==='none'){toast('Choisis un modèle et complète le tableau.');return;}
+  if(state.model.type==='prop')state.model.k=ft.k;else{state.model.a=ft.a;state.model.b=ft.b;}slidersHTML();save();refreshGraph();};
+ $('#opt-ecarts').checked=state.graph.ecarts;$('#opt-ecarts').onchange=e=>{state.graph.ecarts=e.target.checked;save();refreshGraph();};
+ $('#btn-journal').onclick=()=>{const mt=metricsHTML();const s=curSeries();if(!mt||!s){toast('Choisis un modèle avec au moins 2 points.');return;}
+  state.journal.push({serie:serieLabel(s),xl:QTY[state.graph.x].lab,yl:QTY[state.graph.y].lab,eq:mt.eq,eps:mt.eps});if(state.journal.length>14)state.journal.shift();save();renderJournal();toast('Essai gardé dans le journal.');};
+ $('#journal').addEventListener('click',e=>{const d=e.target.closest('[data-jdel]');if(!d)return;state.journal.splice(+d.dataset.jdel,1);save();renderJournal();});
+ $('#series-chips').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const s=state.series[b.dataset.s];state.medium=s.mid;state.dir=s.dir;$('#mat').value=s.mid;$$('input[name=dir]').forEach(r=>r.checked=r.value===s.dir);syncBench();});
+ $('#series-chips').addEventListener('change',e=>{const o=e.target.closest('[data-over]');if(!o)return;state.graph.over[o.dataset.over]=o.checked;save();refreshGraph();});
+}
+/* ---------- VAL : indice, incertitude, identification ---------- */
+function statsFor(s){const m=byId(s.mid),list=[];
+ s.rows.forEach((row,i)=>{if(row.tir)return;const v=rowV(row);if(!(v.i1>0)||!(v.i2>0))return;const q=Math.sin(v.i1*D2R)/Math.sin(v.i2*D2R);list.push({i,i1:row.i1,n:s.dir==='out'?1/q:q,use:row.use!==false});});
+ const u=list.filter(x=>x.use),N=u.length,mean=N?u.reduce((a,x)=>a+x.n,0)/N:NaN,sd=N>1?Math.sqrt(u.reduce((a,x)=>a+(x.n-mean)*(x.n-mean),0)/(N-1)):NaN;
+ return{m,list,N,mean,sd,Ut:sd/Math.sqrt(N)};}
+function renderStats(){const s=curSeries(),box=$('#stats');
+ if(!s||!s.rows.length){box.innerHTML='<p class="muted">Complète d\'abord le tableau de mesures de la série active.</p>';return;}
+ const st=statsFor(s);if(!st.list.length){box.innerHTML='<p class="muted">Aucune ligne complète (i₁ et i₂ renseignés) pour calculer un indice.</p>';return;}
+ let h=`<p>Série active : <b>${esc(serieLabel(s))}</b>. Pour chaque mesure, n = sin i₁ ÷ sin i₂${s.dir==='out'?' (inversé car la lumière sort du milieu)':''}. Retire une mesure seulement si tu peux justifier pourquoi.</p>`;
+ h+='<div class="tscroll"><table class="data"><thead><tr><th>i₁ (°)</th><th>n calculé</th><th>retenue</th></tr></thead><tbody>'+st.list.map(x=>`<tr><td class="c-i1">${x.i1}</td><td>${fmt(x.n,2)}</td><td><input type="checkbox" data-use="${x.i}" ${x.use?'checked':''} aria-label="Retenir la mesure à ${x.i1} degrés"></td></tr>`).join('')+'</tbody></table></div>';
+ h+=`<div class="hint h-gi">Document 5 : U(n) = σ ÷ √N, avec N le nombre de mesures retenues et σ l'écart-type (touche σₙ₋₁ de la calculatrice).</div>`;
+ h+=`<div class="field"><label for="u-in">Incertitude-type U(n), calculée par toi (en unité d'indice)</label><input type="text" id="u-in" inputmode="decimal" value="${esc(s.U||'')}" style="width:8rem"></div><div id="stats-res"></div>`;
+ h+=`<div class="field"><label for="src">Sources d'erreur possibles (lecture de l'angle, épaisseur du faisceau, petits angles…) : lesquelles expliquent les écarts ?</label><textarea id="src">${esc(state.sources)}</textarea></div>`;
+ box.innerHTML=h;statsResult();}
+function statsResult(){const s=curSeries(),el=$('#stats-res');if(!s||!el)return;const st=statsFor(s);
+ let h=`<div class="metrics"><div>N<b>${st.N}</b></div><div>Moyenne n̄<b>${fmt(st.mean,3)}</b></div><div>Écart-type σ<b>${fmt(st.sd,3)}</b></div></div>`;
+ const U=num(s.U);
+ if(st.N<2){el.innerHTML=h+'<p class="muted">Retiens au moins 2 mesures.</p>';return;}
+ if(!Number.isFinite(U)){el.innerHTML=h+'<p class="muted">Calcule U(n) puis saisis-la ci-dessus.</p>';return;}
+ const okU=Math.abs(U-st.Ut)<=0.05*st.Ut+0.0005;
+ h+=`<div class="verdict ${okU?'ok':'warn'}">${okU?'Ton calcul de U(n) est cohérent avec les données.':'Vérifie ton calcul : U(n) = σ ÷ √N, ici N = '+st.N+'.'}</div>`;
+ const lo=st.mean-U,hi=st.mean+U;h+=`<p><b>Encadrement :</b> ${fmt(lo,2)} ≤ n ≤ ${fmt(hi,2)}</p>`;
+ const known=st.m.id!=='inconnu'||state.revealed;
+ if(st.m.id==='inconnu'&&!state.revealed){
+  h+='<h3>Quel liquide ? Compare ton encadrement aux valeurs du document 3</h3><div class="tscroll"><table class="data"><thead><tr><th>Liquide</th><th>n tabulé</th><th>Dans ton encadrement ?</th><th>Mon choix</th></tr></thead><tbody>'+
+   CANDIDATS.map(id=>{const m=byId(id);return `<tr><td>${m.court}</td><td>${fmt(m.n,2)}</td><td>${m.n>=lo-1e-6&&m.n<=hi+1e-6?'oui':'non'}</td><td><input type="radio" name="ident" value="${id}" ${state.ident===id?'checked':''}></td></tr>`;}).join('')+'</tbody></table></div>';
+  h+='<button class="btn primary" id="btn-ident" type="button" style="margin-top:.5rem">Valider mon identification</button>';}
+ else{const nr=nOf(st.m),gap=100*Math.abs(st.mean-nr)/nr,inside=nr>=lo-1e-6&&nr<=hi+1e-6;
+  h+=`<div class="verdict ${inside?'ok':'warn'}"><b>Valeur de référence :</b> n = ${fmt(nr,2)}. Écart avec ta moyenne : ${fmt(gap,1)} %. La référence ${inside?'est':'n\'est pas'} dans ton encadrement. ${inside?'':'Quelles sources d\'erreur peuvent l\'expliquer ? Les petits angles, où une erreur de 1° pèse beaucoup, sont de bons suspects.'}</div>`;
+  if(st.m.id==='inconnu'&&state.ident)h+=`<div class="verdict ${state.ident===state.secret?'ok':'bad'}">Tu avais choisi : ${esc(byId(state.ident).court)}. Le liquide était : <b>${esc(byId(state.secret).court)}</b>.${state.ident===state.secret?'':' Relis tes mesures : quel encadrement aurait permis de trancher ?'}</div>`;
+  if(nr>1)h+=`<p class="small">Vitesse de la lumière dans ce milieu : v = c ÷ n ≈ ${fmt(C_LIGHT/nr/1e8,2)} × 10⁸ m/s (document 3).</p>`;}
+ el.innerHTML=h;}
+$('#stats').addEventListener('input',e=>{const s=curSeries();if(!s)return;
+ if(e.target.id==='u-in'){s.U=e.target.value;save();statsResult();}else if(e.target.id==='src'){state.sources=e.target.value;save();}});
+$('#stats').addEventListener('change',e=>{const s=curSeries();if(!s)return;
+ if(e.target.dataset.use!==undefined){s.rows[+e.target.dataset.use].use=e.target.checked;save();statsResult();renderStatsTable();}
+ else if(e.target.name==='ident'){state.ident=e.target.value;save();}});
+function renderStatsTable(){}
+$('#stats').addEventListener('click',e=>{if(e.target.id!=='btn-ident')return;if(!state.ident){toast('Choisis un liquide.');return;}state.revealed=true;save();statsResult();toast('Identification validée.');});
+
+/* ---------- Onglet 4 ---------- */
+function renderConclPrev(){const p=state.prev,box=$('#concl-prev');
+ if(!p.saved){box.innerHTML='<p class="muted">Tu n\'as pas encore enregistré de prévision (onglet Situation).</p>';}
+ else{const txt={inv:'inversée, comme avec l\'eau',droite:'dans le même sens que l\'autre flèche',nsp:'je ne savais pas'}[p.choice],cert={1:'pas sûr·e',2:'assez sûr·e',3:'très sûr·e'}[p.cert];
+  const mg=magn(byId('glycerine').n,p.d),res=mg<0?'inversée':'dans le même sens';
+  box.innerHTML=`<p>Tu avais prévu pour la glycérine à ${fmt(p.d,1)} cm : <b>${esc(txt)}</b> (${cert}). Le modèle de la situation donne : flèche <b>${res}</b>.</p>`+(p.why?`<p class="small muted">Ton hypothèse : « ${esc(p.why)} »</p>`:'');}
+ const rows=['eau','ethanol','glycerine'].map(id=>{const m=byId(id),sv=seuilInversion(m.n);return `<tr><td>${m.court}</td><td>${fmt(m.n,2)}</td><td>${sv?fmt(sv,1)+' cm':'—'}</td></tr>`;}).join('');
+ box.innerHTML+=`<p class="small">Distance verre → papier à partir de laquelle la flèche s'inverse, d'après le modèle (indice du document 3) :</p><div class="tscroll"><table class="data"><thead><tr><th>Liquide</th><th>n</th><th>Inversion dès</th></tr></thead><tbody>${rows}</tbody></table></div><p class="small muted">Plus l'indice est grand, plus la lumière est déviée à l'entrée et à la sortie du liquide.</p>`;}
+function renderSnaps(){const b=$('#snaps');if(!state.snaps.length){b.innerHTML='<p class="muted small">Dans l\'onglet Mesurer, « Photographier le schéma » ajoute une image ici : légende-la.</p>';return;}
+ b.innerHTML=state.snaps.map((s,i)=>`<div class="snap"><img src="${s.img}" alt="Schéma : ${esc(s.info)}"><div style="flex:1"><div class="small muted">${esc(s.info)}</div><textarea data-snap="${i}" placeholder="Légende : nomme chaque élément (milieu 1, milieu 2, normale, rayons, angles…)">${esc(s.legende)}</textarea><button class="btn sm" data-sdel="${i}" type="button">Supprimer</button></div></div>`).join('');}
+$('#snaps').addEventListener('input',e=>{if(e.target.dataset.snap===undefined)return;state.snaps[+e.target.dataset.snap].legende=e.target.value;save();});
+$('#snaps').addEventListener('click',e=>{const d=e.target.closest('[data-sdel]');if(!d)return;state.snaps.splice(+d.dataset.sdel,1);save();renderSnaps();});
+function carnetData(){const out=[];out.push(['Lois de Snell-Descartes — mon carnet','']);
+ out.push(['Problématique (mes mots)',state.app||'—']);
+ const p=state.prev;out.push(['Prévision',p.saved?({inv:'inversée',droite:'même sens',nsp:'je ne sais pas'}[p.choice])+' (certitude '+p.cert+'/3) — '+(p.why||''):'—']);
+ return out;}
+function carnetText(){let t='MON CARNET — LOIS DE SNELL-DESCARTES\n\nProblématique (mes mots) : '+(state.app||'—')+'\n';
+ const p=state.prev;t+='Prévision : '+(p.saved?({inv:'inversée',droite:'même sens',nsp:'je ne sais pas'}[p.choice])+' (certitude '+p.cert+'/3). '+(p.why||''):'—')+'\n';
+ if(state.concl.prevana)t+='Prévision et résultat : '+state.concl.prevana+'\n';
+ Object.keys(state.series).forEach(k=>{const s=state.series[k];if(!s.rows.length)return;t+='\nMESURES — '+serieLabel(s)+'\n i1 (°) | r (°) | i2 (°)\n';
+  s.rows.forEach(r=>{t+=' '+r.i1+' | '+(r.r||'?')+' | '+(r.tir?'pas de rayon réfracté':(r.i2||'?'))+'\n';});
+  const st=statsFor(s);if(st.N>1){t+='n moyen = '+fmt(st.mean,3)+' ; σ = '+fmt(st.sd,3)+' ; N = '+st.N;const U=num(s.U);if(Number.isFinite(U))t+=' ; U(n) = '+fmt(U,3)+' → '+fmt(st.mean-U,2)+' ≤ n ≤ '+fmt(st.mean+U,2);t+='\n';}});
+ if(state.journal.length){t+='\nESSAIS DE MODÈLES\n'+state.journal.map(j=>' '+j.serie+' : '+j.yl+' en fonction de '+j.xl+' ; '+j.eq+' ; écart '+fmt(j.eps,1)+' % de l\'étendue').join('\n')+'\n';}
+ if(state.sources)t+='\nSources d\'erreur : '+state.sources+'\n';
+ const c=state.concl;t+='\nCONCLUSIONS\nRéflexion : '+(c.refl||'—')+'\nRéfraction : '+(c.refr||'—')+'\nLa flèche inversée : '+(c.fleche||'—')+'\nIdentification : '+(c.ident||'—')+'\n';
+ if(state.snaps.length)t+='\nSchémas : '+state.snaps.map((s,i)=>(i+1)+') '+s.info+' — '+(s.legende||'sans légende')).join(' ; ')+'\n';return t;}
+function copyText(t,msg){const done=()=>toast(msg);const fb=()=>{$('#dlg-text').value=t;const d=$('#dlg-copy');if(d.showModal)d.showModal();$('#dlg-text').select();};
+ try{navigator.clipboard.writeText(t).then(done,fb);}catch(e){fb();}}
+function printCarnet(){const esc2=esc;let h='<h1>Mon carnet — Lois de Snell-Descartes</h1><p><b>Problématique :</b> '+esc2(state.app||'—')+'</p>';
+ Object.keys(state.series).forEach(k=>{const s=state.series[k];if(!s.rows.length)return;h+='<h2>'+esc2(serieLabel(s))+'</h2><table><tr><th>i₁</th><th>r</th><th>i₂</th></tr>'+s.rows.map(r=>`<tr><td>${r.i1}</td><td>${esc2(r.r)}</td><td>${r.tir?'—':esc2(r.i2)}</td></tr>`).join('')+'</table>';});
+ const c=state.concl;h+='<h2>Conclusions</h2><p><b>Réflexion :</b> '+esc2(c.refl)+'</p><p><b>Réfraction :</b> '+esc2(c.refr)+'</p><p><b>Flèche inversée :</b> '+esc2(c.fleche)+'</p><p><b>Identification :</b> '+esc2(c.ident)+'</p>';
+ h+=state.snaps.map(s=>`<p><img src="${s.img}" style="width:9cm"><br>${esc2(s.legende||s.info)}</p>`).join('');$('#print-zone').innerHTML=h;try{window.print();}catch(e){}toast('Si rien ne s\'ouvre, utilise « Copier mon carnet ».');}
+/* ---------- Initialisation ---------- */
+function buildMaterials(){const groups={};MEDIA.forEach(m=>{(groups[m.groupe]=groups[m.groupe]||[]).push(m);});
+ $('#mat').innerHTML=Object.keys(groups).map(g=>`<optgroup label="${g}">`+groups[g].map(m=>`<option value="${m.id}">${m.nom}</option>`).join('')+'</optgroup>').join('');}
+function syncBench(){$('#mat').value=state.medium;$$('input[name=dir]').forEach(r=>r.checked=r.value===state.dir);
+ $('#opt-loupe').checked=state.loupe;$('#opt-legende').checked=state.legende;$('#opt-aide').checked=state.aide;
+ setI1(state.i1);renderTables();renderSeriesChips();slidersHTML();refreshAnalysis();}
+function showTab(t){state.tab=t;$$('.panel').forEach(p=>p.hidden=p.id!=='tab-'+t);$$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+ if(t==='situation')drawSituation();if(t==='mesurer')redraw();if(t==='exploiter'){renderSeriesChips();slidersHTML();refreshAnalysis();}
+ if(t==='conclure'){renderConclPrev();renderSnaps();}save();}
+function notesHTML(){return `<p><b>Compétences travaillées</b> (BO spécial n° 1 du 22 janvier 2019, démarche scientifique)</p>
+<div class="tscroll"><table class="data"><thead><tr><th>Compétence</th><th>Tâche dans la simulation</th><th>Hors page, pour compléter</th></tr></thead><tbody>
+<tr><td>APP</td><td>Observer la situation, reformuler la problématique (Situation)</td><td>Faire schématiser le montage du verre</td></tr>
+<tr><td>ANA</td><td>Prévision avec degré de certitude ; choix des grandeurs et du modèle (Exploiter)</td><td>Faire justifier le protocole</td></tr>
+<tr><td>RÉA</td><td>Mesurer r et i₂ à la graduation ; compléter le tableau ; tracer, ajuster, calculer n et U(n)</td><td>—</td></tr>
+<tr><td>VAL</td><td>Relire la prévision ; lire les écarts au modèle ; incertitude-type σ/√N ; comparer à la valeur de référence ; sources d'erreur</td><td>—</td></tr>
+<tr><td>COM</td><td>Conclusions rédigées, schémas légendés, carnet copiable ou imprimable</td><td>Restitution orale</td></tr></tbody></table></div>
+<p><b>Capacités exigibles</b> : « Exploiter les lois de Snell-Descartes pour la réflexion et la réfraction » ; « Tester les lois de Snell-Descartes à partir d'une série de mesures et déterminer l'indice de réfraction d'un milieu » (programme de Seconde, Vision et image).</p>
+<p><b>Réglages du modèle</b> : indices du document 3 du TP (air 1,00 ; eau 1,33 ; éthanol 1,36 ; glycérine 1,47) ; bruit commun du site (shared/bruit.js : 0,5 % de 60°, soit 0,3° d'écart-type) sur les rayons réfléchi et réfracté, stable pour un même angle, avec l'interrupteur « Modèle théorique » ; lecture à la graduation au degré. Le sens « milieu → air » et la réflexion totale ne figurent pas au programme de Seconde : option masquée par défaut.</p>
+<p><b>Points de vigilance</b> : calculatrice en degrés ; à petit angle (10°), une erreur de 1° pèse lourd sur le rapport des sinus ; le rapport des angles i₁/i₂ n'est pas constant.</p>
+<div class="rowflex"><button class="btn sm" id="btn-reveal" type="button">Révéler le liquide inconnu</button><button class="btn sm" id="btn-newsecret" type="button">Tirer un nouveau liquide inconnu</button></div><p id="reveal-msg" class="small"></p>`;}
+function bindAll(){
+ $$('.tabs button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+ $('.tabs').addEventListener('keydown',e=>{if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;const bs=$$('.tabs button'),i=bs.findIndex(b=>b.dataset.tab===state.tab),j=(i+(e.key==='ArrowRight'?1:bs.length-1))%bs.length;showTab(bs[j].dataset.tab);bs[j].focus();});
+ $('#niveau').value=state.niveau;document.body.dataset.niveau=state.niveau;$('#niveau').onchange=e=>{state.niveau=e.target.value;document.body.dataset.niveau=state.niveau;save();};
+ $('#btn-theme').onclick=()=>{const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);
+  document.documentElement.dataset.theme=dark?'light':'dark';state.theme=document.documentElement.dataset.theme;save();refreshGraph();};
+ $('#btn-lien').onclick=()=>copyText(location.href.split('#')[0]+'#m='+state.medium+'&i='+state.i1+'&n='+state.niveau+'&d='+state.dir+(Bruit.lien()?'&'+Bruit.lien():''),'Lien copié.');
+ let armed=0;$('#btn-reset').onclick=()=>{if(!armed){armed=1;toast('Clique encore une fois pour tout effacer.');setTimeout(()=>armed=0,3000);return;}wipe();state=defState();location.reload();};
+ $('#mat').onchange=e=>{state.medium=e.target.value;save();syncBench();};
+ $$('input[name=dir]').forEach(r=>r.onchange=()=>{state.dir=r.value;save();syncBench();});
+ $('#i1').oninput=e=>setI1(e.target.value);$('#i1n').onchange=e=>setI1(e.target.value);
+ $('#i1minus').onclick=()=>setI1(state.i1-1);$('#i1plus').onclick=()=>setI1(state.i1+1);
+ [['#opt-loupe','loupe'],['#opt-legende','legende'],['#opt-aide','aide']].forEach(([id,k])=>$(id).onchange=e=>{state[k]=e.target.checked;save();redraw();});
+ $('#btn-add').onclick=addMeasure;$('#btn-snap').onclick=snapshot;
+ $('#btn-clear').onclick=()=>{const s=curSeries();if(!s||!s.rows.length)return;s.rows=[];s.U='';save();renderTables();refreshAnalysis();};
+ /* Situation */
+ $('#sit-liquide').onchange=e=>{state.sit.liquide=e.target.value;save();drawSituation();};
+ $('#sit-d').oninput=e=>{state.sit.d=Number(e.target.value);save();drawSituation();};
+ $('#prev-save').onclick=savePrevision;
+ /* champs de texte */
+ [['#app-reformule',v=>state.app=v],['#prev-why',()=>{}],['#c-prevana',v=>state.concl.prevana=v],['#c-refl',v=>state.concl.refl=v],['#c-refr',v=>state.concl.refr=v],['#c-fleche',v=>state.concl.fleche=v],['#c-ident',v=>state.concl.ident=v]]
+  .forEach(([id,fn])=>$(id).addEventListener('input',e=>{fn(e.target.value);save();}));
+ $('#btn-copy').onclick=()=>copyText(carnetText(),'Carnet copié.');$('#btn-print').onclick=printCarnet;
+ $('#notes-body').innerHTML=notesHTML();
+ $('#notes-body').addEventListener('click',e=>{const m=$('#reveal-msg');
+  if(e.target.id==='btn-reveal')m.textContent='Liquide inconnu : '+byId(state.secret).nom+' (n = '+fmt(byId(state.secret).n,2)+').';
+  if(e.target.id==='btn-newsecret'){state.secret=SECRET_POOL[Math.floor(Math.random()*2)];state.revealed=false;state.ident=null;delete state.series.inconnu;save();syncBench();m.textContent='Nouveau liquide tiré : la série « inconnu » a été effacée.';}});
+ bindGraph();
+ Bruit.bascule('#bruit-host',{onChange:()=>{redraw();}});
+}
+function restoreFields(){$('#app-reformule').value=state.app;$('#prev-why').value=state.prev.why||'';
+ if(state.prev.choice){const r=$(`input[name=prev][value="${state.prev.choice}"]`);if(r)r.checked=true;}
+ if(state.prev.cert){const r=$(`input[name=cert][value="${state.prev.cert}"]`);if(r)r.checked=true;}
+ $('#c-prevana').value=state.concl.prevana;$('#c-refl').value=state.concl.refl;$('#c-refr').value=state.concl.refr;$('#c-fleche').value=state.concl.fleche;$('#c-ident').value=state.concl.ident;
+ $('#sit-d').value=state.sit.d;}
+function fromHash(){const h=new URLSearchParams(location.hash.slice(1));if(byId(h.get('m')||''))state.medium=h.get('m');
+ const i=parseInt(h.get('i'),10);if(Number.isFinite(i))state.i1=Math.max(0,Math.min(85,i));if(['guide','inter','auto'].includes(h.get('n')))state.niveau=h.get('n');if(h.get('d')==='out')state.dir='out';}
+load();fromHash();
+if(state.theme)document.documentElement.dataset.theme=state.theme;
+buildMaterials();bindAll();restoreFields();buildLiquids();updatePrevMsg();syncBench();showTab(state.tab||'situation');
+})();
+</script>
+</body>
+</html>
