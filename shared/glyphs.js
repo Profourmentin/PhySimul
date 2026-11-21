@@ -338,6 +338,19 @@
     return s;
   });
 
+  /* Action mécanique : lampe suspendue à un fil, deux forces de même valeur tracées à l'échelle (tension T de A vers le haut, poids de G vers le bas), barre d'échelle. */
+  add("forces", function () {
+    var s = "";
+    s += '<line class="s" x1="64" y1="8" x2="136" y2="8"/>';
+    s += '<line class="s" x1="100" y1="8" x2="100" y2="52" style="stroke-width:1.5"/>';
+    s += '<path class="water" d="M80 86L88 52H112L120 86Z"/><path class="s" d="M80 86L88 52H112L120 86Z"/>';
+    s += '<circle class="f" cx="100" cy="70" r="3"/>';
+    s += '<line class="v" x1="100" y1="52" x2="100" y2="18"/><path class="v" d="M94 25L100 17L106 25"/>';
+    s += '<line class="v" x1="100" y1="70" x2="100" y2="104"/><path class="v" d="M94 97L100 105L106 97"/>';
+    s += '<path class="s" d="M26 62H54M26 56V68M54 56V68"/>';
+    return s;
+  });
+
   /* ---------- Noms génériques (anciens noms, à éviter pour une nouvelle simulation) ---------- */
   /* Générique : chronophotographie d'un lancer. */
   add("chrono", function () {

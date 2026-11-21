@@ -42,6 +42,7 @@ Les glyphes sont décoratifs (`aria-hidden`) : le titre de la carte porte le sen
 | `champ` | Deux plaques, équipotentielles pointillées, lignes de champ, sonde | Cartographier un champ : de la cuve à la pesanteur |
 | `charges` | Dipôle : charge + pleine, charge − creuse, lignes de champ de + vers − | Champ électrique créé par des charges ponctuelles |
 | `cristal` | Maille cubique en perspective cavalière : atomes pleins aux sommets, atomes creux au centre des faces, arête a cotée | Cristaux : de la maille au cristal |
+| `forces` | Lampe suspendue à un fil : tension de A vers le haut et poids de G vers le bas, de même longueur, barre d'échelle | Action mécanique : du diagramme objet-interaction aux forces |
 | `graph` | Graphe de mesures (**repli** pour un nom inconnu) | — |
 | `chrono`, `beaker` | Anciens noms génériques, **à ne plus utiliser** | — |
 

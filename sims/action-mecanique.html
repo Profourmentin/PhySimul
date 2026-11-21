@@ -1,0 +1,1467 @@
+<!doctype html>
+<!-- Simulation créée avec le gabarit Simulabo : voir docs/socle.md. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Action mécanique : du diagramme objet-interaction aux forces · Simulabo PhCh</title>
+<meta name="description" content="Seconde, Mouvement et interactions : pour une situation donnée, repérer les actions mécaniques exercées sur un système (diagramme objet-interaction), les modéliser par des forces, puis tracer les vecteurs force à l'échelle.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette simulation uniquement (le reste vient du socle). */
+.panel-step { display: flex; flex-direction: column; gap: 16px; }
+.panel-step[hidden] { display: none; }
+.card h3 { display: block; line-height: 1.9; }
+.probleme { border-left: 4px solid var(--accent); background: var(--info-bg); color: var(--ink); padding: 10px 12px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.tabs .tab { min-height: var(--tap); }
+#sim, #sim > * { min-width: 0; max-width: 100%; }
+#etapes { flex-wrap: wrap; }
+code { overflow-wrap: anywhere; }
+.opts { gap: 12px 16px; }
+.opts label.lab { font-weight: 600; }
+
+/* Champs de saisie (non fournis par le socle) */
+select, textarea, input[type="text"], input[type="number"] {
+  font: 500 15px var(--font-body); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; min-height: var(--tap); max-width: 100%;
+}
+textarea { width: 100%; min-height: 84px; resize: vertical; line-height: 1.5; }
+input[type="text"], input[type="number"] { width: 9em; font-family: var(--font-data); font-weight: 600; }
+input[type="radio"] { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+fieldset { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px 12px; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+fieldset:disabled { opacity: .75; }
+legend { font: 600 16px var(--font-head); padding: 0 6px; }
+.opt { display: flex; align-items: center; gap: 10px; min-height: var(--tap); padding: 4px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); cursor: pointer; background: var(--bg); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--info-bg); }
+.opt:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.grid2 { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.fld { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fld > label { font-weight: 600; }
+.st { font-size: 13.5px; min-height: 1.4em; color: var(--muted); }
+.st[data-s="ok"] { color: var(--ok); }
+.st[data-s="bad"] { color: var(--bad); }
+.fb { line-height: 1.55; }
+.fb ul { margin: 6px 0 0; padding-left: 20px; }
+.fb li + li { margin-top: 3px; }
+.aide-txt { background: var(--warn-bg); color: var(--warn); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; }
+body.sans-aide .aide { display: none !important; }
+.lockmsg { border: 1px dashed var(--line); border-radius: var(--radius); padding: 16px; background: var(--surface); display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.fiche .row.btns { margin-top: 2px; }
+.ro { font: 500 14px var(--font-data); color: var(--muted); min-height: 1.5em; }
+
+/* Scène */
+.stage .cv canvas { aspect-ratio: 1000 / 520; background: var(--surface); }
+.stage .legend { align-items: center; }
+.tools { border-top: 1px solid var(--line); padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+.tools[hidden] { display: none; }
+.tools .row { gap: 8px; }
+.kbd-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.kbd-ctl button.dirb { min-width: var(--tap); padding: 8px 10px; font-size: 18px; }
+.kbd-ctl button.dirb[aria-pressed="true"] { background: var(--info-bg); color: var(--accent); border-color: var(--accent); }
+
+/* Diagramme objet-interaction (SVG) */
+.doi-form { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.doi-fig svg { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.doi-node { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.doi-sys { fill: var(--info-bg); stroke: var(--info); stroke-width: 3; }
+.doi-t { fill: var(--ink); font: 600 15px var(--font-body); text-anchor: middle; }
+.doi-link { stroke: var(--ink); stroke-width: 2.5; fill: none; stroke-linecap: round; }
+.doi-link.d { stroke-dasharray: 9 7; }
+.doi-ah { fill: var(--ink); }
+.doi-lab { fill: var(--ink); font: italic 500 13px var(--font-body); text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+.doi-empty { fill: var(--muted); font: 500 14px var(--font-body); text-anchor: middle; }
+.keyline { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; color: var(--muted); }
+.keyline svg { width: 44px; height: 10px; vertical-align: middle; margin-right: 6px; }
+
+.vecs { white-space: nowrap; }
+.card .compline { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+#print-zone { display: none; }
+@media print {
+  body.printing > *:not(#print-zone) { display: none !important; }
+  body.printing #print-zone { display: block !important; color: #000; }
+  #print-zone pre { white-space: pre-wrap; font: 13px/1.5 var(--font-body); }
+  #print-zone img { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#sim">Aller à la simulation</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="mouvement">Mouvement et interactions · Seconde</p>
+    <h1>Action mécanique : du diagramme objet-interaction aux forces</h1>
+    <p class="sub">Qui agit sur l'objet étudié, et comment ? Fais l'inventaire des actions mécaniques, modélise chacune par une force, puis trace les vecteurs force à l'échelle.</p>
+  </header>
+
+  <main id="sim" class="wrap" style="gap:16px">
+
+    <!-- Choix de la situation, aides, bruit de mesure -->
+    <section class="card" aria-labelledby="h-reglages">
+      <h2 id="h-reglages">Situation</h2>
+      <div class="row opts">
+        <label class="lab" for="sit">Situation étudiée</label>
+        <select id="sit"></select>
+        <button type="button" id="nouveau" class="small">Nouveaux nombres</button>
+        <button type="button" class="sw" role="switch" aria-checked="true" id="sw-aide"><span class="track"><span class="knob"></span></span>Aides et indices</button>
+      </div>
+      <div id="bruit-hote"></div>
+    </section>
+
+    <!-- Étapes -->
+    <div class="tabs" id="etapes" role="group" aria-label="Étapes de la simulation">
+      <button type="button" class="tab" data-mode="1">1 · Inventaire</button>
+      <button type="button" class="tab" data-mode="2">2 · Modéliser</button>
+      <button type="button" class="tab" data-mode="3">3 · Tracer</button>
+      <button type="button" class="tab" data-mode="4">4 · Valider et conclure</button>
+    </div>
+
+    <!-- Scène commune aux quatre étapes -->
+    <section class="stage" id="stage" aria-label="Schéma de la situation">
+      <div class="cv">
+        <canvas id="cv" role="img" aria-label="Schéma de la situation étudiée."></canvas>
+      </div>
+      <div class="legend" id="cv-legend"></div>
+      <div class="tools" id="tools" hidden>
+        <div>
+          <b>Force à tracer</b>
+          <div class="row" id="tool-forces" role="group" aria-label="Choisir la force à tracer"></div>
+        </div>
+        <p class="help" id="tool-help">Choisis une force, puis appuie sur le schéma et fais glisser : le segment fléché part du point d'application.</p>
+        <details>
+          <summary>Régler au clavier ou au millimètre près</summary>
+          <div class="kbd-ctl" style="margin-top:8px">
+            <span id="kb-lab">Direction et sens :</span>
+            <span class="row" role="group" aria-labelledby="kb-lab">
+              <button type="button" class="dirb" data-dir="haut" aria-pressed="false" aria-label="Vers le haut">↑</button>
+              <button type="button" class="dirb" data-dir="bas" aria-pressed="false" aria-label="Vers le bas">↓</button>
+              <button type="button" class="dirb" data-dir="gauche" aria-pressed="false" aria-label="Vers la gauche">←</button>
+              <button type="button" class="dirb" data-dir="droite" aria-pressed="false" aria-label="Vers la droite">→</button>
+            </span>
+            <label for="kb-len">Longueur (cm)</label>
+            <input type="number" id="kb-len" min="0" max="12" step="0.1" inputmode="decimal">
+            <button type="button" id="kb-ok" class="small">Tracer</button>
+          </div>
+        </details>
+        <p class="ro" id="trace-ro" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ===================== ÉTAPE 1 : INVENTAIRE ===================== -->
+    <section class="panel-step" id="p1" aria-label="Étape 1 : inventaire des actions mécaniques">
+      <div class="card" id="enonce"></div>
+
+      <div class="card" id="prevision"></div>
+
+      <div class="card" id="doi-card">
+        <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Construire le diagramme</span></div>
+        <h2>Diagramme objet-interaction</h2>
+        <p class="help">Le système est au centre. Pour chaque objet de la liste, indique s'il agit sur le système et comment : le diagramme se dessine au fur et à mesure.</p>
+        <p class="help" id="doi-lock">Enregistre d'abord ta prévision : le diagramme se débloque ensuite.</p>
+        <div id="doi-form" class="doi-form"></div>
+        <div class="doi-fig">
+          <svg id="doi-svg" viewBox="0 0 700 380" role="img" aria-label="Diagramme objet-interaction : le système seul, aucune interaction placée."></svg>
+        </div>
+        <div class="keyline" aria-hidden="false">
+          <span><svg viewBox="0 0 44 10"><line class="doi-link" x1="2" y1="5" x2="42" y2="5"/></svg>trait plein : interaction de contact</span>
+          <span><svg viewBox="0 0 44 10"><line class="doi-link d" x1="2" y1="5" x2="42" y2="5"/></svg>trait pointillé : interaction à distance</span>
+        </div>
+        <div class="row">
+          <button type="button" class="primary" id="doi-verif">Vérifier mon diagramme</button>
+          <button type="button" id="doi-efface">Effacer</button>
+          <button type="button" id="doi-solution" hidden>Voir la solution</button>
+        </div>
+        <div class="fb" id="doi-fb" role="status" aria-live="polite" hidden></div>
+      </div>
+
+      <div class="row"><button type="button" class="primary" id="next1" hidden>Passer à l'étape 2 : modéliser par des forces →</button></div>
+    </section>
+
+    <!-- ===================== ÉTAPE 2 : MODÉLISER ===================== -->
+    <section class="panel-step" id="p2" aria-label="Étape 2 : modéliser chaque action par une force" hidden>
+      <div class="lockmsg" id="lock2" hidden>
+        <p>Cette étape s'ouvre quand le diagramme objet-interaction est validé.</p>
+        <button type="button" data-goto="1">Retour à l'étape 1</button>
+      </div>
+      <div id="body2" class="panel-step">
+        <div class="card">
+          <div class="compline">
+            <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir un modèle</span>
+            <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Mesurer, calculer</span>
+          </div>
+          <h2>Modéliser chaque action par une force</h2>
+          <p>Une action mécanique exercée par un objet A sur un objet B se modélise par une force notée <span class="vec">F</span><sub>A/B</sub> (« force exercée par A sur B »). On ne modélise ici que les actions <b>subies</b> par le système. Une force se caractérise par son <b>point d'application</b>, sa <b>direction</b>, son <b>sens</b> et sa <b>valeur</b> en newtons (N).</p>
+          <details>
+            <summary>Rappels utiles</summary>
+            <ul>
+              <li>Le poids d'un objet de masse m (en kg) vaut P = m × g, avec g ≈ 9,8 N/kg sur Terre.</li>
+              <li>Une action à distance s'exerce sans contact : on place l'origine du vecteur au centre G de l'objet.</li>
+              <li>Une action de contact s'exerce là où les deux objets se touchent.</li>
+            </ul>
+          </details>
+        </div>
+
+        <div class="card" id="instr-card">
+          <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span></div>
+          <h2>Instruments</h2>
+          <p class="help">Choisis un instrument et relève la valeur affichée. Une mesure n'est jamais parfaitement identique d'un relevé à l'autre : fais-en plusieurs si tu veux.</p>
+          <div class="row">
+            <label for="instr" class="lab">Instrument</label>
+            <select id="instr"></select>
+            <button type="button" class="primary" id="relever">Relever</button>
+          </div>
+          <div class="readouts" id="lcd-hote"></div>
+          <div id="releves"></div>
+        </div>
+
+        <div id="fiches" class="panel-step"></div>
+
+        <div class="row">
+          <button type="button" class="primary" id="verif2">Vérifier mes fiches</button>
+        </div>
+        <div class="fb" id="fb2" role="status" aria-live="polite" hidden></div>
+        <div class="row"><button type="button" class="primary" id="next2" hidden>Passer à l'étape 3 : tracer à l'échelle →</button></div>
+      </div>
+    </section>
+
+    <!-- ===================== ÉTAPE 3 : TRACER ===================== -->
+    <section class="panel-step" id="p3" aria-label="Étape 3 : tracer les vecteurs à l'échelle" hidden>
+      <div class="lockmsg" id="lock3" hidden>
+        <p>Cette étape s'ouvre quand les fiches des forces (étape 2) sont validées.</p>
+        <button type="button" data-goto="2">Retour à l'étape 2</button>
+      </div>
+      <div id="body3" class="panel-step">
+        <div class="card">
+          <div class="compline"><span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir une échelle</span></div>
+          <h2>Choisir une échelle</h2>
+          <p>Une échelle relie la valeur d'une force à la longueur du segment fléché. Le schéma mesure 25 cm sur 13 cm (un carreau = 1 cm). Il faut que tous les vecteurs <b>tiennent dans le schéma</b> et restent <b>assez longs pour être tracés avec précision</b>.</p>
+          <div class="row">
+            <label for="echelle" class="lab">Échelle</label>
+            <select id="echelle"></select>
+            <button type="button" class="primary" id="ech-ok">Valider cette échelle</button>
+          </div>
+          <div class="aide aide-txt" id="ech-live" aria-live="polite"></div>
+          <div class="fb" id="fb-ech" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <div class="card" id="longs-card" hidden>
+          <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Calculer</span></div>
+          <h2>Longueur de chaque segment fléché</h2>
+          <p class="help">Longueur (cm) = valeur de la force (N) ÷ nombre de newtons représentés par 1 cm.</p>
+          <div id="longs-form" class="grid2"></div>
+          <div class="row"><button type="button" class="primary" id="longs-verif">Vérifier mes longueurs</button></div>
+          <div class="fb" id="fb-longs" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <div class="card" id="trace-card" hidden>
+          <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Tracer</span></div>
+          <h2>Tracer les vecteurs force</h2>
+          <p>Sous le schéma, choisis une force puis trace son segment fléché depuis son point d'application, avec la bonne direction, le bon sens et la bonne longueur. Quand tout est tracé, vérifie.</p>
+          <p class="aide aide-txt">Un vecteur force se représente par une flèche : son origine est le point d'application, la droite qui la porte donne la direction, la pointe indique le sens, sa longueur est proportionnelle à la valeur (échelle).</p>
+          <div class="row">
+            <button type="button" class="primary" id="trace-verif">Vérifier mes tracés</button>
+            <button type="button" id="trace-efface">Effacer ce vecteur</button>
+          </div>
+          <div class="fb" id="fb-trace" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <div class="row"><button type="button" class="primary" id="next3" hidden>Passer à l'étape 4 : valider et conclure →</button></div>
+      </div>
+    </section>
+
+    <!-- ===================== ÉTAPE 4 : VALIDER ET CONCLURE ===================== -->
+    <section class="panel-step" id="p4" aria-label="Étape 4 : valider et conclure" hidden>
+      <div class="lockmsg" id="lock4" hidden>
+        <p>Cette étape s'ouvre quand tous les vecteurs sont tracés et validés (étape 3).</p>
+        <button type="button" data-goto="3">Retour à l'étape 3</button>
+      </div>
+      <div id="body4" class="panel-step">
+        <div class="card">
+          <div class="compline"><span class="comp"><abbr title="Valider">VAL</abbr> · Relire ma prévision</span></div>
+          <h2>Ma prévision était-elle juste ?</h2>
+          <div id="val-prev"></div>
+          <div class="fld"><label for="val-prev-txt">Que t'apprend l'écart éventuel ? (ou : pourquoi ma prévision était-elle juste ?)</label>
+            <textarea id="val-prev-txt"></textarea></div>
+        </div>
+
+        <div class="card">
+          <div class="compline"><span class="comp"><abbr title="Valider">VAL</abbr> · Juger un écart</span></div>
+          <h2>Des mesures qui varient : cela change-t-il le schéma ?</h2>
+          <div id="val-ecart"></div>
+        </div>
+
+        <div class="card">
+          <div class="compline"><span class="comp"><abbr title="Valider">VAL</abbr> · Comparer</span></div>
+          <h2>Que remarques-tu ?</h2>
+          <div class="fld"><label for="val-comp-txt">Compare les longueurs et les sens de tes vecteurs. Certains sont-ils de même longueur et de sens opposés ? Que peut-on en penser pour le mouvement du système ?</label>
+            <textarea id="val-comp-txt"></textarea></div>
+          <p class="help">Il n'y a pas de bonne réponse à donner ici : tu y reviendras avec le principe d'inertie.</p>
+        </div>
+
+        <div class="card">
+          <div class="compline"><span class="comp"><abbr title="Communiquer">COM</abbr> · Conclure</span></div>
+          <h2>Ma conclusion</h2>
+          <div class="fld"><label for="concl-txt">Rédige en quelques phrases : quelles actions s'exercent sur le système, comment les modélises-tu, avec quelle échelle ?</label>
+            <textarea id="concl-txt" placeholder="Sur … s'exercent … actions mécaniques : … Chacune est modélisée par une force caractérisée par … J'ai choisi l'échelle … parce que …"></textarea></div>
+          <div class="row">
+            <button type="button" id="snap">Ajouter ma figure au carnet</button>
+            <button type="button" class="primary" id="copie">Copier mon carnet</button>
+            <button type="button" id="imprime">Imprimer / PDF</button>
+            <button type="button" id="lien">Copier le lien de cette situation</button>
+          </div>
+          <div id="snap-hote"></div>
+          <p class="status" id="com-status" aria-live="polite"></p>
+          <div id="copie-secours" hidden>
+            <label for="copie-txt">Sélectionne et copie ce texte :</label>
+            <textarea id="copie-txt" readonly></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <details>
+      <summary>Pour aller plus loin et notes pour l'enseignant</summary>
+      <ul>
+        <li><b>Programme visé</b> : physique-chimie de Seconde, « Mouvement et interactions », modéliser une action sur un système : action mécanique, interactions de contact et à distance, force (point d'application, direction, sens, valeur), poids, représentation à l'échelle par un vecteur. Le diagramme objet-interaction est un outil d'analyse, pas une fin en soi. À vérifier : intitulés exacts des capacités dans le BO spécial n° 1 du 22 janvier 2019.</li>
+        <li><b>Hypothèses du modèle</b> : g = 9,8 N/kg ; frottements de l'air négligés ; chaque objet reste modélisé par un solide dont on choisit le point d'application de chaque force. Pour une action de contact, l'origine peut aussi être placée en G si l'on modélise l'objet par un point : la simulation accepte les deux et le dit.</li>
+        <li><b>Ce que la simulation ne traite pas</b> : le principe des actions réciproques (les deux pointes du diagramme annoncent seulement que l'interaction est réciproque), la décomposition d'une force, les forces obliques, l'égalité des forces qui se compensent (principe d'inertie).</li>
+        <li><b>Mesures</b> : les relevés des instruments sont bruités (0,5 % par défaut). L'interrupteur « Modèle théorique » donne les valeurs exactes. Les tolérances de correction tiennent compte de ce bruit.</li>
+        <li><b>Liens de situation</b> : <code>#sit=livre|lampe|ballon|bille|autoporteur&amp;seed=3</code> fixe la situation et les nombres ; <code>&amp;theo=1</code> ouvre en modèle théorique ; <code>&amp;debloque=1</code> ouvre toutes les étapes (préparation de la séance).</li>
+        <li><b>Prolongements</b> : actions réciproques, force d'interaction gravitationnelle, principe d'inertie (somme des forces), variation du vecteur vitesse.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · simulation libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+<div id="print-zone" aria-hidden="true"></div>
+
+<script src="../shared/bruit.js"></script>   <!-- bruit de mesure commun : à charger AVANT le socle -->
+<script src="../shared/simulabo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = Simulabo, $ = S.$, $$ = S.$$, h = S.h, fmt = S.fmt;
+
+  /* ======================================================================
+     CONSTANTES ET DONNÉES
+     Le schéma mesure 25 cm × 13 cm : 1 cm = 40 unités du repère logique.
+     ====================================================================== */
+  var PX = 40, CW = 1000, CH = 520, MARGE = 0.25, G_PES = 9.8;
+  var DIRS = {
+    haut:   { x: 0,  y: -1, txt: "vers le haut",   axe: "V" },
+    bas:    { x: 0,  y: 1,  txt: "vers le bas",    axe: "V" },
+    gauche: { x: -1, y: 0,  txt: "vers la gauche", axe: "H" },
+    droite: { x: 1,  y: 0,  txt: "vers la droite", axe: "H" }
+  };
+  var ECHELLES = [0.1, 0.2, 0.5, 1, 2, 5, 10];       // newtons représentés par 1 cm
+
+  function vecHtml(f) { return '<span class="vec">F</span><sub>' + f.notation + '</sub>'; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* ---------- Les cinq situations ---------- */
+  var SIT = {
+    livre: {
+      titre: "Un livre posé sur une table",
+      sys: "le livre",
+      enonce: "Un livre est posé sur une table. Il est immobile. On étudie le livre.",
+      masses: [0.40, 0.60, 0.80],
+      alea: function (r) { return { m: pick(this.masses, r) }; },
+      cands: [
+        { id: "terre", nom: "la Terre", kind: "distance", force: "P" },
+        { id: "table", nom: "la table", kind: "contact", force: "R" },
+        { id: "chaise", nom: "la chaise voisine", kind: "none", msg: "La chaise est à côté, sans toucher le livre : elle n'exerce aucune action sur lui." },
+        { id: "mur", nom: "le mur de la salle", kind: "none", msg: "Le mur ne touche pas le livre et ne l'attire pas de façon notable : aucune action à représenter." },
+        { id: "air", nom: "l'air", kind: "neglig", msg: "L'air exerce bien une action sur le livre, mais elle est négligeable devant les autres : on peut ne pas la représenter." }
+      ],
+      marks: { G: { x: 500, y: 260, desc: "le centre du livre" }, C: { x: 500, y: 285, desc: "le point de contact avec la table" } },
+      forces: [
+        { id: "P", from: "la Terre", notation: "Terre/livre", extra: "c'est le poids du livre", pt: "G", ptAlt: [], dir: "V", sens: "bas",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "dynamomètre accroché au livre",
+          hPt: "Le poids est une action à distance : on place son origine au centre de l'objet, en G.",
+          hDir: "Le poids est dirigé vers le centre de la Terre : sa direction est verticale.",
+          hSens: "Vers le centre de la Terre, donc vers le bas.",
+          hVal: "P = m × g, avec m en kilogrammes (lue sur la balance) et g = 9,8 N/kg." },
+        { id: "R", from: "la table", notation: "table/livre", extra: "réaction du support", pt: "C", ptAlt: ["G"], dir: "V", sens: "haut",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "capteur de force intégré à la table",
+          hPt: "C'est une action de contact : l'origine est là où la table touche le livre (C).",
+          hDir: "La table est horizontale : elle pousse perpendiculairement à sa surface, donc suivant la verticale.",
+          hSens: "La table empêche le livre de s'enfoncer : elle le pousse vers le haut.",
+          hVal: "Lis la valeur sur le capteur de force de la table." }
+      ],
+      draw: function (c, g) {
+        g.line(60, 470, 940, 470, c.line, 2);
+        g.rect(260, 325, 34, 145, c.tabs, c.muted, 2); g.rect(706, 325, 34, 145, c.tabs, c.muted, 2);
+        g.rect(220, 285, 560, 40, c.tabs, c.muted, 2);
+        g.text("table", 240, 311, { size: 16, color: c.muted, align: "left" });
+        g.rect(420, 235, 160, 50, c.infoBg, c.info, 3);
+        g.text("livre", 500, 266, { size: 17, weight: 600, align: "center" });
+      }
+    },
+
+    lampe: {
+      titre: "Une lampe suspendue à un fil",
+      sys: "la lampe",
+      enonce: "Une lampe est suspendue au plafond par un fil. Elle est immobile. On étudie la lampe.",
+      masses: [0.80, 1.20, 1.50, 2.00],
+      alea: function (r) { return { m: pick(this.masses, r) }; },
+      cands: [
+        { id: "terre", nom: "la Terre", kind: "distance", force: "P" },
+        { id: "fil", nom: "le fil", kind: "contact", force: "T" },
+        { id: "plafond", nom: "le plafond", kind: "none", msg: "Le plafond ne touche pas la lampe : c'est le fil qui touche la lampe. Le plafond agit sur le fil, et le fil agit sur la lampe." },
+        { id: "mur", nom: "le mur de la pièce", kind: "none", msg: "Le mur ne touche pas la lampe : aucune action à représenter." },
+        { id: "air", nom: "l'air", kind: "neglig", msg: "L'air exerce bien une action sur la lampe, mais elle est négligeable ici : on peut ne pas la représenter." }
+      ],
+      marks: { G: { x: 500, y: 210, desc: "le centre de la lampe" }, A: { x: 500, y: 168, desc: "le point d'attache du fil" } },
+      forces: [
+        { id: "P", from: "la Terre", notation: "Terre/lampe", extra: "c'est le poids de la lampe", pt: "G", ptAlt: [], dir: "V", sens: "bas",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "dynamomètre accroché à la lampe",
+          hPt: "Le poids est une action à distance : l'origine est au centre de l'objet, en G.",
+          hDir: "Le poids est dirigé vers le centre de la Terre : sa direction est verticale.",
+          hSens: "Vers le centre de la Terre, donc vers le bas.",
+          hVal: "P = m × g, avec m en kilogrammes (lue sur la balance) et g = 9,8 N/kg." },
+        { id: "T", from: "le fil", notation: "fil/lampe", extra: "tension du fil", pt: "A", ptAlt: ["G"], dir: "V", sens: "haut",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "dynamomètre placé dans le fil",
+          hPt: "C'est une action de contact : l'origine est là où le fil est accroché à la lampe (A).",
+          hDir: "Le fil tendu est vertical : la force qu'il exerce a la direction du fil.",
+          hSens: "Le fil tire la lampe vers le point où il est fixé : vers le haut.",
+          hVal: "Lis la valeur sur le dynamomètre placé dans le fil." }
+      ],
+      draw: function (c, g) {
+        g.rect(300, 0, 400, 24, c.tabs, c.muted, 2);
+        for (var x = 312; x < 700; x += 22) g.line(x, 24, x - 12, 4, c.muted, 1.5);
+        g.text("plafond", 312, 44, { size: 15, color: c.muted, align: "left" });
+        g.line(500, 24, 500, 168, c.ink, 2.5);
+        g.text("fil", 514, 100, { size: 15, color: c.muted, align: "left" });
+        g.poly([[455, 168], [545, 168], [570, 250], [430, 250]], c.infoBg, c.info, 3);
+        g.circle(500, 266, 14, c.surface, c.info, 3);
+        g.text("lampe", 500, 215, { size: 17, weight: 600, align: "center" });
+      }
+    },
+
+    ballon: {
+      titre: "Un ballon en l'air",
+      sys: "le ballon",
+      enonce: "Un joueur de basket vient de lâcher le ballon vers le panier. Le ballon est en l'air, au sommet de sa trajectoire. On étudie le ballon ; on néglige les frottements de l'air.",
+      masses: [0.45, 0.60, 0.65],
+      alea: function (r) { return { m: pick(this.masses, r) }; },
+      cands: [
+        { id: "terre", nom: "la Terre", kind: "distance", force: "P" },
+        { id: "main", nom: "la main du joueur", kind: "none", msg: "La main a lâché le ballon : sans contact, elle n'exerce plus d'action. Le lancer a donné au ballon sa vitesse, pas une force qui « resterait »." },
+        { id: "panier", nom: "le panier", kind: "none", msg: "Le panier est loin et ne touche pas le ballon : aucune action sur lui à cet instant." },
+        { id: "vitesse", nom: "son mouvement (sa vitesse)", kind: "none", msg: "Un mouvement ou une vitesse n'est pas un objet : il n'agit pas sur le ballon. Seuls des objets exercent des actions." },
+        { id: "air", nom: "l'air", kind: "neglig", msg: "L'énoncé dit de négliger l'air : tu peux ne pas le représenter." }
+      ],
+      marks: { G: { x: 500, y: 260, desc: "le centre du ballon" }, H: { x: 500, y: 216, desc: "le point le plus haut du ballon" }, B: { x: 500, y: 304, desc: "le point le plus bas du ballon" } },
+      forces: [
+        { id: "P", from: "la Terre", notation: "Terre/ballon", extra: "c'est le poids du ballon", pt: "G", ptAlt: [], dir: "V", sens: "bas",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "dynamomètre (un ballon identique, au repos)",
+          hPt: "Le poids est une action à distance : l'origine est au centre de l'objet, en G (pas en un point de la surface).",
+          hDir: "Le poids est dirigé vers le centre de la Terre : sa direction est verticale, même quand le ballon se déplace.",
+          hSens: "Vers le centre de la Terre, donc vers le bas, même au sommet de la trajectoire.",
+          hVal: "P = m × g, avec m en kilogrammes (lue sur la balance) et g = 9,8 N/kg." }
+      ],
+      draw: function (c, g) {
+        g.curve(80, 400, 500, 120, 920, 400, c.muted, 2, [9, 7]);
+        g.text("trajectoire", 250, 262, { size: 15, color: c.muted, align: "left" });
+        g.circle(60, 425, 18, c.surface, c.muted, 2);
+        g.text("main (a lâché le ballon)", 90, 462, { size: 14, color: c.muted, align: "left" });
+        g.line(880, 400, 965, 400, c.muted, 3);
+        g.line(965, 400, 965, 340, c.muted, 3);
+        g.text("panier", 905, 424, { size: 15, color: c.muted, align: "left" });
+        g.circle(500, 260, 44, c.infoBg, c.info, 3);
+        g.text("ballon", 500, 266, { size: 16, weight: 600, align: "center" });
+      }
+    },
+
+    bille: {
+      titre: "Une bille d'acier sous un aimant",
+      sys: "la bille",
+      enonce: "Une bille d'acier est maintenue immobile sous un aimant, sans le toucher. On étudie la bille.",
+      masses: [0.050, 0.080, 0.120],
+      alea: function (r) { return { m: pick(this.masses, r) }; },
+      cands: [
+        { id: "terre", nom: "la Terre", kind: "distance", force: "P" },
+        { id: "aimant", nom: "l'aimant", kind: "distance", force: "A" },
+        { id: "support", nom: "le support de l'aimant", kind: "none", msg: "Le support tient l'aimant, pas la bille : il ne touche pas la bille et n'agit pas sur elle." },
+        { id: "air", nom: "l'air", kind: "neglig", msg: "L'air exerce bien une action sur la bille, mais elle est négligeable ici : on peut ne pas la représenter." }
+      ],
+      marks: { G: { x: 500, y: 240, desc: "le centre de la bille" }, T: { x: 500, y: 206, desc: "le haut de la bille, côté aimant" } },
+      forces: [
+        { id: "P", from: "la Terre", notation: "Terre/bille", extra: "c'est le poids de la bille", pt: "G", ptAlt: [], dir: "V", sens: "bas",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "dynamomètre accroché à la bille",
+          hPt: "Le poids est une action à distance : l'origine est au centre de l'objet, en G.",
+          hDir: "Le poids est dirigé vers le centre de la Terre : sa direction est verticale.",
+          hSens: "Vers le centre de la Terre, donc vers le bas.",
+          hVal: "P = m × g, avec m en kilogrammes (lue sur la balance) et g = 9,8 N/kg." },
+        { id: "A", from: "l'aimant", notation: "aimant/bille", extra: "attraction magnétique", pt: "G", ptAlt: [], dir: "V", sens: "haut",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "capteur de force fixé à l'aimant",
+          hPt: "L'aimant agit sans contact : comme pour le poids, on place l'origine au centre de l'objet, en G.",
+          hDir: "L'aimant est juste au-dessus de la bille : la force a la direction de la droite qui les relie, la verticale.",
+          hSens: "L'aimant attire la bille d'acier : la force est dirigée vers l'aimant, donc vers le haut.",
+          hVal: "Lis la valeur sur le capteur de force fixé à l'aimant." }
+      ],
+      draw: function (c, g) {
+        g.rect(380, 0, 240, 24, c.tabs, c.muted, 2);
+        g.text("support", 640, 17, { size: 15, color: c.muted, align: "left" });
+        g.rect(470, 24, 60, 70, c.tabs, c.ink, 2.5);
+        g.line(470, 59, 530, 59, c.ink, 2);
+        g.text("N", 500, 49, { size: 16, weight: 700, align: "center" });
+        g.text("S", 500, 83, { size: 16, weight: 700, align: "center" });
+        g.text("aimant", 548, 66, { size: 16, color: c.muted, align: "left" });
+        g.circle(500, 240, 34, c.infoBg, c.info, 3);
+        g.text("bille", 500, 246, { size: 16, weight: 600, align: "center" });
+      }
+    },
+
+    autoporteur: {
+      titre: "Un autoporteur tiré par un fil",
+      sys: "l'autoporteur",
+      enonce: "Un autoporteur (mobile qui glisse sur un coussin d'air) est tiré vers la droite par un fil. Le fil passe sur une poulie et porte une masse suspendue. Les frottements sont négligeables. On étudie l'autoporteur à un instant de son mouvement.",
+      masses: [0.45, 0.50, 0.60],
+      alea: function (r) { return { m: pick(this.masses, r), T: pick([1.0, 1.5, 2.0], r) }; },
+      cands: [
+        { id: "terre", nom: "la Terre", kind: "distance", force: "P" },
+        { id: "table", nom: "la table à coussin d'air", kind: "contact", force: "R" },
+        { id: "fil", nom: "le fil", kind: "contact", force: "T" },
+        { id: "masse", nom: "la masse suspendue", kind: "none", msg: "La masse tire le fil, et c'est le fil qui tire l'autoporteur : seul le fil touche l'autoporteur." },
+        { id: "poulie", nom: "la poulie", kind: "none", msg: "La poulie guide le fil mais ne touche pas l'autoporteur : elle n'agit pas directement sur lui." },
+        { id: "vitesse", nom: "sa vitesse", kind: "none", msg: "Une vitesse n'est pas un objet : elle n'exerce aucune action sur l'autoporteur." }
+      ],
+      marks: { G: { x: 500, y: 265, desc: "le centre de l'autoporteur" }, C: { x: 500, y: 300, desc: "le point de contact avec la table (par le coussin d'air)" }, E: { x: 580, y: 265, desc: "le point où le fil est accroché" } },
+      forces: [
+        { id: "P", from: "la Terre", notation: "Terre/autoporteur", extra: "c'est le poids de l'autoporteur", pt: "G", ptAlt: [], dir: "V", sens: "bas",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "dynamomètre accroché à l'autoporteur",
+          hPt: "Le poids est une action à distance : l'origine est au centre de l'objet, en G.",
+          hDir: "Le poids est dirigé vers le centre de la Terre : sa direction est verticale.",
+          hSens: "Vers le centre de la Terre, donc vers le bas.",
+          hVal: "P = m × g, avec m en kilogrammes (lue sur la balance) et g = 9,8 N/kg." },
+        { id: "R", from: "la table", notation: "table/autoporteur", extra: "réaction du support", pt: "C", ptAlt: ["G"], dir: "V", sens: "haut",
+          valeur: function (v) { return v.m * G_PES; }, capteur: "capteur de force intégré à la table",
+          hPt: "C'est une action de contact (par le coussin d'air) : l'origine est là où l'autoporteur touche la table (C).",
+          hDir: "La table est horizontale : elle pousse perpendiculairement à sa surface, donc suivant la verticale.",
+          hSens: "La table empêche l'autoporteur de tomber : elle le pousse vers le haut.",
+          hVal: "Lis la valeur sur le capteur de force de la table." },
+        { id: "T", from: "le fil", notation: "fil/autoporteur", extra: "tension du fil", pt: "E", ptAlt: ["G"], dir: "H", sens: "droite",
+          valeur: function (v) { return v.T; }, capteur: "dynamomètre placé dans le fil",
+          hPt: "C'est une action de contact : l'origine est là où le fil est accroché à l'autoporteur (E).",
+          hDir: "Le fil tendu est horizontal : la force qu'il exerce a la direction du fil.",
+          hSens: "Le fil tire l'autoporteur vers la poulie, donc vers la droite.",
+          hVal: "Lis la valeur sur le dynamomètre placé dans le fil." }
+      ],
+      draw: function (c, g) {
+        g.line(60, 470, 940, 470, c.line, 2);
+        g.rect(100, 330, 30, 140, c.tabs, c.muted, 2); g.rect(690, 330, 30, 140, c.tabs, c.muted, 2);
+        g.rect(60, 300, 710, 30, c.tabs, c.muted, 2);
+        g.text("table à coussin d'air", 80, 322, { size: 14, color: c.muted, align: "left" });
+        g.rect(770, 296, 30, 10, c.tabs, c.muted, 2);
+        g.rect(420, 230, 160, 70, c.infoBg, c.info, 3);
+        g.text("autoporteur", 500, 272, { size: 16, weight: 600, align: "center" });
+        g.line(580, 265, 800, 265, c.ink, 2.5);
+        g.circle(800, 287, 22, c.surface, c.muted, 3);
+        g.line(822, 287, 822, 400, c.ink, 2.5);
+        g.rect(800, 400, 44, 56, c.tabs, c.muted, 2);
+        g.text("masse", 856, 432, { size: 14, color: c.muted, align: "left" });
+        g.text("poulie", 770, 250, { size: 14, color: c.muted, align: "left" });
+      }
+    }
+  };
+  var ORDRE = ["livre", "lampe", "ballon", "bille", "autoporteur"];
+
+  function pick(arr, r) { return arr[Math.floor(r() * arr.length)]; }
+  function shuffle(arr, r) {
+    var a = arr.slice(), i, j, t;
+    for (i = a.length - 1; i > 0; i--) { j = Math.floor(r() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  /* ======================================================================
+     ÉTAT
+     ====================================================================== */
+  var etat = S.shareState({ sit: "livre", seed: 1, debloque: 0, debug: 0 });
+  var init = etat.read();
+  var st = {};
+  var scene, tabsApi, table, lcd;
+
+  function resetEtat() {
+    st.step = st.step || 1;
+    st.prev = null;
+    st.doi = {}; st.doiTries = 0; st.doiOK = false; st.doiSolution = false;
+    st.fiche = {}; st.ficheOK = false;
+    st.echelle = null; st.echelleOK = false; st.longsOK = false;
+    st.traces = {}; st.traceStat = {}; st.sel = null; st.tracesOK = false;
+    st.kbDir = null; st.snap = null; st.ecartRep = null;
+  }
+  st.aides = true;
+  st.unlockAll = init.debloque === 1;
+
+  function forceById(id) { for (var i = 0; i < st.sit.forces.length; i++) if (st.sit.forces[i].id === id) return st.sit.forces[i]; return null; }
+  function nbInteractions() { return st.sit.cands.filter(function (c) { return c.kind === "contact" || c.kind === "distance"; }).length; }
+  function valeurN(f) { return f.valeur(st.v); }
+  function typeTxt(k) { return k === "contact" ? "interaction de contact" : "interaction à distance"; }
+
+  /* ======================================================================
+     DESSIN DE LA SCÈNE (canvas)
+     ====================================================================== */
+  function couleurs() {
+    return {
+      ink: S.cssVar("--ink"), muted: S.cssVar("--muted"), line: S.cssVar("--line"), surface: S.cssVar("--surface"),
+      bg: S.cssVar("--bg"), accent: S.cssVar("--accent"), force: S.cssVar("--c-force"),
+      infoBg: S.cssVar("--info-bg"), info: S.cssVar("--info"), tabs: S.cssVar("--tabs-bg"), ok: S.cssVar("--ok")
+    };
+  }
+  var FONT = '"IBM Plex Sans", system-ui, sans-serif';
+
+  function helpers(ctx) {
+    return {
+      line: function (x1, y1, x2, y2, col, w, dash) { ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = w || 2; ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore(); },
+      rect: function (x, y, w, hh, fill, stroke, lw) { ctx.save(); ctx.fillStyle = fill; ctx.fillRect(x, y, w, hh); ctx.strokeStyle = stroke; ctx.lineWidth = lw || 2; ctx.strokeRect(x, y, w, hh); ctx.restore(); },
+      circle: function (x, y, r, fill, stroke, lw) { ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = stroke; ctx.lineWidth = lw || 2; ctx.stroke(); ctx.restore(); },
+      poly: function (pts, fill, stroke, lw) { ctx.save(); ctx.beginPath(); pts.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = stroke; ctx.lineWidth = lw || 2; ctx.stroke(); ctx.restore(); },
+      curve: function (x0, y0, cx, cy, x1, y1, col, w, dash) { ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = w || 2; ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(cx, cy, x1, y1); ctx.stroke(); ctx.restore(); },
+      text: function (s, x, y, o) { o = o || {}; ctx.save(); ctx.font = (o.weight || 500) + " " + (o.size || 16) + "px " + FONT; ctx.fillStyle = o.color || couleurs().ink; ctx.textAlign = o.align || "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(s, x, y); ctx.restore(); }
+    };
+  }
+
+  function origine(f) {
+    var ch = st.fiche[f.id] && st.fiche[f.id].choix;
+    var ok = ch && (ch === f.pt || f.ptAlt.indexOf(ch) >= 0);
+    return st.sit.marks[ok ? ch : f.pt];
+  }
+  function pointsOk(f) { return [f.pt].concat(f.ptAlt); }
+
+  function dessineEtiquetteVecteur(ctx, c, x, y, sous, col) {
+    ctx.save();
+    ctx.font = "700 21px " + FONT; ctx.fillStyle = col; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    ctx.lineJoin = "round"; ctx.strokeStyle = c.surface; ctx.lineWidth = 5;
+    var w = ctx.measureText("F").width;
+    ctx.strokeText("F", x, y); ctx.fillText("F", x, y);
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(x + 1, y - 21); ctx.lineTo(x + w - 1, y - 21);
+    ctx.moveTo(x + w - 5, y - 24); ctx.lineTo(x + w - 1, y - 21); ctx.lineTo(x + w - 5, y - 18); ctx.stroke();
+    ctx.font = "600 14px " + FONT; ctx.strokeStyle = c.surface; ctx.lineWidth = 4;
+    ctx.strokeText(sous, x + w + 2, y + 5); ctx.fillText(sous, x + w + 2, y + 5);
+    ctx.restore();
+  }
+
+  function dessineVecteur(ctx, c, O, dx, dy, opts) {
+    var L = Math.sqrt(dx * dx + dy * dy) * PX;
+    if (L < 2) return null;
+    var ux = dx * PX / L, uy = dy * PX / L;
+    var tip = { x: O.x + dx * PX, y: O.y + dy * PX };
+    var head = Math.min(16, L * 0.6);
+    ctx.save();
+    ctx.strokeStyle = opts.color; ctx.fillStyle = opts.color; ctx.lineWidth = 4; ctx.lineCap = "round";
+    ctx.setLineDash(opts.dash ? [11, 7] : []);
+    ctx.beginPath(); ctx.moveTo(O.x, O.y); ctx.lineTo(tip.x - ux * head * 0.8, tip.y - uy * head * 0.8); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - ux * head + uy * head * 0.45, tip.y - uy * head - ux * head * 0.45);
+    ctx.lineTo(tip.x - ux * head - uy * head * 0.45, tip.y - uy * head + ux * head * 0.45);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+    return { tip: tip, ux: ux, uy: uy, L: L };
+  }
+
+  function dessineGrille(ctx, c) {
+    ctx.save();
+    var i;
+    for (i = 0; i <= CW / PX; i++) {
+      ctx.strokeStyle = c.line; ctx.globalAlpha = i % 5 === 0 ? 0.9 : 0.45; ctx.lineWidth = i % 5 === 0 ? 1.5 : 1;
+      ctx.beginPath(); ctx.moveTo(i * PX, 0); ctx.lineTo(i * PX, CH); ctx.stroke();
+    }
+    for (i = 0; i <= CH / PX; i++) {
+      ctx.strokeStyle = c.line; ctx.globalAlpha = i % 5 === 0 ? 0.9 : 0.45; ctx.lineWidth = i % 5 === 0 ? 1.5 : 1;
+      ctx.beginPath(); ctx.moveTo(0, i * PX); ctx.lineTo(CW, i * PX); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function dessineScene(ctx) {
+    if (!st.sit) return;
+    var c = couleurs(), g = helpers(ctx);
+    if (st.step >= 3) dessineGrille(ctx, c);
+    st.sit.draw(c, g);
+
+    // Étape 2 : repères des points possibles
+    if (st.step === 2) {
+      Object.keys(st.sit.marks).forEach(function (k) {
+        var m = st.sit.marks[k];
+        g.circle(m.x, m.y, 6, c.surface, c.ink, 2.5);
+        g.text(k, m.x + 10, m.y - 8, { size: 18, weight: 700 });
+      });
+    }
+
+    // Étapes 3 et 4 : vecteurs
+    if (st.step >= 3) {
+      st.sit.forces.forEach(function (f) {
+        var O = origine(f), t = st.traces[f.id], sel = st.sel === f.id && st.step === 3;
+        if (sel) { ctx.save(); ctx.strokeStyle = c.accent; ctx.lineWidth = 3; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(O.x, O.y, 13, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+        g.circle(O.x, O.y, 5, c.force, c.surface, 2);
+        if (!t) return;
+        var ok = st.traceStat[f.id] === "ok";
+        var r = dessineVecteur(ctx, c, O, t.dx, t.dy, { color: c.force, dash: !ok });
+        if (!r) return;
+        var mx, my;
+        if (Math.abs(r.uy) > Math.abs(r.ux)) { mx = r.tip.x + 14; my = r.tip.y + (r.uy < 0 ? 20 : -8); }
+        else { mx = O.x + t.dx * PX / 2 - 12; my = O.y - 16; }
+        dessineEtiquetteVecteur(ctx, c, mx, my, f.notation, c.force);
+      });
+      if (st.echelleOK && st.echelle) {
+        var y = CH - 22, ev = fmtE(st.echelle);
+        g.line(28, y, 28 + PX, y, c.ink, 3); g.line(28, y - 7, 28, y + 7, c.ink, 3); g.line(28 + PX, y - 7, 28 + PX, y + 7, c.ink, 3);
+        ctx.save(); ctx.font = "600 16px " + FONT; var w = ctx.measureText("Échelle : 1 cm ↔ " + ev + " N").width; ctx.restore();
+        ctx.save(); ctx.fillStyle = c.surface; ctx.globalAlpha = 0.85; ctx.fillRect(22 + PX + 4, y - 15, w + 14, 28); ctx.restore();
+        g.text("Échelle : 1 cm ↔ " + ev + " N", 28 + PX + 12, y + 5, { size: 16, weight: 600 });
+      }
+    }
+  }
+
+  function fmtE(e) { return fmt(e, e < 1 ? 1 : 0); }
+
+  function majLegende() {
+    var el = $("#cv-legend"); el.textContent = "";
+    var sys = st.sit ? st.sit.sys : "";
+    el.appendChild(h("span", { class: "lg", style: "color:var(--info)" }, h("i"), "Système étudié : " + sys));
+    if (st.step >= 3) el.appendChild(h("span", { class: "lg", style: "color:var(--c-force)" }, h("i"), "Force (vecteur)"));
+    if (st.step >= 3) el.appendChild(h("span", { class: "lg" }, "Carreaux : 1 cm"));
+  }
+
+  function majAriaScene() {
+    var cv = $("#cv"), s = st.sit;
+    var txt = "Schéma : " + s.titre.toLowerCase() + ". Système étudié : " + s.sys + ".";
+    if (st.step === 2) txt += " Les points d'application possibles sont repérés par des lettres : " + Object.keys(s.marks).map(function (k) { return k + ", " + s.marks[k].desc; }).join(" ; ") + ".";
+    if (st.step >= 3) {
+      var tr = s.forces.filter(function (f) { return st.traces[f.id]; });
+      txt += " " + tr.length + " vecteur(s) tracé(s) sur " + s.forces.length + ".";
+    }
+    cv.setAttribute("aria-label", txt);
+  }
+
+  /* ======================================================================
+     ÉTAPE 1 : énoncé, prévision, diagramme objet-interaction
+     ====================================================================== */
+  function renderEnonce() {
+    var s = st.sit, el = $("#enonce");
+    el.innerHTML = "";
+    el.appendChild(h("div", { class: "compline" }, h("span", { class: "comp", html: '<abbr title="S\'approprier">APP</abbr> · Lire la situation' })));
+    el.appendChild(h("h2", { text: s.titre }));
+    el.appendChild(h("p", { text: s.enonce }));
+    el.appendChild(h("div", { class: "probleme", html: "<b>Problématique.</b> Quels objets exercent une action mécanique sur " + s.sys + ", et comment représenter chacune de ces actions ?" }));
+    el.appendChild(h("div", { class: "fld" },
+      h("label", { for: "app-txt", text: "Avec tes mots : que cherche-t-on, et que sais-tu déjà ?" }),
+      h("textarea", { id: "app-txt", placeholder: "On cherche… Je sais que…" })));
+  }
+
+  function renderPrevision() {
+    var s = st.sit, el = $("#prevision");
+    el.innerHTML = "";
+    el.appendChild(h("div", { class: "compline" }, h("span", { class: "comp", html: '<abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir' })));
+    el.appendChild(h("h2", { text: "Avant de chercher : ta prévision" }));
+    el.appendChild(h("p", { text: "Combien d'objets exercent une action mécanique sur " + s.sys + " ? Compte-les, qu'ils touchent le système ou non." }));
+    var fs = h("fieldset", { id: "prev-n" }, h("legend", { text: "Nombre d'objets qui agissent sur " + s.sys }));
+    [["0", "aucun"], ["1", "un seul"], ["2", "deux"], ["3", "trois"], ["4", "quatre ou plus"]].forEach(function (o) {
+      var id = "prev-n-" + o[0];
+      fs.appendChild(h("label", { class: "opt", for: id }, h("input", { type: "radio", name: "prevn", id: id, value: o[0] }), o[1]));
+    });
+    el.appendChild(fs);
+    var fc = h("fieldset", { id: "prev-c" }, h("legend", { text: "Mon degré de certitude" }));
+    [["1", "pas sûr·e"], ["2", "assez sûr·e"], ["3", "très sûr·e"]].forEach(function (o) {
+      var id = "prev-c-" + o[0];
+      fc.appendChild(h("label", { class: "opt", for: id }, h("input", { type: "radio", name: "prevc", id: id, value: o[0] }), o[1]));
+    });
+    el.appendChild(fc);
+    el.appendChild(h("div", { class: "fld" },
+      h("label", { for: "prev-why", text: "Mon hypothèse : lesquels, et pourquoi ?" }),
+      h("textarea", { id: "prev-why" })));
+    var b = h("button", { type: "button", class: "primary", id: "prev-save", text: "Enregistrer ma prévision" });
+    var msg = h("p", { class: "status", id: "prev-msg", "aria-live": "polite" });
+    b.addEventListener("click", function () {
+      var n = $('input[name="prevn"]:checked'), c = $('input[name="prevc"]:checked');
+      if (!n || !c) { msg.textContent = "Choisis un nombre et ton degré de certitude."; msg.className = "status err"; return; }
+      st.prev = { n: Number(n.value), c: Number(c.value), why: $("#prev-why").value };
+      msg.className = "status"; msg.textContent = "Prévision enregistrée. Le diagramme est débloqué.";
+      majVerrouDoi();
+    });
+    el.appendChild(h("div", { class: "row" }, b));
+    el.appendChild(msg);
+  }
+
+  function majVerrouDoi() {
+    var ok = !!st.prev;
+    $("#doi-lock").hidden = ok;
+    $$("#doi-form fieldset").forEach(function (f) { f.disabled = !ok || st.doiOK; });
+    $("#doi-verif").disabled = !ok || st.doiOK;
+    $("#doi-efface").disabled = !ok;
+    if (ok && !$("#doi-fb").hidden && false) $("#doi-fb").hidden = true;
+  }
+
+  function renderDoiForm(rand) {
+    var host = $("#doi-form"); host.textContent = "";
+    st.ordre = shuffle(st.sit.cands, rand);
+    st.ordre.forEach(function (c) {
+      var fs = h("fieldset", { class: "doi-c" }, h("legend", { text: cap(c.nom) }));
+      [["none", "Aucune action sur le système"], ["contact", "Interaction de contact"], ["distance", "Interaction à distance"]].forEach(function (o) {
+        var id = "doi-" + c.id + "-" + o[0];
+        var inp = h("input", { type: "radio", name: "doi-" + c.id, id: id, value: o[0] });
+        inp.addEventListener("change", function () { st.doi[c.id] = o[0]; majFbDoiPerime(); dessineDoi(); });
+        fs.appendChild(h("label", { class: "opt", for: id }, inp, o[1]));
+      });
+      host.appendChild(fs);
+    });
+  }
+  function majFbDoiPerime() { /* le retour reste affiché jusqu'à la prochaine vérification */ }
+
+  function ellipsePoint(cx, cy, a, b, dx, dy) {
+    var t = 1 / Math.sqrt((dx / a) * (dx / a) + (dy / b) * (dy / b));
+    return { x: cx + dx * t, y: cy + dy * t };
+  }
+  function tete(x, y, ang) {
+    var l = 13, w = 6.5, ux = Math.cos(ang), uy = Math.sin(ang);
+    var p1 = [x - ux * l + uy * w, y - uy * l - ux * w], p2 = [x - ux * l - uy * w, y - uy * l + ux * w];
+    return '<polygon class="doi-ah" points="' + x.toFixed(1) + "," + y.toFixed(1) + " " + p1[0].toFixed(1) + "," + p1[1].toFixed(1) + " " + p2[0].toFixed(1) + "," + p2[1].toFixed(1) + '"/>';
+  }
+  function svgTexte(nom, x, y, cls) {
+    var mots = nom.split(" "), l1 = nom, l2 = "";
+    if (nom.length > 15 && mots.length > 1) {
+      var best = 1, diff = 99;
+      for (var i = 1; i < mots.length; i++) { var d = Math.abs(mots.slice(0, i).join(" ").length - mots.slice(i).join(" ").length); if (d < diff) { diff = d; best = i; } }
+      l1 = mots.slice(0, best).join(" "); l2 = mots.slice(best).join(" ");
+    }
+    var out = '<text class="' + cls + '" x="' + x + '" y="' + (l2 ? y - 3 : y + 5) + '">' + esc(l1) + "</text>";
+    if (l2) out += '<text class="' + cls + '" x="' + x + '" y="' + (y + 15) + '">' + esc(l2) + "</text>";
+    return out;
+  }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+
+  function dessineDoi() {
+    var svg = $("#doi-svg"), cx = 350, cy = 190, A = 80, B = 34, an = 88, bn = 29, s = "";
+    var liens = st.sit.cands.filter(function (c) { return st.doi[c.id] === "contact" || st.doi[c.id] === "distance"; });
+    var n = liens.length, resume = [];
+    liens.forEach(function (c, i) {
+      var ang = -Math.PI / 2 + i * 2 * Math.PI / n;
+      var nx = cx + 245 * Math.cos(ang), ny = cy + 120 * Math.sin(ang);
+      if (n === 1) { nx = cx; ny = cy - 120; }
+      var dx = nx - cx, dy = ny - cy;
+      var p1 = ellipsePoint(cx, cy, A + 4, B + 4, dx, dy), p2 = ellipsePoint(nx, ny, an + 4, bn + 4, -dx, -dy);
+      var a12 = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      var type = st.doi[c.id];
+      s += '<line class="doi-link' + (type === "distance" ? " d" : "") + '" x1="' + p1.x.toFixed(1) + '" y1="' + p1.y.toFixed(1) + '" x2="' + p2.x.toFixed(1) + '" y2="' + p2.y.toFixed(1) + '"/>';
+      s += tete(p1.x, p1.y, a12 + Math.PI) + tete(p2.x, p2.y, a12);
+      var mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+      var offx = Math.abs(dx) < 40 ? 56 : 0, offy = Math.abs(dx) < 40 ? 4 : -9;
+      s += '<text class="doi-lab" x="' + (mx + offx).toFixed(1) + '" y="' + (my + offy).toFixed(1) + '">' + (type === "distance" ? "à distance" : "contact") + "</text>";
+      resume.push(c.nom + " : " + typeTxt(type));
+    });
+    liens.forEach(function (c, i) {
+      var ang = -Math.PI / 2 + i * 2 * Math.PI / n;
+      var nx = cx + 245 * Math.cos(ang), ny = cy + 120 * Math.sin(ang);
+      if (n === 1) { nx = cx; ny = cy - 120; }
+      s += '<ellipse class="doi-node" cx="' + nx.toFixed(1) + '" cy="' + ny.toFixed(1) + '" rx="' + an + '" ry="' + bn + '"/>' + svgTexte(c.nom, nx.toFixed(1), ny.toFixed(1), "doi-t");
+    });
+    s += '<ellipse class="doi-sys" cx="' + cx + '" cy="' + cy + '" rx="' + A + '" ry="' + B + '"/>' + svgTexte(st.sit.sys, cx, cy, "doi-t");
+    if (!n) s += '<text class="doi-empty" x="350" y="300">Aucune interaction placée pour l\'instant.</text>';
+    svg.innerHTML = s;
+    svg.setAttribute("aria-label", "Diagramme objet-interaction. Système : " + st.sit.sys + ". " + (n ? resume.join(". ") + "." : "Aucune interaction placée."));
+  }
+
+  function fbShow(el, tone, html) { el.hidden = false; el.setAttribute("data-tone", tone); el.innerHTML = html; }
+
+  function verifDoi() {
+    var fb = $("#doi-fb"), cands = st.sit.cands;
+    var sans = cands.filter(function (c) { return !st.doi[c.id]; });
+    if (sans.length) { fbShow(fb, "warn", "<b>Il reste des objets à examiner :</b> " + sans.map(function (c) { return esc(c.nom); }).join(", ") + "."); return; }
+    st.doiTries += 1;
+    var extra = [], manque = [], type = [];
+    cands.forEach(function (c) {
+      var v = st.doi[c.id];
+      if (c.kind === "neglig") return;
+      if (c.kind === "none") { if (v !== "none") extra.push(c); }
+      else if (v === "none") manque.push(c);
+      else if (v !== c.kind) type.push(c);
+    });
+    if (!extra.length && !manque.length && !type.length) { doiValide(false); return; }
+    var li = "";
+    extra.forEach(function (c) { li += "<li><b>" + esc(cap(c.nom)) + "</b> : " + esc(c.msg) + "</li>"; });
+    if (manque.length) {
+      if (st.doiTries === 1) li += "<li>Il manque au moins une interaction.</li>";
+      else if (st.doiTries === 2) li += "<li>Il manque " + manque.length + " interaction" + (manque.length > 1 ? "s" : "") + (manque.some(function (c) { return c.kind === "contact"; }) ? " : cherche ce qui touche le système" : "") + (manque.some(function (c) { return c.kind === "distance"; }) ? (manque.some(function (c) { return c.kind === "contact"; }) ? ", et ce qui agit sans le toucher" : " : cherche ce qui agit sans toucher le système") : "") + ".</li>";
+      else li += "<li>Il manque : " + manque.map(function (c) { return "<b>" + esc(c.nom) + "</b>"; }).join(", ") + ".</li>";
+    }
+    if (type.length) {
+      if (st.doiTries === 1) li += "<li>Le type d'au moins une interaction (contact ou à distance) est à revoir.</li>";
+      else li += "<li>Type à revoir pour : " + type.map(function (c) { return "<b>" + esc(c.nom) + "</b>"; }).join(", ") + ". Rappel : <i>contact</i> = les deux objets se touchent ; <i>à distance</i> = ils agissent l'un sur l'autre sans se toucher.</li>";
+    }
+    fbShow(fb, "warn", "<b>Pas encore.</b> Relis la situation et corrige.<ul>" + li + "</ul>");
+    $("#doi-solution").hidden = st.doiTries < 3;
+  }
+
+  function doiValide(parSolution) {
+    st.doiOK = true; st.doiSolution = !!parSolution;
+    var cands = st.sit.cands, liste = "";
+    cands.forEach(function (c) {
+      if (c.kind === "contact" || c.kind === "distance") liste += "<li>Action de " + esc(c.nom) + " sur " + esc(st.sit.sys) + " : " + typeTxt(c.kind) + ".</li>";
+    });
+    var nb = nbInteractions(), neglig = cands.filter(function (c) { return c.kind === "neglig" && (st.doi[c.id] === "contact" || st.doi[c.id] === "distance"); });
+    var rem = neglig.length ? "<p>À propos de <b>" + esc(neglig[0].nom) + "</b> : " + esc(neglig[0].msg) + "</p>" : "";
+    fbShow($("#doi-fb"), "ok", "<b>" + (parSolution ? "Solution affichée." : "Diagramme validé.") + "</b> Sur " + esc(st.sit.sys) + " s'exerce" + (nb > 1 ? "nt " : " ") + nb + " action" + (nb > 1 ? "s" : "") + " mécanique" + (nb > 1 ? "s" : "") + " :<ul>" + liste + "</ul>" + rem +
+      "<p>Les doubles flèches rappellent qu'une interaction est réciproque. Pour modéliser, on ne retient que les actions <b>subies</b> par le système.</p>");
+    $("#doi-solution").hidden = true;
+    $("#next1").hidden = false;
+    $$("#doi-form fieldset").forEach(function (f) { f.disabled = true; });
+    $("#doi-verif").disabled = true;
+    majOnglets();
+  }
+
+  function solutionDoi() {
+    st.sit.cands.forEach(function (c) {
+      var v = c.kind === "neglig" ? "none" : c.kind;
+      st.doi[c.id] = v;
+      var r = $("#doi-" + c.id + "-" + v); if (r) r.checked = true;
+    });
+    dessineDoi(); doiValide(true);
+  }
+
+  function effaceDoi() {
+    st.doi = {}; st.doiTries = 0; st.doiOK = false; st.doiSolution = false;
+    $$("#doi-form input").forEach(function (i) { i.checked = false; });
+    $("#doi-fb").hidden = true; $("#doi-solution").hidden = true; $("#next1").hidden = true;
+    dessineDoi(); majVerrouDoi(); majOnglets();
+  }
+
+  /* ======================================================================
+     ÉTAPE 2 : instruments et fiches de forces
+     ====================================================================== */
+  function renderInstruments() {
+    var sel = $("#instr"); sel.textContent = "";
+    sel.appendChild(h("option", { value: "balance", text: "Balance (masse de " + st.sit.sys + ")" }));
+    st.sit.forces.forEach(function (f) { sel.appendChild(h("option", { value: f.id, text: cap(f.capteur) + " : " + f.notation })); });
+    lcd.set("–");
+  }
+
+  function releve() {
+    var id = $("#instr").value, txt, row;
+    if (id === "balance") {
+      var g = Math.round(Bruit.appliquer(st.v.m * 1000, st.v.m * 1000));
+      txt = fmt(g, 0) + " g";
+      row = { grandeur: "masse de " + st.sit.sys, valeur: txt, id: "balance", num: g };
+    } else {
+      var f = forceById(id), F = valeurN(f);
+      var x = Math.round(Bruit.appliquer(F, F) * 100) / 100;
+      txt = fmt(x, 2) + " N";
+      row = { grandeur: "F " + f.notation, valeur: txt, id: id, num: x };
+    }
+    lcd.set(txt);
+    table.add(row);
+  }
+
+  function renderFiches() {
+    var host = $("#fiches"); host.textContent = "";
+    st.sit.forces.forEach(function (f) {
+      var base = "f-" + f.id;
+      var card = h("div", { class: "card fiche", id: base });
+      card.appendChild(h("h3", { html: "Action de " + esc(f.from) + " sur " + esc(st.sit.sys) + " : <span class='vecs'>" + vecHtml(f) + "</span> <span class='help'>(" + esc(f.extra) + ")</span>" }));
+      var g = h("div", { class: "grid2" });
+      var sPt = h("select", { id: base + "-pt" }, h("option", { value: "", text: "— choisir —" }));
+      Object.keys(st.sit.marks).forEach(function (k) { sPt.appendChild(h("option", { value: k, text: k + " : " + st.sit.marks[k].desc })); });
+      var sDir = h("select", { id: base + "-dir" }, h("option", { value: "", text: "— choisir —" }), h("option", { value: "V", text: "verticale" }), h("option", { value: "H", text: "horizontale" }), h("option", { value: "O", text: "oblique" }));
+      var sSens = h("select", { id: base + "-sens" }, h("option", { value: "", text: "— choisir —" }));
+      Object.keys(DIRS).forEach(function (k) { sSens.appendChild(h("option", { value: k, text: DIRS[k].txt })); });
+      var iVal = h("input", { type: "text", id: base + "-val", inputmode: "decimal", autocomplete: "off", "aria-describedby": base + "-val-st" });
+      g.appendChild(fld("Point d'application", sPt, base + "-pt"));
+      g.appendChild(fld("Direction", sDir, base + "-dir"));
+      g.appendChild(fld("Sens", sSens, base + "-sens"));
+      g.appendChild(h("div", { class: "fld" }, h("label", { for: base + "-val", text: "Valeur (en newtons)" }), h("span", { class: "row" }, iVal, h("span", { text: "N" })), h("span", { class: "st", id: base + "-val-st" })));
+      card.appendChild(g);
+      card.appendChild(h("p", { class: "aide aide-txt", text: "Indice : " + f.hVal }));
+      var rev = h("button", { type: "button", id: base + "-rev", hidden: true, text: "Voir la réponse de cette fiche" });
+      rev.addEventListener("click", function () { revele(f); });
+      card.appendChild(h("div", { class: "row btns" }, rev));
+      host.appendChild(card);
+      st.fiche[f.id] = { tries: 0, ok: false, choix: null };
+    });
+  }
+  function fld(label, ctrl, id) {
+    return h("div", { class: "fld" }, h("label", { for: id, text: label }), ctrl, h("span", { class: "st", id: id + "-st" }));
+  }
+
+  function tolVal(F) { return Math.max(0.06 * F, 0.05); }
+
+  function evalFiche(f) {
+    var base = "f-" + f.id;
+    var pt = $("#" + base + "-pt").value, dir = $("#" + base + "-dir").value, sens = $("#" + base + "-sens").value;
+    var vtxt = $("#" + base + "-val").value, val = S.parseNum(vtxt), F = valeurN(f), res = {};
+    res.pt = !pt ? { s: "vide" } : pt === f.pt ? { s: "ok" } : f.ptAlt.indexOf(pt) >= 0 ? { s: "alt" } : { s: "bad" };
+    res.dir = !dir ? { s: "vide" } : dir === f.dir ? { s: "ok" } : { s: "bad" };
+    var coh = sens && dir && dir !== "O" && DIRS[sens].axe !== dir;
+    res.sens = !sens ? { s: "vide" } : sens === f.sens ? (coh ? { s: "bad", incoh: true } : { s: "ok" }) : { s: "bad", incoh: coh };
+    res.val = (vtxt.trim() === "" ? { s: "vide" } : isNaN(val) ? { s: "bad", nan: true } : Math.abs(val - F) <= tolVal(F) ? { s: "ok" } : { s: "bad", haut: val > F });
+    return res;
+  }
+
+  function majStatut(base, champ, r, f, hint) {
+    var el = $("#" + base + "-" + champ + "-st");
+    var t = "", s = "";
+    if (r.s === "ok") { t = "✓ Correct"; s = "ok"; }
+    else if (r.s === "alt") { t = "✓ Accepté : en modélisant l'objet par un point, on peut placer l'origine en G. L'origine « naturelle » est au point de contact."; s = "ok"; }
+    else if (r.s === "vide") { t = "À compléter"; s = ""; }
+    else {
+      s = "bad";
+      if (champ === "val" && r.nan) t = "✗ Entre un nombre (la virgule est acceptée).";
+      else if (champ === "val") t = "✗ Valeur à revoir : " + (r.haut ? "trop grande" : "trop petite") + "." + (st.aides ? " " + hint : "");
+      else if (champ === "sens" && r.incoh) t = "✗ Sens incompatible avec la direction choisie.";
+      else t = "✗ À revoir." + (st.aides ? " " + hint : "");
+    }
+    el.textContent = t; el.setAttribute("data-s", s);
+  }
+
+  function verifFiches() {
+    var tout = true, incomplet = false, lignes = "";
+    st.sit.forces.forEach(function (f) {
+      var base = "f-" + f.id, r = evalFiche(f), fi = st.fiche[f.id];
+      majStatut(base, "pt", r.pt, f, f.hPt); majStatut(base, "dir", r.dir, f, f.hDir);
+      majStatut(base, "sens", r.sens, f, f.hSens); majStatut(base, "val", r.val, f, f.hVal);
+      var vide = ["pt", "dir", "sens", "val"].some(function (k) { return r[k].s === "vide"; });
+      var ok = ["pt", "dir", "sens", "val"].every(function (k) { return r[k].s === "ok" || r[k].s === "alt"; });
+      if (vide) incomplet = true;
+      if (!vide) fi.tries += 1;
+      fi.ok = ok;
+      if (ok) fi.choix = $("#" + base + "-pt").value;
+      if (!ok) { tout = false; if (fi.tries >= 2) $("#" + base + "-rev").hidden = false; }
+      if (ok) $("#" + base + "-rev").hidden = true;
+    });
+    var fb = $("#fb2");
+    if (tout) {
+      st.ficheOK = true;
+      fbShow(fb, "ok", "<b>Toutes les fiches sont justes.</b> Chaque action est modélisée par une force dont tu connais le point d'application, la direction, le sens et la valeur." );
+      $("#next2").hidden = false;
+    } else {
+      st.ficheOK = false; $("#next2").hidden = true;
+      fbShow(fb, incomplet ? "warn" : "bad", incomplet ? "<b>Fiches à compléter.</b> Remplis tous les champs puis revérifie." : "<b>Pas encore.</b> Regarde ce qui est marqué « ✗ À revoir » et corrige.");
+    }
+    majOnglets();
+  }
+
+  function revele(f) {
+    var base = "f-" + f.id;
+    $("#" + base + "-pt").value = f.pt; $("#" + base + "-dir").value = f.dir; $("#" + base + "-sens").value = f.sens;
+    $("#" + base + "-val").value = fmt(S.sig(valeurN(f), 2), 2 - 1 - Math.floor(Math.log10(Math.abs(valeurN(f)))) < 0 ? 0 : Math.max(0, 1 - Math.floor(Math.log10(Math.abs(valeurN(f))))));
+    verifFiches();
+  }
+
+  /* ======================================================================
+     ÉTAPE 3 : échelle, longueurs, tracé
+     ====================================================================== */
+  function room(f) {
+    var O = origine(f), d = DIRS[f.sens], t;
+    if (d.y < 0) t = O.y; else if (d.y > 0) t = CH - O.y; else if (d.x < 0) t = O.x; else t = CW - O.x;
+    return t / PX - MARGE;
+  }
+  function analyseEchelle(e) {
+    var res = st.sit.forces.map(function (f) {
+      var F = valeurN(f), L = F / e, r = room(f);
+      return { f: f, F: F, L: L, room: r, trop: L > r, petit: L < 1 };
+    });
+    return { res: res, ok: res.every(function (x) { return !x.trop && !x.petit; }), lmax: Math.max.apply(null, res.map(function (x) { return x.L; })) };
+  }
+  function messagesEchelle(a) {
+    var li = "";
+    a.res.forEach(function (x) {
+      var nom = "<span class='vecs'>" + vecHtml(x.f) + "</span>";
+      if (x.trop) li += "<li>" + nom + " mesurerait " + fmt(x.L, 1) + " cm : il sortirait du schéma (" + fmt(x.room, 1) + " cm disponibles).</li>";
+      else if (x.petit) li += "<li>" + nom + " ne mesurerait que " + fmt(x.L, 1) + " cm : trop court pour être tracé avec précision (au moins 1 cm).</li>";
+      else li += "<li>" + nom + " mesurerait " + fmt(x.L, 1) + " cm : convenable.</li>";
+    });
+    return "<ul>" + li + "</ul>";
+  }
+
+  function renderEchelle() {
+    var sel = $("#echelle"); sel.textContent = "";
+    sel.appendChild(h("option", { value: "", text: "— choisir —" }));
+    ECHELLES.forEach(function (e) { sel.appendChild(h("option", { value: String(e), text: "1 cm représente " + fmt(e, e < 1 ? 1 : 0) + " N" })); });
+    $("#ech-live").innerHTML = "Choisis une échelle : je te montre les longueurs obtenues.";
+  }
+
+  function liveEchelle() {
+    var v = Number($("#echelle").value);
+    if (!v) { $("#ech-live").innerHTML = "Choisis une échelle : je te montre les longueurs obtenues."; return; }
+    $("#ech-live").innerHTML = "<b>Avec cette échelle :</b>" + messagesEchelle(analyseEchelle(v));
+  }
+
+  function valideEchelle() {
+    var v = Number($("#echelle").value), fb = $("#fb-ech");
+    if (!v) { fbShow(fb, "warn", "Choisis d'abord une échelle."); return; }
+    var a = analyseEchelle(v);
+    if (!a.ok) {
+      fbShow(fb, "bad", "<b>Cette échelle ne convient pas.</b>" + messagesEchelle(a) + "<p>Change d'échelle : plus de newtons par centimètre raccourcit les vecteurs, moins les allonge.</p>");
+      st.echelleOK = false; $("#longs-card").hidden = true; $("#trace-card").hidden = true; $("#tools").hidden = true;
+      majApresEchelle(); return;
+    }
+    var nouvelle = st.echelle !== v;
+    st.echelle = v; st.echelleOK = true;
+    if (nouvelle) { st.traces = {}; st.traceStat = {}; st.tracesOK = false; st.longsOK = false; st.sel = null; $("#next3").hidden = true; }
+    var remarque = a.lmax < 3 ? "<p>Elle est utilisable, mais le plus grand vecteur ne mesure que " + fmt(a.lmax, 1) + " cm : le tracé sera moins précis. Une échelle plus petite donnerait un dessin plus lisible.</p>" : "";
+    fbShow(fb, "ok", "<b>Échelle retenue : 1 cm représente " + fmtE(v) + " N.</b>" + messagesEchelle(a) + remarque);
+    $("#longs-card").hidden = false; $("#trace-card").hidden = false;
+    renderLongs(); renderOutilsTrace();
+    majApresEchelle();
+  }
+  function majApresEchelle() { majLegende(); majAriaScene(); scene.redraw(); majOnglets(); }
+
+  function renderLongs() {
+    var host = $("#longs-form"); host.textContent = "";
+    st.sit.forces.forEach(function (f) {
+      var id = "lg-" + f.id;
+      host.appendChild(h("div", { class: "fld" },
+        h("label", { for: id, html: "Longueur de <span class='vecs'>" + vecHtml(f) + "</span> (cm)" }),
+        h("span", { class: "row" }, h("input", { type: "text", id: id, inputmode: "decimal", autocomplete: "off" }), h("span", { text: "cm" })),
+        h("span", { class: "st", id: id + "-st" })));
+    });
+    $("#fb-longs").hidden = true;
+  }
+
+  function verifLongs() {
+    var tout = true, vide = false;
+    st.sit.forces.forEach(function (f) {
+      var v = S.parseNum($("#lg-" + f.id).value), L = valeurN(f) / st.echelle, el = $("#lg-" + f.id + "-st");
+      if (isNaN(v)) { el.textContent = "À compléter"; el.setAttribute("data-s", ""); vide = true; tout = false; return; }
+      var ok = Math.abs(v - L) <= Math.max(0.15, 0.04 * L);
+      el.setAttribute("data-s", ok ? "ok" : "bad");
+      el.textContent = ok ? "✓ Correct" : "✗ À revoir." + (st.aides ? " Longueur = " + fmt(valeurN(f), 2) + " N ÷ " + fmtE(st.echelle) + " N/cm." : "");
+      if (!ok) tout = false;
+    });
+    st.longsOK = tout;
+    fbShow($("#fb-longs"), tout ? "ok" : (vide ? "warn" : "bad"), tout ? "<b>Longueurs justes.</b> Tu peux tracer." : (vide ? "Remplis toutes les longueurs." : "<b>Pas encore.</b> Revois les calculs marqués « ✗ »."));
+  }
+
+  function renderOutilsTrace() {
+    $("#tools").hidden = false;
+    var host = $("#tool-forces"); host.textContent = "";
+    st.sit.forces.forEach(function (f) {
+      var b = h("button", { type: "button", class: "pill", "aria-pressed": "false", "data-f": f.id });
+      b.addEventListener("click", function () { choisitForce(f.id); });
+      host.appendChild(b);
+    });
+    majBoutonsForces();
+    $("#trace-ro").textContent = "";
+    $("#cv").style.touchAction = "none";
+  }
+  function majBoutonsForces() {
+    $$("#tool-forces button").forEach(function (b) {
+      var f = forceById(b.getAttribute("data-f"));
+      b.setAttribute("aria-pressed", String(st.sel === f.id));
+      b.innerHTML = (st.traceStat[f.id] === "ok" ? "✓ " : "") + "<span class='vecs'>" + vecHtml(f) + "</span>";
+      b.setAttribute("aria-label", "Tracer la force " + f.notation.replace("/", " sur ") + (st.traceStat[f.id] === "ok" ? " (validée)" : ""));
+    });
+  }
+  function choisitForce(id) {
+    st.sel = id; majBoutonsForces(); scene.redraw();
+    var f = forceById(id);
+    $("#tool-help").textContent = "Trace " + "F " + f.notation + " : appuie sur le schéma et fais glisser, ou règle la direction et la longueur ci-dessous.";
+    majLectureTrace();
+  }
+
+  function posePointeur(ev) {
+    if (!st.sel) return;
+    var f = forceById(st.sel), O = origine(f), p = scene.toLocal(ev);
+    var dx = (p.x - O.x) / PX, dy = (p.y - O.y) / PX, L = Math.sqrt(dx * dx + dy * dy);
+    if (L < 0.02) { delete st.traces[st.sel]; }
+    else { var k = Math.round(L * 10) / 10 / L; st.traces[st.sel] = { dx: dx * k, dy: dy * k }; }
+    st.traceStat[st.sel] = null; st.tracesOK = false; $("#next3").hidden = true;
+    scene.redraw(); majLectureTrace(); majBoutonsForces();
+  }
+  function longTrace(t) { return Math.sqrt(t.dx * t.dx + t.dy * t.dy); }
+  function dirDe(t) {
+    var L = longTrace(t); if (L < 0.05) return "";
+    var ux = t.dx / L, uy = t.dy / L;
+    if (Math.abs(uy) > Math.abs(ux)) return uy > 0 ? "vers le bas" : "vers le haut";
+    return ux > 0 ? "vers la droite" : "vers la gauche";
+  }
+  function majLectureTrace() {
+    var ro = $("#trace-ro");
+    if (!st.sel) { ro.textContent = ""; return; }
+    var t = st.traces[st.sel];
+    ro.textContent = t ? "Segment en cours : " + fmt(longTrace(t), 1) + " cm, " + dirDe(t) + "." : "Aucun segment tracé pour cette force.";
+    $("#kb-len").value = t ? fmt(longTrace(t), 1).replace(",", ".") : "";
+  }
+
+  function appliqueClavier() {
+    if (!st.sel) { $("#trace-ro").textContent = "Choisis d'abord une force."; return; }
+    var L = S.parseNum($("#kb-len").value);
+    if (!st.kbDir || isNaN(L) || L <= 0) { $("#trace-ro").textContent = "Choisis une direction et une longueur positive."; return; }
+    var d = DIRS[st.kbDir]; L = Math.round(Math.min(L, 12) * 10) / 10;
+    st.traces[st.sel] = { dx: d.x * L, dy: d.y * L };
+    st.traceStat[st.sel] = null; st.tracesOK = false; $("#next3").hidden = true;
+    scene.redraw(); majLectureTrace(); majBoutonsForces();
+  }
+
+  function effaceVecteur() {
+    if (!st.sel) return;
+    delete st.traces[st.sel]; st.traceStat[st.sel] = null; st.tracesOK = false; $("#next3").hidden = true;
+    scene.redraw(); majLectureTrace(); majBoutonsForces();
+  }
+
+  function verifTraces() {
+    var tout = true, li = "", manque = 0;
+    st.sit.forces.forEach(function (f) {
+      var t = st.traces[f.id], nom = "<span class='vecs'>" + vecHtml(f) + "</span>";
+      if (!t) { tout = false; manque++; li += "<li>" + nom + " : pas encore tracé.</li>"; st.traceStat[f.id] = null; return; }
+      var L = longTrace(t), Lexp = valeurN(f) / st.echelle, d = DIRS[f.sens];
+      var cos = (t.dx * d.x + t.dy * d.y) / (L || 1);
+      var ang = Math.acos(Math.max(-1, Math.min(1, cos))) * 180 / Math.PI;
+      var okDir = ang <= 8, okLong = Math.abs(L - Lexp) <= Math.max(0.2, 0.06 * Lexp);
+      var axe = (Math.abs(t.dx) > Math.abs(t.dy) ? "H" : "V") === d.axe;
+      var msgs = [];
+      if (!okDir) msgs.push(!axe ? "direction à revoir (la force est " + (d.axe === "V" ? "verticale" : "horizontale") + ")" : "sens à revoir (la pointe est à l'envers)");
+      if (!okLong) msgs.push("longueur à revoir (" + fmt(L, 1) + " cm tracés" + (st.aides ? " au lieu de " + fmt(Lexp, 1) + " cm" : "") + ")");
+      if (!msgs.length) { st.traceStat[f.id] = "ok"; li += "<li>" + nom + " : ✓ direction, sens et longueur corrects.</li>"; }
+      else { st.traceStat[f.id] = "bad"; tout = false; li += "<li>" + nom + " : ✗ " + msgs.join(" ; ") + ".</li>"; }
+    });
+    st.tracesOK = tout;
+    fbShow($("#fb-trace"), tout ? "ok" : "warn", (tout ? "<b>Tous les vecteurs sont corrects.</b>" : "<b>Pas encore.</b>") + "<ul>" + li + "</ul>");
+    $("#next3").hidden = !tout;
+    scene.redraw(); majBoutonsForces(); majOnglets();
+  }
+
+  /* ======================================================================
+     ÉTAPE 4 : validation et communication
+     ====================================================================== */
+  function renderVal() {
+    var vp = $("#val-prev"); vp.textContent = "";
+    var n = nbInteractions(), p = st.prev;
+    var cert = p ? ["", "pas sûr·e", "assez sûr·e", "très sûr·e"][p.c] : "";
+    var html;
+    if (!p) html = "<p>Tu n'as pas enregistré de prévision à l'étape 1.</p>";
+    else if (p.n === n || (p.n === 4 && n >= 4)) html = "<p>Tu avais prévu <b>" + (p.n === 4 ? "quatre ou plus" : p.n) + "</b> objet" + (p.n > 1 ? "s" : "") + " (" + cert + ") et le diagramme en compte <b>" + n + "</b> : ta prévision était juste.</p>";
+    else html = "<p>Tu avais prévu <b>" + (p.n === 4 ? "quatre ou plus" : p.n) + "</b> objet" + (p.n > 1 ? "s" : "") + " (" + cert + ") et le diagramme en compte <b>" + n + "</b>. " + (p.c === 3 ? "Tu étais très sûr·e de toi : c'est une information utile sur ta façon de raisonner." : "L'écart est une occasion de revoir ce qui agit vraiment sur le système.") + "</p>";
+    vp.innerHTML = html;
+    renderEcart();
+  }
+
+  function renderEcart() {
+    var host = $("#val-ecart"); host.textContent = "";
+    var f = null, vals = [];
+    st.sit.forces.some(function (ff) {
+      var v = table.rows().filter(function (r) { return r.id === ff.id; }).map(function (r) { return r.num; });
+      if (v.length >= 2) { f = ff; vals = v; return true; } return false;
+    });
+    if (!f) { host.appendChild(h("p", { text: "Tu n'as pas relevé deux fois la même force à l'étape 2. Reviens-y, relève la valeur d'un des instruments plusieurs fois, puis reviens ici." })); return; }
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), d = mx - mn, cm = st.echelle ? d / st.echelle : 0;
+    if (d === 0) { host.appendChild(h("p", { html: "Tes relevés de <span class='vecs'>" + vecHtml(f) + "</span> sont tous identiques : tu es en mode « modèle théorique ». Désactive-le (en haut de la page) et refais plusieurs relevés pour voir la variabilité d'une mesure réelle." })); return; }
+    host.appendChild(h("p", { html: "Pour <span class='vecs'>" + vecHtml(f) + "</span>, tes relevés vont de <b>" + fmt(mn, 2) + " N</b> à <b>" + fmt(mx, 2) + " N</b> : un écart de <b>" + fmt(d, 2) + " N</b>. Avec l'échelle choisie (1 cm représente " + fmtE(st.echelle) + " N), cet écart représente <b>" + fmt(cm, 2) + " cm</b> sur ton schéma." }));
+    var fs = h("fieldset", null, h("legend", { text: "Avec un tracé précis au millimètre près (0,1 cm), cet écart est…" }));
+    [["vis", "visible sur le schéma"], ["inv", "invisible sur le schéma"]].forEach(function (o) {
+      var id = "ec-" + o[0];
+      var inp = h("input", { type: "radio", name: "ec", id: id, value: o[0] });
+      inp.addEventListener("change", function () {
+        var visible = cm >= 0.1, bon = (o[0] === "vis") === visible;
+        fbShow($("#fb-ecart"), bon ? "ok" : "warn", (bon ? "<b>Oui.</b> " : "<b>Pas tout à fait.</b> ") + (visible ?
+          "L'écart représente " + fmt(cm, 2) + " cm, soit plus que la précision du tracé : la variabilité des mesures se verrait sur le schéma. Pour la valeur de la force, on retient plutôt la moyenne de plusieurs relevés." :
+          "L'écart représente " + fmt(cm, 2) + " cm, soit moins que la précision du tracé : les relevés diffèrent, mais le schéma ne change pas. On peut retenir la moyenne ou une valeur arrondie."));
+      });
+      fs.appendChild(h("label", { class: "opt", for: id }, inp, o[1]));
+    });
+    host.appendChild(fs);
+    host.appendChild(h("div", { class: "fb", id: "fb-ecart", role: "status", "aria-live": "polite", hidden: true }));
+  }
+
+  /* ----- Carnet ----- */
+  function carnet() {
+    var s = st.sit, L = [];
+    var val = function (id) { var e = $("#" + id); return e && e.value ? e.value.trim() : ""; };
+    L.push("CARNET : Action mécanique (Simulabo PhCh)");
+    L.push("Situation : " + s.titre + ". " + s.enonce);
+    L.push("Système étudié : " + s.sys);
+    if (val("app-txt")) L.push("Ma reformulation : " + val("app-txt"));
+    if (st.prev) L.push("Prévision : " + (st.prev.n === 4 ? "quatre ou plus" : st.prev.n) + " objet(s), certitude « " + ["", "pas sûr·e", "assez sûr·e", "très sûr·e"][st.prev.c] + " »" + (st.prev.why ? ". Mon hypothèse : " + st.prev.why : ""));
+    L.push("");
+    L.push("DIAGRAMME OBJET-INTERACTION" + (st.doiSolution ? " (solution affichée)" : ""));
+    s.cands.forEach(function (c) {
+      var v = st.doi[c.id];
+      if (v === "contact" || v === "distance") L.push("- " + s.sys + " ↔ " + c.nom + " : " + typeTxt(v));
+    });
+    L.push("");
+    L.push("MODÉLISATION PAR DES FORCES");
+    s.forces.forEach(function (f) {
+      var b = "f-" + f.id, p = $("#" + b + "-pt"), d = $("#" + b + "-dir"), se = $("#" + b + "-sens"), va = $("#" + b + "-val");
+      L.push("- F " + f.notation + " (" + f.extra + ") : origine " + (p && p.value ? p.value : "?") + " ; direction " + (d && d.value ? { V: "verticale", H: "horizontale", O: "oblique" }[d.value] : "?") +
+        " ; sens " + (se && se.value ? DIRS[se.value].txt : "?") + " ; valeur " + (va && va.value ? va.value : "?") + " N");
+    });
+    var rel = table.rows();
+    if (rel.length) { L.push(""); L.push("MES RELEVÉS"); rel.forEach(function (r) { L.push("- " + r.grandeur + " : " + r.valeur); }); }
+    if (st.echelleOK) {
+      L.push(""); L.push("TRACÉ À L'ÉCHELLE : 1 cm représente " + fmtE(st.echelle) + " N");
+      s.forces.forEach(function (f) { L.push("- F " + f.notation + " : " + fmt(valeurN(f) / st.echelle, 1) + " cm" + (st.traceStat[f.id] === "ok" ? " (tracé validé)" : "")); });
+    }
+    var vp = val("val-prev-txt"), vc = val("val-comp-txt"), cc = val("concl-txt");
+    if (vp || vc || cc) L.push("");
+    if (vp) L.push("Ma prévision et l'écart : " + vp);
+    if (vc) L.push("Ce que je remarque : " + vc);
+    if (cc) L.push("Ma conclusion : " + cc);
+    return L.join("\n");
+  }
+
+  function copieCarnet() {
+    var txt = carnet(), st2 = $("#com-status");
+    function secours() { $("#copie-secours").hidden = false; var t = $("#copie-txt"); t.value = txt; t.focus(); t.select(); st2.textContent = "Copie automatique impossible : sélectionne le texte ci-dessous et copie-le."; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { st2.textContent = "Carnet copié. Colle-le dans ton document."; }, secours);
+    else secours();
+  }
+  function lienSituation() {
+    var base = location.href.split("#")[0] + "#sit=" + st.sitId + "&seed=" + st.seed + (Bruit.theorique() ? "&theo=1" : "");
+    var st2 = $("#com-status");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(base).then(function () { st2.textContent = "Lien copié : il rouvre la même situation avec les mêmes nombres."; }, function () { st2.textContent = base; });
+    else st2.textContent = base;
+  }
+  function photo() {
+    var step = st.step; st.step = 4; scene.redraw();
+    try { st.snap = $("#cv").toDataURL("image/png"); } catch (e) { st.snap = null; }
+    scene.redraw();
+    var hote = $("#snap-hote"); hote.textContent = "";
+    if (st.snap) { hote.appendChild(h("img", { src: st.snap, alt: "Ma figure : " + st.sit.titre.toLowerCase() + ", vecteurs force tracés à l'échelle.", style: "max-width:100%;border:1px solid var(--line);border-radius:8px" })); $("#com-status").textContent = "Figure ajoutée : elle sera dans l'impression."; }
+    else $("#com-status").textContent = "La figure n'a pas pu être capturée sur cet appareil.";
+  }
+  function imprime() {
+    var z = $("#print-zone"); z.textContent = "";
+    z.appendChild(h("h1", { text: "Action mécanique : " + st.sit.titre }));
+    z.appendChild(h("pre", { text: carnet() }));
+    var src = st.snap; if (!src) { try { src = $("#cv").toDataURL("image/png"); } catch (e) { src = null; } }
+    if (src) z.appendChild(h("img", { src: src, alt: "Figure" }));
+    document.body.classList.add("printing");
+    var fin = function () { document.body.classList.remove("printing"); window.removeEventListener("afterprint", fin); };
+    window.addEventListener("afterprint", fin);
+    window.print();
+    setTimeout(function () { document.body.classList.remove("printing"); }, 1500);
+  }
+
+  /* ======================================================================
+     ÉTAPES, VERROUS, ONGLETS
+     ====================================================================== */
+  function ouvert(n) { return n === 1 || st.unlockAll || (n === 2 && st.doiOK) || (n === 3 && st.ficheOK) || (n === 4 && st.tracesOK); }
+  function majOnglets() {
+    var labels = { 1: "1 · Inventaire", 2: "2 · Modéliser", 3: "3 · Tracer", 4: "4 · Valider et conclure" };
+    var ok = { 1: st.doiOK, 2: st.ficheOK, 3: st.tracesOK, 4: false };
+    $$("#etapes .tab").forEach(function (b) {
+      var n = Number(b.getAttribute("data-mode"));
+      b.textContent = labels[n] + (ok[n] ? " ✓" : "");
+      b.setAttribute("aria-label", labels[n].replace("·", ":") + (ok[n] ? " (validée)" : "") + (ouvert(n) ? "" : " (verrouillée)"));
+    });
+    [2, 3, 4].forEach(function (n) { $("#lock" + n).hidden = ouvert(n); $("#body" + n).hidden = !ouvert(n); });
+  }
+  function allerEtape(n) {
+    if (!st.sit) return;
+    st.step = n;
+    $$(".panel-step[id^='p']").forEach(function (p) { p.hidden = p.id !== "p" + n; });
+    if (!ouvert(n)) { majOnglets(); }
+    if (n === 4 && ouvert(4)) renderVal();
+    if (n !== 3) $("#tools").hidden = true; else if (st.echelleOK) $("#tools").hidden = false;
+    $("#cv").style.touchAction = (n === 3 && st.echelleOK) ? "none" : "";
+    majOnglets(); majLegende(); majAriaScene(); scene.redraw();
+  }
+
+  /* ======================================================================
+     NOUVELLE SITUATION
+     ====================================================================== */
+  function charge(id, seed) {
+    st.sitId = id; st.seed = seed; st.sit = SIT[id];
+    var rand = S.rng(seed * 7919 + ORDRE.indexOf(id) * 104729);
+    st.v = st.sit.alea(rand);
+    resetEtat();
+    st.step = 1;
+    renderEnonce(); renderPrevision(); renderDoiForm(rand); dessineDoi();
+    renderInstruments(); renderFiches(); renderEchelle();
+    table.clear();
+    $("#doi-fb").hidden = true; $("#doi-solution").hidden = true; $("#next1").hidden = true;
+    $("#fb2").hidden = true; $("#next2").hidden = true;
+    $("#fb-ech").hidden = true; $("#longs-card").hidden = true; $("#trace-card").hidden = true; $("#tools").hidden = true;
+    $("#fb-trace").hidden = true; $("#next3").hidden = true; $("#snap-hote").textContent = ""; $("#com-status").textContent = ""; $("#copie-secours").hidden = true;
+    ["val-prev-txt", "val-comp-txt", "concl-txt"].forEach(function (i) { $("#" + i).value = ""; });
+    majVerrouDoi(); majOnglets();
+    tabsApi.select("1");
+    var ecr = { sit: id, seed: seed }; if (st.unlockAll) ecr.debloque = 1; if (init.debug === 1) ecr.debug = 1; etat.write(ecr);
+  }
+  function progression() {
+    return !!st.prev || Object.keys(st.doi).length > 0 || Object.keys(st.traces).length > 0 || table.rows().length > 0;
+  }
+
+  /* ======================================================================
+     INITIALISATION
+     ====================================================================== */
+  function init0() {
+    // Liste des situations
+    ORDRE.forEach(function (id) { $("#sit").appendChild(h("option", { value: id, text: SIT[id].titre })); });
+    var id0 = SIT[init.sit] ? init.sit : "livre";
+    $("#sit").value = id0;
+
+    table = S.measureTable("#releves", {
+      caption: "Mes relevés",
+      columns: [{ key: "grandeur", label: "Grandeur" }, { key: "valeur", label: "Valeur lue" }],
+      filename: "releves-action-mecanique", max: 40, empty: "Aucun relevé pour l'instant."
+    });
+    lcd = S.readout("#lcd-hote", { label: "Lecture de l'instrument", digits: 2 });
+    scene = S.canvas("#cv", { width: CW, height: CH, draw: dessineScene });
+    tabsApi = S.tabs("#etapes", function (v) { allerEtape(Number(v)); }, "1");
+
+    $("#sit").addEventListener("change", function () {
+      var nouv = $("#sit").value;
+      if (progression() && !window.confirm("Changer de situation efface ta progression. Continuer ?")) { $("#sit").value = st.sitId; return; }
+      charge(nouv, st.seed);
+    });
+    $("#nouveau").addEventListener("click", function () {
+      if (progression() && !window.confirm("De nouveaux nombres effacent ta progression. Continuer ?")) return;
+      charge(st.sitId, 1 + Math.floor(Math.random() * 9000));
+    });
+    $("#sw-aide").addEventListener("switch", function (e) { st.aides = e.detail.checked; document.body.classList.toggle("sans-aide", !st.aides); });
+    $("#doi-verif").addEventListener("click", verifDoi);
+    $("#doi-efface").addEventListener("click", effaceDoi);
+    $("#doi-solution").addEventListener("click", solutionDoi);
+    $("#next1").addEventListener("click", function () { tabsApi.select("2"); window.scrollTo({ top: $("#etapes").offsetTop - 8, behavior: S.reducedMotion ? "auto" : "smooth" }); });
+    $("#relever").addEventListener("click", releve);
+    $("#verif2").addEventListener("click", verifFiches);
+    $("#next2").addEventListener("click", function () { tabsApi.select("3"); window.scrollTo({ top: $("#etapes").offsetTop - 8 }); });
+    $("#echelle").addEventListener("change", liveEchelle);
+    $("#ech-ok").addEventListener("click", valideEchelle);
+    $("#longs-verif").addEventListener("click", verifLongs);
+    $("#trace-verif").addEventListener("click", verifTraces);
+    $("#trace-efface").addEventListener("click", effaceVecteur);
+    $("#next3").addEventListener("click", function () { tabsApi.select("4"); window.scrollTo({ top: $("#etapes").offsetTop - 8 }); });
+    $("#kb-ok").addEventListener("click", appliqueClavier);
+    $("#kb-len").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); appliqueClavier(); } });
+    $$(".dirb").forEach(function (b) {
+      b.addEventListener("click", function () {
+        st.kbDir = b.getAttribute("data-dir");
+        $$(".dirb").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        if (!isNaN(S.parseNum($("#kb-len").value))) appliqueClavier();
+      });
+    });
+    $$("[data-goto]").forEach(function (b) { b.addEventListener("click", function () { tabsApi.select(b.getAttribute("data-goto")); }); });
+    $("#snap").addEventListener("click", photo);
+    $("#copie").addEventListener("click", copieCarnet);
+    $("#imprime").addEventListener("click", imprime);
+    $("#lien").addEventListener("click", lienSituation);
+
+    // Pointeur sur le schéma
+    var cv = $("#cv"), glisse = false;
+    cv.addEventListener("pointerdown", function (e) {
+      if (st.step !== 3 || !st.echelleOK || !st.sel) return;
+      glisse = true; try { cv.setPointerCapture(e.pointerId); } catch (x) { /* sans effet */ }
+      e.preventDefault(); posePointeur(e);
+    });
+    cv.addEventListener("pointermove", function (e) { if (glisse) posePointeur(e); });
+    function fin() { glisse = false; }
+    cv.addEventListener("pointerup", fin); cv.addEventListener("pointercancel", fin);
+
+    Bruit.bascule("#bruit-hote", { onChange: function () { if (st.step === 4) renderVal(); } });
+    charge(id0, init.seed);
+    if (init.debug === 1) window.__actionMeca = { st: st, SIT: SIT, analyseEchelle: analyseEchelle, room: room, valeurN: valeurN, charge: charge, DIRS: DIRS, ECHELLES: ECHELLES };
+  }
+  init0();
+})();
+</script>
+</body>
+</html>
