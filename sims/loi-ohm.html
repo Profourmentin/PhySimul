@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Loi d'Ohm : caractéristique d'un dipôle · Simulabo PhCh</title>
-<meta name="description" content="Fais varier la tension aux bornes d'un conducteur ohmique, relève l'intensité et trace la caractéristique. Compare avec une lampe, une thermistance et une photorésistance, puis trouve une résistance inconnue.">
+<meta name="description" content="Fais varier la tension aux bornes d'un conducteur ohmique, relève l'intensité et trace la caractéristique. Compare avec une lampe, une thermistance et une photorésistance, puis trouve une résistance inconnue, seul·e ou dans une activité guidée avec prévision, conclusion et carnet.">
 <link rel="stylesheet" href="../shared/simulabo.css">
 <style>
 /* Couleurs propres à cette simulation (clair puis sombre) : le reste vient du socle. */
@@ -53,6 +53,29 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
 .ans { min-height: var(--tap); font: 600 16px var(--font-data); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 9em; max-width: 100%; }
 .card > label { font-weight: 600; }
 .card .slider + .help { margin-top: -6px; }
+/* Activité guidée (mode 4) : consignes, prévision, productions écrites */
+.card .comp { margin-bottom: 8px; }
+.probleme { margin: 0; padding: 10px 12px; border-left: 4px solid var(--accent); background: var(--bg); border-radius: var(--radius-sm); }
+.act-field { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+.act-field label, .act-field legend { font-weight: 600; padding: 0; }
+fieldset.act-field { border: 0; margin: 4px 0; padding: 0; min-width: 0; }
+.opt { display: flex; align-items: center; gap: 10px; min-height: var(--tap); cursor: pointer; font-weight: 400; }
+.opt input { width: 22px; height: 22px; flex: none; accent-color: var(--accent); margin: 0; }
+textarea.act { width: 100%; box-sizing: border-box; min-height: 4.5em; font: 400 16px/1.45 var(--font-body); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--bg); color: var(--ink); resize: vertical; }
+textarea.act:disabled, .ans:disabled { opacity: .75; }
+.mesure-bloc { margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg); font-size: 15px; }
+.mesure-bloc p { margin: 0 0 6px; }
+.mesure-bloc p:last-child { margin-bottom: 0; }
+#act-top { margin-bottom: 0; }
+#print-zone { display: none; }
+@media print {
+  body > *:not(#print-zone) { display: none !important; }
+  #print-zone { display: block; color: #000; background: #fff; font: 12pt/1.4 var(--font-body); }
+  #print-zone table { border-collapse: collapse; margin: 6px 0; }
+  #print-zone td, #print-zone th { border: 1px solid #444; padding: 2px 8px; text-align: right; }
+}
+dialog { max-width: min(560px, 92vw); border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+dialog textarea { width: 100%; min-height: 12em; box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -71,6 +94,50 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
       <button class="tab" data-mode="1">Conducteur ohmique</button>
       <button class="tab" data-mode="2">Autres dipôles</button>
       <button class="tab" data-mode="3">Défi : R inconnue</button>
+      <button class="tab" data-mode="4">Activité guidée</button>
+    </div>
+
+    <!-- Activité guidée : situation et prévision avant de manipuler (les autres tâches sont plus bas, à côté des outils) -->
+    <div class="panel" id="act-top" data-m="4">
+      <section class="card" aria-labelledby="h-app">
+        <span class="comp" data-comp="app"><abbr title="S'approprier">APP</abbr> · Reformuler la problématique</span>
+        <h2 id="h-app">Situation</h2>
+        <p>Un conducteur ohmique est branché dans le circuit ci-dessous, avec un générateur réglable, un ampèremètre et un voltmètre. Sa valeur nominale (tolérance 5 %) est cachée : tu pourras la lire à la fin pour confronter ton résultat.</p>
+        <p class="probleme"><b>Problématique.</b> Comment déterminer la résistance de ce conducteur à partir de mesures de tension et d'intensité, et comment savoir que ce dipôle obéit à la loi d'Ohm ?</p>
+        <div class="act-field">
+          <label for="app-text">Reformule la question à résoudre avec tes mots</label>
+          <textarea id="app-text" class="act" placeholder="Pour répondre, je dois…"></textarea>
+        </div>
+        <p class="help">Lis le schéma : l'ampèremètre est en série avec le dipôle, le voltmètre est en dérivation à ses bornes.</p>
+      </section>
+
+      <section class="card" aria-labelledby="h-ana">
+        <span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span>
+        <h2 id="h-ana">Avant de mesurer</h2>
+        <fieldset class="act-field"><legend>Je double la tension U aux bornes du conducteur. L'intensité I sera…</legend>
+          <label class="opt"><input type="radio" name="pv-q1" value="x2"> doublée (× 2)</label>
+          <label class="opt"><input type="radio" name="pv-q1" value="plus"> multipliée par plus de 2</label>
+          <label class="opt"><input type="radio" name="pv-q1" value="moins"> multipliée par moins de 2</label>
+          <label class="opt"><input type="radio" name="pv-q1" value="nsp"> je ne sais pas</label>
+        </fieldset>
+        <fieldset class="act-field"><legend>Le graphique U = f(I) aura l'allure…</legend>
+          <label class="opt"><input type="radio" name="pv-q2" value="droite0"> d'une droite passant par l'origine</label>
+          <label class="opt"><input type="radio" name="pv-q2" value="droite"> d'une droite ne passant pas par l'origine</label>
+          <label class="opt"><input type="radio" name="pv-q2" value="courbe"> d'une courbe qui s'incurve</label>
+          <label class="opt"><input type="radio" name="pv-q2" value="nsp"> je ne sais pas</label>
+        </fieldset>
+        <fieldset class="act-field"><legend>Mon degré de certitude</legend>
+          <label class="opt"><input type="radio" name="pv-cert" value="1"> pas sûr·e</label>
+          <label class="opt"><input type="radio" name="pv-cert" value="2"> assez sûr·e</label>
+          <label class="opt"><input type="radio" name="pv-cert" value="3"> très sûr·e</label>
+        </fieldset>
+        <div class="act-field">
+          <label for="pv-why">Pourquoi ? (une phrase)</label>
+          <textarea id="pv-why" class="act" rows="2"></textarea>
+        </div>
+        <div class="row"><button type="button" class="primary" id="pv-save">Enregistrer ma prévision</button></div>
+        <p id="pv-status" class="status" aria-live="polite"></p>
+      </section>
     </div>
 
     <div class="sim-grid">
@@ -97,7 +164,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
       </div>
 
       <div class="col-ctl">
-        <section class="card" aria-labelledby="h-dip">
+        <section class="card" aria-labelledby="h-dip" data-m="123">
           <h2 id="h-dip">Conducteur ohmique</h2>
 
           <div data-m="1">
@@ -129,6 +196,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
         </section>
 
         <section class="card" aria-labelledby="h-mes">
+          <span class="comp" data-comp="rea" data-m="4"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span>
           <h2 id="h-mes">Mesures</h2>
           <div id="sl-u"></div>
           <button type="button" class="primary" id="btn-add">Ajouter la mesure au tableau</button>
@@ -141,7 +209,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
           <div class="switches">
             <div id="bruit-hote"></div>
             <button type="button" class="sw" role="switch" aria-checked="true" id="sw-live"><span class="track"><span class="knob"></span></span>Montrer le point de fonctionnement sur le graphique</button>
-            <button type="button" class="sw" role="switch" aria-checked="true" id="sw-fit" data-m="13"><span class="track"><span class="knob"></span></span>Tracer la droite modèle (U = k × I)</button>
+            <button type="button" class="sw" role="switch" aria-checked="true" id="sw-fit" data-m="134"><span class="track"><span class="knob"></span></span>Tracer la droite modèle (U = k × I)</button>
             <button type="button" class="sw" role="switch" aria-checked="true" id="sw-link" data-m="2"><span class="track"><span class="knob"></span></span>Relier les points</button>
             <button type="button" class="sw" role="switch" aria-checked="true" id="sw-anim"><span class="track"><span class="knob"></span></span>Animer le courant</button>
           </div>
@@ -155,6 +223,77 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
         <section class="card" aria-labelledby="h-tab">
           <h2 id="h-tab">Tableau de mesures</h2>
           <div class="tablewrap scroll" id="tablewrap"><table class="mesures" id="tbl" aria-labelledby="h-tab"></table></div>
+        </section>
+
+        <section class="card" data-m="4" aria-labelledby="h-calc">
+          <span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span>
+          <h2 id="h-calc">Ma valeur de R</h2>
+          <p>À partir de ton tableau et de ton graphique, détermine la résistance R du conducteur (loi d'Ohm : U = R × I).</p>
+          <div class="act-field">
+            <label for="calc-txt">Mon calcul (valeurs utilisées, conversion d'unités)</label>
+            <textarea id="calc-txt" class="act" rows="2" placeholder="R = U / I = …"></textarea>
+          </div>
+          <div class="act-field">
+            <label for="ans4">Résistance R, en ohms (Ω)</label>
+            <div class="row">
+              <input type="text" id="ans4" class="ans" inputmode="decimal" autocomplete="off" placeholder="ex. 470">
+              <button type="button" class="primary" id="btn-ans4">Enregistrer ma valeur</button>
+            </div>
+          </div>
+          <p id="ans4-fb" class="fb" role="status" aria-live="polite" hidden></p>
+        </section>
+
+        <section class="card" data-m="4" aria-labelledby="h-pv">
+          <span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Relire ma prévision</span>
+          <h2 id="h-pv">Ma prévision face aux mesures</h2>
+          <div id="val-prev" class="mesure-bloc"></div>
+          <fieldset class="act-field"><legend>Ma prévision est…</legend>
+            <label class="opt"><input type="radio" name="pv-j" value="conf"> confirmée par mes mesures</label>
+            <label class="opt"><input type="radio" name="pv-j" value="nuance"> à nuancer</label>
+            <label class="opt"><input type="radio" name="pv-j" value="contre"> contredite par mes mesures</label>
+          </fieldset>
+          <div class="act-field">
+            <label for="pv-j-txt">Appuie-toi sur tes valeurs : qu'est-ce qui se confirme, ou que m'apprend l'écart ?</label>
+            <textarea id="pv-j-txt" class="act" rows="2"></textarea>
+          </div>
+        </section>
+
+        <section class="card" data-m="4" aria-labelledby="h-ec">
+          <span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Juger un écart</span>
+          <h2 id="h-ec">Ma valeur face à la valeur inscrite</h2>
+          <p>Enregistre d'abord ta valeur de R : ensuite seulement, tu peux lire la valeur inscrite sur le conducteur.</p>
+          <div class="row"><button type="button" id="btn-ref" disabled>Lire la valeur inscrite</button></div>
+          <div id="val-ref" class="mesure-bloc" hidden></div>
+          <fieldset class="act-field" id="fs-ec" hidden><legend>L'écart relevé est…</legend>
+            <label class="opt"><input type="radio" name="ec-j" value="oui"> compatible avec la tolérance de 5 %</label>
+            <label class="opt"><input type="radio" name="ec-j" value="non"> plus grand que ce que permet la tolérance</label>
+          </fieldset>
+          <div class="act-field" id="ec-box" hidden>
+            <label for="ec-txt">Explique ton jugement : d'où peut venir l'écart (tolérance, lecture bruitée, nombre de points, conversion d'unités) ?</label>
+            <textarea id="ec-txt" class="act" rows="3"></textarea>
+          </div>
+          <p id="ec-fb" class="fb" role="status" aria-live="polite" hidden></p>
+          <p class="help">L'interrupteur « Modèle théorique » supprime le bruit des lectures : compare une lecture avec et sans bruit pour estimer son poids dans l'écart.</p>
+        </section>
+
+        <section class="card" data-m="4" aria-labelledby="h-com">
+          <span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · Conclure</span>
+          <h2 id="h-com">Ma conclusion</h2>
+          <div class="act-field">
+            <label for="leg-txt">Légende de mon graphique (grandeurs, unités, ce qu'il montre)</label>
+            <textarea id="leg-txt" class="act" rows="2"></textarea>
+          </div>
+          <div class="act-field">
+            <label for="concl-txt">Réponds à la problématique, avec tes mesures à l'appui</label>
+            <textarea id="concl-txt" class="act" rows="4" placeholder="D'après mes mesures, … donc …"></textarea>
+          </div>
+          <div class="row">
+            <button type="button" class="primary" id="btn-copy">Copier mon carnet</button>
+            <button type="button" id="btn-print">Imprimer / PDF</button>
+            <button type="button" id="btn-link">Copier le lien de cette situation</button>
+          </div>
+          <div class="row"><button type="button" id="btn-restart">Recommencer l'activité</button></div>
+          <p id="com-status" class="status" aria-live="polite"></p>
         </section>
 
         <section class="card" data-m="3" aria-labelledby="h-rep">
@@ -181,6 +320,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
         <li>Modèle : le générateur, les fils et les appareils de mesure sont idéaux (le voltmètre ne dérive aucun courant, l'ampèremètre n'a aucune résistance).</li>
         <li>Le conducteur ohmique est parfaitement linéaire ; sa valeur réelle s'écarte de la valeur inscrite de 3 % au plus.</li>
         <li>La lampe, la thermistance et la photorésistance suivent des lois empiriques de simulation, pas une fiche constructeur. Les capteurs ne s'échauffent pas.</li>
+        <li>Activité guidée : la situation (conducteur caché) se rouvre par un lien du type <code>#activite=1&amp;s=37</code> ; le numéro de situation fixe le conducteur et ses mesures. Le travail de l'élève est gardé dans ce navigateur seulement (aucune donnée n'est envoyée) ; « Recommencer l'activité » l'efface.</li>
         <li>Par défaut, les valeurs lues sont bruitées (niveau global de <code>shared/bruit.js</code>, 0,5 % de la valeur) ; ce bruit ne représente pas la résolution réelle d'un multimètre. L'interrupteur « Modèle théorique » le supprime.</li>
       </ul>
     </details>
@@ -191,6 +331,10 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
     <a href="../index.html">Retour au catalogue</a>
   </footer>
 </div>
+
+<div id="print-zone"></div>
+<dialog id="dlg-copy"><p>Sélectionne et copie ce texte :</p><textarea id="dlg-text" readonly></textarea>
+  <form method="dialog"><button>Fermer</button></form></dialog>
 
 <script src="../shared/bruit.js"></script>
 <script src="../shared/simulabo.js"></script>
@@ -250,7 +394,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
   }
 
   function dipoleInfo() {
-    if (st.mode === 3) {
+    if (st.mode === 3 || st.mode === 4) {     // conducteur caché : défi (mode 3) ou activité guidée (mode 4)
       var R = st.hid.nom * st.hid.fac;
       return { id: "ohm", R: R, par: st.hid.nom, Umax: 12, key: "", label: st.revealed ? "R = " + frR(st.hid.nom) + NBSP + "Ω" : "R = ?", sub: "" };
     }
@@ -570,12 +714,14 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
 
   function renderTable() {
     var showSer = st.points.some(function (p) { return p.key; });
-    var head = '<thead><tr><th scope="col">N°</th>' + (showSer ? '<th scope="col" class="ser">Série</th>' : "") + '<th scope="col">U (V)</th><th scope="col">I (mA)</th><th scope="col">U/I (Ω)</th></tr></thead>';
-    if (!st.points.length) { $("tbl").innerHTML = head + '<tbody><tr><td colspan="' + (showSer ? 5 : 4) + '" class="empty">Aucune mesure pour l\'instant.</td></tr></tbody>'; return; }
+    var withR = st.mode !== 4;                 // activité guidée : le calcul de R reste à la charge de l'élève
+    var head = '<thead><tr><th scope="col">N°</th>' + (showSer ? '<th scope="col" class="ser">Série</th>' : "") + '<th scope="col">U (V)</th><th scope="col">I (mA)</th>' + (withR ? '<th scope="col">U/I (Ω)</th>' : "") + '</tr></thead>';
+    var ncol = 3 + (showSer ? 1 : 0) + (withR ? 1 : 0);
+    if (!st.points.length) { $("tbl").innerHTML = head + '<tbody><tr><td colspan="' + ncol + '" class="empty">Aucune mesure pour l\'instant.</td></tr></tbody>'; return; }
     var rows = st.points.map(function (p, i) {
       return "<tr><td>" + (i + 1) + "</td>" +
         (showSer ? '<td class="ser">' + glyphHtml(indexFor(p.key)) + esc(p.key) + "</td>" : "") +
-        "<td>" + S.fmt(p.U, 2) + "</td><td>" + fmtI(p.I) + "</td><td>" + (p.I > 0 ? frR(p.U / p.I * 1000) : "—") + "</td></tr>";
+        "<td>" + S.fmt(p.U, 2) + "</td><td>" + fmtI(p.I) + "</td>" + (withR ? "<td>" + (p.I > 0 ? frR(p.U / p.I * 1000) : "—") + "</td>" : "") + "</tr>";
     }).join("");
     $("tbl").innerHTML = head + "<tbody>" + rows + "</tbody>";
   }
@@ -594,7 +740,12 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
     var cs = SL.filter(function (s) { return s.key === d.key; })[0];
     var sc = cs ? stats(cs.pts) : { n: 0 };
     var li = [];
-    if (!st.points.length) {
+    if (st.mode === 4) {
+      /* Activité guidée : l'observation ne donne ni R ni le verdict, elle renvoie l'élève à ses propres tâches. */
+      if (!st.points.length) li = ["Règle U, lis les deux instruments, puis ajoute la mesure au tableau (ou lance le balayage automatique)."];
+      else if (st.points.length < 4) li = [st.points.length + " mesure" + (st.points.length > 1 ? "s" : "") + " dans le tableau : relève au moins 4 tensions différentes."];
+      else li = [st.points.length + " mesures dans le tableau. Observe le graphique : les points te semblent-ils alignés avec l'origine ? Qu'est-ce que cela signifierait pour U et I ?"];
+    } else if (!st.points.length) {
       li = [st.mode === 3 ? "Fais varier U, relève U et I, puis ajoute chaque mesure au tableau (ou lance le balayage automatique)."
           : st.mode === 2 && (st.dip === "ctn" || st.dip === "ldr") ? "Relève quelques mesures, puis change " + (st.dip === "ctn" ? "la température" : "l'éclairement") + " et recommence : chaque valeur donne une nouvelle série."
           : "Fais varier U, lis les deux instruments, puis ajoute la mesure au tableau (ou lance le balayage automatique)."];
@@ -644,7 +795,8 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
       t += st.points.length + " point" + (st.points.length > 1 ? "s" : "") + " relevé" + (st.points.length > 1 ? "s" : "") + ", listés dans le tableau de mesures. ";
       SL.forEach(function (s) {
         var q = stats(s.pts);
-        t += (s.key ? s.key + " : " : "") + s.pts.length + " point" + (s.pts.length > 1 ? "s" : "") + (q.n >= 3 ? (q.aligned ? ", alignés avec l'origine, U/I voisin de " + frR(q.R) + " Ω. " : ", non alignés, U/I de " + frR(q.rmin) + " à " + frR(q.rmax) + " Ω. ") : ". ");
+        var cache = st.mode === 4 && !st.revealed;   // activité guidée : la description ne donne pas la valeur de R
+        t += (s.key ? s.key + " : " : "") + s.pts.length + " point" + (s.pts.length > 1 ? "s" : "") + (q.n >= 3 && !cache ? (q.aligned ? ", alignés avec l'origine, U/I voisin de " + frR(q.R) + " Ω. " : ", non alignés, U/I de " + frR(q.rmin) + " à " + frR(q.rmax) + " Ω. ") : ". ");
       });
     }
     t += "Point actuel : I = " + fmtI(st.cur.I) + " mA, U = " + S.fmt(st.cur.U, 2) + " V.";
@@ -678,6 +830,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
     $("warn").hidden = !w; $("warn").textContent = w;
 
     renderLegend(); renderTable(); updateObs();
+    if (st.mode === 4 && act) actRefresh();
     describeCircuit(d); describeGraph(d);
     syncLoop();
     redrawAll();
@@ -698,15 +851,17 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
     st.hid = { nom: nom, fac: 1 + (Math.random() * 2 - 1) * 0.03 };
     st.seed = Math.floor(Math.random() * 1000);
     st.revealed = false;
+    st.hidAct = false;
     clearPoints();
     resetFeedback();
   }
 
   function setMode(m) {
+    if (st.mode === 4 && m !== 4) st.revealed = false;
     st.mode = m;
-    if (m === 3 && !st.hid) newChallenge();
+    if (m === 3 && (!st.hid || st.hidAct)) newChallenge();   // le conducteur de l'activité guidée n'est jamais réutilisé par le défi
     else if (m === 3) { st.revealed = false; resetFeedback(); }
-    clearPoints();
+    if (m === 4) enterAct(); else clearPoints();
     applyMode(); update();
   }
 
@@ -744,6 +899,245 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
     update();
   }
 
+  /* ==========================================================================
+     Activité guidée (mode 4) : APP, ANA, RÉA, VAL, COM autour d'un conducteur caché.
+     La physique est celle du défi (dipoleInfo, measure) ; on ajoute seulement des tâches écrites,
+     la mémorisation de la prévision pour la relire, et la trace exportable (carnet, impression, lien).
+     Le travail de l'élève reste dans ce navigateur (localStorage, clé versionnée) ; rien n'est envoyé.
+     ========================================================================== */
+  var KEY = "simulabo.loi-ohm.activite.v1";
+  var act = null, actTimer = null, comTimer = null;
+  var LBL = {
+    q1: { x2: "doublée (× 2)", plus: "multipliée par plus de 2", moins: "multipliée par moins de 2", nsp: "je ne sais pas" },
+    q2: { droite0: "d'une droite passant par l'origine", droite: "d'une droite ne passant pas par l'origine", courbe: "d'une courbe qui s'incurve", nsp: "je ne sais pas" },
+    cert: { "1": "pas sûr·e", "2": "assez sûr·e", "3": "très sûr·e" },
+    pj: { conf: "confirmée par mes mesures", nuance: "à nuancer", contre: "contredite par mes mesures" },
+    ej: { oui: "compatible avec la tolérance de 5 %", non: "plus grand que ce que permet la tolérance" }
+  };
+  var TXT = [["app-text", "app"], ["calc-txt", "calc"], ["leg-txt", "leg"], ["concl-txt", "concl"]];
+
+  function actNew(s) {
+    return { v: 1, s: s, app: "", pv: { q1: "", q2: "", cert: "", why: "", saved: false, n: 0 }, calc: "", ans: "", ansSaved: false,
+      revealed: false, ec: { j: "", txt: "" }, pp: { j: "", txt: "" }, leg: "", concl: "", pts: [] };
+  }
+  function actLoad() {
+    try {
+      var o = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (o && o.v === 1 && typeof o.s === "number" && o.pv && o.ec && o.pp && Array.isArray(o.pts)) return o;
+    } catch (e) { /* stockage indisponible : l'activité fonctionne sans */ }
+    return null;
+  }
+  function actSave() {
+    clearTimeout(actTimer);
+    actTimer = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(act)); } catch (e) { /* ignoré */ } }, 250);
+  }
+  var hashS = (function () { var m = /[#&?]s=(\d{1,3})(?:&|$)/.exec(String(location.hash)); return m ? Number(m[1]) : null; })();
+  var hashAct = /[#&?]activite=1(?:&|$)/.test(String(location.hash));
+
+  function applySituation(s) {                // le numéro de situation fixe le conducteur (valeur nominale, écart réel) et le bruit
+    var x = Math.sin(s * 12.9898 + 78.233) * 43758.5453; x = (x - Math.floor(x)) * 2 - 1;
+    st.hid = { nom: CHALLENGE_R[s % CHALLENGE_R.length], fac: 1 + 0.03 * x };
+    st.seed = (s * 37) % 1000;
+    st.hidAct = true;
+  }
+  function restorePoints() {
+    st.points = [];
+    act.pts.forEach(function (u) { addPoint(u, true); });
+  }
+  function enterAct() {
+    if (!act) {
+      var stored = actLoad();
+      if (hashS !== null) act = (stored && stored.s === hashS) ? stored : actNew(hashS);
+      else act = stored || actNew(1 + Math.floor(Math.random() * 99));
+    }
+    applySituation(act.s);
+    st.revealed = !!act.revealed;
+    restorePoints();
+    fillAct();
+  }
+  function restartAct() {
+    if (!window.confirm("Effacer tout ton travail et recommencer avec un nouveau conducteur ?")) return;
+    try { localStorage.removeItem(KEY); } catch (e) { /* ignoré */ }
+    hashS = null;
+    var s; do { s = 1 + Math.floor(Math.random() * 99); } while (act && s === act.s);
+    act = actNew(s);
+    enterAct();
+    update();
+    comSay("Activité remise à zéro : nouveau conducteur.");
+  }
+
+  function setRadio(name, v) { S.$$('input[name="' + name + '"]').forEach(function (r) { r.checked = (r.value === v); }); }
+  function fillAct() {
+    TXT.forEach(function (p) { $(p[0]).value = act[p[1]] || ""; });
+    $("pv-why").value = act.pv.why; $("pv-j-txt").value = act.pp.txt; $("ec-txt").value = act.ec.txt; $("ans4").value = act.ans;
+    setRadio("pv-q1", act.pv.q1); setRadio("pv-q2", act.pv.q2); setRadio("pv-cert", act.pv.cert);
+    setRadio("pv-j", act.pp.j); setRadio("ec-j", act.ec.j);
+    $("ans4-fb").hidden = true; $("ec-fb").hidden = true; $("pv-status").textContent = "";
+    resetFeedback();
+  }
+  function comSay(msg) {
+    var el = $("com-status");
+    el.textContent = msg; clearTimeout(comTimer);
+    if (msg) comTimer = setTimeout(function () { el.textContent = ""; }, 5000);
+  }
+
+  /* Couple de mesures dont les tensions sont dans un rapport voisin de 2 (pour relire la prévision) */
+  function doublingPair() {
+    var q = st.points.filter(function (p) { return p.U > 0 && p.I > 0; }), best = null;
+    for (var i = 0; i < q.length; i++) for (var j = 0; j < q.length; j++) {
+      var r = q[j].U / q[i].U;
+      if (r >= 1.85 && r <= 2.15 && (!best || Math.abs(r - 2) < best.d)) best = { d: Math.abs(r - 2), a: q[i], b: q[j], ru: r, ri: q[j].I / q[i].I };
+    }
+    return best;
+  }
+  function ansShown() {                       // valeur de l'élève, écrite proprement (évite « 1026 Ω Ω » s'il a tapé l'unité)
+    var v = parseAns(act.ans || "");
+    return isNaN(v) ? "—" : S.fmt(v, v < 100 ? 1 : 0) + NBSP + "Ω";
+  }
+  function refInfo() {                        // valeur inscrite, tolérance, écart relatif de l'élève
+    var nom = st.hid.nom, Rm = parseAns(act.ans || "");
+    return { nom: nom, lo: nom * 0.95, hi: nom * 1.05, Rm: Rm, e: isNaN(Rm) ? NaN : Math.abs(Rm - nom) / nom * 100 };
+  }
+
+  function actRefresh() {
+    act.pts = st.points.map(function (p) { return p.Uset; });
+    act.revealed = st.revealed;
+
+    // ANA : prévision verrouillée une fois enregistrée (elle doit rester telle quelle pour être relue)
+    var pvLocked = act.pv.saved;
+    S.$$('input[name="pv-q1"], input[name="pv-q2"], input[name="pv-cert"]').forEach(function (r) { r.disabled = pvLocked; });
+    $("pv-why").disabled = pvLocked; $("pv-save").disabled = pvLocked;
+    $("pv-save").textContent = pvLocked ? "Prévision enregistrée" : "Enregistrer ma prévision";
+
+    // RÉA : la valeur est figée dès que la valeur inscrite est lue (on compare ce qu'on avait engagé)
+    $("ans4").disabled = st.revealed; $("btn-ans4").disabled = st.revealed;
+    $("btn-ref").disabled = !act.ansSaved || st.revealed;
+    $("btn-ref").textContent = st.revealed ? "Valeur inscrite lue" : "Lire la valeur inscrite";
+
+    // VAL : relecture de la prévision
+    var box = $("val-prev"), h = "";
+    if (!act.pv.saved) {
+      h = "<p>Tu n'as pas encore enregistré de prévision (carte « Avant de mesurer »). Fais-le avant de mesurer : une prévision enregistrée après les mesures est signalée comme telle.</p>";
+    } else {
+      h = "<p>Tu avais prévu : si U double, I sera <b>" + esc(LBL.q1[act.pv.q1]) + "</b> ; le graphique aurait l'allure <b>" + esc(LBL.q2[act.pv.q2]) + "</b>. Certitude : " + esc(LBL.cert[act.pv.cert]) + "." +
+        (act.pv.why ? "<br>Ta justification : « " + esc(act.pv.why) + " »" : "") +
+        (act.pv.n > 0 ? "<br><i>Prévision enregistrée après " + act.pv.n + " mesure" + (act.pv.n > 1 ? "s" : "") + " : tiens-en compte dans ton jugement.</i>" : "") + "</p>";
+    }
+    var dp = doublingPair();
+    h += dp
+      ? "<p>Ce que lisent tes appareils : à U = " + S.fmt(dp.a.U, 2) + " V, I = " + fmtI(dp.a.I) + " mA ; à U = " + S.fmt(dp.b.U, 2) + " V, I = " + fmtI(dp.b.I) + " mA. Quand U est multipliée par <b>" + S.fmt(dp.ru, 2) + "</b>, I est multipliée par <b>" + S.fmt(dp.ri, 2) + "</b> (lectures bruitées : de l'ordre de 1 % d'écart est normal).</p>"
+      : "<p>Ton tableau ne contient pas encore deux tensions dans un rapport voisin de 2. Ajoute des mesures (le balayage automatique en fournit).</p>";
+    h += "<p>Pour l'allure, observe tes points et la droite modèle sur le graphique.</p>";
+    box.innerHTML = h;
+
+    // VAL : écart à la valeur inscrite
+    $("val-ref").hidden = !st.revealed; $("fs-ec").hidden = !st.revealed; $("ec-box").hidden = !st.revealed;
+    if (st.revealed) {
+      var ri = refInfo();
+      $("val-ref").innerHTML = "<p>Valeur inscrite : <b>" + frR(ri.nom) + " Ω</b> ; tolérance 5 % : entre " + frR(ri.lo) + " Ω et " + frR(ri.hi) + " Ω.</p>" +
+        "<p>Ta valeur : <b>" + (isNaN(ri.Rm) ? "—" : frR(ri.Rm) + " Ω") + "</b>. Écart relatif à la valeur inscrite : <b>" + (isNaN(ri.e) ? "—" : S.fmt(ri.e, 1) + " %") + "</b>.</p>";
+      ecFeedback();
+    }
+    actSave();
+  }
+
+  function ecFeedback() {
+    var f = $("ec-fb"), ri = refInfo();
+    if (!act.ec.j || isNaN(ri.e)) { f.hidden = true; return; }
+    var e = S.fmt(ri.e, 1) + " %", ok = ri.e <= 5, m;
+    if (ok && act.ec.j === "oui") m = "Ton écart (" + e + ") reste dans la tolérance annoncée : ta valeur est <b>cohérente</b> avec la valeur inscrite. Dans ton explication, distingue ce qui vient du conducteur lui-même (tolérance) de ce qui vient de tes lectures (bruit, nombre de points).";
+    else if (ok) m = "L'écart de " + e + " est inférieur à 5 % : relis la façon dont tu as comparé (la tolérance est un intervalle autour de la valeur inscrite). Qu'est-ce qui te fait penser qu'il est trop grand ?";
+    else if (act.ec.j === "oui") m = "L'écart de " + e + " dépasse 5 % : la tolérance seule ne l'explique pas. Regarde ton calcul, tes unités (I est lue en mA) et le nombre de points utilisés.";
+    else m = "L'écart de " + e + " dépasse la tolérance de 5 %. Cherche la source : conversion mA → A, un seul point utilisé, lecture bruitée ? Refais ton calcul avec plusieurs points avant de conclure.";
+    f.hidden = false; f.removeAttribute("data-tone"); f.innerHTML = m;
+  }
+
+  function savePrevision() {
+    var q1 = (S.$('input[name="pv-q1"]:checked') || {}).value, q2 = (S.$('input[name="pv-q2"]:checked') || {}).value, ce = (S.$('input[name="pv-cert"]:checked') || {}).value;
+    if (!q1 || !q2 || !ce) { $("pv-status").textContent = "Réponds aux deux questions et indique ta certitude (« je ne sais pas » est une réponse permise)."; return; }
+    act.pv = { q1: q1, q2: q2, cert: ce, why: $("pv-why").value, saved: true, n: st.points.length };
+    $("pv-status").textContent = "Prévision enregistrée : tu la retrouveras plus bas, dans « Ma prévision face aux mesures ».";
+    update();
+  }
+
+  function saveAnswer() {
+    var v = parseAns($("ans4").value), fb = $("ans4-fb");
+    fb.hidden = false; fb.removeAttribute("data-tone");
+    if (isNaN(v) || v <= 0) { fb.setAttribute("data-tone", "warn"); fb.textContent = "Écris un nombre positif, en ohms. Exemple : 470."; act.ansSaved = false; update(); return; }
+    act.ans = $("ans4").value; act.ansSaved = true;
+    var q = stats(st.points), ratio = q.n >= 2 ? v / q.R : 1;
+    if (q.n < 3) fb.textContent = "Valeur enregistrée. Appuie-toi sur au moins 4 mesures de tensions différentes pour la justifier.";
+    else if (ratio < 0.8 || ratio > 1.25) { fb.setAttribute("data-tone", "warn"); fb.textContent = "Valeur enregistrée, mais elle s'éloigne de ce que donnent tes mesures : refais ton calcul (I est lue en mA, or 1 mA = 0,001 A) et vérifie avec plusieurs points."; }
+    else fb.textContent = "Valeur enregistrée : R = " + S.fmt(v, v < 100 ? 1 : 0) + " Ω. Tu peux maintenant lire la valeur inscrite (carte « Ma valeur face à la valeur inscrite »).";
+    update();
+  }
+
+  /* ---------- Trace COM : carnet copiable, imprimable, lien ---------- */
+  function carnetRows() { return st.points.map(function (p, i) { return [i + 1, S.fmt(p.U, 2), fmtI(p.I)]; }); }
+  function carnetText() {
+    var t = "MON CARNET : LOI D'OHM (activité guidée)\nSituation n° " + act.s + (Bruit.theorique() ? " (modèle théorique : mesures sans bruit)" : " (mesures bruitées)") + "\n\n";
+    t += "Problématique (mes mots) : " + (act.app || "—") + "\n\n";
+    t += "PRÉVISION : " + (act.pv.saved ? "si U double, I sera " + LBL.q1[act.pv.q1] + " ; allure du graphique : " + LBL.q2[act.pv.q2] + " ; certitude : " + LBL.cert[act.pv.cert] + (act.pv.n > 0 ? " [enregistrée après " + act.pv.n + " mesure(s)]" : "") + "\nJustification : " + (act.pv.why || "—") : "non enregistrée") + "\n\n";
+    t += "MESURES\n N° | U (V) | I (mA)\n";
+    t += (carnetRows().map(function (r) { return " " + r.join(" | "); }).join("\n") || " (aucune mesure)") + "\n\n";
+    t += "MON CALCUL : " + (act.calc || "—") + "\nMa valeur : R = " + ansShown() + "\n";
+    if (st.revealed) {
+      var ri = refInfo();
+      t += "Valeur inscrite : " + frR(ri.nom) + " Ω (tolérance 5 %) ; écart relatif : " + (isNaN(ri.e) ? "—" : S.fmt(ri.e, 1) + " %") + "\n";
+      t += "Mon jugement sur l'écart : " + (act.ec.j ? LBL.ej[act.ec.j] : "—") + ". " + (act.ec.txt || "") + "\n";
+    }
+    t += "\nMA PRÉVISION RELUE : " + (act.pp.j ? LBL.pj[act.pp.j] : "—") + ". " + (act.pp.txt || "") + "\n\n";
+    t += "LÉGENDE DE MON GRAPHIQUE : " + (act.leg || "—") + "\n\nMA CONCLUSION : " + (act.concl || "—") + "\n";
+    return t;
+  }
+  function printCarnet() {
+    var h = "<h1>Mon carnet : loi d'Ohm</h1><p>Situation n° " + act.s + (Bruit.theorique() ? " (modèle théorique)" : " (mesures bruitées)") + "</p>";
+    h += "<p><b>Problématique :</b> " + esc(act.app || "—") + "</p>";
+    h += "<p><b>Prévision :</b> " + (act.pv.saved ? "si U double, I sera " + esc(LBL.q1[act.pv.q1]) + " ; allure : " + esc(LBL.q2[act.pv.q2]) + " ; certitude : " + esc(LBL.cert[act.pv.cert]) + ". " + esc(act.pv.why) : "non enregistrée") + "</p>";
+    h += "<table><thead><tr><th>N°</th><th>U (V)</th><th>I (mA)</th></tr></thead><tbody>" + carnetRows().map(function (r) { return "<tr><td>" + r.join("</td><td>") + "</td></tr>"; }).join("") + "</tbody></table>";
+    h += "<p><b>Mon calcul :</b> " + esc(act.calc || "—") + "<br><b>Ma valeur :</b> R = " + esc(ansShown()) + "</p>";
+    if (st.revealed) { var ri = refInfo(); h += "<p><b>Valeur inscrite :</b> " + frR(ri.nom) + " Ω (tolérance 5 %), écart relatif " + (isNaN(ri.e) ? "—" : S.fmt(ri.e, 1) + " %") + ". " + esc(act.ec.j ? LBL.ej[act.ec.j] : "") + ". " + esc(act.ec.txt) + "</p>"; }
+    h += "<p><b>Ma prévision relue :</b> " + esc(act.pp.j ? LBL.pj[act.pp.j] : "—") + ". " + esc(act.pp.txt) + "</p>";
+    h += "<p><b>Légende du graphique :</b> " + esc(act.leg || "—") + "</p><p><b>Conclusion :</b> " + esc(act.concl || "—") + "</p>";
+    $("print-zone").innerHTML = h;
+    try { window.print(); } catch (e) { /* repli ci-dessous */ }
+    comSay("Si rien ne s'ouvre, utilise « Copier mon carnet ».");
+  }
+  function copyText(t, msg) {
+    function fallback() {
+      $("dlg-text").value = t;
+      var d = $("dlg-copy");
+      if (d.showModal) d.showModal(); else d.setAttribute("open", "");
+      $("dlg-text").select();
+    }
+    try { navigator.clipboard.writeText(t).then(function () { comSay(msg); }, fallback); } catch (e) { fallback(); }
+  }
+  function situationLink() {
+    var extra = Bruit.lien();
+    return location.href.split("#")[0] + "#activite=1&s=" + act.s + (extra ? "&" + extra : "");
+  }
+
+  function bindAct() {
+    TXT.forEach(function (p) { $(p[0]).addEventListener("input", function () { act[p[1]] = this.value; actSave(); }); });
+    $("pv-j-txt").addEventListener("input", function () { act.pp.txt = this.value; actSave(); });
+    $("ec-txt").addEventListener("input", function () { act.ec.txt = this.value; actSave(); });
+    $("pv-why").addEventListener("input", function () { if (!act.pv.saved) { act.pv.why = this.value; actSave(); } });
+    [["pv-q1", "q1"], ["pv-q2", "q2"], ["pv-cert", "cert"]].forEach(function (p) {
+      S.$$('input[name="' + p[0] + '"]').forEach(function (r) { r.addEventListener("change", function () { if (!act.pv.saved) { act.pv[p[1]] = this.value; actSave(); } }); });
+    });
+    S.$$('input[name="pv-j"]').forEach(function (r) { r.addEventListener("change", function () { act.pp.j = this.value; actSave(); }); });
+    S.$$('input[name="ec-j"]').forEach(function (r) { r.addEventListener("change", function () { act.ec.j = this.value; ecFeedback(); actSave(); }); });
+    $("pv-save").addEventListener("click", savePrevision);
+    $("btn-ans4").addEventListener("click", saveAnswer);
+    $("ans4").addEventListener("keydown", function (e) { if (e.key === "Enter") saveAnswer(); });
+    $("btn-ref").addEventListener("click", function () { st.revealed = true; update(); $("val-ref").scrollIntoView({ block: "nearest" }); });
+    $("btn-copy").addEventListener("click", function () { copyText(carnetText(), "Carnet copié."); });
+    $("btn-print").addEventListener("click", printCarnet);
+    $("btn-link").addEventListener("click", function () { copyText(situationLink(), "Lien copié : il rouvre la même situation."); });
+    $("btn-restart").addEventListener("click", restartAct);
+  }
+  bindAct();
+
   /* ---------- Événements ---------- */
   $("btn-new").addEventListener("click", function () { newChallenge(); update(); });
   $("btn-check").addEventListener("click", checkAnswer);
@@ -773,7 +1167,7 @@ table.mesures td.ser, table.mesures th.ser { text-align: left; }
 
   Bruit.bascule("#bruit-hote", { onChange: function () { update(); } });
   var dipTabs = S.tabs("#dipoles", function (v) { st.dip = v; clearPoints(); update(); }, st.dip);
-  var modeTabs = S.tabs("#modes", function (v) { setMode(Number(v)); }, "1");
+  var modeTabs = S.tabs("#modes", function (v) { setMode(Number(v)); }, hashAct ? "4" : "1");
 })();
 </script>
 </body>
