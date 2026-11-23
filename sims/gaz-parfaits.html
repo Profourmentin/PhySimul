@@ -107,6 +107,55 @@ details ul { padding-left: 20px; }
 .fraction { display: inline-block; vertical-align: middle; text-align: center; }
 .fraction > span { display: block; padding: 0 4px; }
 .fraction > span:first-child { border-bottom: 1px solid currentColor; }
+
+/* Puces de compétence (APP · ANA · RÉA · VAL · COM) : même règle que shared/simulabo.css, section 16.
+   Copie locale tant que la page n'est pas migrée vers le socle ; à supprimer à la migration. */
+.comp { display: inline-block; padding: 1px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font: 600 12px/1.5 var(--font-data); letter-spacing: .04em; vertical-align: middle; }
+.comp abbr { text-decoration: none; font-weight: 700; color: var(--ink); }
+.comp + .comp { margin-left: 4px; }
+@media (forced-colors: active) { .comp { border-color: CanvasText; } }
+.compline { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 6px; }
+
+/* Parcours en boucle : tâches, champs de saisie, retours */
+.parcours { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.parcours p { margin: 0 0 8px; font-size: 14px; color: var(--muted); max-width: 78ch; }
+.parcours ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.parcours li a { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); text-decoration: none; min-height: 44px; }
+.parcours li a:hover { border-color: var(--accent); }
+.parcours li a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.parcours .etat { font: 500 13px var(--font-data); color: var(--muted); }
+.parcours li.fait .etat { color: var(--ok); font-weight: 600; }
+.panel h3 { margin: 20px 0 2px; font: 600 16px var(--font-head); padding-top: 12px; border-top: 1px solid var(--line); }
+.panel p { max-width: 80ch; }
+.fld { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.fld > label, fieldset > legend { font-weight: 600; }
+fieldset { border: 0; padding: 0; margin: 12px 0 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 4px; }
+textarea, select { font: 400 16px/1.5 var(--font-body); padding: 8px 10px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); max-width: 100%; }
+textarea { width: 100%; min-height: 88px; resize: vertical; }
+textarea:focus-visible, select:focus-visible, .answer input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.opts { display: flex; flex-direction: column; gap: 2px; }
+.opts label { display: flex; align-items: flex-start; gap: 10px; min-height: 36px; padding: 4px 0; cursor: pointer; font-weight: 400; }
+.opts input { flex: none; margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent); }
+.opts input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.help { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+.fb.info { color: var(--accent); }
+.fb:empty { display: none; }
+.status { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+.status:empty { display: none; }
+.trirow { display: grid; grid-template-columns: minmax(150px, 1fr) 2fr; gap: 6px 12px; align-items: center; margin-top: 8px; }
+.trirow label { font-weight: 500; }
+.trirow select { width: 100%; }
+@media (max-width: 520px) { .trirow { grid-template-columns: 1fr; } }
+.valtab td, .valtab th { text-align: left; white-space: normal; font: 400 15px var(--font-body); text-transform: none; letter-spacing: 0; }
+.valtab th[scope=row] { font-weight: 600; color: var(--ink); width: 38%; }
+#carnet-imprimable { display: none; white-space: pre-wrap; font: 400 12pt/1.5 var(--font-body); }
+#copie-secours[hidden] { display: none; }
+@media print {
+  body.imprime-carnet { background: #fff; color: #000; }
+  body.imprime-carnet .wrap > *:not(#carnet-imprimable) { display: none !important; }
+  body.imprime-carnet #carnet-imprimable { display: block; }
+}
 </style>
 </head>
 <body>
@@ -115,12 +164,76 @@ details ul { padding-left: 20px; }
     <a class="back" href="../index.html">← Catalogue des simulations</a>
     <p class="kicker">Mouvement et interactions · Première spécialité</p>
     <h1>Loi des gaz parfaits : P·V = constante</h1>
-    <p class="sub">Un gaz est enfermé dans une seringue, à température constante. Comprime-le, lis sa pression sur le capteur, relève des mesures et teste la loi de Mariotte.</p>
+    <p class="sub">Un gaz est enfermé dans une seringue reliée à un capteur de pression. À toi de poser le problème, de prévoir ce qui va se passer, de mesurer, de juger tes résultats et de conclure.</p>
   </header>
 
+  <nav class="parcours" aria-label="Tes tâches">
+    <p>Cinq tâches, à faire dans l’ordre que tu veux, et tu peux revenir sur l’une pendant que tu fais l’autre. Un conseil : prévois avant de mesurer, car tu relis ta prévision dans la tâche « Valider ».</p>
+    <ul id="parcours-liste">
+      <li data-t="app"><a href="#t-app"><span class="comp"><abbr title="S’approprier">APP</abbr> · Poser le problème</span><span class="etat">À faire</span></a></li>
+      <li data-t="ana"><a href="#t-ana"><span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span><span class="etat">À faire</span></a></li>
+      <li data-t="rea"><a href="#t-manip"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Manipuler et mesurer</span><span class="etat">À faire</span></a></li>
+      <li data-t="val"><a href="#t-val"><span class="comp"><abbr title="Valider">VAL</abbr> · Relire et juger</span><span class="etat">À faire</span></a></li>
+      <li data-t="com"><a href="#t-com"><span class="comp"><abbr title="Communiquer">COM</abbr> · Conclure</span><span class="etat">À faire</span></a></li>
+    </ul>
+  </nav>
+
+  <section class="panel" id="t-app" aria-labelledby="h-app">
+    <div class="compline"><span class="comp"><abbr title="S’approprier">APP</abbr> · Poser le problème</span></div>
+    <h2 id="h-app">La situation</h2>
+    <p>Quand on enfonce le piston d’une seringue dont l’embout est bouché, on sent une résistance de plus en plus forte. Ici, un capteur de pression est relié à la seringue : il indique la pression du gaz enfermé, en hectopascals (hPa). Au départ, à 50 mL, il indique environ 1 014 hPa, la pression de l’air ambiant.</p>
+    <div class="fld">
+      <label for="app-q">Écris avec tes mots la question à laquelle tu veux répondre</label>
+      <textarea id="app-q" rows="2" placeholder="Comment varie … quand on …"></textarea>
+      <p class="help">Une bonne question cite les deux grandeurs qui t’intéressent.</p>
+    </div>
+    <fieldset>
+      <legend>Trie les grandeurs : que fais-tu de chacune dans cette expérience ?</legend>
+      <div class="trirow"><label for="tri-V">Volume du gaz V</label><select id="tri-V"><option value="">Choisis…</option><option value="varie">Je la fais varier</option><option value="mesure">Je la mesure</option><option value="const">Je la garde constante</option></select></div>
+      <div class="trirow"><label for="tri-P">Pression du gaz P</label><select id="tri-P"><option value="">Choisis…</option><option value="varie">Je la fais varier</option><option value="mesure">Je la mesure</option><option value="const">Je la garde constante</option></select></div>
+      <div class="trirow"><label for="tri-th">Température du gaz θ</label><select id="tri-th"><option value="">Choisis…</option><option value="varie">Je la fais varier</option><option value="mesure">Je la mesure</option><option value="const">Je la garde constante</option></select></div>
+      <div class="trirow"><label for="tri-n">Quantité de gaz n</label><select id="tri-n"><option value="">Choisis…</option><option value="varie">Je la fais varier</option><option value="mesure">Je la mesure</option><option value="const">Je la garde constante</option></select></div>
+    </fieldset>
+    <p class="fb info" id="tri-fb" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" id="t-ana" aria-labelledby="h-ana">
+    <div class="compline"><span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span></div>
+    <h2 id="h-ana">Ma prévision</h2>
+    <p>À 50 mL, la pression est d’environ 1 014 hPa. On enfonce lentement le piston jusqu’à 20 mL, sans fuite, en laissant le gaz à la même température. <b>Avant de manipuler</b>, prévois ce que va indiquer le capteur.</p>
+    <fieldset>
+      <legend>Selon moi, quand le volume diminue, la pression…</legend>
+      <div class="opts">
+        <label><input type="radio" name="ana-m" value="direct"> varie dans le même sens que le volume, proportionnellement (le quotient P / V reste constant)</label>
+        <label><input type="radio" name="ana-m" value="somme"> varie en sens inverse du volume, de la même quantité (la somme P + V reste constante)</label>
+        <label><input type="radio" name="ana-m" value="produit"> varie en sens inverse du volume, proportionnellement à 1/V (le produit P × V reste constant)</label>
+        <label><input type="radio" name="ana-m" value="nul"> ne varie pas</label>
+        <label><input type="radio" name="ana-m" value="nsp"> je ne sais pas encore</label>
+      </div>
+    </fieldset>
+    <div class="fld">
+      <label for="ana-val">Avec ce raisonnement, ma prévision de la pression à 20 mL est de</label>
+      <div class="answer"><input type="text" id="ana-val" inputmode="decimal" autocomplete="off" placeholder="ex. 2 000"><span class="unit">hPa</span></div>
+    </div>
+    <fieldset>
+      <legend>Mon degré de certitude</legend>
+      <div class="opts">
+        <label><input type="radio" name="ana-c" value="1"> Je ne suis pas très sûr·e</label>
+        <label><input type="radio" name="ana-c" value="2"> Je suis plutôt sûr·e</label>
+        <label><input type="radio" name="ana-c" value="3"> Je suis très sûr·e</label>
+      </div>
+    </fieldset>
+    <div class="toolbar">
+      <button type="button" class="btn primary" id="ana-save">Enregistrer ma prévision</button>
+      <button type="button" class="btn" id="ana-edit" hidden>Modifier ma prévision</button>
+    </div>
+    <p class="status" id="ana-status" role="status" aria-live="polite"></p>
+  </section>
+
   <div class="grid">
-    <section class="panel" aria-label="Seringue et capteur de pression">
-      <h2>1. Le dispositif</h2>
+    <section class="panel" id="t-manip" aria-labelledby="h-disp">
+      <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Manipuler</span></div>
+      <h2 id="h-disp">Le dispositif</h2>
       <canvas id="syringe" width="640" height="250" tabindex="0" role="img" aria-label="Seringue contenant un gaz, reliée à un capteur de pression. Le piston se déplace avec le curseur ou en le faisant glisser. Les particules du gaz rebondissent sur les parois."></canvas>
       <div class="ctrl">
         <label for="vSlider">Volume</label>
@@ -137,8 +250,9 @@ details ul { padding-left: 20px; }
       <p class="note">Chaque point représente une particule de gaz. L'échelle est illustrative : cette seringue contient environ <span id="nbMol">10<sup>21</sup></span> molécules. Plus le volume est petit, plus les chocs sur le piston sont fréquents.</p>
     </section>
 
-    <section class="panel" aria-label="Graphique">
-      <h2>2. Le graphique</h2>
+    <section class="panel" aria-labelledby="h-graph">
+      <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Représenter</span></div>
+      <h2 id="h-graph">Le graphique</h2>
       <div class="tabs" role="group" aria-label="Choix du graphique">
         <button type="button" class="btn tab" data-tab="P" aria-pressed="true">P = f(V)</button>
         <button type="button" class="btn tab" data-tab="inv" aria-pressed="false">P = f(1/V)</button>
@@ -163,9 +277,10 @@ details ul { padding-left: 20px; }
     <div class="calc" id="calc" aria-live="polite"></div>
   </section>
 
-  <section class="panel" aria-label="Tableau de mesures">
-    <h2>3. Teste la loi : tableau de mesures</h2>
-    <p class="note" style="margin-top:0">Déplace le piston, relève plusieurs mesures (au moins 5, bien réparties entre 10 mL et 60 mL), puis observe le produit P × V.</p>
+  <section class="panel" id="t-rea" aria-labelledby="h-rea">
+    <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span></div>
+    <h2 id="h-rea">Relever des mesures</h2>
+    <p class="note" style="margin-top:0">Déplace le piston et relève au moins 5 mesures, bien réparties entre 10 mL et 60 mL. Relève-en une à 20 mL : tu en auras besoin pour relire ta prévision. Observe le produit P × V dans la colonne de droite.</p>
     <div class="toolbar">
       <button type="button" class="btn primary" id="addBtn">＋ Relever la mesure</button>
       <button type="button" class="btn" id="delBtn">Supprimer la dernière</button>
@@ -181,9 +296,59 @@ details ul { padding-left: 20px; }
     <p class="bilan" id="bilan" aria-live="polite"></p>
   </section>
 
-  <section class="panel" aria-label="Défi de calcul">
-    <h2>4. Défi : à toi de calculer</h2>
+  <section class="panel" id="t-val" aria-labelledby="h-val">
+    <div class="compline"><span class="comp"><abbr title="Valider">VAL</abbr> · Relire et juger</span></div>
+    <h2 id="h-val">Mes mesures confirment-elles ma prévision et la loi ?</h2>
+    <p>Une mesure n’est jamais exacte : le capteur fluctue un peu. Pour juger un écart, compare-le à cette fluctuation. Interrupteur « Modèle théorique » (dans le tableau de mesures) : il supprime la fluctuation, pour voir ce que donne le modèle seul.</p>
+
+    <h3>Relire ma prévision</h3>
+    <div id="val-prev-vue"></div>
+    <fieldset>
+      <legend>L’écart entre ma prévision et ma mesure à 20 mL est…</legend>
+      <div class="opts">
+        <label><input type="radio" name="val-p" value="compat"> acceptable : ma prévision est compatible avec la mesure</label>
+        <label><input type="radio" name="val-p" value="ecart"> trop grand pour venir de la seule fluctuation du capteur : ma prévision est à revoir</label>
+      </div>
+    </fieldset>
+    <p class="fb" id="val-p-fb" role="status" aria-live="polite"></p>
+    <div class="fld">
+      <label for="val-p-txt">Que m’apprend cet écart ? (ou : pourquoi ma prévision était-elle juste ?)</label>
+      <textarea id="val-p-txt" rows="2"></textarea>
+    </div>
+
+    <h3>Juger la constance de P × V</h3>
+    <div id="val-pv-vue"></div>
+    <fieldset>
+      <legend>Le produit P × V est-il constant ?</legend>
+      <div class="opts">
+        <label><input type="radio" name="val-pv" value="oui"> Oui, aux incertitudes près : les produits diffèrent d’une quantité du même ordre que la fluctuation du capteur</label>
+        <label><input type="radio" name="val-pv" value="non"> Non : les produits diffèrent trop pour que ce soit la seule fluctuation du capteur</label>
+      </div>
+    </fieldset>
+    <p class="fb" id="val-pv-fb" role="status" aria-live="polite"></p>
+
+    <h3>Dans un vrai montage</h3>
+    <div class="fld">
+      <label for="val-err">Qu’est-ce qui pourrait écarter P × V d’une valeur constante ? Choisis une cause à examiner.</label>
+      <select id="val-err">
+        <option value="">Choisis une cause…</option>
+        <option value="volume">Un volume mort : le tuyau et le capteur contiennent aussi du gaz</option>
+        <option value="fuite">Une fuite de gaz pendant la manipulation</option>
+        <option value="vite">Une compression trop rapide</option>
+        <option value="lecture">La lecture de la graduation de la seringue, à ± 1 mL près</option>
+      </select>
+    </div>
+    <p class="fb info" id="val-err-fb" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" id="t-defi" aria-labelledby="h-defi">
+    <div class="compline"><span class="comp"><abbr title="Réaliser">RÉA</abbr> · Calculer</span><span class="comp"><abbr title="Valider">VAL</abbr> · Tester la vraisemblance</span></div>
+    <h2 id="h-defi">Défi de calcul</h2>
     <p class="q" id="chQ"></p>
+    <div class="fld">
+      <label for="ch-plaus" id="ch-plaus-lab"></label>
+      <select id="ch-plaus"></select>
+    </div>
     <div class="answer">
       <label for="chIn" class="note" style="margin:0">Ta réponse :</label>
       <input type="text" id="chIn" inputmode="decimal" autocomplete="off" placeholder="ex. 2 535">
@@ -195,6 +360,35 @@ details ul { padding-left: 20px; }
     <p class="fb" id="chFb" aria-live="polite"></p>
     <div class="solution" id="chSolBox" hidden></div>
     <p class="score" id="chScore"></p>
+  </section>
+
+  <section class="panel" id="t-com" aria-labelledby="h-com">
+    <div class="compline"><span class="comp"><abbr title="Communiquer">COM</abbr> · Conclure</span></div>
+    <h2 id="h-com">Ma conclusion</h2>
+    <div class="fld">
+      <label for="com-txt">Rédige ta conclusion en quelques phrases</label>
+      <textarea id="com-txt" rows="5" placeholder="Pour une quantité de gaz donnée et à température …, quand le volume …, la pression … Mes mesures donnent P × V = … ± … hPa·mL, donc … J’avais prévu …, j’ai mesuré …"></textarea>
+      <p class="help">Une bonne conclusion donne la loi avec ses conditions, s’appuie sur tes mesures (valeur de P × V et sa dispersion), revient sur ta prévision et nomme une limite du montage ou du modèle.</p>
+    </div>
+    <fieldset>
+      <legend>Ma relecture avant de rendre</legend>
+      <div class="opts">
+        <label><input type="checkbox" class="com-chk"> J’ai écrit la loi avec ses conditions (température, quantité de gaz)</label>
+        <label><input type="checkbox" class="com-chk"> J’ai cité mes mesures de P × V et leur dispersion</label>
+        <label><input type="checkbox" class="com-chk"> J’ai comparé avec ma prévision</label>
+        <label><input type="checkbox" class="com-chk"> J’ai nommé une limite ou une source d’erreur</label>
+      </div>
+    </fieldset>
+    <div class="toolbar">
+      <button type="button" class="btn primary" id="com-copie">Copier mon carnet</button>
+      <button type="button" class="btn" id="com-mesures">Copier les mesures (tableur)</button>
+      <button type="button" class="btn" id="com-imprime">Imprimer / PDF</button>
+    </div>
+    <p class="status" id="com-status" role="status" aria-live="polite"></p>
+    <div id="copie-secours" hidden>
+      <label for="copie-txt" class="help">Copie automatique impossible : sélectionne ce texte et copie-le (Ctrl+C).</label>
+      <textarea id="copie-txt" readonly rows="8"></textarea>
+    </div>
   </section>
 
   <details>
@@ -223,10 +417,13 @@ details ul { padding-left: 20px; }
     <summary>Repères pour l'enseignant</summary>
     <ul>
       <li><b>Programme de Première spécialité</b>, thème « Mouvement et interactions », partie « Description d'un fluide au repos » : grandeurs macroscopiques (pression, température), modèle de comportement d'un gaz (loi de Mariotte), relation <i>F</i> = <i>P</i>·<i>S</i>.</li>
+      <li><b>Démarche scientifique</b> : parcours « en boucle » (ordre libre) qui travaille les cinq compétences : APP (poser la question, trier les grandeurs), ANA (choisir un modèle et prévoir la pression à 20 mL, avec un degré de certitude), RÉA (manipuler, mesurer, tracer, calculer), VAL (relire la prévision, juger la constance de P × V à l’aide de la fluctuation du capteur, examiner une source d’erreur, tester la vraisemblance d’un résultat), COM (conclusion rédigée, carnet copiable ou imprimable). La page ne donne jamais de verdict « juste ou faux » sur ces jugements : elle les confronte aux chiffres. Voir la <a href="../enseignants/fiches/gaz-parfaits.html">fiche enseignant</a>.</li>
       <li><b>Capacités travaillées</b> : expliquer qualitativement le lien entre grandeurs macroscopiques et agitation des particules ; tester la loi de Mariotte à partir de mesures (le capteur est bruité par défaut (0,5 % de la valeur, réglage global de shared/bruit.js ; l'interrupteur « Modèle théorique » le supprime)) ; utiliser la loi de Mariotte dans un calcul ; exploiter <i>F</i> = <i>P</i>·<i>S</i> avec les conversions d'unités.</li>
       <li><b>Au-delà du programme de Première</b> : l'équation d'état <i>PV</i> = <i>nRT</i> (Terminale) n'est proposée que dans le volet « Pour aller plus loin ».</li>
     </ul>
   </details>
+
+  <div id="carnet-imprimable" aria-hidden="true"></div>
 </div>
 
 <script src="../shared/bruit.js"></script>
@@ -513,6 +710,7 @@ details ul { padding-left: 20px; }
       'P = n·R·T / V = ' + sg(kJ(), 4) + ' J / ' + sci(Vm3, 2) + ' m<sup>3</sup> = <b>' + sci(kJ() / Vm3, 4) + ' Pa</b> = ' + sg(kJ() / Vm3 / 100, 4) + ' hPa';
 
     renderTable();
+    majParcours();
     dirty = true;
   }
 
@@ -536,14 +734,14 @@ details ul { padding-left: 20px; }
     var mean = prods.reduce(function (a, x) { return a + x; }, 0) / prods.length;
     var dev = Math.max.apply(null, prods.map(function (x) { return Math.abs(x - mean) / mean * 100; }));
     var varied = st.rows.some(function (r) { return r.th !== st.rows[0].th || r.n !== st.rows[0].n; });
+    var sdev = Math.sqrt(prods.reduce(function (a, x) { return a + (x - mean) * (x - mean); }, 0) / (prods.length - 1));
     if (varied) { b.className = 'bilan warn'; b.textContent = 'Les mesures n’ont pas toutes été faites à la même température et avec la même quantité de gaz : le produit P × V ne peut pas être comparé.'; }
-    else if (dev < 2) { b.className = 'bilan ok'; b.innerHTML = 'Le produit P × V reste égal à ' + fr(Math.round(mean / 10) * 10, 0) + ' hPa·mL environ (écart maximal à la moyenne : ' + fr(dev, 1) + ' %). Il est constant, aux incertitudes de mesure près : la loi de Mariotte est vérifiée.'; }
-    else { b.className = 'bilan warn'; b.textContent = 'Le produit P × V varie de ' + fr(dev, 1) + ' % autour de sa moyenne : vérifie les mesures relevées.'; }
+    else { b.className = 'bilan'; b.innerHTML = 'P × V : moyenne ' + fr(Math.round(mean / 10) * 10, 0) + '\u00a0hPa·mL, écart-type ' + fr(Math.round(sdev), 0) + '\u00a0hPa·mL (' + fr(sdev / mean * 100, 1) + '\u00a0%), écart maximal à la moyenne ' + fr(dev, 1) + '\u00a0%. À toi de juger dans la tâche « Valider ».'; }
   }
   function addRow() {
     if (st.rows.length >= MAX_ROWS) return;
     st.rows.push({ V: st.V, P: st.P, th: st.th, n: st.n });
-    renderTable(); dirty = true;
+    renderTable(); renderVal(); dirty = true;
   }
 
   /* ---------- état : volume ---------- */
@@ -564,10 +762,10 @@ details ul { padding-left: 20px; }
     this.textContent = st.paused ? '▶ Animer' : '⏸ Pause'; dirty = true;
   });
   $('addBtn').addEventListener('click', addRow);
-  $('delBtn').addEventListener('click', function () { st.rows.pop(); renderTable(); dirty = true; });
-  $('clearBtn').addEventListener('click', function () { st.rows = []; renderTable(); dirty = true; });
+  $('delBtn').addEventListener('click', function () { st.rows.pop(); renderTable(); renderVal(); dirty = true; });
+  $('clearBtn').addEventListener('click', function () { st.rows = []; renderTable(); renderVal(); dirty = true; });
   $('modelChk').addEventListener('change', function (e) { st.model = e.target.checked; dirty = true; });
-  Bruit.bascule('#bruit-hote', { onChange: function () { readSensor(); refresh(); } });
+  Bruit.bascule('#bruit-hote', { onChange: function () { readSensor(); refresh(); renderVal(); } });
   Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
     b.addEventListener('click', function () {
       st.tab = b.getAttribute('data-tab');
@@ -629,6 +827,7 @@ details ul { padding-left: 20px; }
       ch = {
         q: 'Le piston d’une seringue a une section S = ' + S + ' cm<sup>2</sup>. Le gaz enfermé exerce sur lui une pression P = ' + pTxt + ' ' + pu + '. Calcule la valeur de la force pressante F exercée par le gaz sur le piston.',
         unit: 'N', ans: F,
+        plaus: { lab: 'Avant de calculer, je m’attends à une force de l’ordre de…', opts: [['0', '1 N'], ['1', '10 N'], ['2', '100 N'], ['3', '1 000 N']], ok: function (v) { return Math.abs(Math.log10(F) - Number(v)) <= 0.7; }, expl: 'F = P × S vaut environ ' + sg(F, 2) + ' N : compare avec ton estimation d’ordre de grandeur.' },
         wrongs: [
           { v: pPa * S, hint: 'Pense à convertir la section en m² : 1 cm² = 10⁻⁴ m².' },
           { v: pv * S * 1e-4, hint: 'Pense à convertir la pression en pascal : 1 hPa = 100 Pa et 1 bar = 10⁵ Pa.' },
@@ -650,6 +849,7 @@ details ul { padding-left: 20px; }
         ch = {
           q: base + 'On déplace le piston lentement jusqu’à V<sub>2</sub> = ' + V2 + ' mL. Calcule la pression P<sub>2</sub> de l’air.',
           unit: unit, ans: P2,
+          plaus: { lab: 'Avant de calculer, je m’attends à ce que P₂ soit…', opts: [['plus', 'plus grande que P₁'], ['moins', 'plus petite que P₁'], ['egale', 'égale à P₁']], ok: function (v) { return v === (V2 < V1 ? 'plus' : 'moins'); }, expl: V2 < V1 ? 'le volume diminue, donc la pression augmente.' : 'le volume augmente, donc la pression diminue.' },
           wrongs: [{ v: P1 * V2 / V1, hint: 'Attention : P et V sont inversement proportionnels. Si le volume diminue, la pression augmente.' }].filter(function (w) { return rel(w.v, P2) > 0.03; }),
           sol: 'Loi de Mariotte : P<sub>1</sub> × V<sub>1</sub> = P<sub>2</sub> × V<sub>2</sub><br>P<sub>2</sub> = P<sub>1</sub> × V<sub>1</sub> / V<sub>2</sub> = ' + fr(P1, dec) + ' × ' + V1 + ' / ' + V2 + ' = <b>' + sg(P2, 3) + ' ' + unit + '</b>'
         };
@@ -659,12 +859,14 @@ details ul { padding-left: 20px; }
         ch = {
           q: base + 'On déplace le piston lentement jusqu’à ce que la pression atteigne P<sub>2</sub> = ' + sg(P2s, 3) + ' ' + unit + '. Calcule le volume V<sub>2</sub> de l’air.',
           unit: 'mL', ans: V2b,
+          plaus: { lab: 'Avant de calculer, je m’attends à ce que V₂ soit…', opts: [['plus', 'plus grand que V₁'], ['moins', 'plus petit que V₁'], ['egal', 'égal à V₁']], ok: function (v) { return v === (V2b < V1 ? 'moins' : 'plus'); }, expl: V2b < V1 ? 'la pression augmente, donc le volume diminue.' : 'la pression diminue, donc le volume augmente.' },
           wrongs: [{ v: V1 * P2s / P1, hint: 'Attention : P et V sont inversement proportionnels. Si la pression augmente, le volume diminue.' }].filter(function (w) { return rel(w.v, V2b) > 0.03; }),
           sol: 'Loi de Mariotte : P<sub>1</sub> × V<sub>1</sub> = P<sub>2</sub> × V<sub>2</sub><br>V<sub>2</sub> = P<sub>1</sub> × V<sub>1</sub> / P<sub>2</sub> = ' + fr(P1, dec) + ' × ' + V1 + ' / ' + sg(P2s, 3) + ' = <b>' + sg(V2b, 3) + ' mL</b>'
         };
       }
     }
     $('chQ').innerHTML = ch.q;
+    fillPlaus();
     $('chUnit').textContent = ch.unit;
     $('chSolBox').innerHTML = ch.sol;
     $('chScore').textContent = doneCount ? 'Défis réussis : ' + okCount + ' sur ' + doneCount + ' essayés.' : '';
@@ -673,8 +875,9 @@ details ul { padding-left: 20px; }
     var v = parseNum($('chIn').value), fb = $('chFb');
     if (isNaN(v)) { fb.className = 'fb warn'; fb.textContent = 'Écris un nombre, par exemple 2535 ou 2,5.'; return; }
     tries++;
+    var pl = plausNote();
     if (rel(v, ch.ans) <= 0.02) {
-      fb.className = 'fb ok'; fb.innerHTML = 'Bravo, c’est correct : ' + sg(ch.ans, 3) + ' ' + ch.unit + '.';
+      fb.className = 'fb ok'; fb.innerHTML = 'Bravo, c’est correct : ' + sg(ch.ans, 3) + '\u00a0' + ch.unit + '.' + (pl || '');
       $('chSolBox').hidden = false;
       if (!ch.done) { ch.done = true; okCount++; doneCount++; $('chScore').textContent = 'Défis réussis : ' + okCount + ' sur ' + doneCount + ' essayés.'; }
       return;
@@ -682,7 +885,9 @@ details ul { padding-left: 20px; }
     var hint = '';
     for (var i = 0; i < ch.wrongs.length; i++) if (rel(v, ch.wrongs[i].v) <= 0.03) { hint = ch.wrongs[i].hint; break; }
     fb.className = 'fb err';
-    fb.textContent = 'Ce n’est pas encore ça. ' + (hint || 'Relis l’énoncé et vérifie ton calcul et les unités.') + (tries >= 2 ? ' Tu peux aussi regarder la correction.' : '');
+    fb.innerHTML = 'Ce n’est pas encore ça. ' + (hint || 'Relis l’énoncé et vérifie ton calcul et les unités.') +
+      (pl === null ? ' Astuce : avant de calculer, estime le sens ou l’ordre de grandeur du résultat (test de vraisemblance).' : pl) +
+      (tries >= 2 ? ' Tu peux aussi regarder la correction.' : '');
   }
   $('chCheck').addEventListener('click', checkChallenge);
   $('chIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') checkChallenge(); });
@@ -691,6 +896,244 @@ details ul { padding-left: 20px; }
     if (!ch.done) { ch.done = true; doneCount++; $('chScore').textContent = 'Défis réussis : ' + okCount + ' sur ' + doneCount + ' essayés.'; }
   });
   $('chNew').addEventListener('click', newChallenge);
+
+  /* ---------- parcours en boucle : APP · ANA · VAL · COM ---------- */
+  var T_PREV = 20;   // volume visé par la prévision (mL)
+  var MODELES = {
+    direct: 'le quotient P / V reste constant',
+    somme: 'la somme P + V reste constante',
+    produit: 'le produit P × V reste constant',
+    nul: 'la pression ne varie pas',
+    nsp: 'je ne sais pas encore'
+  };
+  var CERTS = { 1: 'pas très sûr·e', 2: 'plutôt sûr·e', 3: 'très sûr·e' };
+  var GRANDEURS = {
+    V:  { nom: 'Volume V', attendu: 'varie', raison: 'le piston fixe le volume : c’est la grandeur que tu fais varier.' },
+    P:  { nom: 'Pression P', attendu: 'mesure', raison: 'le capteur donne la pression : tu la mesures.' },
+    th: { nom: 'Température θ', attendu: 'const', raison: 'pour relier P et V, on garde la température constante : sinon on ne saurait pas si P change à cause de V ou de θ.' },
+    n:  { nom: 'Quantité de gaz n', attendu: 'const', raison: 'le gaz est enfermé, sans fuite : sa quantité ne change pas.' }
+  };
+  var ETIQ = { varie: 'je la fais varier', mesure: 'je la mesure', const: 'je la garde constante' };
+  var CAUSES = {
+    volume: 'Le gaz occupe aussi le volume V₀ du tuyau et du capteur : c’est le volume total V + V₀ qui est comprimé. Le produit P × V calculé avec la seule graduation diminue donc quand V diminue (la pression est grande, le volume est petit). Pour limiter l’erreur : mesurer V₀ et l’ajouter à V, ou travailler avec des volumes grands devant V₀.',
+    fuite: 'La quantité de gaz diminue : à chaque nouvelle compression, la pression est plus faible que prévu. Le produit P × V diminue au fil des mesures successives. Pour limiter l’erreur : vérifier l’étanchéité du montage avant de mesurer et relever les points rapidement.',
+    vite: 'Une compression rapide échauffe le gaz : la température n’est plus constante, or la loi de Mariotte exige une température constante. La pression lue est trop grande, donc le produit P × V aussi. Pour limiter l’erreur : comprimer lentement et attendre quelques secondes avant de lire.',
+    lecture: 'Une incertitude de ± 1 mL pèse plus lourd quand le volume est petit : 10 % de 10 mL, contre 2 % de 50 mL. L’incertitude relative sur P × V est donc la plus grande aux petits volumes. Pour la réduire : une seringue plus finement graduée, ou répéter la mesure.'
+  };
+
+  function lire(id) { return $(id).value.trim(); }
+  function coche(nom) { return document.querySelector('input[name="' + nom + '"]:checked'); }
+  function sigmaRel() { return Bruit.actif() ? Bruit.niveau() : 0; }
+  function tolerance() { return Math.max(0.02, 3 * sigmaRel()); }          // comme les autres animations : jamais plus étroite que 3 σ
+  function pct(x, d) { return fr(x * 100, d) + ' %'; }
+  function moyenne(a) { return a.reduce(function (s, x) { return s + x; }, 0) / a.length; }
+  function pluriel(n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); }
+  function mesuresVolume(V) { return st.rows.filter(function (r) { return r.V === V && r.th === TH_REF && r.n === N_REF; }); }
+  function statsPV() {                       // produits P × V des mesures faites aux conditions de départ
+    var r = st.rows.filter(function (x) { return x.th === TH_REF && x.n === N_REF; });
+    if (r.length < 3) return { n: r.length, tot: st.rows.length };
+    var p = r.map(function (x) { return x.P * x.V; }), m = moyenne(p);
+    var s = Math.sqrt(p.reduce(function (a, x) { return a + (x - m) * (x - m); }, 0) / (p.length - 1));
+    var dev = Math.max.apply(null, p.map(function (x) { return Math.abs(x - m) / m; }));
+    return { n: p.length, tot: st.rows.length, mean: m, s: s, dev: dev, min: Math.min.apply(null, p), max: Math.max.apply(null, p) };
+  }
+
+  /* APP : trier les grandeurs */
+  function triFeedback() {
+    var fb = $('tri-fb'), vides = 0, ecarts = [];
+    ['V', 'P', 'th', 'n'].forEach(function (g) {
+      var v = $('tri-' + g).value;
+      if (!v) vides++; else if (v !== GRANDEURS[g].attendu) ecarts.push(GRANDEURS[g].nom + ' : ' + GRANDEURS[g].raison);
+    });
+    if (vides) fb.textContent = '';
+    else if (!ecarts.length) fb.textContent = 'Ton tri est cohérent avec le dispositif : tu fais varier le volume, tu mesures la pression, et tu gardes constantes la température et la quantité de gaz. Ainsi, si P change, c’est à cause de V.';
+    else fb.textContent = 'À revoir : ' + ecarts.join(' ');
+    majParcours();
+  }
+
+  /* ANA : enregistrer la prévision (avant les mesures, de préférence) */
+  function setPrevDisabled(d) {
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="ana-m"], input[name="ana-c"], #ana-val'), function (e) { e.disabled = d; });
+    $('ana-save').hidden = d; $('ana-edit').hidden = !d;
+  }
+  function savePrev() {
+    var m = coche('ana-m'), c = coche('ana-c'), v = parseNum($('ana-val').value), s = $('ana-status');
+    if (!m || !c || isNaN(v) || v <= 0) { s.textContent = 'Pour enregistrer, choisis un raisonnement, écris une valeur de pression (en hPa) et indique ton degré de certitude.'; return; }
+    st.prev = { modele: m.value, val: v, cert: Number(c.value), apres: st.rows.length, revisee: !!st.prevRevisee,
+                heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
+    setPrevDisabled(true);
+    s.textContent = 'Prévision enregistrée à ' + st.prev.heure +
+      (st.prev.apres === 0 ? ', avant toute mesure.' : ', après ' + pluriel(st.prev.apres, 'mesure') + ' : tes mesures ont pu t’influencer, ton carnet le notera.') +
+      (st.prev.revisee ? ' Elle a été modifiée.' : '') + ' Tu la relis dans la tâche « Valider ».';
+    renderVal(); majParcours();
+  }
+  function editPrev() {
+    st.prevRevisee = true; setPrevDisabled(false);
+    $('ana-status').textContent = 'Tu modifies ta prévision : ton carnet le mentionnera.';
+  }
+
+  /* VAL : relire la prévision, juger P × V, avec la fluctuation du capteur comme repère */
+  function renderVal() {
+    var s0 = sigmaRel(), tl = tolerance(), p = st.prev;
+    var fluct = s0 > 0 ? 'environ ' + pct(s0, 1) + ' de la valeur lue (écart-type)' : 'nulle (modèle théorique)';
+    var m20 = mesuresVolume(T_PREV), meas = m20.length ? moyenne(m20.map(function (r) { return r.P; })) : null;
+    var ecart = (p && meas !== null) ? (p.val - meas) / meas : null;
+    var h = '';
+
+    if (!p) {
+      h = '<p class="help">Tu n’as pas encore enregistré de prévision (tâche « Prévoir »). Tu peux le faire maintenant, mais ton carnet notera qu’elle a été faite après tes mesures.</p>';
+    } else {
+      h = '<div class="tablewrap valtab"><table><tbody>' +
+        '<tr><th scope="row">Ma prévision à ' + T_PREV + ' mL</th><td>' + sg(p.val, 4) + ' hPa<br><span class="help">Raisonnement : ' + MODELES[p.modele] + '. Certitude : ' + CERTS[p.cert] + '.</span></td></tr>' +
+        '<tr><th scope="row">Enregistrée</th><td>' + (p.apres === 0 ? 'avant toute mesure' : 'après ' + pluriel(p.apres, 'mesure')) + (p.revisee ? ' (puis modifiée)' : '') + '</td></tr>' +
+        '<tr><th scope="row">Ma mesure à ' + T_PREV + ' mL</th><td>' + (meas !== null ? sg(meas, 4) + ' hPa (' + pluriel(m20.length, 'mesure') + ')' : 'pas encore de mesure à ' + T_PREV + ' mL : relève-en une dans le tableau') + '</td></tr>' +
+        (ecart !== null ? '<tr><th scope="row">Écart (prévu − mesuré)</th><td>' + (ecart < 0 ? '−' : '+') + sg(Math.abs(p.val - meas), 3) + ' hPa, soit ' + pct(Math.abs(ecart), 1) + '</td></tr>' : '') +
+        '<tr><th scope="row">Fluctuation du capteur</th><td>' + fluct + (s0 > 0 && meas !== null ? ', soit ≈ ' + sg(s0 * meas, 2) + ' hPa à ' + T_PREV + ' mL' : '') + '</td></tr>' +
+        '</tbody></table></div>';
+    }
+    $('val-prev-vue').innerHTML = h;
+
+    var S = statsPV(), h2;
+    if (S.n < 3) {
+      var autres = S.tot - S.n;
+      h2 = '<p class="help">Relève au moins 3 mesures aux conditions de départ (20 °C, 2,08 mmol) pour pouvoir juger P × V' + (autres > 0 ? ' : ' + pluriel(autres, 'mesure') + ' faite' + (autres > 1 ? 's' : '') + ' dans d’autres conditions ne compte' + (autres > 1 ? 'nt' : '') + ' pas ici' : '') + '.</p>';
+    } else {
+      h2 = '<div class="tablewrap valtab"><table><tbody>' +
+        '<tr><th scope="row">Produits P × V relevés</th><td>de ' + fr(S.min, 0) + ' à ' + fr(S.max, 0) + ' hPa·mL (' + pluriel(S.n, 'mesure') + ')</td></tr>' +
+        '<tr><th scope="row">Moyenne</th><td>' + fr(Math.round(S.mean / 10) * 10, 0) + ' hPa·mL</td></tr>' +
+        '<tr><th scope="row">Dispersion (écart-type s)</th><td>' + fr(Math.round(S.s), 0) + ' hPa·mL, soit ' + pct(S.s / S.mean, 1) + '</td></tr>' +
+        '<tr><th scope="row">Écart maximal à la moyenne</th><td>' + pct(S.dev, 1) + '</td></tr>' +
+        '<tr><th scope="row">Fluctuation du capteur</th><td>' + fluct + '</td></tr>' +
+        '</tbody></table></div>';
+    }
+    $('val-pv-vue').innerHTML = h2;
+
+    // jugement sur la prévision
+    var cp = coche('val-p'), fbp = $('val-p-fb');
+    if (!cp) { fbp.className = 'fb'; fbp.textContent = ''; }
+    else if (!p || meas === null) { fbp.className = 'fb warn'; fbp.textContent = 'Il te manque ' + (!p ? 'une prévision enregistrée' : 'une mesure à ' + T_PREV + ' mL') + ' pour juger cet écart.'; }
+    else {
+      var compat = Math.abs(ecart) <= tl, okP = (cp.value === 'compat') === compat;
+      var chiffres = 'écart de ' + pct(Math.abs(ecart), 1) + ', tolérance retenue de ' + pct(tl, 1) + ' : le plus grand de 2 %, pour une prévision arrondie, et de 3 fois la fluctuation du capteur';
+      var modeleOk = S.n >= 3 && S.dev <= tl;
+      var piste = compat ? '' : (p.modele === 'produit'
+        ? (modeleOk ? ' Ton modèle (P × V constant) est compatible avec tes mesures : c’est la valeur que tu en as déduite qui s’écarte, vérifie ton calcul.' : ' Vérifie ton calcul.')
+        : ' Tu avais choisi un modèle où « ' + MODELES[p.modele] + ' » : confronte-le à la colonne P × V de ton tableau.');
+      if (okP && compat) { fbp.className = 'fb ok'; fbp.textContent = 'Ton jugement est cohérent avec les chiffres (' + chiffres + '). Ta prévision n’est pas contredite par la mesure.'; }
+      else if (okP) { fbp.className = 'fb ok'; fbp.textContent = 'Ton jugement est cohérent avec les chiffres (' + chiffres + '). Le capteur ne peut pas expliquer cet écart.' + piste; }
+      else { fbp.className = 'fb warn'; fbp.textContent = 'Regarde à nouveau les chiffres (' + chiffres + ') : l’écart ' + (compat ? 'reste dans la tolérance.' : 'dépasse la tolérance.') + piste; }
+    }
+
+    // jugement sur la constance de P × V
+    var cv = coche('val-pv'), fbv = $('val-pv-fb');
+    if (!cv) { fbv.className = 'fb'; fbv.textContent = ''; }
+    else if (S.n < 3) { fbv.className = 'fb warn'; fbv.textContent = 'Il te faut au moins 3 mesures aux conditions de départ pour juger.'; }
+    else {
+      var cst = S.dev <= tl, okV = (cv.value === 'oui') === cst;
+      var res = 'P × V = (' + fr(Math.round(S.mean / 10) * 10, 0) + ' ± ' + fr(Math.round(S.s), 0) + ') hPa·mL';
+      if (okV && cst) {
+        fbv.className = 'fb ok';
+        fbv.textContent = 'Ton jugement est cohérent : ' + (s0 > 0
+          ? 'les produits ne sont pas tous égaux (de ' + fr(S.min, 0) + ' à ' + fr(S.max, 0) + '), mais leur dispersion (' + pct(S.s / S.mean, 1) + ') est du même ordre que la fluctuation du capteur (' + pct(s0, 1) + '). Elle vient de la mesure, pas d’un écart à la loi : '
+          : 'sans fluctuation, le modèle donne un produit P × V constant, aux arrondis près : ') + res + '.';
+      } else if (okV) {
+        fbv.className = 'fb ok';
+        fbv.textContent = 'Ton jugement est cohérent : les produits s’écartent de ' + pct(S.dev, 1) + ' au plus de leur moyenne, plus que la tolérance de ' + pct(tl, 1) + '. Vérifie que toutes tes mesures ont été faites dans les mêmes conditions.';
+      } else if (cst) {
+        fbv.className = 'fb warn';
+        fbv.textContent = 'Regarde à nouveau : les produits ne sont pas identiques, mais leur dispersion (' + pct(S.s / S.mean, 1) + ') reste dans la tolérance de ' + pct(tl, 1) + '. Une mesure n’est jamais exacte : rien n’indique ici un écart à la loi.';
+      } else {
+        fbv.className = 'fb warn';
+        fbv.textContent = 'Regarde à nouveau : l’écart maximal à la moyenne (' + pct(S.dev, 1) + ') dépasse la tolérance de ' + pct(tl, 1) + '. Les produits ne sont pas constants aux incertitudes près.';
+      }
+    }
+  }
+
+  /* COM : carnet de l'élève (copie, tableur, impression) */
+  function tableauTexte() {
+    var L = ['n°\tV (mL)\tP (hPa)\tP × V (hPa·mL)\tθ (°C)\tn (mmol)'];
+    st.rows.forEach(function (r, i) { L.push((i + 1) + '\t' + r.V + '\t' + sg(r.P, 4) + '\t' + fr(r.P * r.V, 0) + '\t' + r.th + '\t' + fr(r.n, 2)); });
+    if (!st.rows.length) L.push('(aucune mesure relevée)');
+    return L.join('\n');
+  }
+  function carnet() {
+    var L = [], S = statsPV(), p = st.prev, m20 = mesuresVolume(T_PREV), cp = coche('val-p'), cv = coche('val-pv');
+    L.push('CARNET : loi de Mariotte, P·V = constante', 'Date : ' + new Date().toLocaleDateString('fr-FR'), '');
+    L.push('APP · Ma question : ' + (lire('app-q') || '(non rédigée)'));
+    L.push('APP · Mon tri des grandeurs : ' + ['V', 'P', 'th', 'n'].map(function (g) { return GRANDEURS[g].nom + ' (' + (ETIQ[$('tri-' + g).value] || 'non triée') + ')'; }).join(' ; '), '');
+    L.push(p ? 'ANA · Ma prévision : à ' + T_PREV + ' mL, ' + sg(p.val, 4) + ' hPa, car ' + MODELES[p.modele] + ' (certitude : ' + CERTS[p.cert] + '). Enregistrée à ' + p.heure + ', ' + (p.apres === 0 ? 'avant toute mesure' : 'après ' + pluriel(p.apres, 'mesure')) + (p.revisee ? ', puis modifiée' : '') + '.'
+             : 'ANA · Ma prévision : non enregistrée.', '');
+    L.push('RÉA · Mes mesures (capteur ' + (Bruit.actif() ? 'avec fluctuation d’environ ' + pct(Bruit.niveau(), 1) : 'en modèle théorique, sans fluctuation') + ') :', tableauTexte(), '');
+    if (p && m20.length) {
+      var meas = moyenne(m20.map(function (r) { return r.P; }));
+      L.push('VAL · Ma prévision relue : prévu ' + sg(p.val, 4) + ' hPa, mesuré ' + sg(meas, 4) + ' hPa, écart de ' + pct(Math.abs(p.val - meas) / meas, 1) + '. Mon jugement : ' + (cp ? (cp.value === 'compat' ? 'compatible avec la mesure' : 'à revoir') : 'non rendu') + '.');
+    } else L.push('VAL · Ma prévision relue : comparaison impossible (prévision ou mesure à ' + T_PREV + ' mL manquante).');
+    if (lire('val-p-txt')) L.push('VAL · Ce que m’apprend l’écart : ' + lire('val-p-txt'));
+    L.push(S.n >= 3 ? 'VAL · Constance de P × V : (' + fr(Math.round(S.mean / 10) * 10, 0) + ' ± ' + fr(Math.round(S.s), 0) + ') hPa·mL, dispersion de ' + pct(S.s / S.mean, 1) + '. Mon jugement : ' + (cv ? (cv.value === 'oui' ? 'constant aux incertitudes près' : 'pas constant') : 'non rendu') + '.'
+                    : 'VAL · Constance de P × V : moins de 3 mesures aux conditions de départ.');
+    if ($('val-err').value) L.push('VAL · Source d’erreur examinée : ' + $('val-err').options[$('val-err').selectedIndex].text + '.');
+    L.push('', 'COM · Ma conclusion : ' + (lire('com-txt') || '(non rédigée)'));
+    L.push('Relecture : ' + document.querySelectorAll('.com-chk:checked').length + ' point(s) coché(s) sur 4.');
+    return L.join('\n');
+  }
+  function copieTexte(txt, msg) {
+    var s = $('com-status');
+    function secours() { $('copie-secours').hidden = false; $('copie-txt').value = txt; $('copie-txt').select(); s.textContent = ''; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { $('copie-secours').hidden = true; s.textContent = msg; }, secours);
+    else secours();
+  }
+  function imprimeCarnet() {
+    $('carnet-imprimable').textContent = carnet();
+    document.body.classList.add('imprime-carnet'); window.print(); document.body.classList.remove('imprime-carnet');
+  }
+
+  /* Parcours : l'état de chaque tâche est affiché en toutes lettres (jamais par la couleur seule) */
+  function majParcours() {
+    var tri = ['V', 'P', 'th', 'n'].every(function (g) { return $('tri-' + g).value; });
+    var etat = {
+      app: lire('app-q').length >= 15 && tri,
+      ana: !!st.prev,
+      rea: st.rows.length >= 5,
+      val: !!coche('val-pv') && (!st.prev || !!coche('val-p')),
+      com: lire('com-txt').length >= 40
+    };
+    Array.prototype.forEach.call(document.querySelectorAll('#parcours-liste li'), function (li) {
+      var ok = etat[li.getAttribute('data-t')];
+      li.classList.toggle('fait', ok);
+      li.querySelector('.etat').textContent = ok ? '✓ Fait' : 'À faire';
+    });
+  }
+
+  $('app-q').addEventListener('input', majParcours);
+  ['V', 'P', 'th', 'n'].forEach(function (g) { $('tri-' + g).addEventListener('change', triFeedback); });
+  $('ana-save').addEventListener('click', savePrev);
+  $('ana-edit').addEventListener('click', editPrev);
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="val-p"], input[name="val-pv"]'), function (e) {
+    e.addEventListener('change', function () { renderVal(); majParcours(); });
+  });
+  $('val-err').addEventListener('change', function () {
+    var c = $('val-err').value;
+    $('val-err-fb').textContent = c ? CAUSES[c] + ' Dans cette simulation, seule la fluctuation du capteur est modélisée : aucune de ces causes n’est présente.' : '';
+  });
+  $('com-txt').addEventListener('input', majParcours);
+  $('com-copie').addEventListener('click', function () { copieTexte(carnet(), 'Carnet copié. Colle-le dans ton document.'); });
+  $('com-mesures').addEventListener('click', function () { copieTexte(tableauTexte(), 'Mesures copiées : colle-les dans un tableur.'); });
+  $('com-imprime').addEventListener('click', imprimeCarnet);
+  window.addEventListener('afterprint', function () { document.body.classList.remove('imprime-carnet'); });
+
+  /* VAL dans le défi : estimer avant de calculer */
+  function fillPlaus() {
+    $('ch-plaus-lab').textContent = ch.plaus.lab;
+    $('ch-plaus').innerHTML = '<option value="">Choisis…</option>' + ch.plaus.opts.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  }
+  function plausNote() {                     // null : pas d'estimation faite ; sinon phrase de retour
+    var sel = $('ch-plaus');
+    if (!sel.value) return null;
+    var lab = sel.options[sel.selectedIndex].text;
+    return ch.plaus.ok(sel.value)
+      ? ' Ton estimation de départ (« ' + lab + ' ») était cohérente avec ce résultat.'
+      : ' Ton estimation de départ (« ' + lab + ' ») n’était pas cohérente : ' + ch.plaus.expl;
+  }
 
   /* ---------- boucle d'animation ---------- */
   var lastTs = null;
@@ -710,6 +1153,8 @@ details ul { padding-left: 20px; }
   readSensor();
   refresh();
   newChallenge();
+  renderVal();
+  triFeedback();
   requestAnimationFrame(frame);
 })();
 </script>
