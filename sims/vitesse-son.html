@@ -66,6 +66,19 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
 .resbox { display: grid; gap: 10px; }
 .resline { font: 500 16px/1.7 var(--font-data); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
 .resline b { color: var(--accent); font-weight: 600; }
+
+/* Puces de compétence (le style .comp vient du socle) et zone d'impression du carnet */
+.compline { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 8px; }
+.compline[hidden] { display: none; }
+.fld { display: grid; gap: 6px; margin-top: 10px; }
+textarea.proto.s { min-height: 84px; }
+.legcomp { font-size: 14px; color: var(--muted); }
+#print-zone { display: none; }
+@media print {
+  body.printing > *:not(#print-zone) { display: none !important; }
+  body.printing #print-zone { display: block !important; color: #000; }
+  #print-zone pre { white-space: pre-wrap; font: 13px/1.5 var(--font-body); }
+}
 </style>
 </head>
 <body>
@@ -91,6 +104,12 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
         <button class="tab" data-mode="3" type="button">Autonome</button>
       </div>
       <p class="help" id="niv-desc" aria-live="polite"></p>
+      <p class="legcomp">Chaque tâche porte une puce qui dit la compétence travaillée :
+        <span class="comp" data-comp="app"><abbr title="S’approprier">APP</abbr> · s’approprier</span>
+        <span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · analyser, raisonner</span>
+        <span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · réaliser</span>
+        <span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · valider</span>
+        <span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · communiquer</span></p>
     </section>
 
     <div class="progress" id="progress" aria-label="Avancement des étapes"></div>
@@ -106,9 +125,15 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
     <!-- ================= ÉTAPE 1 ================= -->
     <section class="stack step" id="s1" aria-labelledby="h-s1">
       <div class="card">
+        <div class="compline"><span class="comp" data-comp="app"><abbr title="S’approprier">APP</abbr> · Relever les données</span></div>
         <h2 id="h-s1"><span class="num">1</span>Une mesure historique : le canon de 1822</h2>
         <p class="stmt">Dans la nuit du 21 au 22 juin 1822, par une température de 15,9 °C, les physiciens F. Arago, L.-J. Gay-Lussac et G. de Prony tirent des coups de canon entre deux lieux distants de <b>L = 18 612 m</b>. Entre l’instant où ils aperçoivent la lumière de l’explosion et celui où ils entendent le son, ils mesurent au chronomètre une durée <b>Δt = 54,6 s</b>.</p>
         <p class="note">Cette expérience a été réalisée par ordre du Bureau des longitudes.</p>
+        <div class="fld">
+          <label class="lab" for="app-txt" data-niv="1 2">Avant de tirer le canon, j’écris ce que l’on cherche et ce que l’on sait (grandeurs, valeurs, unités).</label>
+          <label class="lab" for="app-txt" data-niv="3">Avant de tirer le canon, je reformule la question à résoudre avec mes mots, puis je liste les grandeurs connues et la grandeur cherchée.</label>
+          <textarea class="proto s" id="app-txt" placeholder="On cherche… On connaît L = … et Δt = …"></textarea>
+        </div>
       </div>
 
       <section class="stage" aria-label="Scène du canon">
@@ -136,7 +161,9 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
         </div>
         <div data-niv="2"><p>Observe l’expérience, explique l’hypothèse faite sur la lumière, puis calcule la vitesse du son dans l’air lors de cette expérience.</p></div>
         <div data-niv="3"><p>Détermine la vitesse du son dans l’air lors de cette expérience historique et justifie l’hypothèse qui rend ton calcul possible.</p></div>
+        <div class="compline"><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Justifier une hypothèse</span></div>
         <div id="q1"></div>
+        <div class="compline"><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span></div>
         <div id="d1"></div>
       </div>
     </section>
@@ -164,10 +191,15 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
         <div data-niv="2"><p>À l’aide du matériel décrit, réponds aux questions pour construire le protocole qui permet de déterminer la vitesse du son dans l’air.</p></div>
         <div data-niv="3">
           <p>À l’aide du matériel décrit, élabore un protocole expérimental permettant de déterminer la vitesse du son dans l’air. Décris-le avec du texte (matériel, étapes, grandeurs mesurées, nombre de mesures). Un schéma sur papier est un bon complément.</p>
+          <div class="compline">
+            <span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Élaborer un protocole</span>
+            <span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · Décrire</span>
+          </div>
           <label for="proto" class="lab" style="font-weight:600">Mon protocole</label>
           <textarea class="proto" id="proto" placeholder="Pour déterminer la vitesse du son, je mesure… Je place… Je répète…"></textarea>
           <p class="help" id="proto-st" aria-live="polite"></p>
         </div>
+        <div class="compline" data-niv="1 2"><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir un protocole</span></div>
         <div data-niv="1 2" id="q2"></div>
         <p class="note" data-niv="3">Pas de correction automatique pour un texte libre : compare ton protocole avec celui d’un camarade, ou demande à ton professeur de le relire. Tu peux aussi passer à l’étape 3 pour le tester.</p>
       </div>
@@ -176,6 +208,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
     <!-- ================= ÉTAPE 3 ================= -->
     <section class="stack step" id="s3" aria-labelledby="h-s3" hidden>
       <div class="card">
+        <div class="compline"><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span></div>
         <h2 id="h-s3"><span class="num">3</span>Mesurer la durée de propagation entre deux récepteurs</h2>
         <div data-niv="1">
           <ol>
@@ -189,6 +222,10 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
         </div>
         <div data-niv="2"><p class="stmt">Mesure la durée Δt de propagation du signal entre R<sub>1</sub> et R<sub>2</sub> pour les distances d = 5, 10, 15, 20, 25 et 30 cm. Repère le début de chaque salve avec le pointeur.</p></div>
         <div data-niv="3"><p class="stmt">Détermine, avec le dispositif, la durée de propagation entre les deux récepteurs pour plusieurs distances que tu choisis (au moins cinq, bien réparties). Les réglages de l’émetteur et de la console sont à ta charge. Tu peux refaire une même distance pour voir si le résultat change.</p></div>
+      </div>
+
+      <div class="card">
+        <div class="compline"><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span></div>
         <div id="q3"></div>
       </div>
 
@@ -262,6 +299,16 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
         <h2>Observation</h2>
         <p data-obs-text>Place les récepteurs, puis appuie sur « Acquérir ».</p>
       </section>
+
+      <section class="card" id="val3" hidden aria-labelledby="h-val3">
+        <div class="compline"><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Relire ma prévision</span></div>
+        <h3 id="h-val3">Ma prévision était-elle juste ?</h3>
+        <p class="stmt" id="val3-recap"></p>
+        <div class="fld">
+          <label class="lab" for="val3-txt">Que m’apprend cette observation sur le choix du mode « salves » ? (Si ma prévision était juste : pourquoi l’était-elle ?)</label>
+          <textarea class="proto s" id="val3-txt"></textarea>
+        </div>
+      </section>
     </section>
 
     <!-- ================= TABLEAU (étapes 3 et 4) ================= -->
@@ -278,6 +325,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
 
       <div id="s4-body" class="stack" hidden>
         <article class="card" aria-labelledby="h-m1">
+          <div class="compline"><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span></div>
           <h3 id="h-m1">Méthode 1 : une vitesse par distance, puis la moyenne</h3>
           <p class="help" data-niv="1 2">Convertis d en mètres (1 cm = 10⁻² m) et Δt en secondes (1 µs = 10⁻⁶ s) avant de diviser.</p>
           <div id="m1-ex"></div>
@@ -287,12 +335,16 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
             <div class="readouts three" id="lcd-m1"></div>
             <p class="resline" id="m1-line"></p>
             <p class="help">L’écart-type s mesure la dispersion des valeurs. L’incertitude-type de la moyenne vaut u(v) = s / √n, où n est le nombre de valeurs. Le résultat s’écrit v = valeur ± u(v).</p>
+            <div class="compline"><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Interpréter la dispersion</span></div>
+            <div id="q4c"></div>
           </div>
         </article>
 
         <article class="card" aria-labelledby="h-m2">
           <h3 id="h-m2">Méthode 2 : le graphe d = f(Δt)</h3>
+          <div class="compline"><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir un modèle</span></div>
           <div id="q4a"></div>
+          <div class="compline" style="margin-top:12px"><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Tracer</span></div>
           <div class="stage">
             <div class="cv"><canvas id="cv-g" role="img" aria-label="Graphe de la distance d en mètres en fonction de la durée Δt en millisecondes. Chaque mesure du tableau est un point. Une droite passant par l’origine se règle avec le curseur du coefficient directeur."></canvas></div>
             <div class="legend">
@@ -315,6 +367,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
     <!-- ================= ÉTAPE 5 ================= -->
     <section class="stack step" id="s5" aria-labelledby="h-s5" hidden>
       <div class="card">
+        <div class="compline"><span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Relever, calculer</span></div>
         <h2 id="h-s5"><span class="num">5</span>Synthèse : comparer, interpréter, conclure</h2>
         <p class="stmt">Pour de l’air entre −20 °C et 40 °C, la vitesse du son peut être calculée avec la relation <b>v<sub>son</sub> = 331,5 + 0,607 × θ</b> (θ en °C, v<sub>son</sub> en m/s).</p>
         <div class="readouts three" id="lcd-th"></div>
@@ -323,30 +376,63 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
       </div>
 
       <div class="card">
+        <div class="compline"><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Comparer</span></div>
         <h3>Comparer les résultats</h3>
         <p class="note" id="cmp-empty">Termine d’abord l’étape 4 (au moins la méthode 1 et la modélisation) pour afficher la comparaison.</p>
         <div id="cmp-body" hidden>
           <div class="cv"><canvas id="cv-c" role="img" aria-label="Axe des vitesses en mètres par seconde. La valeur obtenue par la méthode 1 est un point avec une barre d’incertitude, la valeur de la méthode 2 est un losange, la valeur théorique est une ligne verticale en pointillés."></canvas></div>
           <p class="resline" id="cmp-line" aria-live="polite"></p>
           <p class="help">Quand les valeurs sont proches et que les barres d’incertitude se recouvrent, on dit que les résultats sont compatibles. Si ce n’est pas le cas, cherche une source d’erreur.</p>
+          <div class="fld">
+            <label class="lab" for="val-txt">Tes résultats sont-ils compatibles avec la valeur théorique ? Justifie en t’appuyant sur l’incertitude u(v), et cite une source d’erreur possible.</label>
+            <textarea class="proto s" id="val-txt" placeholder="Ma valeur est … m/s ± … ; la valeur théorique est … Mes résultats sont / ne sont pas compatibles parce que…"></textarea>
+          </div>
         </div>
       </div>
 
       <div class="card">
         <h3>Interpréter</h3>
+        <div class="compline"><span class="comp" data-comp="val"><abbr title="Valider">VAL</abbr> · Repérer une source d’erreur</span></div>
         <div id="q5a"></div>
-        <div id="q5b"></div>
+        <div id="q5b" style="margin-top:14px"></div>
       </div>
 
       <div class="card">
         <h3>Comparer à d’autres vitesses</h3>
+        <div style="overflow-x:auto" tabindex="0" role="region" aria-label="Tableau des ordres de grandeur, défilable">
         <table class="compar">
           <caption>Ordres de grandeur de quelques vitesses</caption>
           <thead><tr><th scope="col">Situation</th><th scope="col">Valeur (m/s)</th><th scope="col">Rapport à la vitesse du son</th></tr></thead>
           <tbody id="vit-body"></tbody>
         </table>
+        </div>
+        <div class="compline" style="margin-top:12px"><span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Évaluer un ordre de grandeur</span></div>
         <div id="q5c"></div>
+        <div class="compline" style="margin-top:12px">
+          <span class="comp" data-comp="ana"><abbr title="Analyser / Raisonner">ANA</abbr> · Transférer</span>
+          <span class="comp" data-comp="rea"><abbr title="Réaliser">RÉA</abbr> · Calculer</span>
+        </div>
         <div id="d5-orage"></div>
+      </div>
+
+      <div class="card" id="com-card">
+        <div class="compline"><span class="comp" data-comp="com"><abbr title="Communiquer">COM</abbr> · Conclure</span></div>
+        <h3>Ma conclusion</h3>
+        <div class="fld">
+          <label class="lab" for="concl-txt">Rédige ta conclusion en quelques phrases : ce que tu as mesuré, avec quelle méthode, quelle valeur tu obtiens, et ce que tu en conclus par rapport à la valeur de référence.</label>
+          <textarea class="proto" id="concl-txt" placeholder="Pour déterminer la vitesse du son dans l’air, j’ai… J’ai obtenu v = … m/s. La valeur théorique est … Je conclus que…"></textarea>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button type="button" class="primary" id="b-copie">Copier mon carnet</button>
+          <button type="button" id="b-imprime">Imprimer / PDF</button>
+          <button type="button" id="b-link">Copier le lien de cette situation</button>
+        </div>
+        <p class="status" id="com-st" aria-live="polite"></p>
+        <div id="copie-secours" hidden>
+          <label for="copie-txt" class="lab">Sélectionne et copie ce texte :</label>
+          <textarea class="proto" id="copie-txt" readonly></textarea>
+        </div>
+        <p class="help">Le carnet reprend ta prévision, ton protocole, ton tableau de mesures, tes résultats et ta conclusion. Rien n’est envoyé : c’est à toi de le coller dans ton document ou de l’imprimer.</p>
       </div>
 
       <div class="card">
@@ -368,7 +454,6 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
         <li>La distance d est lue sur la règle sans incertitude dans cette simulation. Au laboratoire, elle est connue à environ 1 mm.</li>
         <li>Lien avec le programme de Seconde (Ondes et signaux) : « Mesurer la vitesse d’un signal sonore » et « Citer une valeur approchée de la vitesse de propagation d’un signal sonore dans l’air et la comparer à d’autres valeurs de vitesses couramment rencontrées ».</li>
       </ul>
-      <div class="row" style="margin-top:10px"><button type="button" class="small" id="b-link">Copier le lien de cette situation</button><span class="status" id="link-st" aria-live="polite"></span></div>
     </details>
   </main>
 
@@ -377,6 +462,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
     <a href="../index.html">Retour au catalogue</a>
   </footer>
 </div>
+<div id="print-zone" aria-hidden="true"></div>
 
 <script src="../shared/bruit.js"></script>   <!-- bruit de mesure commun : à charger AVANT le socle -->
 <script src="../shared/simulabo.js"></script>
@@ -434,14 +520,16 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
       inputs.push(inp);
       opts.appendChild(h("label", { class: "opt", "for": name + "-" + i }, inp, h("span", { html: o.t })));
     });
-    var btn = h("button", { type: "button", class: "primary", text: q.predict ? "Valider ma prédiction" : "Vérifier" });
-    host.appendChild(h("fieldset", { class: "q" }, h("legend", { html: q.legend }), opts, h("div", { class: "row" }, btn), fb));
+    var btn = h("button", { type: "button", class: "primary", text: q.predict ? "Enregistrer ma prévision" : "Vérifier" });
+    var why = q.why ? h("div", { class: "fld" }, h("label", { class: "lab", "for": name + "-why", text: q.why }), h("textarea", { class: "proto s", id: name + "-why" })) : null;
+    if (why) why.querySelector("textarea").addEventListener("input", function () { if (q.onWhy) q.onWhy(this.value); });
+    host.appendChild(h("fieldset", { class: "q" }, h("legend", { html: q.legend }), opts, why, h("div", { class: "row" }, btn), fb));
     function show(tone, html) { fb.hidden = false; fb.setAttribute("data-tone", tone); fb.innerHTML = html; }
     btn.addEventListener("click", function () {
       var k = -1; inputs.forEach(function (x, i) { if (x.checked) k = i; });
       if (k < 0) { show("warn", "<b>À vérifier :</b> choisis une réponse."); return; }
       var o = q.options[k];
-      if (q.predict) { show("info", "<b>Prédiction notée.</b> " + (o.fb || "")); st.flags[q.id] = true; progress(); return; }
+      if (q.predict) { show("info", "<b>Prévision enregistrée.</b> " + (o.fb || "")); st.flags[q.id] = true; if (q.onPick) q.onPick(k, o); progress(); return; }
       if (o.ok) { show("ok", "<b>Bien vu.</b> " + (o.fb || "")); st.flags[q.id] = true; } else show("bad", "<b>Pas tout à fait.</b> " + (o.fb || ""));
       progress();
     });
@@ -736,7 +824,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
   function endAcq() {
     var a = st.anim.a; loopB.stop(); st.anim = null; st.acq = a; st.busy = false; $("#b-acq").disabled = false;
     cvB.redraw(); updatePtr();
-    if (a.mode === "continu") obs3("warn", "<b>Signal continu :</b> les deux voies montrent des sinusoïdes qui se ressemblent à un décalage près. Y a-t-il un « début » que tu peux repérer ? Essaie de noter tA.");
+    if (a.mode === "continu") { obs3("warn", "<b>Signal continu :</b> les deux voies montrent des sinusoïdes qui se ressemblent à un décalage près. Y a-t-il un « début » que tu peux repérer ? Essaie de noter tA."); st.flags.contTest = true; renderVal3(); }
     else if (a.ta2 > a.T) obs3("warn", "<b>La voie 2 est vide :</b> la salve de R<sub>2</sub> arrive après la fin de l’acquisition. Choisis une durée d’acquisition plus longue.");
     else if (a.ta1 > a.T) obs3("warn", "<b>Les deux voies sont vides :</b> les salves arrivent après la fin de l’acquisition. Choisis une durée plus longue.");
     else obs3("info", "<b>Acquisition n° " + a.id + " :</b> la voie 2 est décalée par rapport à la voie 1. Place le pointeur au tout début de la salve de la voie 1, puis note tA. Fais de même pour la voie 2.");
@@ -744,7 +832,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
   function note(which) {
     var a = st.acq; if (!a) { obs3("warn", "Fais d’abord une acquisition."); return; }
     if (a.x1 !== st.x1 || a.x2 !== st.x2) { obs3("warn", "Les récepteurs ont bougé depuis l’acquisition : refais une acquisition."); return; }
-    if (a.mode === "continu") { obs3("bad", "<b>Impossible de repérer un début de signal :</b> en mode continu, le signal n’a ni début ni fin. On ne peut pas dire quel maximum de la voie 1 correspond à quel maximum de la voie 2. Passe l’émetteur en mode « salves »."); return; }
+    if (a.mode === "continu") { obs3("bad", "<b>Impossible de repérer un début de signal :</b> en mode continu, le signal n’a ni début ni fin. On ne peut pas dire quel maximum de la voie 1 correspond à quel maximum de la voie 2. Passe l’émetteur en mode « salves »."); st.flags.contTest = true; renderVal3(); return; }
     var ta = which === "A" ? a.ta1 : a.ta2, res = a.T / NPTS, t = tPtr(), voie = which === "A" ? 1 : 2;
     if (ta > a.T) { obs3("warn", "Il n’y a pas de salve visible sur la voie " + voie + " : augmente la durée d’acquisition."); return; }
     if (t < ta - res) { obs3("warn", "Le pointeur est <b>avant</b> le début de la salve de la voie " + voie + " : il n’y a encore rien à cet instant."); return; }
@@ -776,11 +864,25 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
   function nextNote() { var d = nextD(); $("#next-note").textContent = d == null ? "Les six distances sont mesurées." : "Prochaine distance : d = " + d + " cm."; }
   $("#b-next").addEventListener("click", function () { var d = nextD(); if (d == null) return; setPos(2, st.x1 + d); nextNote(); });
 
-  ask("#q3", { id: "p3", predict: true, legend: "<b>Prédis, puis teste.</b> Si l’émetteur est réglé en mode <b>continu</b> au lieu de « salves », pourra-t-on repérer le début du signal sur chaque voie et mesurer Δt ?", options: [
-    { t: "Oui, aussi facilement qu’avec des salves.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA." },
-    { t: "Non, il n’y a plus de début identifiable.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA." },
-    { t: "Oui, mais seulement si les récepteurs sont très proches.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA." }
+  st.prev = null; st.prevWhy = "";
+  ask("#q3", { id: "p3", predict: true, legend: "<b>Avant de tester, prévois.</b> Si l’émetteur est réglé en mode <b>continu</b> au lieu de « salves », pourra-t-on repérer le début du signal sur chaque voie et mesurer Δt ?",
+    why: "Pourquoi ? Explique en une phrase ce qui te fait penser cela.",
+    onWhy: function (v) { st.prevWhy = v.trim(); },
+    onPick: function (k, o) { st.prev = { i: k, t: o.t.replace(/<[^>]+>/g, "") }; renderVal3(); },
+    options: [
+    { t: "Oui, aussi facilement qu’avec des salves.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA. Tu reviendras sur ta prévision juste après." },
+    { t: "Non, il n’y a plus de début identifiable.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA. Tu reviendras sur ta prévision juste après." },
+    { t: "Oui, mais seulement si les récepteurs sont très proches.", fb: "Teste : passe en mode « continu », acquiers, puis essaie de noter tA. Tu reviendras sur ta prévision juste après." }
   ] });
+  /* VAL : relecture de la prévision, une fois le test en mode continu fait */
+  function renderVal3() {
+    var card = $("#val3"); if (!st.flags.contTest) { card.hidden = true; return; }
+    card.hidden = false;
+    var obsTxt = "en mode continu, les deux voies montrent des sinusoïdes qui se ressemblent à un décalage près : aucun début de signal n’est identifiable, donc ni tA ni tB ne peuvent être notés.";
+    $("#val3-recap").innerHTML = st.prev
+      ? "Tu avais prévu : <b>« " + st.prev.t + " »</b>" + (st.prevWhy ? " (« " + st.prevWhy.replace(/</g, "&lt;") + " »)" : "") + ".<br>Ce que tu observes : " + obsTxt
+      : "Tu n’avais pas enregistré de prévision. Ce que tu observes : " + obsTxt;
+  }
 
   /* tableau de mesures */
   var table = S.measureTable("#tableau", {
@@ -854,6 +956,11 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
       : "<b>La modélisation donne v = " + S.fmt(v, 1) + " m/s.</b> Ta droite (" + S.fmt(k, 0) + " m/s) s’en écarte : ajuste le curseur pour réduire l’écart quadratique moyen.");
     progress();
   });
+  ask("#q4c", { id: "q4c", legend: "<b>Question.</b> Les vitesses de la colonne « v » ne sont pas toutes identiques alors que le son va à la même vitesse pendant toute la séance. Comment l’expliquer ?", options: [
+    { t: "Chaque mesure de Δt est entachée d’une petite incertitude (repérage du pointeur, résolution de la console, bruit) : v varie un peu d’une ligne à l’autre.", ok: true, fb: "C’est la dispersion des mesures. L’écart-type s la chiffre, et u(v) = s / √n dit avec quelle précision la moyenne est connue : plus on fait de mesures, plus u(v) diminue." },
+    { t: "La vitesse du son change avec la distance entre R₁ et R₂.", fb: "Dans l’air à température constante, la vitesse du son ne dépend pas de la distance. Regarde si l’écart est plus fort pour les petites distances : Δt y est plus court, donc plus sensible à une erreur de lecture." },
+    { t: "Le tableur a arrondi les résultats de façon aléatoire.", fb: "Le calcul de chaque ligne est exact. Ce sont les valeurs de Δt mesurées qui portent une incertitude." }
+  ] });
   ask("#q4a", { id: "q4a", legend: "<b>Question.</b> Quelle est l’allure des points du graphe d = f(Δt) ?", options: [
     { t: "Des points alignés sur une droite qui passe par l’origine : d est proportionnelle à Δt.", ok: true, fb: "Si Δt = 0, le signal n’a parcouru aucune distance : d = 0." },
     { t: "Des points alignés sur une droite qui ne passe pas par l’origine.", fb: "Regarde la droite que tu règles : elle part du point (0 ; 0) et passe près de tous les points." },
@@ -928,6 +1035,55 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
     hint: "Pense à l’hypothèse de la mesure historique : la lumière est vue aussitôt. Utilise ensuite d = v × Δt avec v ≈ 344 m/s.",
     explain: "d = v × Δt ≈ 344 m/s × 6,0 s ≈ 2,1×10³ m, soit environ 2 km.", onResult: function (ok) { if (ok) { st.flags.orage = true; progress(); } } });
 
+  /* ---------------------------------------------------------------- COM : carnet exportable */
+  function val(id) { var el = $("#" + id); return el ? el.value.trim() : ""; }
+  function carnet() {
+    var L = ["Carnet : mesurer la vitesse de propagation du son", "Niveau d’autonomie : " + ["", "pas à pas", "guidé", "autonome"][st.niv], ""];
+    var a = val("app-txt"); if (a) L.push("CE QUE L’ON CHERCHE ET CE QUE L’ON SAIT", a, "");
+    if (val("proto")) L.push("MON PROTOCOLE", val("proto"), "");
+    if (st.prev) {
+      L.push("MA PRÉVISION (émetteur en mode continu)", "« " + st.prev.t + " »" + (st.prevWhy ? " — " + st.prevWhy : ""));
+      if (st.flags.contTest) { L.push("Observation : en mode continu, aucun début de signal n’est repérable sur les voies."); if (val("val3-txt")) L.push("Ce que m’apprend l’observation : " + val("val3-txt")); }
+      L.push("");
+    }
+    var rows = table.rows();
+    if (rows.length) {
+      L.push("MES MESURES (d en cm ; tA, tB et Δt en µs ; v en m/s)");
+      rows.forEach(function (r) { L.push("d = " + S.fmt(r.d, 1) + " | tA = " + S.fmt(r.tA, 0) + " | tB = " + S.fmt(r.tB, 0) + " | Δt = " + S.fmt(r.dt, 0) + " | v = " + S.fmt(r.v, 0)); });
+      L.push("");
+    }
+    if (rows.length >= 4 && st.flags.m1) {
+      var s = stats(rows.map(function (r) { return r.v; }));
+      L.push("MES RÉSULTATS", "Méthode 1 (moyenne des v) : v = " + withU(s.mean, s.u) + " m/s, avec n = " + s.n + " mesures");
+      if (st.fit) L.push("Méthode 2 (graphe d = f(Δt), modélisation) : v = " + S.fmt(fitV(pts()), 1) + " m/s");
+      L.push("Valeur théorique à " + S.fmt(st.thetaMes, 1) + " °C : " + S.fmt(vRef(), 1) + " m/s", "");
+    }
+    if (val("val-txt")) L.push("MA COMPARAISON AVEC LA VALEUR THÉORIQUE", val("val-txt"), "");
+    if (val("concl-txt")) L.push("MA CONCLUSION", val("concl-txt"));
+    return L.join("\n");
+  }
+  function comSt(t) { $("#com-st").textContent = t; }
+  $("#b-copie").addEventListener("click", function () {
+    var txt = carnet();
+    function secours() { $("#copie-secours").hidden = false; var t = $("#copie-txt"); t.value = txt; t.focus(); t.select(); comSt("Copie automatique impossible : sélectionne le texte ci-dessous et copie-le."); }
+    try { navigator.clipboard.writeText(txt).then(function () { comSt("Carnet copié. Colle-le dans ton document."); }, secours); } catch (e) { secours(); }
+  });
+  $("#b-imprime").addEventListener("click", function () {
+    var z = $("#print-zone"); z.textContent = "";
+    z.appendChild(h("h1", { text: "Mesurer la vitesse de propagation du son" }));
+    z.appendChild(h("pre", { text: carnet() }));
+    document.body.classList.add("printing");
+    var fin = function () { document.body.classList.remove("printing"); window.removeEventListener("afterprint", fin); };
+    window.addEventListener("afterprint", fin);
+    window.print();
+    setTimeout(function () { document.body.classList.remove("printing"); }, 1500);
+  });
+  $("#b-link").addEventListener("click", function () {
+    var url = location.href;
+    try { navigator.clipboard.writeText(url).then(function () { comSt("Lien copié : il rouvre la même situation (température et niveau)."); }, function () { comSt(url); }); } catch (e) { comSt(url); }
+  });
+  $("#concl-txt").addEventListener("input", function () { progress(); });
+
   /* ---------------------------------------------------------------- Mise à jour générale */
   function stepDone() {
     var rows = (typeof table !== "undefined" && table && table.rows) ? table.rows() : [], dist = {}; rows.forEach(function (r) { dist[Math.round(r.d)] = 1; });
@@ -936,7 +1092,7 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
       st.niv === 3 ? !!(proto && proto.value.trim().length >= 60) : !!(st.flags.q2a && st.flags.q2b),
       rows.length >= 5 && Object.keys(dist).length >= 4,
       !!(st.flags.m1 && st.flags.fit),
-      !!(st.flags.q5b && st.flags.orage)
+      !!(st.flags.q5b && st.flags.orage && val("concl-txt").length >= 40)
     ];
   }
   function progress() {
@@ -968,10 +1124,6 @@ table.compar tr.ref td { font-weight: 700; color: var(--accent); }
   applyLevel(); setPos(1, st.x1); updatePtr(); nextNote(); resetTheta(); refresh(true);
 
   var rz = 0; window.addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(function () { cv1.redraw(); cvB.redraw(); cvS.redraw(); cvG.redraw(); cvC.redraw(); }, 120); });
-  $("#b-link").addEventListener("click", function () {
-    var url = location.href, ok = function () { $("#link-st").textContent = "Lien copié : il conserve la température et le niveau."; };
-    try { navigator.clipboard.writeText(url).then(ok, function () { $("#link-st").textContent = "Copie impossible ici : copie l’adresse de la page."; }); } catch (e) { $("#link-st").textContent = "Copie impossible ici : copie l’adresse de la page."; }
-  });
 })();
 </script>
 </body>

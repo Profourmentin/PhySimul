@@ -40,6 +40,7 @@
     <ol>
       <li><a href="#programme">Programme visé</a></li>
       <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#competences">Couverture des compétences</a></li>
       <li><a href="#reponses">Réponses attendues</a></li>
       <li><a href="#difficultes">Difficultés fréquentes</a></li>
       <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
@@ -62,9 +63,9 @@
             <tr><td>« Expliquer le rôle joué par le milieu matériel dans le phénomène de propagation d'un signal sonore. »</td><td>Étape 5 : question sur les ondes sonores et ultrasonores (besoin d'un milieu matériel).</td></tr>
             <tr><td>« Exploiter une série de mesures indépendantes d'une grandeur physique : histogramme, moyenne et écart-type. »</td><td>Étape 4, méthode 1 : moyenne, écart-type s. L'histogramme n'est pas construit (voir prolongements).</td></tr>
             <tr><td>« Expliquer qualitativement la signification d'une incertitude-type et l'évaluer par une approche statistique. » <span class="verify">À vérifier : u = s / √n</span></td><td>Étape 4, méthode 1 : u(v) = s / √n affiché après la moyenne.</td></tr>
-            <tr><td>« Discuter de l'influence de l'instrument de mesure et du protocole. »</td><td>Étape 3 : durée d'acquisition (résolution = durée ÷ 500), mode salves ou continu. Étape 5 : question sur la dispersion aux petites distances.</td></tr>
+            <tr><td>« Discuter de l'influence de l'instrument de mesure et du protocole. »</td><td>Étape 3 : durée d'acquisition (résolution = durée ÷ 500), mode salves ou continu. Étape 4 : question sur la dispersion des v. Étape 5 : question sur l'effet d'une erreur de lecture aux petites distances.</td></tr>
             <tr><td>« Écrire, avec un nombre adapté de chiffres significatifs, le résultat d'une mesure. » ; « Comparer qualitativement un résultat à une valeur de référence. »</td><td>Étape 4 (résultat v = valeur ± u) et étape 5 (graphe de comparaison avec la valeur théorique).</td></tr>
-            <tr><td>Compétences : s'approprier, analyser/raisonner (choisir, élaborer, justifier un protocole), réaliser, valider (identifier des sources d'erreur, comparer à une valeur de référence), communiquer.</td><td>Étape 2 (protocole, texte libre au niveau « Autonome »), étapes 3 à 5.</td></tr>
+            <tr><td>Compétences : s'approprier, analyser/raisonner (choisir, élaborer, justifier un protocole), réaliser, valider (identifier des sources d'erreur, comparer à une valeur de référence), communiquer.</td><td>Les cinq sont étiquetées par une puce dans la page : voir « Couverture des compétences ».</td></tr>
           </tbody>
         </table>
       </div>
@@ -73,19 +74,38 @@
 
     <section id="deroule" aria-labelledby="h-deroule">
       <h2 id="h-deroule">Déroulé</h2>
-      <p>Cinq étapes, séparables : 1 (10 min), 2 (5 à 10 min), 3 (15 à 20 min), 4 (10 à 15 min), 5 (10 min). Le niveau d'autonomie se choisit en haut de la page (ou par le lien : <code>#niv=1</code>, <code>#niv=2</code>, <code>#niv=3</code>) et ne change que l'aide fournie, pas l'expérience.</p>
+      <p>Parcours en <b>autonomie à niveaux</b> (spec <code>docs/specs/methode-scientifique.md</code>, section 5). Cinq étapes séparables : 1 (10 min), 2 (5 à 10 min), 3 (15 à 20 min), 4 (10 à 15 min), 5 (10 à 15 min). Le niveau d'autonomie se choisit en haut de la page (ou par le lien : <code>#niv=1</code>, <code>#niv=2</code>, <code>#niv=3</code>) et ne change que l'aide fournie, pas l'expérience. Chaque tâche porte dans la page une puce de compétence (code et verbe) ; le tableau ci-dessous les reprend dans l'ordre.</p>
       <div class="tablewrap">
         <table>
           <thead><tr><th scope="col">Étape</th><th scope="col">Compétence</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
           <tbody>
-            <tr><td>1. Mesure historique</td><td>APP, ANA</td><td>Observe le tir de canon, justifie que la lumière est vue « aussitôt », calcule v = L / Δt.</td><td>v ≈ 341 m/s, phrase sur l'hypothèse.</td></tr>
-            <tr><td>2. Protocole</td><td>ANA</td><td>Niveaux 1 et 2 : lit le protocole et répond à deux questions (grandeurs à mesurer, intérêt de deux récepteurs). Niveau 3 : rédige son protocole.</td><td>Texte du protocole (niveau 3), schéma sur papier.</td></tr>
-            <tr><td>3. Mesurer</td><td>ANA, RÉA</td><td>Prédit ce qui se passe en mode continu, place R<sub>1</sub> et R<sub>2</sub>, acquiert, place le pointeur au début de chaque salve (tA, tB), ajoute la mesure au tableau pour six distances.</td><td>Tableau d, tA, tB, Δt, v ; export CSV possible.</td></tr>
-            <tr><td>4. Exploiter</td><td>RÉA</td><td>Méthode 1 : calcule v pour une ligne (conversions cm → m, µs → s), puis la moyenne, lit s et u(v). Méthode 2 : ajuste la droite d = k × Δt, compare à la modélisation, interprète le coefficient directeur.</td><td>v = valeur ± u (m/s) ; valeur de k.</td></tr>
-            <tr><td>5. Synthèse</td><td>VAL, COM</td><td>Calcule la valeur théorique avec la température lue, compare les résultats, interprète la dispersion, distingue sons et ultrasons, compare à d'autres vitesses, applique à l'orage.</td><td>Valeur théorique ; phrase de comparaison ; distance de la foudre.</td></tr>
+            <tr><td>1. Mesure historique</td><td>APP · Relever les données<br>ANA · Justifier une hypothèse<br>RÉA · Calculer</td><td>Lit la mesure de 1822 et écrit ce qu'on cherche et ce qu'on sait (niveau 3 : reformule la question). Tire le canon, justifie que la lumière est vue « aussitôt », calcule v = L / Δt.</td><td>Texte « cherché / connu » ; v ≈ 341 m/s.</td></tr>
+            <tr><td>2. Protocole</td><td>ANA · Choisir un protocole<br>(niveau 3 : ANA · Élaborer, COM · Décrire)</td><td>Niveaux 1 et 2 : lit le protocole et répond à deux questions (grandeurs à mesurer, intérêt de deux récepteurs). Niveau 3 : rédige son protocole.</td><td>Texte du protocole (niveau 3), schéma sur papier.</td></tr>
+            <tr><td>3. Mesurer</td><td>ANA · Prévoir<br>RÉA · Mesurer<br>VAL · Relire ma prévision</td><td>Prévoit, avec une phrase de justification, ce qui se passe en mode continu. Place R<sub>1</sub> et R<sub>2</sub>, acquiert, place le pointeur au début de chaque salve (tA, tB), ajoute la mesure au tableau pour six distances. Après son essai en mode continu, relit sa prévision et écrit ce que l'observation lui apprend.</td><td>Prévision et justification ; tableau d, tA, tB, Δt, v (export CSV possible) ; phrase de relecture.</td></tr>
+            <tr><td>4. Exploiter</td><td>RÉA · Calculer<br>VAL · Interpréter la dispersion<br>ANA · Choisir un modèle<br>RÉA · Tracer</td><td>Méthode 1 : calcule v pour une ligne (conversions cm → m, µs → s), puis la moyenne, lit s et u(v), explique pourquoi les v ne sont pas toutes égales. Méthode 2 : reconnaît la proportionnalité, ajuste la droite d = k × Δt, compare à la modélisation, interprète le coefficient directeur.</td><td>v = valeur ± u (m/s) ; valeur de k.</td></tr>
+            <tr><td>5. Synthèse</td><td>RÉA · Relever, calculer<br>VAL · Comparer<br>VAL · Repérer une source d'erreur<br>ANA · Évaluer un ordre de grandeur<br>ANA · Transférer, RÉA · Calculer<br>COM · Conclure</td><td>Lit la température et calcule la valeur théorique. Compare ses deux résultats à la valeur théorique en s'appuyant sur u(v) (texte libre). Explique l'effet d'une erreur de lecture selon la distance, distingue sons et ultrasons, compare à d'autres vitesses, applique à l'orage. Rédige sa conclusion, puis copie son carnet, l'imprime ou copie le lien.</td><td>Valeur théorique ; texte de comparaison ; distance de la foudre ; conclusion ; carnet.</td></tr>
           </tbody>
         </table>
       </div>
+      <p class="note">La question sur les sons et les ultrasons (étape 5) est une vérification de connaissance : elle n'est pas étiquetée, faute de compétence de la démarche exercée de façon nette. Les boutons « Vérifier » ne sont pas codés VAL : ils contrôlent une réponse (spec, règle 5).</p>
+    </section>
+
+    <section id="competences" aria-labelledby="h-competences">
+      <h2 id="h-competences">Couverture des compétences</h2>
+      <p>Les cinq compétences sont travaillées dans la page. Les activités hors page prolongent ou consolident ; elles sont des suggestions, à adapter.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Compétence</th><th scope="col">Dans la page</th><th scope="col">À prévoir hors page</th></tr></thead>
+          <tbody>
+            <tr><td>APP · S'approprier</td><td>Étape 1 : relever ce qu'on cherche et ce qu'on sait à partir de la mesure de 1822 (niveau 3 : reformuler la question).</td><td>Faire lire la page de manuel sur les trois approches avant la séance ; faire schématiser le montage sur papier.</td></tr>
+            <tr><td>ANA · Analyser / Raisonner</td><td>Étape 1 (justifier l'hypothèse sur la lumière), étape 2 (choisir ou élaborer un protocole), étape 3 (prévision avec justification), étape 4 (choisir un modèle), étape 5 (ordre de grandeur, transfert).</td><td>Au niveau 3, faire comparer les protocoles entre élèves avant de tester.</td></tr>
+            <tr><td>RÉA · Réaliser</td><td>Étapes 3 (mesurer) et 4 (calculer, tracer), étape 5 (relever la température, calculer).</td><td>Réaliser la mesure sur le banc réel.</td></tr>
+            <tr><td>VAL · Valider</td><td>Étape 3 (relire la prévision), étape 4 (interpréter la dispersion, bruit de 0,5 %), étape 5 (comparer à la valeur théorique avec u(v), repérer une source d'erreur).</td><td>Discuter d'une mesure aberrante ; refaire une distance dix fois pour fabriquer l'histogramme.</td></tr>
+            <tr><td>COM · Communiquer</td><td>Étape 5 : conclusion rédigée et carnet copiable ou imprimable (prévision, tableau, résultats, comparaison, conclusion), lien de la situation. Niveau 3, étape 2 : protocole rédigé.</td><td>Faire présenter la conclusion à l'oral ; échange entre binômes sur la comparaison à la valeur théorique.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Les textes libres (cherché/connu, justification, relecture, comparaison, conclusion) ne sont pas corrigés par la page : ils sont à relire par l'élève avec un camarade ou par vous, d'où l'intérêt du carnet.</p>
     </section>
 
     <section id="reponses" aria-labelledby="h-reponses">
@@ -102,14 +122,17 @@
                 <tr><td>1, question 2</td><td>v = 18 612 / 54,6 ≈ 341 m/s (340,9).</td><td>Tolérance de la page : 0,6 %. À 15,9 °C, la formule donne 341,2 m/s.</td></tr>
                 <tr><td>2, question 1</td><td>La distance parcourue par le signal et sa durée de propagation.</td><td>v = d / Δt.</td></tr>
                 <tr><td>2, question 2</td><td>On mesure la durée entre les deux détections : l'instant exact d'émission n'est pas repérable.</td><td>La simulation ajoute un retard inconnu de 45 µs à l'émission, identique pour les deux récepteurs : il disparaît dans tB − tA.</td></tr>
-                <tr><td>3, prédiction</td><td>En mode continu, il n'y a plus de début identifiable : on ne peut pas repérer tA.</td><td>La page refuse alors de noter tA et explique pourquoi.</td></tr>
+                <tr><td>3, prévision et relecture</td><td>En mode continu, il n'y a plus de début identifiable : on ne peut pas repérer tA.</td><td>La page refuse alors de noter tA et explique pourquoi. Elle affiche ensuite la prévision de l'élève à côté de l'observation, sans dire « juste » ou « faux » : l'élève écrit ce que cela lui apprend.</td></tr>
                 <tr><td>3, mesures (θ = 20 °C)</td><td>Δt ≈ 146, 291, 437, 582, 728 et 873 µs pour d = 5, 10, 15, 20, 25 et 30 cm.</td><td>Valeurs idéales Δt = d / v. Lues sur la console, elles varient de quelques microsécondes : résolution du pointeur (durée ÷ 500, soit 10 µs à 5 ms) et bruit de 0,5 %.</td></tr>
                 <tr><td>4, méthode 1</td><td>Moyenne des v voisine de 340 à 350 m/s (à θ = 20 °C), u(v) de l'ordre de 1 à 6 m/s.</td><td>La dispersion est plus grande aux petites distances (Δt court). Tolérance de la page : 0,5 % sur le calcul de la moyenne à partir de la colonne v.</td></tr>
+                <tr><td>4, dispersion</td><td>Chaque Δt est entaché d'une petite incertitude (pointeur, résolution, bruit) : les v varient un peu d'une ligne à l'autre.</td><td>La vitesse du son ne change pas avec la distance. Les v des petites distances s'écartent davantage.</td></tr>
                 <tr><td>4, méthode 2</td><td>Droite passant par l'origine, d = v × Δt ; v voisin de la valeur théorique.</td><td>La modélisation est un ajustement par une droite passant par l'origine. Le coefficient directeur est la vitesse (m/s si Δt est en s).</td></tr>
                 <tr><td>5, valeur théorique</td><td>331,5 + 0,607 × θ (θ lue sur le thermomètre, à 0,1 °C près).</td><td>À 20 °C : 343,6 m/s (344 m/s).</td></tr>
+                <tr><td>5, comparaison (texte libre)</td><td>Les deux méthodes donnent des valeurs proches de la valeur théorique ; on compare l'écart à u(v) et on cite une source d'erreur (lecture du pointeur, bruit, Δt court).</td><td>À θ = 20 °C, la valeur théorique peut sortir de l'intervalle v ± u(v) : ce n'est pas une erreur de l'élève (u ne tient compte que de la dispersion). Pas de critère de compatibilité chiffré exigé (voir « À vérifier »).</td></tr>
                 <tr><td>5, sons et ultrasons</td><td>Fréquences différentes (ultrasons au-dessus de 20 kHz, inaudibles), même vitesse dans l'air, besoin d'un milieu matériel.</td><td></td></tr>
                 <tr><td>5, avion</td><td>900 km/h = 250 m/s : moins vite que le son.</td><td>Conversion km/h → m/s (÷ 3,6).</td></tr>
                 <tr><td>5, orage</td><td>d = 344 × 6,0 ≈ 2,1×10³ m, soit environ 2 km.</td><td>Tolérance de la page : 3 %.</td></tr>
+                <tr><td>5, conclusion</td><td>Une conclusion qui donne la méthode, la valeur obtenue avec son incertitude, la valeur de référence et un jugement sur l'écart.</td><td>Texte libre, non corrigé par la page.</td></tr>
               </tbody>
             </table>
           </div>
@@ -127,7 +150,7 @@
             <tr><td>Confondre tA et Δt</td><td>« Le son met 476 µs pour aller de R<sub>1</sub> à R<sub>2</sub>. »</td><td>Les afficheurs séparent tA, tB et Δt = tB − tA ; la question 2 de l'étape 2 explique l'intérêt de la différence.</td></tr>
             <tr><td>Mesurer d depuis l'émetteur</td><td>v = distance de R<sub>2</sub> à E divisée par Δt.</td><td>Le schéma représente d entre R<sub>1</sub> et R<sub>2</sub> ; l'afficheur donne d = x₂ − x₁.</td></tr>
             <tr><td>Repérer le « maximum » plutôt que le début de la salve</td><td>tA et tB pris au milieu des salves.</td><td>Le pointeur est vérifié : trop tard, la page demande de reculer jusqu'au premier écart par rapport à zéro.</td></tr>
-            <tr><td>Croire que le mode continu est plus précis</td><td>Prédiction « oui » à l'étape 3.</td><td>La page refuse de noter tA en mode continu et explique l'absence de début identifiable.</td></tr>
+            <tr><td>Croire que le mode continu est plus précis</td><td>Prévision « oui » à l'étape 3.</td><td>La page refuse de noter tA en mode continu, explique l'absence de début identifiable et ramène l'élève à sa prévision.</td></tr>
             <tr><td>Une mesure isolée, sans esprit critique</td><td>Un seul d, une seule acquisition.</td><td>Les mesures sont bruitées : refaire la même distance donne un Δt un peu différent. Le niveau 3 le suggère.</td></tr>
             <tr><td>Confondre ondes sonores et ultrasons</td><td>« Les ultrasons vont plus vite. »</td><td>Question de l'étape 5 avec retour qui rappelle que la vitesse dans l'air ne dépend pas de la fréquence.</td></tr>
             <tr><td>Interpréter le coefficient directeur</td><td>« C'est la durée. »</td><td>Retour de la question de l'étape 4 : rapport d / Δt, donc vitesse ; unités m / s.</td></tr>
@@ -145,7 +168,7 @@
         <li>Différenciation : « Pas à pas » pour les élèves qui ont besoin d'un protocole séquencé (consignes courtes, liste numérotée, bouton qui règle la distance suivante) ; « Autonome » pour les élèves à l'aise, avec rédaction d'un protocole.</li>
         <li>En binôme, un élève manipule et l'autre note, avec échange des rôles à mi-parcours.</li>
         <li>Avant ou après le TP réel : la simulation permet de préparer le geste (pointer le début d'un signal) ou de reprendre une mesure ratée.</li>
-        <li>Fixer la température par le lien (<code>#theta=18&amp;niv=2</code>) pour que toute la classe ait la même valeur de référence, ou la laisser tirer au hasard pour éviter les recopies. Le bouton « Copier le lien de cette situation » est dans « Pour aller plus loin ».</li>
+        <li>Fixer la température par le lien (<code>#theta=18&amp;niv=2</code>) pour que toute la classe ait la même valeur de référence, ou la laisser tirer au hasard pour éviter les recopies. Le bouton « Copier le lien de cette situation » est dans la carte « Ma conclusion » (étape 5).</li>
       </ul>
     </section>
 
@@ -164,7 +187,7 @@
         <li>Comparer les durées d'acquisition (0,5 ms, 1 ms, 2 ms, 5 ms) pour discuter de la résolution et de l'incertitude.</li>
         <li>Faire varier la température par le lien (<code>#theta=5</code>, <code>#theta=35</code>) et vérifier la formule.</li>
         <li>Réaliser la même mesure sur un banc réel, puis comparer les résultats avec ceux de la simulation.</li>
-        <li>Évaluation : demander de décrire un protocole (niveau « Autonome ») avec texte et schémas.</li>
+        <li>Évaluation : demander de décrire un protocole (niveau « Autonome ») avec texte et schémas, ou relever le carnet copié par l'élève.</li>
       </ul>
     </section>
 
@@ -180,7 +203,7 @@
   </main>
 
   <footer>
-    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 16/11/2026</span>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 16/11/2026, mise à jour le 22/11/2026 (compétences APP, ANA, RÉA, VAL, COM)</span>
     <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
   </footer>
 </div>
