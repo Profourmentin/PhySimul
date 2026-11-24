@@ -123,8 +123,15 @@ caption{text-align:left;color:var(--muted);padding-bottom:4px}
 .chip:disabled{opacity:.6}
 .chip.good{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
-input[type=text],select{min-height:44px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit}
+input[type=text],input[type=number],select{min-height:44px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit}
 input[type=text]{width:9em}
+input[type=number]{width:5.5em}
+.printbox{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0 16px;margin:0 0 14px}
+.printbox[open]{padding-bottom:12px}
+.printbox p{margin:.3rem 0}
+.printbox .opt{max-width:36rem}
+.hint{color:var(--muted);font-size:.9rem}
+.pmsg{min-height:1.4em;color:var(--info)}
 select{max-width:100%}
 .unit{font-weight:600}
 .formula{background:var(--info-bg);color:var(--text);border-left:4px solid var(--info);padding:8px 10px;border-radius:6px;margin:.5rem 0}
@@ -148,6 +155,56 @@ details.note ul,details.rappel ul{margin:.3rem 0 .8rem;padding-left:1.2rem}
 footer{margin-top:24px;color:var(--muted);font-size:.88rem}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* ───── Version papier : A4 paysage, marges 8 mm (281 × 194 mm utiles). Tout est en mm : la figure est à l’échelle réelle. ───── */
+#print-zone{display:none}
+@media print{
+  body.printing{background:#fff!important;color:#000!important;margin:0}
+  body.printing>*:not(#print-zone){display:none!important}
+  body.printing #print-zone{display:block!important}
+  #print-zone{color:#000;background:#fff;font:9.5pt/1.35 Arial,"Liberation Sans","Helvetica Neue",Helvetica,sans-serif}
+  #print-zone svg{display:block}
+  .pz-pg{box-sizing:border-box;width:281mm;height:190mm;overflow:hidden;break-after:page;page-break-after:always;display:flex;flex-direction:column;gap:2mm}
+  .pz-pg:last-child{break-after:auto;page-break-after:auto}
+  .pz-head{display:flex;justify-content:space-between;align-items:baseline;gap:6mm;border-bottom:.4mm solid #000;padding-bottom:1mm;font-size:10.5pt}
+  .pz-badge{border:.35mm solid #000;padding:0 2mm;font-weight:700}
+  .pz-who{display:flex;gap:6mm;align-items:flex-end}
+  .pz-ln{display:inline-block;border-bottom:.25mm dotted #000;height:4.5mm;vertical-align:bottom}
+  .pz-row1{display:flex;gap:6mm;min-height:19mm}
+  .pz-enonce{flex:1 1 auto}
+  .pz-enonce p{margin:0 0 1.2mm}
+  .pz-ctrl{width:104mm;flex:none;font-size:8pt;line-height:1.25}
+  .pz-ctrl svg{margin-top:1.5mm;overflow:visible}
+  .pz-row2{display:flex;gap:3mm;height:140mm}
+  .pz-fig{width:240mm;height:140mm;flex:none}
+  .pz-side{flex:1 1 auto;font-size:8.5pt;line-height:1.3}
+  .pz-box{border:.3mm solid #000;padding:1.5mm 2mm;margin-bottom:2.2mm}
+  .pz-g{color:#444;font-size:8pt}
+  .pz-hint{color:#555;font-style:italic;font-size:8pt}
+  .pz-data{border:.3mm solid #000;padding:1.2mm 2mm;font-size:9pt;display:flex;flex-wrap:wrap;gap:0 6mm}
+  .pz-cols{display:grid;grid-template-columns:1fr 1fr;gap:7mm;flex:1 1 auto;min-height:0;align-content:start}
+  .pz-sec{margin-bottom:3.5mm;break-inside:avoid}
+  .pz-sec h3{margin:0 0 1.4mm;font-size:10pt;display:flex;gap:2mm;align-items:center;flex-wrap:wrap}
+  .pz-sec p{margin:0 0 1.8mm}
+  .pz-n{display:inline-block;width:5mm;height:5mm;border:.35mm solid #000;border-radius:50%;text-align:center;font-weight:700;font-size:9pt;line-height:4.5mm}
+  .pz-comp{font-size:7.5pt;border:.25mm solid #000;border-radius:3mm;padding:0 1.8mm;font-weight:600;white-space:nowrap}
+  .pz-opt{display:inline-flex;align-items:center;gap:1.2mm;margin:0 4mm 0 0;white-space:nowrap}
+  .pz-bx{display:inline-block;width:3.4mm;height:3.4mm;border:.35mm solid #000;flex:none}
+  table.pz-tb{border-collapse:collapse;width:100%;table-layout:fixed}
+  .pz-tb th,.pz-tb td{border:.3mm solid #000;padding:1mm 1.4mm;font-size:8.5pt;text-align:center;vertical-align:middle}
+  .pz-tb td{height:15mm}
+  .pz-tb th:first-child,.pz-tb td:first-child{text-align:left}
+  .pz-tb small{display:block;font-weight:400;font-size:7.5pt;line-height:1.2}
+  .pz-ch th{width:36mm;text-align:left}
+  .pz-ch td{height:10.5mm;text-align:left}
+  .pz-rule{border-bottom:.25mm solid #666;height:9.5mm}
+  .pz-ck{display:flex;gap:5mm;margin-bottom:3mm}
+  .pz-calc{flex:1 1 auto;font-size:9pt;line-height:1.3}
+  .pz-calc p{margin:0 0 .8mm}
+  .pz-calc h4,.pz-ans h4{margin:0 0 1mm;font-size:9.5pt}
+  .pz-ans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm;font-size:9pt;line-height:1.3}
+  .pz-ans p{margin:0 0 1.2mm}
+}
 </style>
 <!-- bruit : sans objet : les positions de la chronophotographie sont pointées et construites par l'élève, avec une tolérance de correction déjà prévue ; aucun capteur (voir docs/socle.md, « Bruit de mesure ») -->
 </head>
@@ -173,6 +230,20 @@ footer{margin-top:24px;color:var(--muted);font-size:.88rem}
     <button class="btn" id="btnTheme" type="button">Thème : auto</button>
     <span class="score" id="score">Exercices terminés : 0 · sans aide : 0</span>
   </div>
+
+  <details class="printbox" id="printBox">
+    <summary>Version papier : imprimer l’exercice (PDF)</summary>
+    <p>Fiche élève en A4 paysage : la chronophotographie à l’échelle réelle sur un quadrillage de 1 cm, à mesurer à la règle et à compléter au crayon, puis une page de questions. <span id="pInfo"></span></p>
+    <div class="row">
+      <label for="pNum"><strong>Nombre de fiches différentes</strong></label>
+      <input type="number" id="pNum" min="1" max="40" value="1" inputmode="numeric">
+      <span class="hint">une par élève : tous les exercices sont différents</span>
+    </div>
+    <label class="opt"><input type="checkbox" id="pCorr"><span>Ajouter les corrigés à la fin (une page par fiche, pour l’enseignant)</span></label>
+    <div class="row"><button class="btn primary" id="btnPrint" type="button">Imprimer / enregistrer en PDF</button></div>
+    <p class="hint">Dans la fenêtre d’impression : destination « Enregistrer au format PDF » ou ton imprimante, orientation paysage, <strong>échelle 100 % (taille réelle)</strong>, jamais « Ajuster à la page » ; décoche « En-têtes et pieds de page ». Un trait de 10 cm sur la fiche permet de vérifier l’échelle. Si aucune fenêtre ne s’ouvre (aperçu intégré, fenêtre bloquée), ouvre la page dans un onglet du navigateur.</p>
+    <p class="pmsg" id="printMsg" role="status" aria-live="polite"></p>
+  </details>
 </header>
 
 <main>
@@ -217,7 +288,8 @@ footer{margin-top:24px;color:var(--muted);font-size:.88rem}
       <li><strong>Compétences</strong> : s’approprier (observer la trajectoire et les distances, APP), réaliser (mesure, échelle, valeur, tracé avec les quatre caractéristiques, RÉA), analyser (prévoir l’évolution du vecteur avant de voir tous les vecteurs, ANA), valider (comparer à la prévision et conclure, VAL).</li>
       <li><strong>Niveaux</strong> : 1 = trajectoires rectilignes, origine imposée, formules rappelées ; 2 = toutes les trajectoires, rappels repliés ; 3 = conversions cm/ms → m/s et origine à placer soi-même.</li>
       <li><strong>Même exercice pour toute la classe</strong> : « Copier le lien de l’exercice » reproduit exactement le même énoncé (niveau et numéro).</li>
-      <li><strong>Limites</strong> : la distance sur le schéma est donnée par un outil de mesure (pas de lecture de règle, pas d’incertitude) ; aucune sauvegarde des résultats ; durée par exercice estimée à 10–15 min, à confirmer en classe.</li>
+      <li><strong>Version papier</strong> : « Version papier : imprimer l’exercice (PDF) » produit des fiches A4 paysage. La chronophotographie est imprimée à l’échelle réelle (1 carreau = 1 cm) : l’élève <em>mesure à la règle</em> (précision au mm, ce que l’écran ne fait pas), calcule, puis trace deux vecteurs au crayon, avec une prévision relue (ANA puis VAL) et une conclusion rédigée (COM). On peut imprimer jusqu’à 40 fiches toutes différentes, avec les corrigés (figure réduite, calculs, tolérance de mesure). Régler l’impression sur « échelle 100 % » et vérifier le trait de contrôle de 10 cm.</li>
+      <li><strong>Limites</strong> : à l’écran, la distance est donnée par un outil de mesure (pas de lecture de règle, pas d’incertitude) ; aucune sauvegarde des résultats ; la fiche papier demande deux vecteurs, soit plus de temps que l’exercice écran ; durée estimée à 10–15 min à l’écran, à confirmer en classe (plus sur papier).</li>
     </ul>
   </details>
 </main>
@@ -225,6 +297,7 @@ footer{margin-top:24px;color:var(--muted);font-size:.88rem}
 <footer>Aucun compte, aucun suivi. Seul le choix du thème est mémorisé sur ton appareil. · Simulabo PhCh</footer>
 </div>
 <div class="sr-only" id="live" aria-live="polite"></div>
+<div id="print-zone" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -402,8 +475,8 @@ function arrow(o,t,cls){
   var ux=dx/l,uy=dy/l,hl=Math.min(0.5,l*0.5),hw=0.2,bx=t.x-ux*hl,by=t.y-uy*hl;
   return '<g class="'+cls+'"><line x1="'+o.x+'" y1="'+o.y+'" x2="'+bx+'" y2="'+by+'"/><polygon points="'+t.x+','+t.y+' '+(bx-uy*hw)+','+(by+ux*hw)+' '+(bx+uy*hw)+','+(by-ux*hw)+'"/></g>';
 }
-function normalOut(k){
-  var ex=S.ex,p=ex.pts,N=p.length,a=p[Math.max(0,k-1)],b=p[Math.min(N-1,k+1)];
+function normalOut(k,ex){
+  ex=ex||S.ex;var p=ex.pts,N=p.length,a=p[Math.max(0,k-1)],b=p[Math.min(N-1,k+1)];
   var tx=b.x-a.x,ty=b.y-a.y,l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
   var nx=-ty,ny=tx,dot=nx*(p[k].x-ex.cen.x)+ny*(p[k].y-ex.cen.y);
   if(Math.abs(dot)<0.25){if(ny>0){nx=-nx;ny=-ny}}
@@ -796,6 +869,7 @@ function newExercise(seed){
   S.stage=null;openStage('obs');
   window.scrollTo(0,Math.max(0,window.scrollY));
   $('#live').textContent='Nouvel exercice numéro '+seed+', niveau '+S.level+'.';
+  updatePrintInfo();
   try{history.replaceState(null,'','?niveau='+S.level+'&exo='+seed)}catch(_){}
 }
 function randSeed(){
@@ -851,6 +925,187 @@ $('#btnTraj').addEventListener('click',function(){
   $('#btnTraj').textContent=S.trajOn?'Masquer la trajectoire':'Afficher la trajectoire';
 });
 
+/* ───────── Version papier (PDF) ─────────
+   A4 paysage, marges 8 mm. La figure fait 240 × 140 mm : 1 carreau du schéma = 1 cm sur le papier.
+   Chaque fiche = page 1 (énoncé + figure) + page 2 (questions). Corrigés optionnels à la fin, une page par fiche.
+   L’élève mesure à la règle et trace deux vecteurs : le point imposé par l’exercice (M i) et un second point (M j). */
+var BX='<span class="pz-bx"></span>';
+function opts(a){return a.map(function(t){return '<span class="pz-opt">'+BX+t+'</span>'}).join('')}
+function blank(w){return '<i class="pz-ln" style="width:'+w+'mm"></i>'}
+function pzChip(code,verb){return '<span class="pz-comp">'+code+' · '+verb+'</span>'}
+function pzSec(n,title,chip,body){return '<div class="pz-sec"><h3><span class="pz-n">'+n+'</span>'+title+' '+chip+'</h3>'+body+'</div>'}
+function vecName(k){return VEC('v')+'<sub>'+k+'</sub>'}
+function scaleTexts(ex){return {Edisp:ex.convert?fg(ex.Ecm)+' cm':fg(ex.Em)+' m',dtDisp:ex.convert?ex.dtms+' ms':fg(ex.dts)+' s'}}
+
+/* second point à construire : loin du premier, avec une distance assez grande pour être mesurée à la règle */
+function pickSecond(ex){
+  var tries=[[2,0.9],[1,0.7],[1,0]],best=-1,bd=-1,t,k;
+  for(t=0;t<tries.length&&best<0;t++){
+    for(k=1;k<=ex.N-3;k++){
+      if(k===ex.i||Math.abs(k-ex.i)<tries[t][0]||ex.d[k]<tries[t][1])continue;
+      if(Math.abs(k-ex.i)>bd){bd=Math.abs(k-ex.i);best=k}
+    }
+  }
+  return best<0?(ex.i>1?ex.i-1:ex.i+1):best;
+}
+/* vecteur attendu en M k : mêmes conventions que l’écran (distance arrondie au mm, comme une mesure à la règle) */
+function vecData(ex,k){
+  var dS=Math.round(ex.d[k]*10)/10,D=dS*ex.Em,v=D/ex.dts,L=v/ex.Ev;
+  var u={x:(ex.pts[k+1].x-ex.pts[k].x)/ex.d[k],y:(ex.pts[k+1].y-ex.pts[k].y)/ex.d[k]};
+  return {k:k,dS:dS,D:D,v:v,L:L,u:u,tip:{x:ex.pts[k].x+u.x*L,y:ex.pts[k].y+u.y*L},
+          tol:Math.max(0.2,Math.ceil((L*0.1/Math.max(dS,0.1)+0.1)*10)/10)};
+}
+function pArrow(o,t,col,w,head){
+  var dx=t.x-o.x,dy=t.y-o.y,l=Math.hypot(dx,dy);if(l<0.05)return '';
+  var ux=dx/l,uy=dy/l,hl=Math.min(head,l*0.5),hw=hl*0.42,bx=t.x-ux*hl,by=t.y-uy*hl;
+  return '<path d="M'+o.x+' '+o.y+'L'+bx+' '+by+'" stroke="'+col+'" stroke-width="'+w+'" fill="none"/><polygon fill="'+col+'" points="'+t.x+','+t.y+' '+(bx-uy*hw)+','+(by+ux*hw)+' '+(bx+uy*hw)+','+(by-ux*hw)+'"/>';
+}
+/* figure imprimable : o.w (mm), o.rings (indices entourés), o.vecs (vecteurs attendus), o.others (autres vecteurs en gris) */
+function pSvg(ex,o){
+  var g='',x,y,k,N=ex.N,FF='font-family="Arial, Liberation Sans, Helvetica, sans-serif"';
+  for(x=0;x<W;x++)g+='<path d="M'+(x+0.5)+' 0V'+H+'" stroke="#d6d6d6" stroke-width=".02"/>';
+  for(y=0;y<H;y++)g+='<path d="M0 '+(y+0.5)+'H'+W+'" stroke="#d6d6d6" stroke-width=".02"/>';
+  for(x=0;x<=W;x++)g+='<path d="M'+x+' 0V'+H+'" stroke="'+(x%5?'#a8a8a8':'#6f6f6f')+'" stroke-width="'+(x%5?0.03:0.05)+'"/>';
+  for(y=0;y<=H;y++)g+='<path d="M0 '+y+'H'+W+'" stroke="'+(y%5?'#a8a8a8':'#6f6f6f')+'" stroke-width="'+(y%5?0.03:0.05)+'"/>';
+  g+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="none" stroke="#000" stroke-width=".07"/>';
+  if(o.others){
+    for(k=0;k<N-1;k++){
+      if(o.vecs.some(function(v){return v.k===k}))continue;
+      var Lk=ex.d[k]*ex.Em/ex.dts/ex.Ev,ux=(ex.pts[k+1].x-ex.pts[k].x)/ex.d[k],uy=(ex.pts[k+1].y-ex.pts[k].y)/ex.d[k];
+      g+=pArrow(ex.pts[k],{x:ex.pts[k].x+ux*Lk,y:ex.pts[k].y+uy*Lk},'#808080',0.05,0.35);
+    }
+  }
+  (o.vecs||[]).forEach(function(v){
+    g+=pArrow(ex.pts[v.k],v.tip,'#000',0.11,0.5);
+    var P=ex.pts[v.k],n={x:-v.u.y,y:v.u.x},no=normalOut(v.k,ex);
+    if(n.x*no.x+n.y*no.y>0){n.x=-n.x;n.y=-n.y}
+    g+='<text x="'+((P.x+v.tip.x)/2+n.x*0.9)+'" y="'+((P.y+v.tip.y)/2+n.y*0.9)+'" '+FF+' font-size=".75" font-style="italic" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#000" stroke="#fff" stroke-width=".18" paint-order="stroke">v<tspan font-size=".5" dy=".2">'+v.k+'</tspan></text>';
+  });
+  ex.pts.forEach(function(p,k){
+    var n=normalOut(k,ex),ring=(o.rings||[]).indexOf(k);
+    g+='<path d="M'+(p.x-0.22)+' '+p.y+'H'+(p.x+0.22)+'M'+p.x+' '+(p.y-0.22)+'V'+(p.y+0.22)+'" stroke="#000" stroke-width=".07" fill="none"/>';
+    if(ring>=0)g+='<circle cx="'+p.x+'" cy="'+p.y+'" r=".55" fill="none" stroke="#000" stroke-width=".06"'+(ring===1?' stroke-dasharray=".25 .15"':'')+'/>';
+    g+='<text x="'+(p.x+n.x*0.85)+'" y="'+(p.y+n.y*0.85)+'" '+FF+' font-size=".6" font-weight="'+(ring>=0?700:400)+'" text-anchor="middle" dominant-baseline="central" fill="#000" stroke="#fff" stroke-width=".18" paint-order="stroke">M<tspan font-size=".4" dy=".16">'+k+'</tspan></text>';
+  });
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+o.w+'mm" height="'+(Math.round(o.w*H/W*100)/100)+'mm" role="img" aria-label="Chronophotographie sur un quadrillage de 1 centimètre">'+g+'</svg>';
+}
+
+function pzHead(ex,idx,N,corr){
+  return '<div class="pz-head"><div><strong>Construire un vecteur vitesse</strong> · Seconde · Décrire un mouvement'+(corr?' · <span class="pz-badge">CORRIGÉ · enseignant</span>':'')+'</div>'
+    +'<div>Exercice n° '+ex.seed+' · niveau '+ex.level+(N>1?' · fiche '+(idx+1)+'/'+N:'')+'</div></div>';
+}
+var PZ_WHO='<div class="pz-who"><span>Nom : '+blank(62)+'</span><span>Prénom : '+blank(52)+'</span><span>Classe : '+blank(22)+'</span><span>Date : '+blank(28)+'</span></div>';
+
+/* page 1 : énoncé et figure à l’échelle réelle */
+function pzFigure(ex,idx,N,j){
+  var s=scaleTexts(ex),i=ex.i;
+  return '<section class="pz-pg">'+pzHead(ex,idx,N,false)+PZ_WHO
+    +'<div class="pz-row1"><div class="pz-enonce"><p><strong>Énoncé.</strong> '+ex.ctx.txt+' Le point est repéré à intervalles de temps réguliers : ce sont les positions '+Mh(0)+' à '+Mh(ex.N-1)+'.</p>'
+    +'<p>Construis le vecteur vitesse aux points '+Mh(i)+' et '+Mh(j)+' (entourés). Les questions sont sur la page suivante.</p></div>'
+    +'<div class="pz-ctrl">Contrôle d’impression : ce trait doit mesurer exactement <strong>10 cm</strong>.<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 4" width="100mm" height="4mm"><path d="M0 0V4M100 0V4M0 2H100" stroke="#000" stroke-width=".3" fill="none"/></svg></div></div>'
+    +'<div class="pz-row2"><div class="pz-fig">'+pSvg(ex,{w:240,rings:[i,j]})+'</div><aside class="pz-side">'
+    +'<div class="pz-box"><strong>Durée entre deux positions</strong><br>Δt = '+s.dtDisp+'</div>'
+    +'<div class="pz-box"><strong>Échelle des distances</strong><br>1 cm sur la figure ↔ '+s.Edisp+'</div>'
+    +'<div class="pz-box"><strong>Échelle des vitesses</strong><br>1 cm ↔ '+fg(ex.Ev)+' m/s</div>'
+    +'<div class="pz-box"><strong>Points étudiés</strong><br>'+Mh(i)+' (trait plein)<br>'+Mh(j)+' (trait pointillé)</div>'
+    +'<p class="pz-g">Sur la figure, 1 carreau = 1 cm. Mesure de croix à croix.</p></aside></div></section>';
+}
+
+/* page 2 : questions et cadres à compléter (aides selon le niveau) */
+function pzQuestions(ex,idx,N,vj){
+  var s=scaleTexts(ex),i=ex.i,j=vj.k,lv=ex.level,hint=function(t){return lv===1?'<span class="pz-hint">'+t+'</span>':''};
+  var cap=['d (cm)','D (m)','v (m/s)','L (cm)'],sm=['longueur mesurée','distance réelle','valeur de la vitesse','longueur de la flèche'];
+  if(lv===1)sm=['longueur mesurée','= d × '+fg(ex.Em),'= D ÷ '+fg(ex.dts),'= v ÷ '+fg(ex.Ev)];
+  var th='<tr><th>Point d’étude</th>'+cap.map(function(c,k){return '<th>'+c+'<small>'+sm[k]+'</small></th>'}).join('')+'</tr>';
+  var row=function(k){return '<tr><td>'+Mh(k)+' → '+Mh(k+1)+'</td><td></td><td></td><td></td><td></td></tr>'};
+  var left=
+    pzSec(1,'Observer',pzChip('APP','S’approprier'),
+      '<p>Trajectoire du point : '+opts(['rectiligne','circulaire (arc de cercle)','curviligne quelconque'])+'</p>'
+      +'<p>Entre deux positions successives (durée Δt toujours la même), la distance parcourue : '+opts(['reste la même','augmente','diminue','varie dans les deux sens'])+'</p>')
+   +pzSec(2,'Prévoir',pzChip('ANA','Prévoir'),
+      '<p>Avant de mesurer : de '+Mh(0)+' à '+Mh(ex.N-2)+', comment le vecteur vitesse va-t-il évoluer ?</p>'
+      +'<p>Sa valeur (longueur de la flèche) : '+opts(['reste la même','augmente','diminue','varie dans les deux sens'])+'</p>'
+      +'<p>Sa direction et son sens : '+opts(['restent les mêmes','changent'])+'</p>')
+   +pzSec(3,'Mesurer et calculer',pzChip('RÉA','Mesurer · Calculer'),
+      (ex.convert?'<p>Convertis la durée : Δt = '+ex.dtms+' ms = '+blank(22)+' s. Exprime D en <strong>mètres</strong>.</p>':'')
+      +'<table class="pz-tb">'+th+row(i)+row(j)+'</table>');
+  var right=
+    pzSec(4,'Tracer',pzChip('RÉA','Tracer'),
+      '<p>Sur la figure (page 1), avec ta règle et un crayon bien taillé, trace les vecteurs vitesse '+vecName(i)+' en '+Mh(i)+' et '+vecName(j)+' en '+Mh(j)+'. Écris leur nom près de chaque flèche.</p>'
+      +'<p>Complète les caractéristiques de '+vecName(i)+' :</p>'
+      +'<table class="pz-tb pz-ch"><tr><th>Point d’application</th><td>'+hint('le point où l’on construit le vecteur')+'</td></tr>'
+      +'<tr><th>Direction</th><td>'+hint('la droite passant par … et …')+'</td></tr>'
+      +'<tr><th>Sens</th><td>'+hint('de … vers …')+'</td></tr>'
+      +'<tr><th>Valeur</th><td>'+hint('en m/s')+'</td></tr></table>')
+   +pzSec(5,'Comparer et conclure',pzChip('VAL','Valider')+' '+pzChip('COM','Conclure'),
+      '<p>Compare '+vecName(i)+' et '+vecName(j)+'. Leur valeur est : '+opts(['identique','différente'])+'</p>'
+      +'<p>Leur direction et leur sens sont : '+opts(['identiques','différents'])+'</p>'
+      +'<p>Ta prévision de l’étape 2 est-elle compatible avec ce que tu observes ? '+opts(['oui','non','je ne peux pas conclure avec deux vecteurs'])+'</p>'
+      +'<p>Conclus en une ou deux phrases : que peux-tu dire du vecteur vitesse pendant ce mouvement ? (Utilise : valeur, direction, sens, constant.)</p>'
+      +'<div class="pz-rule"></div><div class="pz-rule"></div><div class="pz-rule"></div><div class="pz-rule"></div>');
+  return '<section class="pz-pg">'+pzHead(ex,idx,N,false)+PZ_WHO
+    +'<div class="pz-data"><span>Durée entre deux positions : <strong>Δt = '+s.dtDisp+'</strong></span><span>Distances : <strong>1 cm sur la figure ↔ '+s.Edisp+'</strong></span><span>Vitesses : <strong>1 cm ↔ '+fg(ex.Ev)+' m/s</strong></span></div>'
+    +'<div class="pz-cols"><div>'+left+'</div><div>'+right+'</div></div></section>';
+}
+
+/* corrigé : figure réduite à 70 % (170 mm), calculs, réponses attendues */
+function calcHTML(ex,vd){
+  var s='<p><strong>'+Mh(vd.k)+Mh(vd.k+1)+'</strong> : d = '+f1(vd.dS)+' cm <span class="pz-g">(mesure à ± 0,1 cm près)</span></p>';
+  s+=ex.convert?'<p>D = '+f1(vd.dS)+' × '+fg(ex.Ecm)+' = '+fg(vd.dS*ex.Ecm)+' cm = '+fg(vd.D)+' m</p>':'<p>D = '+f1(vd.dS)+' × '+fg(ex.Em)+' = '+fg(vd.D)+' m</p>';
+  s+='<p>v = D ÷ Δt = '+fg(vd.D)+' ÷ '+fg(ex.dts)+' = <strong>'+fg(vd.v)+' m/s</strong></p>';
+  s+='<p>L = v ÷ '+fg(ex.Ev)+' = <strong>'+fg(vd.L)+' cm</strong> <span class="pz-g">(tolérance ± '+fg(vd.tol)+' cm)</span></p>';
+  return s;
+}
+function pzCorrige(ex,idx,N,vj){
+  var vi=vecData(ex,ex.i),T=TRUTH[ex.type],i=ex.i,j=vj.k;
+  var sameV=Math.abs(vi.v-vj.v)<=0.03*Math.max(vi.v,vj.v),sameD=(vi.u.x*vj.u.x+vi.u.y*vj.u.y)>0.9986;
+  var note=T.val==='mixte'?'<p class="pz-g">Deux vecteurs ne montrent pas que la valeur augmente puis diminue : faire tracer un troisième vecteur, ou utiliser la version interactive (niveau '+ex.level+', exercice n° '+ex.seed+') qui affiche tous les vecteurs.</p>':'';
+  return '<section class="pz-pg">'+pzHead(ex,idx,N,true)
+    +'<div class="pz-ck"><div>'+pSvg(ex,{w:170,rings:[i,j],vecs:[vi,vj],others:true})+'<p class="pz-g" style="margin:1mm 0 0">Figure réduite à 70 % · vecteurs attendus en noir, autres vecteurs en gris.</p></div>'
+    +'<div class="pz-calc"><h4>Calculs attendus</h4>'+(ex.convert?'<p>Δt = '+ex.dtms+' ms = '+fg(ex.dts)+' s</p>':'')+calcHTML(ex,vi)+'<hr style="border:0;border-top:.2mm solid #999;margin:1.5mm 0">'+calcHTML(ex,vj)+'</div></div>'
+    +'<div class="pz-ans"><div><h4>1 · Observer</h4><p>Trajectoire : '+LAB.traj[T.traj]+'.</p><p>Distance entre deux positions : elle '+LAB.val[T.val]+'.</p><p>Mouvement : '+T.nom+'.</p></div>'
+    +'<div><h4>2 · Prévision attendue</h4><p>Valeur du vecteur : '+LAB.val[T.val]+'.</p><p>Direction et sens : '+LAB.dir[T.dir]+'.</p>'+note+'</div>'
+    +'<div><h4>4 · Caractéristiques de '+vecName(i)+'</h4><p>Point d’application : '+Mh(i)+'. Direction : la droite ('+Mh(i)+Mh(i+1)+'). Sens : de '+Mh(i)+' vers '+Mh(i+1)+'. Valeur : '+fg(vi.v)+' m/s.</p>'
+    +'<h4>5 · Comparer, conclure</h4><p>'+vecName(i)+' = '+fg(vi.v)+' m/s, '+vecName(j)+' = '+fg(vj.v)+' m/s : valeurs '+(sameV?'identiques':'différentes')+' ; direction et sens '+(sameD?'identiques':'différents')+'.</p><p>'+explanation(ex.type)+'</p></div></div></section>';
+}
+
+function exercisesForPrint(n){
+  var sig=function(e){return [e.type,e.i,e.dS,e.Ev,e.dts,Math.round(e.pts[0].x*10),Math.round(e.pts[0].y*10)].join('|')};
+  var list=[S.ex],seen={},sd=S.seed,g=0;seen[sig(S.ex)]=1;
+  while(list.length<n&&g<400){g++;sd+=1009;var e=safeExercise(S.level,sd);if(!e)continue;var s=sig(e);if(seen[s])continue;seen[s]=1;list.push(e)}
+  return list;
+}
+function buildPrint(n,withCorr){
+  var list=exercisesForPrint(n),N=list.length,h='';
+  var data=list.map(function(e){return {ex:e,vj:vecData(e,pickSecond(e))}});
+  data.forEach(function(d,k){h+=pzFigure(d.ex,k,N,d.vj.k)+pzQuestions(d.ex,k,N,d.vj)});
+  if(withCorr)data.forEach(function(d,k){h+=pzCorrige(d.ex,k,N,d.vj)});
+  $('#print-zone').innerHTML=h;
+  return N;
+}
+function endPrint(){
+  document.body.classList.remove('printing');
+  var st=$('#pz-page');if(st)st.parentNode.removeChild(st);
+  $('#print-zone').innerHTML='';
+}
+function doPrint(){
+  if(!S.ex)return;
+  var n=Math.max(1,Math.min(40,parseInt($('#pNum').value,10)||1)),corr=$('#pCorr').checked,msg=$('#printMsg');
+  $('#pNum').value=n;
+  var N=buildPrint(n,corr);
+  var st=document.createElement('style');st.id='pz-page';st.textContent='@page{size:A4 landscape;margin:8mm}';document.head.appendChild(st);
+  document.body.classList.add('printing');
+  var fin=function(){window.removeEventListener('afterprint',fin);endPrint()};
+  window.addEventListener('afterprint',fin);
+  setTimeout(fin,300000);
+  msg.textContent=N+' fiche'+(N>1?'s':'')+(corr?' avec corrigés':'')+' envoyée'+(N>1?'s':'')+' à l’impression. Si aucune fenêtre ne s’ouvre, ouvre la page dans un onglet du navigateur.';
+  setTimeout(function(){try{window.print()}catch(e){msg.textContent='Impression impossible ici : ouvre la page dans un onglet du navigateur.';endPrint()}},60);
+}
+function updatePrintInfo(){
+  var el=$('#pInfo');if(el&&S.ex)el.textContent='La première fiche reprend l’exercice affiché (n° '+S.seed+', niveau '+S.level+').';
+}
+$('#btnPrint').addEventListener('click',doPrint);
+
 /* thème */
 (function(){
   var root=document.documentElement,btn=$('#btnTheme'),modes=['auto','light','dark'],lab={auto:'auto',light:'clair',dark:'sombre'},cur='auto';
@@ -868,7 +1123,7 @@ $('#btnTraj').addEventListener('click',function(){
   newExercise(ex>0?ex:randSeed());
 })();
 
-window.__vv={S:S,makeExercise:makeExercise,safeExercise:safeExercise,TRUTH:TRUTH};
+window.__vv={S:S,makeExercise:makeExercise,safeExercise:safeExercise,TRUTH:TRUTH,buildPrint:buildPrint,endPrint:endPrint};
 })();
 </script>
 </body>
