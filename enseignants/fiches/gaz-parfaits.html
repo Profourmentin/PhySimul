@@ -26,7 +26,7 @@
     <ul class="chips" aria-label="Repères">
       <li>Première, voie générale, spécialité</li>
       <li>Mouvement et interactions</li>
-      <li>25 min (à confirmer en classe)</li>
+      <li>30 min (à confirmer en classe)</li>
       <li>Ordinateur ou tablette, papier</li>
     </ul>
     <div class="actions">
@@ -40,6 +40,7 @@
     <ol>
       <li><a href="#programme">Programme visé</a></li>
       <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#competences">Couverture des compétences</a></li>
       <li><a href="#reponses">Réponses attendues</a></li>
       <li><a href="#difficultes">Difficultés fréquentes</a></li>
       <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
@@ -59,32 +60,50 @@
           <tbody>
             <tr><td>Grandeurs macroscopiques de description d'un fluide au repos : masse volumique, pression, température</td><td>Capteur de pression, graduation du volume, température de la paroi (20 °C) affichée sous la seringue</td></tr>
             <tr><td>Expliquer qualitativement le lien entre les grandeurs macroscopiques de description d'un fluide et la valeur de la pression <span class="verify">Fin de phrase à vérifier</span></td><td>Particules animées : moins de volume, plus de chocs sur le piston par seconde (indicateur sous la seringue), donc pression plus grande</td></tr>
-            <tr><td>Modèle de comportement d'un gaz : loi de Mariotte</td><td>Étapes 3 et 4 : tableau de mesures, produit P × V, graphiques P = f(V), P = f(1/V) et P × V = f(V)</td></tr>
+            <tr><td>Modèle de comportement d'un gaz : loi de Mariotte</td><td>Tâches « Manipuler et mesurer » et « Relire et juger » : tableau de mesures, produit P × V, graphiques P = f(V), P = f(1/V) et P × V = f(V)</td></tr>
             <tr><td>Utiliser la loi de Mariotte</td><td>Défis de calcul de type A (trouver P₂) et B (trouver V₂)</td></tr>
-            <tr><td>Tester la loi de Mariotte (le programme cite l'exemple d'un microcontrôleur)</td><td>Étapes 3 et 4, avec un capteur virtuel ; le capteur est bruité par défaut (0,5 % de la valeur, niveau global réglable dans <code>shared/bruit.js</code>) ; l'interrupteur « Modèle théorique » donne la valeur exacte. Le dispositif réel avec microcontrôleur reste à faire (voir Prolongements)</td></tr>
+            <tr><td>Tester la loi de Mariotte (le programme cite l'exemple d'un microcontrôleur)</td><td>Tâches « Manipuler et mesurer » et « Relire et juger », avec un capteur virtuel ; le capteur est bruité par défaut (0,5 % de la valeur, niveau global réglable dans <code>shared/bruit.js</code>) ; l'interrupteur « Modèle théorique » donne la valeur exacte. La tâche « Relire et juger » demande à l'élève de confronter l'écart observé à la fluctuation du capteur. Le dispositif réel avec microcontrôleur reste à faire (voir Prolongements)</td></tr>
             <tr><td>Exploiter la relation F = P·S pour déterminer la force pressante exercée par un fluide</td><td>Carte « Force pressante F » avec le calcul détaillé en pascal et en m², flèche de force sur le piston, défi de type C</td></tr>
           </tbody>
         </table>
       </div>
-      <p>Compétences mobilisées : s'approprier (lire les grandeurs et leurs unités), analyser et raisonner (relier volume et pression), réaliser (relever des mesures), valider (comparer P × V aux incertitudes près), communiquer (conclure par une phrase).</p>
+      <p>Les cinq compétences de la démarche scientifique (APP, ANA, RÉA, VAL, COM) sont travaillées dans la page ; leur détail est dans les sections « Déroulé » et « Couverture des compétences ».</p>
     </section>
 
     <section id="deroule" aria-labelledby="h-deroule">
       <h2 id="h-deroule">Déroulé</h2>
-      <p>Compétences par tâche (colonne « Compétence » ci-dessous) : ANA (prévoir), RÉA (explorer, mesurer), VAL (confronter P × V aux incertitudes), ANA et RÉA (transférer). Durée estimée : 25 minutes, à confirmer en classe. La page n'impose pas d'ordre : tout est accessible dès l'ouverture, c'est la consigne de l'enseignant qui structure le parcours.</p>
+      <p>Parcours en boucle : la page propose cinq tâches, que l'élève peut faire dans l'ordre de son choix et reprendre à tout moment (un tableau de bord en haut de page indique « À faire » ou « Fait »). L'ordre ci-dessous est celui que nous conseillons : prévoir avant de mesurer, car la prévision est ensuite relue dans la tâche « Relire et juger ». Durée estimée : 30 minutes environ, à confirmer en classe.</p>
       <div class="tablewrap">
         <table>
-          <thead><tr><th scope="col">Étape</th><th scope="col">Compétence</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <thead><tr><th scope="col">Tâche (titre dans la page)</th><th scope="col">Compétence</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
           <tbody>
-            <tr><td>1. Prédire (3 min, hors page)</td><td>ANA</td><td>Avant d'ouvrir la simulation : « Si on divise le volume du gaz par 2, que devient la pression ? » Réponse écrite ou vote à main levée.</td><td>Une phrase de prédiction, datée avant la manipulation</td></tr>
-            <tr><td>2. Explorer (5 min)</td><td>RÉA</td><td>Fait glisser le piston (souris, curseur ou flèches du clavier), regarde les particules, le nombre de chocs par seconde, la flèche de force et la valeur du capteur.</td><td>Une phrase : ce qui change quand le volume diminue</td></tr>
-            <tr><td>3. Mesurer (8 min)</td><td>RÉA</td><td>Relève au moins 5 mesures réparties entre 10 mL et 60 mL avec « Relever la mesure ». Lit la colonne P × V.</td><td>Tableau de mesures (V, P, P × V)</td></tr>
-            <tr><td>4. Conclure (4 min)</td><td>VAL</td><td>Compare le bilan affiché sous le tableau, change d'onglet du graphique, observe que P = f(1/V) est une droite passant par l'origine, puis revient à sa prédiction.</td><td>Énoncé de la loi avec ses conditions (température et quantité de gaz constantes)</td></tr>
-            <tr><td>5. Transférer (5 min)</td><td>ANA, RÉA</td><td>Résout un ou deux défis (bouton « Autre défi » pour en tirer d'autres), avec conversion des unités pour la force pressante.</td><td>Calcul rédigé avec unités, puis vérifié sur la page</td></tr>
+            <tr><td>1. Poser le problème (4 min)</td><td>APP</td><td>Lit la situation (piston enfoncé, capteur de pression), écrit avec ses mots la question à laquelle il veut répondre, puis classe les quatre grandeurs V, P, θ et n : ce qu'il fait varier, ce qu'il mesure, ce qu'il garde constant.</td><td>Une question écrite ; un classement des grandeurs (la page le confronte à la situation)</td></tr>
+            <tr><td>2. Prévoir (4 min)</td><td>ANA</td><td>Choisit un modèle de relation entre V et P, prévoit la pression à 20 mL (en hPa) et indique son degré de certitude, puis enregistre. La page note si la prévision a été faite avant ou après des mesures, et si elle a été modifiée.</td><td>Une prévision chiffrée, un raisonnement choisi, un degré de certitude</td></tr>
+            <tr><td>3. Manipuler et mesurer (8 min)</td><td>RÉA</td><td>Fait glisser le piston (souris, curseur ou flèches du clavier), observe les particules, le nombre de chocs par seconde, la flèche de force et le capteur, puis relève au moins 5 mesures réparties entre 10 mL et 60 mL, dont une à 20 mL.</td><td>Tableau de mesures (V, P, P × V) ; graphiques P = f(V), P = f(1/V), P × V = f(V)</td></tr>
+            <tr><td>4. Relire et juger (7 min)</td><td>VAL</td><td>Compare sa prévision à sa mesure à 20 mL en tenant compte de la fluctuation du capteur, juge si P × V est constant aux incertitudes près, puis choisit une cause possible d'écart à examiner dans un vrai montage.</td><td>Un jugement sur l'écart, un jugement sur la constance de P × V, une explication écrite de l'écart</td></tr>
+            <tr><td>5. Calculer (5 min)</td><td>RÉA, VAL</td><td>Résout un ou deux défis (bouton « Autre défi »), avec conversion des unités pour la force pressante, après avoir estimé le sens ou l'ordre de grandeur du résultat.</td><td>Calcul rédigé avec unités ; estimation choisie avant le calcul</td></tr>
+            <tr><td>6. Conclure (4 min)</td><td>COM</td><td>Rédige la conclusion en quelques phrases, la relit avec une liste de contrôle (conditions de la loi, mesures citées, comparaison à la prévision, limite nommée), puis copie son carnet ou l'imprime.</td><td>Une conclusion rédigée ; un carnet copiable (texte) ou imprimable (PDF)</td></tr>
           </tbody>
         </table>
       </div>
-      <p>La page mémorise le nombre de défis réussis et essayés sur la session en cours (un rechargement remet le compteur à zéro). Les mesures du tableau ne sont pas exportables : l'élève les recopie ou fait une capture d'écran.</p>
+      <p>La page ne rend aucun verdict « bravo / raté » sur la tâche « Relire et juger » : elle confronte le jugement de l'élève aux chiffres (écart, tolérance, dispersion) et l'invite à réviser s'il n'est pas cohérent. Le carnet regroupe la question, le classement, la prévision, les mesures, les jugements et la conclusion ; il n'est pas enregistré par la page, c'est l'élève qui le copie ou l'imprime. La page mémorise le nombre de défis réussis et essayés sur la session en cours (un rechargement remet tout à zéro, prévision et saisies comprises).</p>
+    </section>
+
+    <section id="competences" aria-labelledby="h-competences">
+      <h2 id="h-competences">Couverture des compétences</h2>
+      <p>Seul ce que la page fait faire à l'élève est indiqué comme travaillé. Chaque compétence est exercée sur ce modèle précis (loi de Mariotte) ; elle reste à prolonger sur d'autres situations.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Compétence</th><th scope="col">Dans la page</th><th scope="col">À prévoir hors page</th></tr></thead>
+          <tbody>
+            <tr><td>APP · S'approprier</td><td>Tâche « Poser le problème » : question écrite, classement des grandeurs. Ressource : « Rappels : unités et relations » en bas de page</td><td>Faire reformuler la question à l'oral ; la page ne corrige pas le contenu de la question écrite, seulement le classement des grandeurs</td></tr>
+            <tr><td>ANA · Analyser / Raisonner</td><td>Tâche « Prévoir » : choix d'un modèle de relation, prévision chiffrée, degré de certitude. Défis : estimation avant calcul</td><td>Faire justifier la prévision à l'écrit avec ses mots (la page propose des modèles à choisir, elle ne lit pas un raisonnement libre)</td></tr>
+            <tr><td>RÉA · Réaliser</td><td>Tâches « Manipuler et mesurer » et « Calculer » : manipulation, relevé de mesures, graphiques, calculs avec conversions</td><td>Refaire avec une vraie seringue et un capteur ; saisir les mesures dans un tableur ou en Python</td></tr>
+            <tr><td>VAL · Valider</td><td>Tâche « Relire et juger » : écart prévision / mesure comparé à la fluctuation du capteur, constance de P × V, causes d'erreur. Défis : vraisemblance du résultat</td><td>Discuter à l'oral les causes systématiques (volume mort, fuite, température) et ce qui ferait changer d'avis</td></tr>
+            <tr><td>COM · Communiquer</td><td>Tâche « Conclure » : conclusion écrite, liste de relecture, carnet exportable (copie ou impression)</td><td>Présentation orale ou affiche ; évaluation de la conclusion par l'enseignant (la page ne l'évalue pas)</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section id="reponses" aria-labelledby="h-reponses">
@@ -94,17 +113,21 @@
         <div class="inner">
           <div class="tablewrap">
             <table>
-              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <thead><tr><th scope="col">Tâche</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
               <tbody>
-                <tr><td>1, prédiction</td><td>La pression est multipliée par 2</td><td>Conception fréquente : « elle diminue de moitié » ou « elle augmente un peu » (voir plus bas)</td></tr>
-                <tr><td>2, état de départ</td><td>V = 50 mL et P ≈ 1 014 hPa (pression atmosphérique), F ≈ 60,8 N</td><td>Section du piston S = 6,0 cm² ; air à 20 °C</td></tr>
-                <tr><td>3, mesures (capteur idéal)</td><td>10 mL : 5 069 hPa · 20 mL : 2 535 hPa · 30 mL : 1 690 hPa · 40 mL : 1 267 hPa · 50 mL : 1 014 hPa · 60 mL : 844,9 hPa</td><td>Pour chaque mesure, P × V ≈ 50 700 hPa·mL (écarts de quelques unités dus à l'arrondi à 4 chiffres significatifs)</td></tr>
-                <tr><td>3, capteur bruité (par défaut)</td><td>P × V varie d'environ 1 % au plus autour de 50 700 hPa·mL</td><td>Le bilan reste « vérifié » tant que l'écart maximal à la moyenne est inférieur à 2 %. Montrer qu'un produit n'est jamais exactement identique en mesure réelle</td></tr>
-                <tr><td>4, graphiques</td><td>P = f(V) : hyperbole · P = f(1/V) : droite passant par l'origine · P × V = f(V) : droite horizontale</td><td>La droite P = f(1/V) est la signature d'une proportionnalité entre P et 1/V</td></tr>
-                <tr><td>4, énoncé</td><td>À température constante et pour une quantité de gaz donnée, le produit de la pression par le volume est constant : P₁ × V₁ = P₂ × V₂</td><td>Les conditions font partie de la réponse</td></tr>
-                <tr><td>5, défi A (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, V₂ = 40 mL : P₂ = 1 000 × 100 / 40 = 2 500 hPa</td><td>Réponse acceptée à 2 % près</td></tr>
-                <tr><td>5, défi B (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, P₂ = 2 500 hPa : V₂ = 1 000 × 100 / 2 500 = 40 mL</td><td>La valeur de P₂ affichée est arrondie à 3 chiffres significatifs ; la réponse attendue part de la valeur affichée</td></tr>
-                <tr><td>5, défi C (exemple)</td><td>P = 2,0 bar = 2,0 × 10⁵ Pa, S = 10 cm² = 1,0 × 10⁻³ m² : F = 2,0 × 10⁵ × 1,0 × 10⁻³ = 200 N</td><td>Il faut convertir les deux grandeurs (P en pascal, S en m²)</td></tr>
+                <tr><td>Poser le problème, classement des grandeurs</td><td>V : je le fais varier · P : je la mesure · θ : je la garde constante · n : je la garde constante</td><td>La page signale si le classement n'est pas cohérent avec le dispositif (par exemple θ ou n laissées variables)</td></tr>
+                <tr><td>Prévoir, à 20 mL</td><td>Modèle : P × V constant (produit) ; P ≈ 2 535 hPa à 20 mL (1 014 × 50 / 20)</td><td>Conceptions fréquentes : « elle diminue de moitié », « elle augmente un peu », « somme constante » (voir plus bas). Tout choix est accepté à l'enregistrement ; c'est la tâche « Relire et juger » qui le confronte à la mesure</td></tr>
+                <tr><td>Manipuler, état de départ</td><td>V = 50 mL et P ≈ 1 014 hPa (pression atmosphérique), F ≈ 60,8 N</td><td>Section du piston S = 6,0 cm² ; air à 20 °C</td></tr>
+                <tr><td>Mesurer (capteur idéal)</td><td>10 mL : 5 069 hPa · 20 mL : 2 535 hPa · 30 mL : 1 690 hPa · 40 mL : 1 267 hPa · 50 mL : 1 014 hPa · 60 mL : 844,9 hPa</td><td>Pour chaque mesure, P × V ≈ 50 700 hPa·mL (écarts de quelques unités dus à l'arrondi à 4 chiffres significatifs)</td></tr>
+                <tr><td>Mesurer (capteur bruité, par défaut)</td><td>P × V varie d'environ 1 % au plus autour de 50 700 hPa·mL</td><td>Le tableau donne la moyenne, l'écart-type et l'écart maximal, sans verdict. Montrer qu'un produit n'est jamais exactement identique en mesure réelle</td></tr>
+                <tr><td>Relire et juger, prévision</td><td>Prévision voisine de 2 535 hPa : écart à la mesure de l'ordre de 1 à 2 %, dans la tolérance → « acceptable » ; une prévision de type « proportionnelle » (environ 406 hPa) est très loin de la mesure → « à revoir »</td><td>Tolérance = le plus grand de 2 % et de 3 fois la fluctuation relative du capteur (0,5 % par défaut, donc 2 %). La page ne valide pas le choix de l'élève : elle lui montre si son jugement est cohérent avec les chiffres</td></tr>
+                <tr><td>Relire et juger, constance de P × V</td><td>« Oui, aux incertitudes près » avec le capteur bruité comme en mode théorique</td><td>Avec le capteur bruité, l'écart maximal à la moyenne reste voisin de 1 %, sous la tolérance de 2 %</td></tr>
+                <tr><td>Relire et juger, cause d'écart</td><td>Plusieurs causes recevables : volume mort (tuyau, capteur), fuite, compression trop rapide (température), lecture du volume</td><td>La page indique l'effet de la cause choisie sur P × V (par exemple le volume mort ajoute un volume V₀ à chaque mesure) et rappelle qu'aucune de ces causes n'est présente dans le modèle</td></tr>
+                <tr><td>Graphiques</td><td>P = f(V) : hyperbole · P = f(1/V) : droite passant par l'origine · P × V = f(V) : droite horizontale</td><td>La droite P = f(1/V) est la signature d'une proportionnalité entre P et 1/V</td></tr>
+                <tr><td>Conclure, énoncé</td><td>À température constante et pour une quantité de gaz donnée, le produit de la pression par le volume est constant : P₁ × V₁ = P₂ × V₂</td><td>Les conditions font partie de la réponse</td></tr>
+                <tr><td>Défi A (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, V₂ = 40 mL : P₂ = 1 000 × 100 / 40 = 2 500 hPa</td><td>Réponse acceptée à 2 % près ; estimation avant calcul : « plus grande que P₁ » (le volume diminue)</td></tr>
+                <tr><td>Défi B (exemple)</td><td>P₁ = 1 000 hPa, V₁ = 100 mL, P₂ = 2 500 hPa : V₂ = 1 000 × 100 / 2 500 = 40 mL</td><td>La valeur de P₂ affichée est arrondie à 3 chiffres significatifs ; la réponse attendue part de la valeur affichée</td></tr>
+                <tr><td>Défi C (exemple)</td><td>P = 2,0 bar = 2,0 × 10⁵ Pa, S = 10 cm² = 1,0 × 10⁻³ m² : F = 2,0 × 10⁵ × 1,0 × 10⁻³ = 200 N</td><td>Il faut convertir les deux grandeurs (P en pascal, S en m²)</td></tr>
               </tbody>
             </table>
           </div>
@@ -122,12 +145,14 @@
           <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
           <tbody>
             <tr><td>Confondre proportionnalité inverse et proportionnalité directe</td><td>« Si le volume est divisé par 2, la pression est divisée par 2 »</td><td>Sous la seringue, une phrase compare les deux facteurs (« volume multiplié par 0,50, pression multipliée par 2,00 : ces deux facteurs sont inverses »). Dans les défis, l'indice « P et V sont inversement proportionnels » s'affiche si l'élève a inversé le rapport</td></tr>
-            <tr><td>Croire que la relation est affine ou linéaire décroissante</td><td>Tracer une droite entre deux points de P = f(V)</td><td>Le graphique P = f(V) montre la courbe ; l'onglet P = f(1/V) donne la droite attendue ; la case « Afficher la courbe du modèle » aide à voir l'écart</td></tr>
-            <tr><td>Penser que P + V est constant, ou que seul « le produit » compte sans condition</td><td>Additionner les valeurs, oublier la température et la quantité de gaz</td><td>Colonne P × V dans le tableau et carte dédiée ; rappel permanent des conditions de la loi. Si la température ou la quantité de gaz est modifiée dans le volet repliable, un avertissement orange s'affiche et le bilan refuse de comparer des mesures faites dans des conditions différentes</td></tr>
+            <tr><td>Croire que la relation est affine ou linéaire décroissante</td><td>Tracer une droite entre deux points de P = f(V)</td><td>Le graphique P = f(V) montre la courbe ; l'onglet P = f(1/V) donne la droite attendue ; la case « Afficher la courbe du modèle » aide à voir l'écart. Dans « Prévoir », le choix « somme constante » ou « proportionnel » est confronté à la mesure dans « Relire et juger »</td></tr>
+            <tr><td>Penser que P + V est constant, ou que seul « le produit » compte sans condition</td><td>Additionner les valeurs, oublier la température et la quantité de gaz</td><td>Colonne P × V dans le tableau et carte dédiée ; rappel permanent des conditions de la loi ; classement des grandeurs dans « Poser le problème ». Si la température ou la quantité de gaz est modifiée dans le volet repliable, un avertissement orange s'affiche et le bilan refuse de comparer des mesures faites dans des conditions différentes</td></tr>
             <tr><td>Imaginer que les particules se compriment ou que leur nombre change</td><td>« Il y a plus de particules quand on comprime »</td><td>Le nombre de particules dessinées reste le même ; seul le volume varie. Le compteur de chocs par seconde (environ 4 par seconde à 60 mL, environ 25 par seconde à 10 mL) relie le modèle microscopique à la pression</td></tr>
             <tr><td>Oublier les conversions d'unités dans F = P·S</td><td>Multiplier des hPa par des cm², ou des bar par des m²</td><td>La carte « Force pressante » détaille le calcul en pascal et en m². Le défi C donne un indice ciblé selon l'erreur : section non convertie, pression non convertie, ou aucune des deux</td></tr>
-            <tr><td>Exiger que P × V soit exactement identique</td><td>« Mes produits ne sont pas égaux, la loi est fausse »</td><td>Avec le capteur bruité (réglage par défaut), les produits varient légèrement ; le bilan conclut à partir d'un écart inférieur à 2 %, aux incertitudes de mesure près</td></tr>
-            <tr><td>Conclure à partir d'une seule mesure ou de mesures trop proches</td><td>Trois mesures entre 48 et 52 mL</td><td>La consigne demande des mesures réparties entre 10 et 60 mL. Le bilan n'apparaît qu'à partir de 3 mesures, mais la page ne vérifie pas la répartition : à contrôler</td></tr>
+            <tr><td>Exiger que P × V soit exactement identique</td><td>« Mes produits ne sont pas égaux, la loi est fausse »</td><td>Avec le capteur bruité (réglage par défaut), les produits varient légèrement. Le tableau donne la dispersion sans verdict ; dans « Relire et juger », l'élève décide, et la page compare son jugement à la tolérance (le plus grand de 2 % et de 3 fois la fluctuation du capteur)</td></tr>
+            <tr><td>Juger une prévision « fausse » parce qu'elle n'est pas égale à la mesure</td><td>« Ma prévision est de 2 535, la mesure de 2 548 : j'avais faux »</td><td>La page affiche l'écart en hPa et en pourcentage à côté de la fluctuation du capteur, et demande de juger la compatibilité (acceptable ou à revoir). Elle ne tranche pas à la place de l'élève</td></tr>
+            <tr><td>Prévoir après avoir mesuré</td><td>Enregistrer la prévision une fois le tableau rempli</td><td>La prévision enregistrée porte la mention « avant toute mesure » ou « après n mesures », et « puis modifiée » le cas échéant ; elle apparaît dans le carnet. Aucun blocage : c'est à l'enseignant d'en parler</td></tr>
+            <tr><td>Conclure à partir d'une seule mesure ou de mesures trop proches</td><td>Trois mesures entre 48 et 52 mL</td><td>La consigne demande des mesures réparties entre 10 et 60 mL. La tâche « Relire et juger » demande au moins 3 mesures aux conditions de départ pour juger P × V, mais la page ne vérifie pas leur répartition : à contrôler</td></tr>
           </tbody>
         </table>
       </div>
@@ -143,15 +168,17 @@
         <li>L'information « température » ne passe pas par la couleur seule : « Paroi : θ = 20 °C » est écrit sous la seringue, comme la valeur de la force à côté de la flèche.</li>
         <li>Si l'appareil demande de réduire les animations, les particules démarrent à l'arrêt ; un bouton « Pause » ou « Animer » est toujours disponible.</li>
         <li>Mode sombre géré. Aucun débordement horizontal à 390 px de large.</li>
+        <li>Les champs de saisie (question, prévision, conclusion, listes de choix) ont une étiquette ; les saisies ne sont pas remises à zéro quand le capteur fluctue.</li>
+        <li>Le carnet se copie en texte (collable dans un traitement de texte) ; les mesures se copient séparées par des tabulations pour un tableur ; une impression en PDF est possible.</li>
       </ul>
-      <p class="note"><b>Ce qui n'a pas été fait :</b> la page n'a pas été auditée (RGAA) ni testée avec un lecteur d'écran réel, ni avec des élèves. Le graphique est un dessin dont la description est une étiquette fixe : ses points sont lisibles dans le tableau de mesures, mais il n'a pas d'équivalent textuel dynamique. Les boutons font 40 px de haut et le curseur 32 px, sous les 44 px souvent recommandés pour le tactile.</p>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> la page n'a pas été auditée (RGAA) ni testée avec un lecteur d'écran réel, ni avec des élèves. Le parcours en boucle, la formulation des retours et la tolérance de jugement n'ont pas été éprouvés en classe. Le graphique est un dessin dont la description est une étiquette fixe : ses points sont lisibles dans le tableau de mesures, mais il n'a pas d'équivalent textuel dynamique. Les boutons font 40 px de haut et le curseur 32 px, sous les 44 px souvent recommandés pour le tactile.</p>
       <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
       <ul class="plain">
         <li>En binôme : un élève manipule le piston, l'autre note les mesures puis inverse les rôles pour les défis.</li>
-        <li>En classe entière : étape 1 au tableau avec vote à main levée, puis une mesure projetée avant de laisser les élèves explorer.</li>
+        <li>En classe entière : prévision écrite ou vote à main levée au tableau avant d'ouvrir la page, puis une mesure projetée avant de laisser les élèves explorer.</li>
         <li>Pour alléger la charge de lecture : laisser l'onglet P × V = f(V) ouvert, activer d'abord le « Modèle théorique » (mesures exactes) puis le désactiver et limiter le défi à un seul type (A ou B).</li>
-        <li>Pour différencier vers le haut : demander de prévoir la valeur de P à un volume donné avant de la lire, puis d'ouvrir le volet « Pour aller plus loin (Terminale) ».</li>
-        <li>Trace écrite : recopier le tableau et la phrase de conclusion, ou imprimer la page en PDF avec les mesures affichées.</li>
+        <li>Pour différencier vers le haut : demander d'expliquer l'écart prévision / mesure à partir de la cause choisie dans « Relire et juger », puis d'ouvrir le volet « Pour aller plus loin (Terminale) ».</li>
+        <li>Trace écrite : le carnet copié ou imprimé (question, prévision, mesures, jugements, conclusion) ; la relecture de l'élève peut être évaluée avec la grille « Couverture des compétences ».</li>
       </ul>
     </section>
 
@@ -162,11 +189,13 @@
         <li>La compression est supposée lente, à température constante, sans fuite et sans « volume mort » (tuyau et capteur). Dans une vraie seringue, ce volume supplémentaire écarte légèrement les mesures de la loi.</li>
         <li>Les particules dessinées sont illustratives : une vingtaine de points au lieu d'environ 10²¹ molécules, et leurs vitesses ne sont pas à l'échelle. Le compteur de chocs par seconde est un indicateur d'animation, pas une grandeur mesurable.</li>
         <li>Le gaz est assimilé à de l'air à 20 °C, à la pression atmosphérique au départ (50 mL, environ 1 014 hPa). La section du piston est fixée à 6,0 cm².</li>
+        <li>La tolérance de jugement (le plus grand de 2 % et de 3 fois la fluctuation relative du capteur) est un choix de conception de la page, pas une valeur du programme.</li>
         <li>Le titre de la page parle de « gaz parfaits » alors que le programme de Première parle de loi de Mariotte : à signaler aux élèves, ou à renommer. L'équation d'état du gaz parfait relève de la Terminale.</li>
       </ul>
       <p>Prolongements possibles :</p>
       <ul class="plain">
         <li>Refaire l'expérience avec une vraie seringue et un capteur de pression, éventuellement relié à un microcontrôleur, puis comparer à la simulation (capacité expérimentale : mesurer une pression dans un gaz).</li>
+        <li>Faire concevoir par les élèves un protocole qui limiterait une des causes d'erreur citées dans « Relire et juger » (réduire le volume mort, comprimer lentement).</li>
         <li>Saisir les mesures dans un tableur ou en Python et tracer P = f(1/V) avec sa droite de régression.</li>
         <li>Relier au volume molaire d'un gaz pour déterminer une quantité de matière (thème « Constitution et transformations de la matière »).</li>
         <li>Ouvrir le volet « Pour aller plus loin (Terminale) » : la température et la quantité de gaz y deviennent variables et la page affiche P × V = n·R·T avec les calculs. À réserver aux élèves en avance ou à une séance de transition vers la Terminale.</li>
@@ -184,7 +213,7 @@
   </main>
 
   <footer>
-    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 30/10/2026</span>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 30/10/2026, révisée le 23/11/2026</span>
     <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
   </footer>
 </div>
