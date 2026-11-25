@@ -49,12 +49,12 @@ canvas { display: block; width: 100%; height: auto; background: #fff; border: 1p
 .ctrl { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-top: 12px; }
 .ctrl label { font-weight: 600; }
 .ctrl output { font: 600 16px var(--font-data); min-width: 5.5em; text-align: right; }
-input[type=range] { width: 100%; height: 32px; margin: 0; cursor: pointer; accent-color: var(--accent); }
+input[type=range] { width: 100%; height: 44px; margin: 0; cursor: pointer; accent-color: var(--accent); }
 .note { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
 .note.warn { color: var(--warn); font-weight: 500; }
 .obs { margin: 12px 0 0; font: 500 16px/1.45 var(--font-body); color: var(--accent); min-height: 2.9em; }
 
-.btn { font: 600 14px var(--font-body); padding: 8px 14px; min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn { font: 600 14px var(--font-body); padding: 8px 14px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 .btn:hover { border-color: var(--accent); }
 .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0D1419; } }
@@ -123,6 +123,7 @@ details ul { padding-left: 20px; }
 .parcours li a { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); text-decoration: none; min-height: 44px; }
 .parcours li a:hover { border-color: var(--accent); }
 .parcours li a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.parcours .restart { margin: 10px 0 0; }
 .parcours .etat { font: 500 13px var(--font-data); color: var(--muted); }
 .parcours li.fait .etat { color: var(--ok); font-weight: 600; }
 .panel h3 { margin: 20px 0 2px; font: 600 16px var(--font-head); padding-top: 12px; border-top: 1px solid var(--line); }
@@ -135,7 +136,7 @@ textarea, select { font: 400 16px/1.5 var(--font-body); padding: 8px 10px; min-h
 textarea { width: 100%; min-height: 88px; resize: vertical; }
 textarea:focus-visible, select:focus-visible, .answer input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .opts { display: flex; flex-direction: column; gap: 2px; }
-.opts label { display: flex; align-items: flex-start; gap: 10px; min-height: 36px; padding: 4px 0; cursor: pointer; font-weight: 400; }
+.opts label { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 4px 0; cursor: pointer; font-weight: 400; }
 .opts input { flex: none; margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent); }
 .opts input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .help { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
@@ -176,6 +177,7 @@ textarea:focus-visible, select:focus-visible, .answer input:focus-visible { outl
       <li data-t="val"><a href="#t-val"><span class="comp"><abbr title="Valider">VAL</abbr> · Relire et juger</span><span class="etat">À faire</span></a></li>
       <li data-t="com"><a href="#t-com"><span class="comp"><abbr title="Communiquer">COM</abbr> · Conclure</span><span class="etat">À faire</span></a></li>
     </ul>
+    <p class="restart"><button type="button" class="btn" id="restart">Recommencer</button> <span class="status" id="restart-status" role="status" aria-live="polite"></span></p>
   </nav>
 
   <section class="panel" id="t-app" aria-labelledby="h-app">
@@ -1103,6 +1105,25 @@ textarea:focus-visible, select:focus-visible, .answer input:focus-visible { outl
       li.querySelector('.etat').textContent = ok ? '✓ Fait' : 'À faire';
     });
   }
+
+  /* Recommencer : remet à zéro les saisies, la prévision, les mesures et les défis (rien n'est conservé par la page) */
+  function recommencer() {
+    if (!window.confirm('Tout effacer et recommencer ? Ta question, ta prévision, tes mesures et ta conclusion seront perdues.')) return;
+    st.rows = []; st.prev = null; st.prevRevisee = false;
+    ['app-q', 'ana-val', 'val-p-txt', 'com-txt', 'copie-txt'].forEach(function (id) { $(id).value = ''; });
+    ['tri-V', 'tri-P', 'tri-th', 'tri-n', 'val-err', 'ch-plaus'].forEach(function (id) { $(id).value = ''; });
+    Array.prototype.forEach.call(document.querySelectorAll('input[type=radio], input[type=checkbox].com-chk'), function (e) { e.checked = false; });
+    ['tri-fb', 'ana-status', 'val-err-fb', 'com-status'].forEach(function (id) { $(id).textContent = ''; });
+    $('copie-secours').hidden = true;
+    setPrevDisabled(false);
+    okCount = 0; doneCount = 0;
+    st.th = TH_REF; st.n = N_REF; $('thSlider').value = TH_REF; $('nSlider').value = N_REF; syncParticles();
+    setV(V_REF); readSensor(); refresh();
+    renderTable(); renderVal(); triFeedback(); newChallenge();
+    $('restart-status').textContent = 'Tout est remis à zéro.';
+    $('app-q').focus();
+  }
+  $('restart').addEventListener('click', recommencer);
 
   $('app-q').addEventListener('input', majParcours);
   ['V', 'P', 'th', 'n'].forEach(function (g) { $('tri-' + g).addEventListener('change', triFeedback); });
