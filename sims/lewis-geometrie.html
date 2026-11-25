@@ -21,7 +21,7 @@ h3{font-size:1rem;margin:.9rem 0 .3rem}
 .tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
 .grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
-@media (max-width:840px){.grid2{grid-template-columns:1fr}}
+@media (max-width:840px){.grid2{grid-template-columns:minmax(0,1fr)}}
 .two{display:flex;gap:12px;flex-wrap:wrap}
 .two>div{flex:1 1 220px;text-align:center}
 .comp{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 8px;font-size:.78rem;color:var(--mute);background:var(--stage);margin:0 6px 4px 0}
@@ -73,6 +73,20 @@ svg.lewis .hit:focus-visible circle.ring,svg.lewis .hit:focus-visible line.ring{
 #toast.on{opacity:1}
 pre.copy{white-space:pre-wrap;background:var(--stage);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.84rem;max-height:300px;overflow:auto}
 sub,sup{line-height:0}
+.btn,.tab,.seg button,.opts button{min-height:44px}
+select,input[type=text],input[type=number]{min-height:44px}
+input[type=checkbox]{width:22px;height:22px;flex:0 0 auto}
+label.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px}
+input[type=range]{min-height:44px}
+.note{font-size:.88rem;color:var(--mute)}
+.vblk{border-top:1px solid var(--line);padding:6px 0}
+@media print{
+  body{background:#fff;color:#000}
+  .tabs,header,#toast,main>section:not(#p-carnet),#p-carnet>.card:not(#nbCard),.noprint{display:none!important}
+  #p-carnet{display:block!important}
+  #nbCard{border:0;margin:0;padding:0}
+  pre.copy{max-height:none;overflow:visible;border:0;font-size:11pt;color:#000;background:#fff}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -110,6 +124,8 @@ sub,sup{line-height:0}
     <p>Pourtant, ces deux entités n'ont pas la même forme dans l'espace. Le schéma de Lewis décrit <b>l'enchaînement des atomes</b> et la répartition des électrons de valence, mais il ne dit rien de leur <b>disposition dans l'espace</b>.</p>
     <label for="q"><b>Problématique.</b> Écris, avec tes mots, la question à laquelle on va répondre.</label>
     <textarea id="q" placeholder="Comment peut-on prévoir…"></textarea>
+    <p><label for="qKnow"><b>Ce que je connais</b> (dans la situation)</label><input type="text" id="qKnow" style="width:100%" placeholder="ex. le nombre d'atomes, la formule, le schéma de Lewis…"></p>
+    <p><label for="qSeek"><b>Ce que je cherche</b></label><input type="text" id="qSeek" style="width:100%" placeholder="ex. la forme de l'entité, la valeur d'un angle…"></p>
     <div class="btns">
       <button class="btn" data-go="lewis" type="button">Commencer par le schéma de Lewis</button>
       <button class="btn sec" data-go="mol" type="button">Observer d'abord les entités en 3D</button>
@@ -149,8 +165,8 @@ sub,sup{line-height:0}
       <div>
         <div class="stage"><canvas class="cv" id="cv-lab" aria-label="Modèle 3D des directions des doublets autour de l'atome central. Glisser pour tourner."></canvas></div>
         <div class="row small">
-          <label><input type="checkbox" id="lab-auto" checked> Rotation automatique</label>
-          <label><input type="checkbox" id="lab-hidelp"> Masquer les doublets non liants (voir seulement les atomes)</label>
+          <label class="chk"><input type="checkbox" id="lab-auto" checked> Rotation automatique</label>
+          <label class="chk"><input type="checkbox" id="lab-hidelp"> Masquer les doublets non liants (voir seulement les atomes)</label>
         </div>
         <div class="legend"><span><span class="dot" style="background:var(--lp)"></span>doublet non liant</span><span><span class="dot" style="background:#9aa3b2"></span>atome lié (doublet liant)</span></div>
       </div>
@@ -172,8 +188,8 @@ sub,sup{line-height:0}
         <div class="row small">
           <label>Doublets non liants :
             <select id="mol-lp"><option value="none">aucun</option><option value="center" selected>atome central</option><option value="all">tous</option></select></label>
-          <label><input type="checkbox" id="mol-auto" checked> Rotation</label>
-          <label><input type="checkbox" id="mol-labels" checked> Symboles</label>
+          <label class="chk"><input type="checkbox" id="mol-auto" checked> Rotation</label>
+          <label class="chk"><input type="checkbox" id="mol-labels" checked> Symboles</label>
         </div>
       </div>
       <div id="molPanel"></div>
@@ -185,13 +201,14 @@ sub,sup{line-height:0}
 <!-- ============ 5. WHO ============ -->
 <section id="p-who" role="tabpanel" hidden>
   <div class="card">
-    <span class="comp"><abbr title="Valider">VAL</abbr> · Identifier et justifier</span>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Observer</span>
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Raisonner</span>
     <h2>Qui est-ce ?</h2>
     <p class="small mute">Un modèle apparaît, sans nom. Retrouve l'entité à partir de ce que tu vois. Tu peux faire apparaître les doublets non liants pour t'aider.</p>
     <div class="row">
       <div class="seg" role="group" aria-label="Niveau"><button type="button" data-wm="color" aria-pressed="true">Atomes colorés</button><button type="button" data-wm="shape" aria-pressed="false">Forme seule</button></div>
-      <label class="small"><input type="checkbox" id="who-lp"> Montrer les doublets non liants</label>
-      <label class="small"><input type="checkbox" id="who-auto" checked> Rotation</label>
+      <label class="chk small"><input type="checkbox" id="who-lp"> Montrer les doublets non liants</label>
+      <label class="chk small"><input type="checkbox" id="who-auto" checked> Rotation</label>
     </div>
     <div class="grid2">
       <div>
@@ -226,14 +243,15 @@ sub,sup{line-height:0}
   </div>
   <div class="card">
     <h2>Mon explication</h2>
+    <p class="small mute" id="qEcho"></p>
     <label for="expl">Explique, sur l'exemple d'une entité de ton choix, comment la répulsion des paires d'électrons de la couche de valence permet de prévoir sa géométrie.</label>
     <textarea id="expl" placeholder="Pour l'entité …, l'atome central est entouré de … doublets …"></textarea>
     <div class="small mute" id="vocab"></div>
   </div>
-  <div class="card">
+  <div class="card" id="nbCard">
     <h2>Mon carnet</h2>
-    <p class="small mute">Il se remplit tout seul avec ce que tu fais dans les étapes. Copie-le pour le coller dans ton compte rendu.</p>
-    <div class="btns"><button class="btn" id="copyNb" type="button">Copier mon carnet</button></div>
+    <p class="small mute noprint">Il se remplit tout seul avec ce que tu fais dans les étapes. Copie-le ou imprime-le pour ton compte rendu.</p>
+    <div class="btns noprint"><button class="btn" id="copyNb" type="button">Copier mon carnet</button><button class="btn sec" id="printNb" type="button">Imprimer ou enregistrer en PDF</button><button class="btn sec" id="resetAll" type="button">Recommencer</button></div>
     <pre class="copy" id="nbPre"></pre>
   </div>
 </section>
@@ -491,7 +509,7 @@ function sceneOf(e,opt){
 }
 
 /* ======================= État de l'élève ======================= */
-const S={question:'',lewisDone:{},counts:{},pred:{},meas:[],valChoice:null,valNum:'',who:{n:0,ok:0,cur:null,mode:'color',hints:0},locDone:{},explain:'',map:[],mapOk:false};
+const S={question:'',know:'',seek:'',labNote:{},valText:'',lewisDone:{},counts:{},pred:{},meas:[],valChoice:null,valNum:'',who:{n:0,ok:0,cur:null,mode:'color',hints:0},locDone:{},explain:'',map:[],mapOk:false};
 const lewisInst={};
 
 /* ======================= Schéma de Lewis : diagnostic pur ======================= */
@@ -557,7 +575,7 @@ function lewisSVG(m,st,o){
       s+=`<line x1="${cx-px*hl}" y1="${cy-py*hl}" x2="${cx+px*hl}" y2="${cy+py*hl}" stroke="var(--lp)" stroke-width="${3.6*k}" stroke-linecap="round"/>`;
     });
     const sel=st.sel&&st.sel.t==='a'&&st.sel.i===i,done=o.done&&o.done[i];
-    if(o.interactive)s+=`<g class="hit" data-a="${i}" tabindex="0" role="button" aria-label="Atome ${a.s} : ${plural(n,'doublet non liant','doublets non liants')}. Activer pour agir"><circle class="ring" cx="${x}" cy="${y}" r="${(R+6*k)}" fill="transparent" stroke="${sel?'var(--accent)':'transparent'}" stroke-width="${sel?3:0}" pointer-events="all"/>`;
+    if(o.interactive)s+=`<g class="hit" data-a="${i}" tabindex="0" role="button" aria-label="Atome ${a.s} : ${plural(n,'doublet non liant','doublets non liants')}. Activer pour agir"><circle class="ring" cx="${x}" cy="${y}" r="${Math.max(R+6*k,17)}" fill="transparent" stroke="${sel?'var(--accent)':'transparent'}" stroke-width="${sel?3:0}" pointer-events="all"/>`;
     else s+='<g>';
     s+=`<circle cx="${x}" cy="${y}" r="${R}" fill="${bg}" stroke="${EL[a.s].col==='#eef1f5'?'var(--stick)':EL[a.s].col}" stroke-width="${2*k}"/>`;
     s+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${19*k}" font-weight="700" fill="var(--ink)" font-family="system-ui,sans-serif">${a.s}</text>`;
@@ -727,6 +745,8 @@ function initApp(){
   $('#appSvgs').innerHTML=[h2o,co2].map(e=>`<div>${lewisSVG(e,{o:e.sol.o,lp:e.sol.lp},{interactive:false})}<div class="small mute">${e.name} (${e.f})</div></div>`).join('');
   $$('#appSvgs svg').forEach(s=>{s.style.maxHeight='190px'});
   $('#q').addEventListener('input',e=>{S.question=e.target.value;nbRefresh()});
+  $('#qKnow').addEventListener('input',e=>{S.know=e.target.value;nbRefresh()});
+  $('#qSeek').addEventListener('input',e=>{S.seek=e.target.value;nbRefresh()});
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.go)));
 }
 
@@ -786,13 +806,16 @@ const Lab=(()=>{
       else {t+=` Ta prévision était « ${GEO[p.geom].toLowerCase()} » (certitude ${p.cert}/5). Le modèle donne autre chose : reprends le décompte autour de l'atome central (${plural(b,'atome lié','atomes liés')}, ${plural(l,'doublet non liant','doublets non liants')}). Si tu étais très sûr·e, demande-toi ce que cela t'apprend sur ta méthode.`;cls='warn'}
     }
     fb.className='fb '+cls;fb.textContent=t;
+    if(mode==='ent'&&p){const n=$('#labNote');n.hidden=false;$('#labTxt').value=S.labNote[ent.id]||''}
   }
   function panel(){
     const ents=SIMPLE.filter(e=>e.id!=='OH-');
     box.innerHTML=`<div class="row"><label>Entité : <select id="labSel">${ents.map(e=>`<option value="${e.id}">${e.name} (${e.t})</option>`).join('')}<option value="free">Exploration libre</option></select></label></div>
     <div id="labForm"></div>
-    <div class="row small"><label><input type="checkbox" id="labW"> Les doublets non liants repoussent un peu plus (amélioration du modèle)</label></div>
-    <div id="labRead"></div><div class="fb" id="labFb" aria-live="polite"></div>`;
+    <div class="row small"><label class="chk"><input type="checkbox" id="labW"> Les doublets non liants repoussent un peu plus (amélioration du modèle)</label></div>
+    <div id="labRead"></div><div class="fb" id="labFb" aria-live="polite"></div>
+    <div id="labNote" hidden><label for="labTxt" class="small"><b>Ce que cet accord ou cet écart m'apprend</b> (une phrase)</label><textarea id="labTxt" rows="2"></textarea></div>`;
+    $('#labTxt').addEventListener('input',e=>{if(mode==='ent'){S.labNote[ent.id]=e.target.value;nbRefresh()}});
     $('#labSel').value=mode==='free'?'free':ent.id;$('#labW').checked=weighted;
     $('#labSel').addEventListener('change',e=>{if(e.target.value==='free')mode='free';else{mode='ent';ent=byId(e.target.value)}form();$('#labFb').textContent='';$('#labFb').className='fb';dirs();P=randDirs(b+l);w=weights();ranOnce=false;running=false;v.setScene({atoms:[],bonds:[],lobes:[]});$('#labRead').innerHTML=''});
     $('#labW').addEventListener('change',e=>{weighted=e.target.checked;if(ranOnce){setup()}});
@@ -860,13 +883,13 @@ const Mol=(()=>{
     if(reading&&!reading.err)rd=`<p><b>Angle ${reading.label} : ${fr(reading.val)}°</b> <span class="small mute">${Bruit.actif()?'(lecture, ±0,5 %)':'(valeur du modèle)'}</span></p><div class="btns"><button class="btn" id="mRel" type="button">Relever cet angle dans le tableau</button></div>`;
     box.innerHTML=`<div class="row"><label>Entité : <select id="mSel">${SIM3D.map(e=>`<option value="${e.id}" ${e.id===ent.id?'selected':''}>${e.name} (${e.t})</option>`).join('')}</select></label></div>
     <div class="small mute">${p?`Ta prévision (étape 3) : ${GEO[p.geom].toLowerCase()}, certitude ${p.cert}/5.`:'Tu n\'as pas encore fait de prévision pour cette entité (étape 3).'}</div>
-    <div class="row small"><label><input type="checkbox" id="mTh" ${Bruit.actif()?'':'checked'}> Modèle théorique (sans bruit de lecture)</label></div>
+    <div class="row small"><label class="chk"><input type="checkbox" id="mTh" ${Bruit.actif()?'':'checked'}> Modèle théorique (sans bruit de lecture)</label></div>
     ${rd}
     <h3>Tableau de mesures</h3>${tableHtml()}<div class="btns"><button class="btn sec" id="mClr" type="button">Effacer le tableau</button></div>`;
     $('#mSel').addEventListener('change',e=>{ent=byId(e.target.value);sel=[];reading=null;draw();panel()});
     $('#mTh').addEventListener('change',e=>{Bruit.theorique(e.target.checked);if(sel.length===2)computeReading();draw();panel()});
     const rel=$('#mRel');if(rel)rel.addEventListener('click',()=>{
-      const row={id:ent.id,name:ent.name,t:ent.t,label:reading.label,val:reading.val,ideal,geomPred:p?p.geom:null,theory:!Bruit.actif()};
+      const row={id:ent.id,name:ent.name,t:ent.t,label:reading.label,val:reading.val,ideal,geomPred:p?p.geom:null,predCert:p?p.cert:null,theory:!Bruit.actif()};
       const k=S.meas.findIndex(r=>r.id===ent.id&&r.label===row.label);if(k>=0)S.meas[k]=row;else S.meas.push(row);
       toast('Angle relevé');panel();renderVal();nbRefresh();
     });
@@ -882,21 +905,38 @@ const Mol=(()=>{
 })();
 function molRefresh(){Mol.refresh()}
 
-/* VAL : confronter le modèle aux mesures */
+/* VAL : confronter le modèle aux mesures (l'élève juge l'écart, relit sa prévision, conclut) */
 function renderVal(){
   const box=$('#valCard');
   const ang=renderVal.ang||(renderVal.ang=modelAngle(2,2,true));
-  if(!S.meas.length){box.innerHTML=`<span class="comp"><abbr title="Valider">VAL</abbr> · Juger un écart</span><h2>Le modèle idéal colle-t-il aux mesures ?</h2><p class="small mute">Relève au moins un angle dans le tableau (par exemple celui de l'eau) : tu pourras ensuite comparer la mesure à la prédiction du modèle.</p>`;return}
-  const rows=S.meas.map(r=>{const d=r.val-r.ideal,u=Math.max(.1,Math.abs(r.val)*.005),big=Math.abs(d)>2*u+.05;return `<tr><td>${r.t} (${r.label})</td><td>${fr(r.val)}°</td><td>${fr(r.ideal)}°</td><td>${fr(d)}° (${fr(100*d/r.ideal)} %)</td><td>${big?'<span class="wc">plus grand que l\'incertitude de lecture (≈ ±'+fr(u)+'°)</span>':'<span class="okc">compatible avec l\'incertitude de lecture</span>'}</td></tr>`}).join('');
-  box.innerHTML=`<span class="comp"><abbr title="Valider">VAL</abbr> · Juger un écart</span><span class="comp"><abbr title="Communiquer">COM</abbr> · Argumenter</span>
-  <h2>Le modèle idéal colle-t-il aux mesures ?</h2>
-  <div style="overflow-x:auto"><table class="t"><thead><tr><th>Mesure</th><th>Mesuré</th><th>Modèle idéal</th><th>Écart</th><th>Verdict</th></tr></thead><tbody>${rows}</tbody></table></div>
+  const head='<span class="comp"><abbr title="Valider">VAL</abbr> · Juger un écart</span><span class="comp"><abbr title="Communiquer">COM</abbr> · Conclure</span>';
+  if(!S.meas.length){box.innerHTML=head+'<h2>Le modèle idéal colle-t-il aux mesures ?</h2><p class="small mute">Relève au moins un angle dans le tableau (par exemple celui de l\'eau) : tu pourras ensuite comparer la mesure à la prédiction du modèle.</p>';return}
+  const unc=r=>Math.max(.1,Math.abs(r.val)*.005),big=r=>Math.abs(r.val-r.ideal)>2*unc(r)+.05;
+  const items=S.meas.map((r,k)=>{
+    const d=r.val-r.ideal,u=unc(r),e=byId(r.id);
+    const pr=r.geomPred?`${GEO[r.geomPred]} (certitude ${r.predCert}/5) : ${r.geomPred===e.geom?'<span class="okc">même géométrie que le modèle 3D ✓</span>':'<span class="wc">géométrie différente de celle du modèle 3D</span>'}`:'<span class="mute">pas de prévision</span>';
+    let fb='';
+    if(r.judge){
+      const compat=!big(r),good=(r.judge==='oui')===compat;
+      fb=`<div class="fb ${good?'ok':'warn'}" aria-live="polite">`+(good?(compat?`✓ Oui : ${fr(Math.abs(d))}° d'écart pour une incertitude de lecture d'environ ±${fr(u)}°.`:`✓ Non : ${fr(Math.abs(d))}° d'écart, c'est bien plus que l'incertitude de lecture (environ ±${fr(u)}°). Le modèle idéal ne suffit pas à rendre compte de la mesure.`):`À revoir : compare l'écart (${fr(Math.abs(d))}°) à l'incertitude de lecture (environ ±${fr(u)}°) : sont-ils du même ordre de grandeur ?`)+'</div>';
+    }
+    return {tr:`<tr><td>${r.t} (${r.label})</td><td>${fr(r.val)}°</td><td>${fr(r.ideal)}°</td><td>${fr(d)}° (${fr(100*d/r.ideal)} %)</td></tr>`,
+      blk:`<div class="vblk"><p class="small" style="margin:.2rem 0"><b>${r.t} (${r.label})</b> · ta prévision (étape 3) : ${pr}</p>
+      <p class="small" style="margin:.2rem 0">L'écart s'explique-t-il par l'incertitude de lecture ?</p>
+      <div class="opts" role="group" aria-label="Jugement sur l'écart pour ${r.t}"><button type="button" data-j="oui" data-k="${k}" aria-pressed="${r.judge==='oui'}">Oui, il s'explique</button><button type="button" data-j="non" data-k="${k}" aria-pressed="${r.judge==='non'}">Non, il est trop grand</button></div>${fb}</div>`};
+  });
+  box.innerHTML=head+`<h2>Le modèle idéal colle-t-il aux mesures ?</h2>
+  <p class="small mute">Pour chaque mesure, juge si l'écart avec le modèle idéal peut s'expliquer par l'incertitude de lecture (environ 0,5 % de la valeur).</p>
+  <div style="overflow-x:auto"><table class="t"><thead><tr><th>Mesure</th><th>Mesuré</th><th>Modèle idéal</th><th>Écart</th></tr></thead><tbody>${items.map(x=>x.tr).join('')}</tbody></table></div>
+  ${items.map(x=>x.blk).join('')}
   <h3>Comment interpréter les écarts ?</h3>
   <div class="opts" id="vOpts">
     <button type="button" data-v="A" aria-pressed="${S.valChoice==='A'}">A · Les écarts viennent seulement des erreurs de lecture</button>
     <button type="button" data-v="B" aria-pressed="${S.valChoice==='B'}">B · Les doublets non liants (et les liaisons multiples) prennent un peu plus de place : ils « serrent » les angles entre liaisons</button>
     <button type="button" data-v="C" aria-pressed="${S.valChoice==='C'}">C · Le modèle est faux, il faut l'abandonner</button></div>
   <div class="fb" id="vFb" aria-live="polite"></div>
+  <label for="vTxt" class="small"><b>Ma conclusion</b> : que penses-tu du modèle idéal des doublets ? (une ou deux phrases, avec des valeurs)</label>
+  <textarea id="vTxt" rows="3">${S.valText.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea>
   <h3>Améliorer le modèle</h3>
   <p class="small">À l'étape 3, coche « Les doublets non liants repoussent un peu plus ». Pour l'eau, quel angle entre les deux liaisons O–H le modèle donne-t-il alors ?</p>
   <div class="row"><label>Angle H–O–H du modèle amélioré : <input class="n" type="text" inputmode="decimal" id="vNum" value="${S.valNum}"> °</label><button class="btn sec" id="vNumGo" type="button">Vérifier</button><button class="btn sec" id="vGoLab" type="button">Aller à l'étape 3</button></div>
@@ -906,8 +946,10 @@ function renderVal(){
     B:['ok','Oui ✓. Le modèle prévoit bien la forme (coudée, pyramidale…), mais un doublet non liant est plus « étalé » qu\'un doublet liant : il repousse davantage ses voisins et referme un peu les angles. On peut donc améliorer le modèle sans l\'abandonner.'],
     C:['warn','Le modèle prévoit correctement la forme et l\'ordre de grandeur des angles (à quelques degrés près). Un modèle se critique et s\'améliore plutôt qu\'on ne l\'abandonne : qu\'est-ce qu\'il ne prend pas en compte ?']
   };
+  $$('[data-j]',box).forEach(b=>b.addEventListener('click',()=>{S.meas[+b.dataset.k].judge=b.dataset.j;renderVal();const nb=$(`[data-j="${b.dataset.j}"][data-k="${b.dataset.k}"]`);if(nb)nb.focus();nbRefresh()}));
   $$('#vOpts button').forEach(b=>b.addEventListener('click',()=>{S.valChoice=b.dataset.v;$$('#vOpts button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));const m=msgs[S.valChoice];$('#vFb').className='fb '+m[0];$('#vFb').textContent=m[1];nbRefresh()}));
   if(S.valChoice){const m=msgs[S.valChoice];$('#vFb').className='fb '+m[0];$('#vFb').textContent=m[1]}
+  $('#vTxt').addEventListener('input',e=>{S.valText=e.target.value;nbRefresh()});
   $('#vGoLab').addEventListener('click',()=>{Lab.setEntity('H2O');showTab('lab')});
   $('#vNumGo').addEventListener('click',()=>{
     const x=Number($('#vNum').value.replace(',','.'));S.valNum=$('#vNum').value;const fb=$('#vNumFb');
@@ -1018,6 +1060,13 @@ function initCarnet(){
   });
   $('#expl').addEventListener('input',e=>{S.explain=e.target.value;vocab();nbRefresh()});
   $('#copyNb').addEventListener('click',()=>copyNb());
+  $('#printNb').addEventListener('click',()=>{try{window.print()}catch(e){toast('Impression indisponible ici : copie le carnet')}});
+  let armed=null;
+  $('#resetAll').addEventListener('click',e=>{
+    const b=e.currentTarget;
+    if(!armed){b.textContent='Confirmer : tout effacer';armed=setTimeout(()=>{armed=null;b.textContent='Recommencer'},4000);toast('Appuie encore une fois pour tout effacer')}
+    else{clearTimeout(armed);try{history.replaceState(null,'','#app')}catch(x){}location.reload()}
+  });
   vocab();nbRefresh();
 }
 function vocab(){
@@ -1026,25 +1075,29 @@ function vocab(){
 }
 function notebook(){
   const L=[];L.push('CARNET — Du schéma de Lewis à la géométrie des entités','');
-  L.push('Problématique : '+(S.question.trim()||'(à écrire)'),'');
+  L.push('Problématique : '+(S.question.trim()||'(à écrire)'));
+  if(S.know.trim())L.push('Ce que je connais : '+S.know.trim());
+  if(S.seek.trim())L.push('Ce que je cherche : '+S.seek.trim());
+  L.push('');
   const ld=Object.keys(S.lewisDone).filter(k=>S.lewisDone[k]);
   const ldS=ld.filter(k=>byId(k));
   L.push('Schémas de Lewis réussis : '+(ld.length?ld.map(k=>byId(k)?byId(k).t:(COMPLEX.find(x=>x.id===k)||{name:k}).name).join(', '):'aucun pour l\'instant'));
   ld.forEach(k=>{const e=byId(k);if(!e){const c=COMPLEX.find(x=>x.id===k);if(c)L.push(`  - ${c.name} : doublets non liants complétés`);return}const nn=e.nbr[e.c].length,nl=e.sol.lp[e.c];L.push(`  - ${e.t} : atome central ${centerSym(e)}, ${plural(nn,'atome lié','atomes liés')} et ${plural(nl,'doublet non liant','doublets non liants')}`)});
   L.push('');
   const pk=Object.keys(S.pred);L.push('Mes prévisions de géométrie :'+(pk.length?'':' aucune'));
-  pk.forEach(k=>{const p=S.pred[k],e=byId(k);L.push(`  - ${e.t} : ${p.dirs} directions → ${GEO[p.geom].toLowerCase()} (certitude ${p.cert}/5) ; modèle : ${GEO[e.geom].toLowerCase()}`)});
+  pk.forEach(k=>{const p=S.pred[k],e=byId(k);L.push(`  - ${e.t} : ${p.dirs} directions → ${GEO[p.geom].toLowerCase()} (certitude ${p.cert}/5) ; modèle : ${GEO[e.geom].toLowerCase()}`);if((S.labNote[k]||'').trim())L.push('    Ce que cela m\'apprend : '+S.labNote[k].trim())});
   L.push('');
   L.push('Mes mesures d\'angles :'+(S.meas.length?'':' aucune'));
-  S.meas.forEach(r=>L.push(`  - ${r.t} ${r.label} : ${fr(r.val)}° (modèle idéal ${fr(r.ideal)}°, écart ${fr(r.val-r.ideal)}°)`));
+  S.meas.forEach(r=>L.push(`  - ${r.t} ${r.label} : ${fr(r.val)}° (modèle idéal ${fr(r.ideal)}°, écart ${fr(r.val-r.ideal)}°)`+(r.judge?' ; mon jugement : '+(r.judge==='oui'?'écart compatible avec l\'incertitude de lecture':'écart supérieur à l\'incertitude de lecture'):'')));
   if(S.valChoice)L.push('Interprétation retenue : '+{A:'écarts dus aux erreurs de lecture',B:'les doublets non liants occupent plus de place que les doublets liants',C:'le modèle est abandonné'}[S.valChoice]);
+  if(S.valText.trim())L.push('Ma conclusion sur le modèle : '+S.valText.trim());
   if(S.valNum)L.push('Angle H–O–H du modèle amélioré : '+S.valNum+'°');
   L.push('');
   const lk=Object.keys(S.locDone);if(lk.length){lk.forEach(k=>{const n=Object.values(S.locDone[k]).filter(Boolean).length;L.push(`Molécule complexe ${k} : ${n} atome(s) analysé(s)`)});L.push('')}
   L.push('Mon explication :');L.push(S.explain.trim()||'(à rédiger)');
   return L.join('\n');
 }
-function nbRefresh(){const p=$('#nbPre');if(p)p.textContent=notebook()}
+function nbRefresh(){const p=$('#nbPre');if(p)p.textContent=notebook();const q=$('#qEcho');if(q)q.textContent=S.question.trim()?'Ta problématique de départ : « '+S.question.trim()+' »':'Tu n\'as pas encore écrit ta problématique (onglet 1).'}
 async function copyNb(){
   const t=notebook();
   try{await navigator.clipboard.writeText(t);toast('Carnet copié')}
