@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fiche enseignant : du schéma de Lewis à la géométrie des entités · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/lewis-geometrie.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Physique-chimie, enseignement de spécialité · Première</p>
+    <h1>Du schéma de Lewis à la géométrie des entités</h1>
+    <p class="lead">L'élève part de deux schémas de Lewis qui se ressemblent (H<sub>2</sub>O et CO<sub>2</sub>) mais dont les entités n'ont pas la même forme. Il compte les électrons de valence, construit le schéma, fait se repousser les doublets, mesure des angles sur un modèle 3D et confronte le modèle idéal à ces mesures. Il doit comprendre que le schéma de Lewis ne donne pas la forme, mais permet de la prévoir.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale, spécialité physique-chimie</li>
+      <li>Constitution et transformations de la matière</li>
+      <li>55 min en parcours complet (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette ; papier pour le schéma</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/lewis-geometrie.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#competences">Couverture des compétences</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Programme de physique-chimie de la classe de Première, enseignement de spécialité, thème « Constitution et transformations de la matière », rubrique « De la structure à la polarité d'une entité ». <span class="verify">À vérifier dans le BO</span> : les capacités ci-dessous sont reprises d'un relevé du programme, à comparer au texte de l'annexe publiée au BO.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité du programme</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Établir le schéma de Lewis de molécules et d'ions mono ou polyatomiques, à partir du tableau périodique. <span class="verify">À vérifier dans le BO</span></td><td>Étape 2 (neuf entités simples), étape 6 (méthanamine, paracétamol)</td></tr>
+            <tr><td>Lacune électronique <span class="verify">À vérifier dans le BO</span></td><td>Étape 2 : BF<sub>3</sub> (l'atome de bore n'a que 6 électrons autour de lui)</td></tr>
+            <tr><td>Interpréter la géométrie d'une entité à partir de son schéma de Lewis <span class="verify">À vérifier dans le BO</span></td><td>Étapes 3, 4 et 5</td></tr>
+            <tr><td>Utiliser des modèles moléculaires ou des logiciels de représentation moléculaire pour visualiser la géométrie d'une entité <span class="verify">À vérifier dans le BO</span></td><td>Étape 4 (modèle 3D qu'on fait tourner, lecture d'angles)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Les angles mesurés et la comparaison au modèle idéal (étape 4) relèvent du travail sur les modèles et les incertitudes ; la répulsion de doublets est un modèle, sans équivalent exact de formulation dans le programme.</p>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Parcours en boucle, sans verrou : les sept onglets sont accessibles dans n'importe quel ordre, l'élève peut revenir en arrière (par exemple retourner au schéma de Lewis si son modèle ne colle pas aux mesures). Ordre conseillé : 1, 2, 3, 4, puis 5 à 7. Compétences codées d'après la spécification du site (APP, ANA, RÉA, VAL, COM) : seule l'action réellement exercée par l'élève est codée.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Compétence</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. Situation</td><td>APP</td><td>Lit les schémas de Lewis de H<sub>2</sub>O et CO<sub>2</sub>, reformule la problématique avec ses mots, note ce qu'il connaît et ce qu'il cherche.</td><td>Problématique ; « ce que je connais » ; « ce que je cherche »</td></tr>
+            <tr><td>2. Schéma de Lewis</td><td>RÉA</td><td>Compte les électrons de valence, construit le schéma (liaisons, doublets non liants, ordre de liaison), lit le bilan électronique et les charges formelles.</td><td>Schéma validé ; nombre de doublets</td></tr>
+            <tr><td>3. Répulsion des doublets</td><td>ANA, VAL</td><td>Prévoit le nombre de directions et la géométrie, certitude de 1 à 5, lance la répulsion, confronte sa prévision au résultat, écrit ce que l'accord ou l'écart lui apprend.</td><td>Prévision (directions, géométrie, certitude) ; une phrase par entité</td></tr>
+            <tr><td>4. Modèle 3D et angles</td><td>RÉA, VAL, COM</td><td>Choisit deux atomes liés à un même atome central, lit l'angle (bruité, ±0,5 %), le relève dans un tableau. Juge, pour chaque mesure, si l'écart avec le modèle idéal s'explique par l'incertitude de lecture, relit sa prévision de l'étape 3, interprète les écarts, rédige sa conclusion et propose un modèle amélioré.</td><td>Tableau de mesures ; jugement par mesure ; conclusion avec valeurs ; angle H–O–H du modèle amélioré</td></tr>
+            <tr><td>5. Qui est-ce ?</td><td>RÉA, ANA</td><td>Observe une entité (couleur, ou forme seule) et raisonne pour trouver laquelle est compatible.</td><td>Entité identifiée ; indices utilisés</td></tr>
+            <tr><td>6. Molécules complexes</td><td>RÉA, ANA</td><td>Complète le schéma de Lewis de la méthanamine puis du paracétamol (liaisons imposées), puis analyse la géométrie autour d'un atome choisi.</td><td>Schémas validés ; géométrie locale</td></tr>
+            <tr><td>7. Carnet</td><td>COM</td><td>Rédige son explication, complète la carte mentale, copie ou imprime son carnet.</td><td>Carnet copié ou imprimé</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="competences" aria-labelledby="h-competences">
+      <h2 id="h-competences">Couverture des compétences</h2>
+      <p>Lecture structurelle de la page : ● exercée dans une tâche identifiable, ◐ guidée ou partielle. Ce n'est pas une mesure d'effet sur les élèves.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Compétence</th><th scope="col">Dans la page</th><th scope="col">À prévoir hors page</th></tr></thead>
+          <tbody>
+            <tr><td>APP · S'approprier</td><td>● Étape 1 : problématique rédigée, ce qui est connu et cherché</td><td>Faire formuler la problématique à l'oral avant d'ouvrir la page, ou la comparer à celle de l'énoncé du TP</td></tr>
+            <tr><td>ANA · Analyser / Raisonner</td><td>● Étape 3 (prévision engagée avec certitude), étape 5 (raisonnement), étape 6 (géométrie locale)</td><td>Faire justifier la prévision à l'écrit, sans le modèle</td></tr>
+            <tr><td>RÉA · Réaliser</td><td>● Étapes 2, 4 et 6 (construire, mesurer, compléter)</td><td>Compléter avec des modèles moléculaires physiques si disponibles</td></tr>
+            <tr><td>VAL · Valider</td><td>● Étape 4 : jugement de l'écart mesure/modèle par l'élève, prévision relue ; étape 3 : confrontation de la prévision</td><td>Discuter à l'oral ce qu'un « bon » accord veut dire (comparaison avec 104,5° pour l'eau)</td></tr>
+            <tr><td>COM · Communiquer</td><td>● Étape 4 (conclusion rédigée) et étape 7 (explication, carnet copiable et imprimable)</td><td>Faire présenter la conclusion à l'oral ou dans un compte rendu de TP</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>2. Électrons de valence</td><td>H<sub>2</sub>O : 8 e⁻ (4 doublets) ; CO<sub>2</sub> : 16 e⁻ ; NH<sub>3</sub> : 8 e⁻ ; CH<sub>4</sub> : 8 e⁻ ; NH<sub>4</sub><sup>+</sup> : 8 e⁻ ; H<sub>3</sub>O<sup>+</sup> : 8 e⁻ ; BF<sub>3</sub> : 24 e⁻ (lacune sur B)</td><td>Nombre total = somme des électrons de valence des atomes, moins la charge de l'ion</td></tr>
+                <tr><td>3. Directions et géométrie</td><td>H<sub>2</sub>O : 4 directions, coudée ; NH<sub>3</sub> : 4 directions, pyramidale ; CH<sub>4</sub> : 4 directions, tétraédrique ; CO<sub>2</sub> : 2 directions, linéaire ; BF<sub>3</sub> : 3 directions, triangulaire plane</td><td>Une double liaison compte pour une seule direction</td></tr>
+                <tr><td>4. Angles lus</td><td>H–O–H : 104,5° (idéal 109,5°) ; H–N–H : 107° ; H–C–H dans CH<sub>4</sub> : 109,5° ; O=C=O : 180° ; CH<sub>2</sub>O : H–C–H 116,4°, H–C=O 121,8°</td><td>Lecture bruitée, incertitude d'environ 0,5 % de la valeur ; l'écart de l'eau (5°) est largement supérieur au bruit</td></tr>
+                <tr><td>4. Interprétation des écarts</td><td>Réponse B : les doublets non liants (et liaisons multiples) prennent plus de place et referment les angles</td><td>Réponse C écartée : le modèle prévoit bien la forme, on l'améliore, on ne l'abandonne pas</td></tr>
+                <tr><td>4. Modèle amélioré</td><td>H<sub>2</sub>O : 104,4° ; NH<sub>3</sub> : 106,7° avec le poids 1,25 donné au doublet non liant</td><td>Ce poids est un réglage pédagogique, pas une valeur issue du programme</td></tr>
+                <tr><td>6. Paracétamol</td><td>Schéma de Lewis complet (58 e⁻) ; C carbonyle : triangulaire plane ; N : pyramidale en première approximation</td><td>Voir « Limites »</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Confondre schéma de Lewis et forme de la molécule</td><td>« CO<sub>2</sub> est comme H<sub>2</sub>O parce que le schéma se ressemble »</td><td>Étape 1 : les deux schémas sont mis côte à côte, la problématique naît de cette ressemblance</td></tr>
+            <tr><td>Compter une double liaison comme deux directions</td><td>CO<sub>2</sub> à 4 directions</td><td>Étapes 2 et 3 : la consigne rappelle qu'une liaison multiple compte pour une seule direction, et le bilan par atome affiche le nombre de directions</td></tr>
+            <tr><td>Ne pas compter les doublets non liants dans la géométrie</td><td>L'eau « linéaire » ou NH<sub>3</sub> « plane »</td><td>Étape 3 : la répulsion fait apparaître les 4 directions, et le modèle 3D montre les doublets</td></tr>
+            <tr><td>Croire qu'un écart de quelques degrés est une erreur de lecture</td><td>Choix A à l'étape 4</td><td>L'élève compare lui-même l'écart à l'incertitude de lecture ; le retour l'invite à refaire la comparaison</td></tr>
+            <tr><td>Oublier la charge dans le nombre d'électrons</td><td>Mauvais total pour NH<sub>4</sub><sup>+</sup> ou HO<sup>−</sup></td><td>Étape 2 : bilan électronique par atome et somme des charges formelles</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>Vérifié dans le navigateur : parcours complet au clavier, cibles tactiles d'au moins 44 px, retours annoncés en zone <code>aria-live</code>, pas de défilement horizontal à 390 px et 1100 px en thème clair et sombre, aucune requête hors du site.</p>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> aucun test avec des élèves, aucun test avec un lecteur d'écran, aucun test sur appareil réel (tablette, vidéoprojecteur). Le modèle 3D est un dessin sur canevas : la lecture d'angle se fait en cliquant sur deux atomes, pas au clavier seul.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme, un élève manipule et l'autre rédige la problématique et la conclusion, puis on échange.</li>
+        <li>En classe entière : étapes 1 à 3 projetées, étapes 4 à 7 en autonomie.</li>
+        <li>Différenciation : étape 5 (« Qui est-ce ? ») pour consolider, étape 6 pour aller plus loin.</li>
+        <li>Remise du travail : le carnet se copie dans le compte rendu ou s'imprime en PDF ; aucune donnée d'élève n'est conservée par la page.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>La répulsion des doublets est un modèle qualitatif : le poids 1,25 donné au doublet non liant est ajusté pour retrouver 104,4° (eau) et 106,7° (ammoniac), il ne résulte pas d'un calcul quantique.</li>
+        <li>La valeur de référence de l'angle H–O–H dans H<sub>3</sub>O<sup>+</sup> utilisée par la page est 113° ; elle dépend de la source, à confirmer avant de la présenter comme une mesure.</li>
+        <li>Dans le paracétamol, l'azote d'un groupe amide est en réalité presque plan à cause de la conjugaison avec le carbonyle : la page l'analyse comme pyramidal (4 directions), ce que le modèle des doublets prévoit, et le signale dans le retour de l'étape 6.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Comparer avec un logiciel de représentation moléculaire (Avogadro, par exemple) pour visualiser la même entité.</li>
+        <li>Enchaîner sur la polarité d'une entité à partir de sa géométrie et de l'électronégativité (rubrique suivante du programme).</li>
+        <li>Exercice d'évaluation : prévoir la géométrie de NH<sub>4</sub><sup>+</sup> et de BF<sub>3</sub> sans l'outil, puis vérifier.</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> texte exact des capacités du programme de Première (relevé le 25/11/2026 dans des documents d'enseignants et dans le document éduscol « Modéliser le cortège électronique », à confronter à l'annexe du BO) ; angles de référence de H<sub>3</sub>O<sup>+</sup> et de CH<sub>2</sub>O.</p>
+      <ul class="plain">
+        <li><a href="https://eduscol.education.fr/document/22837/download">Éduscol, Physique-chimie 2de 1re : « Modéliser le cortège électronique »</a></li>
+        <li>Programme de physique-chimie de la classe de Première, enseignement de spécialité, voie générale (BO) : <span class="verify">lien à ajouter après vérification</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 25/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>
