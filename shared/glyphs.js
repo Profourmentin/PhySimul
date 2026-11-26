@@ -109,6 +109,20 @@
     return s;
   });
 
+  /* Polarité d'une liaison : atome peu électronégatif (petit), atome très électronégatif (grand), nuage d'électrons plus dense du côté du second ;
+     dessous, barycentre des charges + (cercle creux) et des charges − (disque plein) séparés d'une distance a (dipôle). */
+  add("polarite", function () {
+    var s = "", k, d = [[73, 42], [77, 58], [83, 50], [92, 45], [97, 55], [103, 47], [108, 53], [114, 41], [119, 58], [125, 44], [131, 62], [122, 36], [142, 36], [146, 63], [153, 50], [138, 49]];
+    s += '<line class="s" style="stroke-width:3" x1="69" y1="50" x2="112" y2="50"/>';
+    s += '<circle class="water s" cx="56" cy="50" r="13"/><circle class="water s" cx="134" cy="50" r="22"/>';
+    for (k = 0; k < d.length; k++) s += '<circle class="f" cx="' + d[k][0] + '" cy="' + d[k][1] + '" r="1.9"/>';
+    s += '<line class="s dash" x1="56" y1="64" x2="56" y2="86"/><line class="s dash" x1="134" y1="74" x2="134" y2="86"/>';
+    s += '<circle class="s" cx="56" cy="94" r="5.5"/><circle class="f" cx="134" cy="94" r="5.5"/>';
+    s += '<line class="v" style="stroke-width:2.2" x1="66" y1="94" x2="124" y2="94"/>';
+    s += '<line class="v" style="stroke-width:2.2" x1="66" y1="89" x2="66" y2="99"/><line class="v" style="stroke-width:2.2" x1="124" y1="89" x2="124" y2="99"/>';
+    return s;
+  });
+
   /* Oxydoréduction : le réducteur cède des électrons à l'oxydant. */
   add("redox", function () {
     var s = "";

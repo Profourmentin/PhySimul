@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polarité des liaisons, polarité des molécules</title>
+<style>
+:root,[data-theme=light]{--bg:#f4f6f9;--card:#fff;--ink:#1c2430;--mute:#596577;--line:#d8dee7;--accent:#2d5bd1;--accent-ink:#fff;--ok:#1b7a47;--warn:#9a5a00;--stage:#eef2f8;--stick:#8a93a3;--neg:#c2410c;--pos:#1d4ed8;--dots:#2d5bd1}
+@media (prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#0f141b;--card:#171d27;--ink:#e8ecf2;--mute:#9aa7b9;--line:#2b3443;--accent:#7ba3ff;--accent-ink:#0b1220;--ok:#5fd493;--warn:#f0b35a;--stage:#0d1219;--stick:#7d889b;--neg:#fb923c;--pos:#7ba3ff;--dots:#9db8ff}}
+[data-theme=dark]{--bg:#0f141b;--card:#171d27;--ink:#e8ecf2;--mute:#9aa7b9;--line:#2b3443;--accent:#7ba3ff;--accent-ink:#0b1220;--ok:#5fd493;--warn:#f0b35a;--stage:#0d1219;--stick:#7d889b;--neg:#fb923c;--pos:#7ba3ff;--dots:#9db8ff}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1120px;margin:0 auto;padding:10px 14px 50px}
+.top{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+h1{font-size:1.35rem;margin:.3rem 0 .1rem;line-height:1.25}
+h2{font-size:1.12rem;margin:.2rem 0 .5rem}
+h3{font-size:1rem;margin:1rem 0 .3rem}
+.sub{color:var(--mute);font-size:.88rem}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-top:6px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.88rem;white-space:nowrap}
+.tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tab.b{border-style:dashed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:840px){.grid2{grid-template-columns:1fr}}
+.two{display:flex;gap:12px;flex-wrap:wrap}
+.two>div{flex:1 1 260px;min-width:0}
+.comp{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 8px;font-size:.78rem;color:var(--mute);background:var(--stage);margin:0 6px 4px 0}
+.comp abbr{text-decoration:none;font-weight:700;color:var(--ink)}
+.part{display:inline-block;font-size:.78rem;font-weight:700;color:var(--accent);margin:0 8px 4px 0;letter-spacing:.02em}
+.btn{font:inherit;font-size:.92rem;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:7px 14px;border-radius:8px;cursor:pointer}
+.btn.sec{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.tab:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.seg button:focus-visible,.opts button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:6px 0}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:.86rem;border:0;background:var(--card);color:var(--ink);padding:6px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+select,input[type=text],input[type=number],textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px;max-width:100%}
+textarea{width:100%;min-height:78px;resize:vertical}
+input.n{width:78px}
+input[type=range]{width:min(320px,100%)}
+label{font-size:.92rem}
+.mute{color:var(--mute)}
+.small{font-size:.86rem}
+.fb{margin:8px 0;padding:9px 11px;border-radius:8px;border-left:4px solid var(--line);background:var(--stage);font-size:.93rem}
+.fb.ok{border-left-color:var(--ok)}
+.fb.warn{border-left-color:var(--warn)}
+.fb:empty{display:none}
+.okc{color:var(--ok);font-weight:600}
+.wc{color:var(--warn);font-weight:600}
+.neg{color:var(--neg);font-weight:700}
+.pos{color:var(--pos);font-weight:700}
+table.t{border-collapse:collapse;width:100%;font-size:.88rem}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:middle}
+table.t th{color:var(--mute);font-weight:600}
+.tw{overflow-x:auto}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+canvas.cv{display:block;width:100%;height:320px;touch-action:none;cursor:grab}
+canvas.cv:active{cursor:grabbing}
+canvas.cl{display:block;width:100%;height:190px}
+canvas.st{display:block;width:100%;height:260px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.82rem;color:var(--mute);margin:6px 0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid var(--line);vertical-align:-1px;margin-right:4px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;border:1px solid var(--line);font-size:.8rem;background:var(--stage);color:var(--mute)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.opts button,.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 11px;border-radius:8px;cursor:pointer}
+.opts button[aria-pressed=true],.chip[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opts.v{flex-direction:column;align-items:stretch}
+.opts.v button{text-align:left}
+.opts button.good{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.chip.sn[aria-pressed=true]{background:var(--neg);border-color:var(--neg);color:#fff}
+.chip.sp[aria-pressed=true]{background:var(--pos);border-color:var(--pos);color:#fff}
+.pt{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;max-width:640px}
+.pt .c{border:1px solid var(--line);border-radius:6px;min-height:50px;padding:3px 2px;text-align:center;font-size:.78rem;line-height:1.15;background:var(--stage);color:var(--ink);display:flex;flex-direction:column;justify-content:center}
+.pt .c b{font-size:1rem}
+.pt .gap{border:0;background:none}
+.pt button.c{cursor:pointer;font:inherit}
+.pt .c.sel{outline:3px solid var(--accent);outline-offset:1px}
+.pt .lbl{font-size:.7rem;color:var(--mute);text-align:center}
+.map{display:grid;gap:6px;margin:8px 0}
+.map .node{display:grid;grid-template-columns:28px 1fr 26px;gap:8px;align-items:center}
+.map .node b{display:inline-block;width:26px;height:26px;border-radius:50%;background:var(--stage);border:1px solid var(--line);text-align:center;line-height:24px;font-size:.8rem}
+.map select{width:100%}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+#toast.on{opacity:1}
+pre.copy{white-space:pre-wrap;background:var(--stage);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.84rem;max-height:340px;overflow:auto}
+svg.rep{display:block;background:var(--stage);border:1px solid var(--line);border-radius:10px;max-width:100%}
+sub,sup{line-height:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="top">
+    <div>
+      <a href="../index.html" class="small" style="color:var(--accent)">← Catalogue des simulations</a>
+      <h1>Polarité des liaisons, polarité des molécules</h1>
+      <div class="sub">Première spécialité · Constitution et transformations de la matière · à la suite de « Du schéma de Lewis à la géométrie des entités »</div>
+    </div>
+    <button id="themeBtn" class="btn sec" type="button" aria-label="Changer le thème d'affichage">Thème : auto</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Parcours de l'activité" id="tabs">
+  <button class="tab" role="tab" data-tab="app" aria-selected="true">1 · Situation</button>
+  <button class="tab" role="tab" data-tab="en" aria-selected="false">2 · Électronégativité</button>
+  <button class="tab" role="tab" data-tab="lia" aria-selected="false">3 · Liaison polarisée</button>
+  <button class="tab b" role="tab" data-tab="mol" aria-selected="false">4 · Molécules : situation</button>
+  <button class="tab b" role="tab" data-tab="bar" aria-selected="false">5 · Barycentres</button>
+  <button class="tab b" role="tab" data-tab="atl" aria-selected="false">6 · Atelier</button>
+  <button class="tab b" role="tab" data-tab="exp" aria-selected="false">7 · Test expérimental</button>
+  <button class="tab" role="tab" data-tab="car" aria-selected="false">8 · Carnet</button>
+</nav>
+
+<main>
+<!-- ============ 1. SITUATION ============ -->
+<section id="p-app" role="tabpanel">
+  <div class="card">
+    <span class="part">PARTIE A · LA LIAISON</span>
+    <span class="comp"><abbr title="S'approprier">APP</abbr> · Lire des schémas</span>
+    <span class="comp"><abbr title="S'approprier">APP</abbr> · Énoncer une problématique</span>
+    <h2>Le doublet d'une liaison est-il toujours partagé de la même façon ?</h2>
+    <p>Une liaison covalente, c'est un doublet d'électrons mis en commun par deux atomes. Les nuages de points ci-dessous représentent, en chaque point, la probabilité de trouver les électrons de la liaison : plus les points sont serrés, plus la probabilité de présence est grande.</p>
+    <div class="two">
+      <div><div class="stage"><canvas class="cl" id="cl-hh" role="img" aria-label="Nuage de probabilité de présence du doublet de la molécule H–H : réparti symétriquement entre les deux atomes."></canvas></div><div class="small mute" style="text-align:center">Dihydrogène H–H</div></div>
+      <div><div class="stage"><canvas class="cl" id="cl-hcl" role="img" aria-label="Nuage de probabilité de présence du doublet de la molécule H–Cl : plus dense du côté de l'atome de chlore."></canvas></div><div class="small mute" style="text-align:center">Chlorure d'hydrogène H–Cl</div></div>
+    </div>
+    <div class="row small">
+      <label>Dans H–H, les électrons de la liaison sont <select id="s-hh"><option value="">…</option><option value="eq">répartis également</option><option value="h">plus souvent près d'un des deux atomes</option></select></label>
+      <label>Dans H–Cl, ils sont <select id="s-hcl"><option value="">…</option><option value="eq">répartis également</option><option value="h">plus souvent près de H</option><option value="cl">plus souvent près de Cl</option></select></label>
+    </div>
+    <div class="fb" id="fb-cloud" aria-live="polite"></div>
+    <label for="q"><b>Problématique.</b> Écris, avec tes mots, la question à laquelle on va répondre dans la partie A.</label>
+    <textarea id="q" placeholder="Pourquoi… ? Comment prévoir… ?"></textarea>
+    <div class="btns"><button class="btn" data-go="en" type="button">Chercher une explication : l'électronégativité</button></div>
+  </div>
+  <div class="card">
+    <span class="part">PARTIE B · LA MOLÉCULE</span>
+    <p class="small">La partie B (onglets en pointillés) reprend la même idée à l'échelle de la molécule entière : quand une molécule est-elle polaire ? Tu peux y accéder directement, mais l'étape 3 prépare les outils dont tu auras besoin.</p>
+    <div class="btns"><button class="btn sec" data-go="mol" type="button">Aller directement à la partie B</button></div>
+  </div>
+  <div class="card">
+    <h2>Ce que le programme demande</h2>
+    <p class="small mute">Programme de physique-chimie de Première, enseignement de spécialité : « Constitution et transformations de la matière », partie 2, sous-partie A.</p>
+    <ul class="small">
+      <li>Électronégativité des atomes et son évolution dans le tableau périodique.</li>
+      <li>Polarisation d'une liaison covalente ; polarité d'une entité moléculaire.</li>
+      <li>Capacité : déterminer le caractère polaire d'une liaison à partir de l'électronégativité des atomes.</li>
+      <li>Capacité : déterminer le caractère polaire ou apolaire d'une entité moléculaire à partir de sa géométrie et de la polarité de ses liaisons.</li>
+    </ul>
+    <p class="small mute">Le programme ne donne pas de valeur numérique pour séparer « polaire » de « apolaire ». La valeur de 0,4 utilisée ici est celle de ton manuel : tu vas apprendre à la regarder comme une <b>convention</b>.</p>
+  </div>
+</section>
+
+<!-- ============ 2. ÉLECTRONÉGATIVITÉ ============ -->
+<section id="p-en" role="tabpanel" hidden>
+  <div class="card">
+    <span class="part">PARTIE A · LA LIAISON</span>
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span>
+    <h2>Qui attire les électrons ?</h2>
+    <p class="small">L'<b>électronégativité</b> χ d'un atome traduit sa tendance à attirer vers lui les électrons d'une liaison covalente. Elle n'a pas d'unité. Voici le début du tableau périodique (3 premières lignes). <b>Avant d'afficher les valeurs</b>, prévois comment χ évolue.</p>
+    <div id="ptHost"></div>
+    <div class="row">
+      <label>Dans une ligne (période), de gauche à droite, χ
+        <select id="pv-per"><option value="">…</option><option value="up">augmente</option><option value="down">diminue</option><option value="cst">ne change pas</option></select></label>
+      <label>Certitude <select id="pv-cper"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+    </div>
+    <div class="row">
+      <label>Dans une colonne (groupe), de haut en bas, χ
+        <select id="pv-grp"><option value="">…</option><option value="up">augmente</option><option value="down">diminue</option><option value="cst">ne change pas</option></select></label>
+      <label>Certitude <select id="pv-cgrp"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+    </div>
+    <div class="btns"><button class="btn" id="pv-go" type="button">Enregistrer mes prévisions et afficher les valeurs</button></div>
+    <div class="fb" id="fb-pv" aria-live="polite"></div>
+  </div>
+  <div class="card" id="enTasks" hidden>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Utiliser le tableau</span>
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Confronter ma prévision</span>
+    <h2>Utiliser les valeurs</h2>
+    <h3>Classer</h3>
+    <p class="small">Clique sur les atomes dans l'ordre d'électronégativité <b>croissante</b> : <span id="rkSet"></span></p>
+    <div class="opts" id="rkBtns"></div>
+    <div class="small">Ton classement : <b id="rkMine">—</b></div>
+    <div class="btns"><button class="btn sec" id="rkReset" type="button">Recommencer</button></div>
+    <div class="fb" id="fb-rk" aria-live="polite"></div>
+    <h3>Expliquer</h3>
+    <div id="q-halo"></div>
+    <div id="q-noble"></div>
+  </div>
+</section>
+
+<!-- ============ 3. LIAISON POLARISÉE ============ -->
+<section id="p-lia" role="tabpanel" hidden>
+  <div class="card">
+    <span class="part">PARTIE A · LA LIAISON</span>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Calculer Δχ</span>
+    <h2>Étape 1 : écart d'électronégativité</h2>
+    <p class="small">Pour chaque liaison, calcule l'écart Δχ = |χ<sub>A</sub> − χ<sub>B</sub>| (arrondi au centième) et indique l'atome le plus électronégatif. Les valeurs de χ sont rappelées dans chaque ligne ; tu peux aussi afficher le tableau complet : <button class="btn sec" id="showChi" type="button" style="padding:2px 10px">afficher / masquer</button></p>
+    <div id="chiRef" hidden></div>
+    <div class="tw"><table class="t" id="tb1"></table></div>
+    <div class="fb" id="fb-1" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Choisir un critère</span>
+    <h2>Étape 2 : à partir de quand dit-on qu'une liaison est polarisée ?</h2>
+    <p class="small">Tu sais que la liaison <b>C–H est apolaire</b> et que la liaison <b>C–N est polaire</b>. Propose une valeur de seuil : une liaison est polarisée lorsque Δχ est <b>supérieur</b> à ce seuil.</p>
+    <div class="row"><label>Seuil proposé : <b id="thrV">0,20</b> <input type="range" id="thr" min="0" max="1" step="0.01" value="0.2" aria-label="Seuil de Δχ"></label></div>
+    <div class="fb" id="fb-2" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Appliquer le critère</span>
+    <h2>Étape 3 : polaire ou apolaire ?</h2>
+    <p class="small">Avec le seuil de 0,4 (celui de ton manuel), classe ces liaisons.</p>
+    <div class="tw"><table class="t" id="tb3"></table></div>
+    <div class="fb" id="fb-3" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <span class="comp"><abbr title="Communiquer">COM</abbr> · Représenter</span>
+    <h2>Étape 4 : représenter une liaison</h2>
+    <p class="small">Choisis une liaison, puis place les charges partielles sur chaque atome (δ<sup>+</sup>, δ<sup>−</sup> ou rien si la liaison est apolaire).</p>
+    <div class="row"><div class="seg" id="rpBond" role="group" aria-label="Liaison à représenter"></div></div>
+    <div class="row">
+      <label>Atome de gauche : <select id="rpL"><option value="">…</option><option value="+">δ+</option><option value="-">δ−</option><option value="0">aucune charge</option></select></label>
+      <label>Atome de droite : <select id="rpR"><option value="">…</option><option value="+">δ+</option><option value="-">δ−</option><option value="0">aucune charge</option></select></label>
+    </div>
+    <div id="rpSvg"></div>
+    <div class="fb" id="fb-4" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Esprit critique sur le modèle</span>
+    <h2>Étape 5 : un seuil, vraiment ?</h2>
+    <p class="small">Voici des liaisons classées selon Δχ. Déplace le seuil et observe ce qui change.</p>
+    <div class="row"><label>Seuil : <b id="sV">0,40</b> <input type="range" id="sl" min="0" max="2.5" step="0.01" value="0.4" aria-label="Seuil de Δχ pour la classification"></label></div>
+    <svg class="rep" id="chart" viewBox="0 0 660 210" width="100%" role="img" aria-label="Liaisons placées selon leur écart d'électronégativité"></svg>
+    <div class="small" id="chChg" aria-live="polite"></div>
+    <div id="q-seuil"></div>
+  </div>
+</section>
+
+<!-- ============ 4. MOLÉCULES : SITUATION ============ -->
+<section id="p-mol" role="tabpanel" hidden>
+  <div class="card">
+    <span class="part">PARTIE B · LA MOLÉCULE</span>
+    <span class="comp"><abbr title="S'approprier">APP</abbr> · Rechercher et organiser l'information</span>
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Formuler une hypothèse</span>
+    <h2>Des liaisons polarisées, mais des molécules pas toujours polaires</h2>
+    <p class="small">Le caractère polaire ou apolaire d'une molécule influence notamment sa solubilité dans les solvants. Voici six molécules, modèles 3D à faire tourner, avec ce que l'on sait de leur polarité.</p>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="cv" id="cv-mol" aria-label="Modèle moléculaire 3D. Glisser pour tourner."></canvas></div>
+        <div class="row"><div class="seg" id="mSel" role="group" aria-label="Molécule"></div></div>
+      </div>
+      <div>
+        <div class="tw"><table class="t" id="tbData"></table></div>
+        <p class="small mute">Données : polarité connue expérimentalement (document 4 du manuel).</p>
+      </div>
+    </div>
+    <h3>Ce que je remarque</h3>
+    <p class="small">Compare CO<sub>2</sub> et H<sub>2</sub>O : un atome central et deux atomes liés, dans les deux cas. Compare aussi CH<sub>4</sub>, CH<sub>2</sub>Cl<sub>2</sub> et CCl<sub>4</sub>.</p>
+    <textarea id="obs" aria-label="Ce que je remarque" placeholder="Je remarque que…"></textarea>
+    <label for="qm"><b>Problématique.</b> Reformule la question de la partie B.</label>
+    <textarea id="qm" placeholder="Comment expliquer que…"></textarea>
+    <h3>Mon hypothèse</h3>
+    <p class="small">Selon moi, la polarité d'une molécule dépend…</p>
+    <div class="opts v" id="hypo"></div>
+    <div class="fb" id="fb-hy" aria-live="polite"></div>
+    <div class="btns"><button class="btn" data-go="bar" type="button">Construire les outils : dipôle et barycentres</button></div>
+  </div>
+  <div class="card">
+    <h2>Vocabulaire</h2>
+    <ul class="small">
+      <li><b>Dipôle électrostatique</b> : ensemble de deux charges électriques de signes opposés, séparées par une distance a non nulle.</li>
+      <li><b>Barycentre</b> : point moyen d'un ensemble de points, pondéré par leurs poids (ici, la valeur des charges).</li>
+      <li><b>Molécule polaire</b> : molécule dont le barycentre des charges partielles positives et celui des charges partielles négatives ne sont pas confondus.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 5. BARYCENTRES ============ -->
+<section id="p-bar" role="tabpanel" hidden>
+  <div class="card">
+    <span class="part">PARTIE B · LA MOLÉCULE</span>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Utiliser un modèle</span>
+    <h2>Étape 1 : du dipôle à plusieurs charges</h2>
+    <p class="small">Un système de plusieurs charges se ramène à un dipôle en considérant le barycentre G<sup>+</sup> des charges positives et le barycentre G<sup>−</sup> des charges négatives. Choisis un système et fais varier la distance a.</p>
+    <div class="grid2">
+      <div><div class="stage"><canvas class="st" id="cv-dip" role="img" aria-label="Charges positives et négatives avec leurs barycentres G plus et G moins."></canvas></div></div>
+      <div>
+        <div class="seg" id="dpMode" role="group" aria-label="Système de charges">
+          <button type="button" data-m="1" aria-pressed="true">1 charge + , 1 charge −</button>
+          <button type="button" data-m="2" aria-pressed="false">+ au centre, 2 charges − alignées</button>
+          <button type="button" data-m="3" aria-pressed="false">− au centre, 2 charges + à 104,5°</button>
+        </div>
+        <div class="row"><label>Distance a : <b id="dpAV">1,5</b> <input type="range" id="dpA" min="0" max="3" step="0.1" value="1.5" aria-label="Distance a"></label></div>
+        <div class="fb" id="fb-dip" aria-live="polite"></div>
+        <div id="q-dip"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Repérer les charges</span>
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Raisonner sur la géométrie</span>
+    <h2>Étape 2 : placer les barycentres dans une molécule</h2>
+    <p class="small">Choisis une molécule. Désigne les atomes qui portent une charge partielle négative, puis positive (clique dans le modèle ou utilise les boutons). Ensuite, l'activité place G<sup>+</sup> et G<sup>−</sup>.</p>
+    <div class="row"><div class="seg" id="bSel" role="group" aria-label="Molécule"></div></div>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="cv" id="cv-bar" aria-label="Modèle 3D de la molécule. Glisser pour tourner, cliquer sur un atome pour le désigner."></canvas></div>
+        <div class="legend"><span><span class="dot" style="background:var(--neg)"></span>δ− : atome désigné</span><span><span class="dot" style="background:var(--pos)"></span>δ+ : atome désigné</span></div>
+      </div>
+      <div id="bPanel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ATELIER ============ -->
+<section id="p-atl" role="tabpanel" hidden>
+  <div class="card">
+    <span class="part">PARTIE B · LA MOLÉCULE</span>
+    <span class="comp"><abbr title="Analyser / Raisonner">ANA</abbr> · Prévoir</span>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Appliquer la méthode</span>
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Confronter la prévision</span>
+    <h2>Atelier : douze molécules</h2>
+    <p class="small">Pour chaque molécule : 1) étudie ses liaisons ; 2) <b>prévois</b> si elle est polaire ; 3) vérifie avec les barycentres. Tu peux traiter les molécules dans l'ordre que tu veux.</p>
+    <div class="row"><div class="seg" id="aSel" role="group" aria-label="Molécule"></div></div>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="cv" id="cv-atl" aria-label="Modèle 3D de la molécule étudiée. Glisser pour tourner."></canvas></div>
+        <div class="legend"><span><span class="dot" style="background:var(--neg)"></span>δ−</span><span><span class="dot" style="background:var(--pos)"></span>δ+</span><span>G<sup>+</sup> : cercle · G<sup>−</sup> : losange</span></div>
+      </div>
+      <div id="aPanel"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Bilan de l'atelier</h2>
+    <div class="tw"><table class="t" id="tbAtl"></table></div>
+    <div class="small mute" id="atlProg"></div>
+  </div>
+</section>
+
+<!-- ============ 7. TEST EXPÉRIMENTAL ============ -->
+<section id="p-exp" role="tabpanel" hidden>
+  <div class="card">
+    <span class="part">PARTIE B · LA MOLÉCULE</span>
+    <span class="comp"><abbr title="Réaliser">RÉA</abbr> · Mesurer</span>
+    <span class="comp"><abbr title="Valider">VAL</abbr> · Confronter le modèle à l'expérience</span>
+    <h2>Une baguette électrisée près d'un filet de liquide</h2>
+    <p class="small">Un filet de liquide coule d'une burette. On approche une baguette chargée. Un liquide formé de molécules polaires est attiré ; un liquide formé de molécules apolaires ne l'est pas. Mesure l'écart du filet, en bas, par rapport à la verticale.</p>
+    <div class="row"><div class="seg" id="xSel" role="group" aria-label="Liquide"></div></div>
+    <div class="grid2">
+      <div>
+        <div class="stage"><canvas class="st" id="cv-exp" role="img" aria-label="Filet de liquide près d'une baguette chargée, avec une règle graduée en millimètres."></canvas></div>
+        <div class="row small">
+          <label><input type="checkbox" id="xRod"> Approcher la baguette</label>
+          <div class="seg" id="xSign" role="group" aria-label="Charge de la baguette"><button type="button" data-s="-" aria-pressed="true">baguette −</button><button type="button" data-s="+" aria-pressed="false">baguette +</button></div>
+          <label><input type="checkbox" id="xTheo"> Modèle théorique (sans bruit de lecture)</label>
+        </div>
+      </div>
+      <div id="xPanel"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Mon bilan de validation</h2>
+    <div class="tw"><table class="t" id="tbExp"></table></div>
+    <div id="xFinal"></div>
+  </div>
+</section>
+
+<!-- ============ 8. CARNET ============ -->
+<section id="p-car" role="tabpanel" hidden>
+  <div class="card">
+    <span class="comp"><abbr title="Communiquer">COM</abbr> · Présenter la démarche</span>
+    <h2>Carte mentale : comment savoir si une molécule est polaire ?</h2>
+    <p class="small mute">Place chaque étape à sa position.</p>
+    <div class="map" id="mapHost"></div>
+    <div class="btns"><button class="btn" id="mapCheck" type="button">Vérifier ma carte</button></div>
+    <div class="fb" id="mapFb" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <h2>Synthèse écrite</h2>
+    <label for="synth">Explique ce qu'est une liaison polaire et comment la représenter, puis ce qui décide qu'une molécule est polaire.</label>
+    <textarea id="synth" placeholder="Une liaison est polaire lorsque… On la représente… Une molécule est polaire lorsque…"></textarea>
+    <div class="small mute" id="vocab"></div>
+  </div>
+  <div class="card">
+    <h2>Mon carnet</h2>
+    <p class="small mute">Il se remplit tout seul avec ce que tu fais dans les étapes. Copie-le pour le coller dans ton compte rendu.</p>
+    <div class="btns"><button class="btn" id="copyNb" type="button">Copier mon carnet</button></div>
+    <pre class="copy" id="nbPre"></pre>
+  </div>
+</section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="../shared/bruit.js"></script>
+<script>
+(()=>{
+'use strict';
+/* ======================= Utilitaires ======================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const fr=(x,d=2)=>Number(x).toFixed(d).replace('.',',').replace('-','−');
+const r2=x=>Math.round(x*100)/100;
+const RAD=Math.PI/180;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const reduceMotion=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const vadd=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const vsub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const vscl=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+const vlen=a=>Math.hypot(a[0],a[1],a[2]);
+const vnrm=a=>{const l=vlen(a)||1;return [a[0]/l,a[1]/l,a[2]/l]};
+let toastT=0;
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),1800)}
+function fb(id,kind,html){const e=typeof id==='string'?document.getElementById(id):id;if(!e)return;e.className='fb'+(kind?' '+kind:'');e.innerHTML=html}
+const OK='<span class="okc">Oui. </span>', KO='<span class="wc">Pas encore. </span>';
+
+/* ======================= État de l'élève (carnet) ======================= */
+const S={cloud:{},q:'',prev:{done:false},rank:{},mcq:{},b1:{},thr:{val:.2,ok:false},b3:{},rep:{},hypo:'',obs:'',qm:'',
+  bar:{},atl:{},exp:{rows:{},c6:{}},map:null,synth:''};
+
+/* ======================= Données chimiques ======================= */
+const EL={};
+[['H',1,1,1,2.20,1],['He',2,1,18,null,2],['Li',3,2,1,.98,1],['Be',4,2,2,1.57,2],['B',5,2,13,2.04,3],['C',6,2,14,2.55,4],['N',7,2,15,3.04,5],['O',8,2,16,3.44,6],['F',9,2,17,3.98,7],['Ne',10,2,18,null,8],['Na',11,3,1,.93,1],['Mg',12,3,2,1.31,2],['Al',13,3,13,1.61,3],['Si',14,3,14,1.90,4],['P',15,3,15,2.19,5],['S',16,3,16,2.58,6],['Cl',17,3,17,3.16,7],['Ar',18,3,18,null,8]]
+ .forEach(([s,z,per,grp,chi,ve])=>EL[s]={s,z,per,grp,chi,ve});
+const COLS=[1,2,13,14,15,16,17,18];
+const dchi=(a,b)=>r2(Math.abs(EL[a].chi-EL[b].chi));
+const SEUIL=0.4;               // seuil du manuel (convention, absent du programme)
+const polarBond=(a,b)=>dchi(a,b)>SEUIL;
+
+/* Molécules : atomes [symbole,[x,y,z] en Å], liaisons [i,j,ordre] */
+const tet=[[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]].map(vnrm);
+function ctr(atoms){const n=atoms.length;const c=[0,0,0];atoms.forEach(a=>{c[0]+=a[1][0];c[1]+=a[1][1];c[2]+=a[1][2]});return atoms.map(a=>[a[0],vsub(a[1],vscl(c,1/n))])}
+function tetra(central,subs,L){ // subs : tableau de 4 symboles, L: longueurs
+  const atoms=[[central,[0,0,0]]];const bonds=[];
+  subs.forEach((s,i)=>{atoms.push([s,vscl(tet[i],L[s])]);bonds.push([0,i+1,1])});
+  return {atoms,bonds};
+}
+const LB={H:1.09,Cl:1.77};
+const MOLS={};
+function add(id,name,f,atoms,bonds,extra){MOLS[id]=Object.assign({id,name,f,atoms:ctr(atoms),bonds},extra||{})}
+add('H2','dihydrogène','H<sub>2</sub>',[['H',[-.37,0,0]],['H',[.37,0,0]]],[[0,1,1]]);
+add('HCl','chlorure d\'hydrogène','HCl',[['H',[-.64,0,0]],['Cl',[.63,0,0]]],[[0,1,1]]);
+add('CO2','dioxyde de carbone','CO<sub>2</sub>',[['C',[0,0,0]],['O',[-1.16,0,0]],['O',[1.16,0,0]]],[[0,1,2],[0,2,2]],{known:'apolaire'});
+{const h=52.25*RAD;add('H2O','eau','H<sub>2</sub>O',[['O',[0,0,0]],['H',[.96*Math.sin(h),-.96*Math.cos(h),0]],['H',[-.96*Math.sin(h),-.96*Math.cos(h),0]]],[[0,1,1],[0,2,1]],{known:'polaire'})}
+{const phi=Math.acos(Math.sqrt((Math.cos(107*RAD)+.5)/1.5));const at=[['N',[0,0,0]]];for(let k=0;k<3;k++)at.push(['H',[1.01*Math.sin(phi)*Math.cos(k*120*RAD),-1.01*Math.cos(phi),1.01*Math.sin(phi)*Math.sin(k*120*RAD)]]);add('NH3','ammoniac','NH<sub>3</sub>',at,[[0,1,1],[0,2,1],[0,3,1]])}
+{const t=tetra('C',['H','H','H','H'],LB);add('CH4','méthane','CH<sub>4</sub>',t.atoms,t.bonds,{known:'apolaire'})}
+{const t=tetra('C',['Cl','H','H','H'],LB);add('CH3Cl','chlorométhane','CH<sub>3</sub>Cl',t.atoms,t.bonds)}
+{const t=tetra('C',['H','H','Cl','Cl'],LB);add('CH2Cl2','dichlorométhane','CH<sub>2</sub>Cl<sub>2</sub>',t.atoms,t.bonds,{known:'polaire'})}
+{const t=tetra('C',['H','Cl','Cl','Cl'],LB);add('CHCl3','trichlorométhane','CHCl<sub>3</sub>',t.atoms,t.bonds)}
+{const t=tetra('C',['Cl','Cl','Cl','Cl'],LB);add('CCl4','tétrachlorométhane','CCl<sub>4</sub>',t.atoms,t.bonds,{known:'apolaire'})}
+{const a=58.2*RAD;add('CH2O','méthanal','CH<sub>2</sub>O',[['C',[0,0,0]],['O',[0,1.21,0]],['H',[1.10*Math.sin(a),-1.10*Math.cos(a),0]],['H',[-1.10*Math.sin(a),-1.10*Math.cos(a),0]]],[[0,1,2],[0,2,1],[0,3,1]],{known:'polaire'})}
+{const at=[['B',[0,0,0]]];for(let k=0;k<3;k++)at.push(['F',[1.31*Math.cos(k*120*RAD),1.31*Math.sin(k*120*RAD),0]]);add('BF3','trifluorure de bore','BF<sub>3</sub>',at,[[0,1,1],[0,2,1],[0,3,1]])}
+const ORDER6=['CH4','CO2','CCl4','CH2Cl2','CH2O','H2O'];
+const ORDER12=['H2','HCl','CO2','H2O','NH3','CH4','CH3Cl','CH2Cl2','CHCl3','CCl4','CH2O','BF3'];
+const bsym=o=>o===2?'=':o===3?'≡':'–';
+
+/* Modèle de charges partielles : une liaison transfère |Δχ|×ordre de charge si Δχ > seuil */
+function charges(m){
+  const q=m.atoms.map(()=>0);
+  m.bonds.forEach(([i,j,o])=>{const a=m.atoms[i][0],b=m.atoms[j][0];const d=EL[a].chi-EL[b].chi;if(Math.abs(d)<=SEUIL)return;const t=Math.abs(d)*o;if(d>0){q[i]-=t;q[j]+=t}else{q[j]-=t;q[i]+=t}});
+  return q;
+}
+function barycentres(m,q){
+  let sp=0,sn=0,gp=[0,0,0],gn=[0,0,0];
+  q.forEach((v,i)=>{const p=m.atoms[i][1];if(v>1e-9){sp+=v;gp=vadd(gp,vscl(p,v))}else if(v<-1e-9){sn+=-v;gn=vadd(gn,vscl(p,-v))}});
+  const G={gp:sp?vscl(gp,1/sp):null,gn:sn?vscl(gn,1/sn):null};
+  G.d=(G.gp&&G.gn)?vlen(vsub(G.gp,G.gn)):0;
+  G.polar=!!(G.gp&&G.gn&&G.d>0.02);
+  return G;
+}
+function bondTypes(m){ // liaisons distinctes d'une molécule
+  const seen={};const out=[];
+  m.bonds.forEach(([i,j,o])=>{const a=m.atoms[i][0],b=m.atoms[j][0];const key=[a,b].sort().join('')+o;if(seen[key])return;seen[key]=1;out.push({a,b,o,key})});
+  return out;
+}
+
+/* ======================= Visionneuse 3D (canvas 2D) ======================= */
+const ATOM={H:{c:'#f2f5f8',r:.30,t:'#1c2430'},C:{c:'#4b5262',r:.46,t:'#fff'},N:{c:'#3b6fe0',r:.42,t:'#fff'},O:{c:'#e0402f',r:.40,t:'#fff'},F:{c:'#8de07d',r:.36,t:'#10300f'},Cl:{c:'#23a047',r:.56,t:'#fff'},B:{c:'#ecae82',r:.44,t:'#3b2412'}};
+const VIEWERS=[];
+class Viewer{
+  constructor(cv){
+    this.cv=cv;this.ctx=cv.getContext('2d');this.yaw=-.7;this.pitch=.28;this.auto=!reduceMotion;this.mol=null;
+    this.q=null;this.gp=null;this.gn=null;this.sel={neg:new Set(),pos:new Set()};this.onPick=null;this.drag=null;this.sym=true;this.dpr=1;this.w=0;this.h=0;this.P=[];
+    cv.addEventListener('pointerdown',e=>{try{cv.setPointerCapture(e.pointerId)}catch(_){}this.drag={x:e.clientX,y:e.clientY,d:0}});
+    cv.addEventListener('pointermove',e=>{if(!this.drag)return;const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y;this.drag.x=e.clientX;this.drag.y=e.clientY;this.drag.d+=Math.abs(dx)+Math.abs(dy);this.yaw+=dx*.01;this.pitch=clamp(this.pitch+dy*.01,-1.45,1.45)});
+    cv.addEventListener('pointerup',e=>{const d=this.drag;this.drag=null;if(d&&d.d<6){const r=cv.getBoundingClientRect();this.pick(e.clientX-r.left,e.clientY-r.top)}});
+    cv.addEventListener('pointercancel',()=>{this.drag=null});
+    VIEWERS.push(this);
+  }
+  setMol(m){this.mol=m;this.q=null;this.gp=null;this.gn=null;this.sel={neg:new Set(),pos:new Set()}}
+  fit(){const w=this.cv.clientWidth,h=this.cv.clientHeight;if(!w||!h)return false;const dpr=window.devicePixelRatio||1;if(w!==this.w||h!==this.h||dpr!==this.dpr){this.w=w;this.h=h;this.dpr=dpr;this.cv.width=Math.round(w*dpr);this.cv.height=Math.round(h*dpr)}return true}
+  proj(p){const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);
+    const x=p[0]*cy+p[2]*sy;let z=-p[0]*sy+p[2]*cy;const y=p[1]*cp-z*sp;z=p[1]*sp+z*cp;const f=1/(1-z/14);
+    return {x:this.cx+x*f*this.sc,y:this.cy-y*f*this.sc,z,f}}
+  draw(){
+    if(!this.fit()||!this.mol)return;const c=this.ctx,w=this.w,h=this.h,m=this.mol;
+    c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,w,h);
+    let R=1.3;m.atoms.forEach(a=>{R=Math.max(R,vlen(a[1])+ATOM[a[0]].r)});
+    this.sc=Math.min(w,h)*.44/R;this.cx=w/2;this.cy=h/2;
+    const P=m.atoms.map(a=>this.proj(a[1]));this.P=P;const items=[];
+    m.bonds.forEach(([i,j,o])=>items.push({z:Math.min(P[i].z,P[j].z)+.001,f:()=>this.bond(P[i],P[j],o,m.atoms[i][0],m.atoms[j][0])}));
+    m.atoms.forEach((a,i)=>items.push({z:P[i].z,f:()=>this.atom(a[0],P[i],i)}));
+    items.sort((a,b)=>a.z-b.z).forEach(it=>it.f());
+    if(this.gp||this.gn)this.markers();
+  }
+  bond(p1,p2,o,e1,e2){const c=this.ctx;let dx=p2.x-p1.x,dy=p2.y-p1.y;const l=Math.hypot(dx,dy)||1;const nx=-dy/l,ny=dx/l;const f=(p1.f+p2.f)/2;let r1=ATOM[e1].r*this.sc*p1.f*.8,r2=ATOM[e2].r*this.sc*p2.f*.8;const k=Math.min(1,Math.max(0,(l-8)/(r1+r2)));r1*=k;r2*=k;const ux=dx/l,uy=dy/l;const q1={x:p1.x+ux*r1,y:p1.y+uy*r1},q2={x:p2.x-ux*r2,y:p2.y-uy*r2};p1=q1;p2=q2;
+    c.strokeStyle=css('--stick');c.lineCap='round';
+    const lines=o===1?[0]:o===2?[-1,1]:[-1.6,0,1.6];const lw=(o===1?.13:o===2?.075:.06)*this.sc*f;c.lineWidth=lw;
+    lines.forEach(k=>{const off=k*.1*this.sc*f;c.beginPath();c.moveTo(p1.x+nx*off,p1.y+ny*off);c.lineTo(p2.x+nx*off,p2.y+ny*off);c.stroke()})}
+  atom(el,p,i){const c=this.ctx,A=ATOM[el],r=A.r*this.sc*p.f;
+    const g=c.createRadialGradient(p.x-r*.35,p.y-r*.35,r*.1,p.x,p.y,r);g.addColorStop(0,'#ffffff');g.addColorStop(.25,A.c);g.addColorStop(1,shade(A.c,-.35));
+    c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,r,0,7);c.fill();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.stroke();
+    if(this.sym){c.fillStyle=A.t;c.font='700 '+Math.max(11,r*.85)+'px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(el,p.x,p.y+1)}
+    [['neg','--neg'],['pos','--pos']].forEach(([k,v])=>{if(this.sel[k].has(i)){c.strokeStyle=css(v);c.lineWidth=4;c.beginPath();c.arc(p.x,p.y,r+5,0,7);c.stroke()}});
+    if(this.q&&Math.abs(this.q[i])>1e-6){const neg=this.q[i]<0;c.font='800 17px system-ui,sans-serif';c.textAlign='left';c.textBaseline='alphabetic';const tx=p.x+r*.72,ty=p.y-r*.72;const t=neg?'δ−':'δ+';
+      c.lineWidth=4;c.strokeStyle=css('--stage');c.strokeText(t,tx,ty);c.fillStyle=css(neg?'--neg':'--pos');c.fillText(t,tx,ty)}}
+  markers(){const c=this.ctx;const gp=this.gp&&this.proj(this.gp),gn=this.gn&&this.proj(this.gn);
+    const close=gp&&gn&&Math.hypot(gp.x-gn.x,gp.y-gn.y)<22;
+    if(gp){c.strokeStyle=css('--pos');c.fillStyle='rgba(29,78,216,.18)';c.lineWidth=3;c.beginPath();c.arc(gp.x,gp.y,11,0,7);c.fill();c.stroke();lab(c,'G+',gp.x+(close?-16:15),gp.y+(close?-14:-12),css('--pos'),close?'right':'left')}
+    if(gn){c.strokeStyle=css('--neg');c.fillStyle='rgba(194,65,12,.18)';c.lineWidth=3;c.beginPath();c.moveTo(gn.x,gn.y-13);c.lineTo(gn.x+13,gn.y);c.lineTo(gn.x,gn.y+13);c.lineTo(gn.x-13,gn.y);c.closePath();c.fill();c.stroke();lab(c,'G−',gn.x+(close?16:15),gn.y+(close?24:-12),css('--neg'),'left')}}
+  pick(x,y){let best=-1,bd=1e9;this.P.forEach((p,i)=>{const r=ATOM[this.mol.atoms[i][0]].r*this.sc*p.f+8;const d=Math.hypot(p.x-x,p.y-y);if(d<r&&d<bd&&p.z>-99){bd=d;best=i}});if(best>=0&&this.onPick)this.onPick(best)}
+}
+function lab(c,t,x,y,col,al){c.font='800 15px system-ui,sans-serif';c.textAlign=al;c.textBaseline='alphabetic';c.lineWidth=4;c.strokeStyle=css('--stage');c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
+function shade(hex,k){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const f=v=>Math.round(clamp(k<0?v*(1+k):v+(255-v)*k,0,255));return 'rgb('+f(r)+','+f(g)+','+f(b)+')'}
+(function loop(){VIEWERS.forEach(v=>{if(v.cv.offsetParent===null)return;if(v.auto&&!v.drag)v.yaw+=.006;v.draw()});requestAnimationFrame(loop)})();
+
+/* ======================= Nuages de probabilité de présence ======================= */
+const CLOUDS=[];
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+function shareB(d){return .5+.4*Math.min(d/2.5,1)}   // représentation qualitative
+function drawCloud(cv,A,B){
+  const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;const dpr=window.devicePixelRatio||1;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+  const cA=EL[A].chi,cB=EL[B].chi;const d=Math.abs(cA-cB);const wB=cB>=cA?shareB(d):1-shareB(d);
+  const xA=w*.3,xB=w*.7,y=h/2,r=rng(A.charCodeAt(0)*131+B.charCodeAt(0)*17+B.length);
+  c.fillStyle=css('--dots');c.globalAlpha=.55;
+  for(let i=0;i<1100;i++){const onB=r()<wB;const x=(onB?xB:xA)+gauss(r)*w*.085,yy=y+gauss(r)*h*.13;c.fillRect(x,yy,1.7,1.7)}
+  c.globalAlpha=1;
+  [[A,xA],[B,xB]].forEach(([s,x])=>{c.fillStyle=css('--card');c.strokeStyle=css('--ink');c.lineWidth=1.5;c.beginPath();c.arc(x,y,17,0,7);c.fill();c.stroke();c.fillStyle=css('--ink');c.font='700 15px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(s,x,y+1)});
+}
+function cloudAdd(id,A,B){const cv=document.getElementById(id);CLOUDS.push(()=>drawCloud(cv,A,B))}
+function redrawAll(){CLOUDS.forEach(f=>f());redrawDip&&redrawDip();redrawChart&&redrawChart();redrawExp&&redrawExp()}
+let redrawDip=null,redrawChart=null,redrawExp=null;
+
+/* ======================= Thème, onglets ======================= */
+const themes=['auto','light','dark'],tn=['auto','clair','sombre'];let ti=0;
+$('#themeBtn').onclick=()=>{ti=(ti+1)%3;document.documentElement.dataset.theme=themes[ti];$('#themeBtn').textContent='Thème : '+tn[ti];redrawAll()};
+const TABS=['app','en','lia','mol','bar','atl','exp','car'];const onShow={};
+function go(id){TABS.forEach(t=>{document.getElementById('p-'+t).hidden=t!==id;$('[data-tab='+t+']').setAttribute('aria-selected',String(t===id))});
+  window.scrollTo({top:0});setTimeout(()=>{redrawAll();onShow[id]&&onShow[id]()},30)}
+$$('.tab').forEach((b,i)=>{b.onclick=()=>go(b.dataset.tab);b.onkeydown=e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const n=$$('.tab')[(i+(e.key==='ArrowRight'?1:-1)+TABS.length)%TABS.length];n.focus();go(n.dataset.tab)}}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+window.addEventListener('resize',()=>redrawAll());
+
+/* ======================= Composants ======================= */
+function seg(host,items,cur,cb){host.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.type='button';b.innerHTML=it.t;b.setAttribute('aria-pressed',String(it.v===cur));b.onclick=()=>{$$('button',host).forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');cb(it.v)};host.appendChild(b)})}
+function mcq(hostId,key,q,opts){const host=document.getElementById(hostId);host.innerHTML=`<p style="margin-bottom:4px"><b>${q}</b></p><div class="opts v"></div><div class="fb" aria-live="polite"></div>`;
+  const box=$('.opts',host),f=$('.fb',host);
+  opts.forEach((o,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML=o.t;b.setAttribute('aria-pressed','false');
+    b.onclick=()=>{$$('button',box).forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');S.mcq[key]={t:o.t,ok:!!o.ok};fb(f,o.ok?'ok':'warn',(o.ok?OK:KO)+o.fb)};box.appendChild(b)})}
+function ptTable(host,o){
+  let h='<div class="pt">';
+  for(let per=1;per<=3;per++)for(let ci=0;ci<8;ci++){
+    const e=Object.values(EL).find(x=>x.per===per&&x.grp===COLS[ci]);
+    if(!e){h+='<div class="c gap"></div>';continue}
+    let st='';if(o.reveal&&e.chi!=null){const l=96-(e.chi-.9)/3.1*50;st=`background:hsl(215,75%,${l}%);color:${l<62?'#fff':'#101828'};border-color:transparent`}
+    const val=o.reveal?`<span>${e.chi!=null?fr(e.chi):'–'}</span>`:'';
+    const cls='c'+(o.sel&&o.sel.includes(e.s)?' sel':'');
+    h+=o.pick?`<button type="button" class="${cls}" data-s="${e.s}" style="${st}" aria-label="${e.s}${o.reveal?(e.chi!=null?', électronégativité '+fr(e.chi):', pas de valeur'):''}"><b>${e.s}</b>${val}</button>`
+              :`<div class="${cls}" style="${st}"><b>${e.s}</b>${val}</div>`;
+  }
+  h+='</div>';host.innerHTML=h;
+}
+
+/* ======================= 1 · Situation ======================= */
+cloudAdd('cl-hh','H','H');cloudAdd('cl-hcl','H','Cl');
+function chkCloud(){const a=$('#s-hh').value,b=$('#s-hcl').value;S.cloud={hh:a,hcl:b};if(!a||!b){fb('fb-cloud','','');return}
+  const ok=a==='eq'&&b==='cl';
+  fb('fb-cloud',ok?'ok':'warn',ok?`${OK}Dans H–H, les deux atomes sont identiques : le doublet est partagé à égalité. Dans H–Cl, il est en moyenne plus près du chlore. Qu'est-ce qui distingue le chlore de l'hydrogène ? C'est ce que tu cherches à l'étape suivante.`:`${KO}Compare la densité de points près de chaque noyau, dans chacun des deux schémas.`)}
+$('#s-hh').onchange=chkCloud;$('#s-hcl').onchange=chkCloud;
+$('#q').oninput=e=>{S.q=e.target.value};
+
+/* ======================= 2 · Électronégativité ======================= */
+const NAME={up:'augmente',down:'diminue',cst:'ne change pas'};
+ptTable($('#ptHost'),{reveal:false});
+$('#pv-go').onclick=()=>{
+  const per=$('#pv-per').value,grp=$('#pv-grp').value;
+  if(!per||!grp){fb('fb-pv','warn','Choisis une réponse pour chaque question avant d\'afficher les valeurs.');return}
+  const cPer=+$('#pv-cper').value,cGrp=+$('#pv-cgrp').value;S.prev={done:true,per,grp,cPer,cGrp};
+  ptTable($('#ptHost'),{reveal:true});$('#enTasks').hidden=false;
+  const okP=per==='up',okG=grp==='down';
+  let h=`<b>Ta prévision relue.</b><br>Dans une période : tu avais prévu que χ « ${NAME[per]} » (certitude ${cPer}/5) → ${okP?'<span class="okc">confirmé</span>':'<span class="wc">infirmé</span>'}. Exemple : Li 0,98 → Be 1,57 → B 2,04 → C 2,55 → N 3,04 → O 3,44 → F 3,98 : χ <b>augmente</b>.<br>Dans un groupe : tu avais prévu que χ « ${NAME[grp]} » (certitude ${cGrp}/5) → ${okG?'<span class="okc">confirmé</span>':'<span class="wc">infirmé</span>'}. Exemple : F 3,98 → Cl 3,16 : χ <b>diminue</b> quand on descend.`;
+  if((!okP&&cPer>=4)||(!okG&&cGrp>=4))h+=`<br><span class="wc">Tu étais très confiant et le tableau dit autre chose.</span> Note dans ton carnet ce que tu retiens de cet écart.`;
+  S.prev.okP=okP;S.prev.okG=okG;fb('fb-pv',okP&&okG?'ok':'warn',h);
+  const c=$('#ptHost');c.scrollIntoView&&c.scrollIntoView({block:'nearest'});
+};
+{const set=['Na','H','C','Cl','O'],shuf=['C','Na','O','H','Cl'];let mine=[];
+  $('#rkSet').textContent=set.join(', ');
+  const box=$('#rkBtns');shuf.forEach(s=>{const b=document.createElement('button');b.type='button';b.textContent=s;b.onclick=()=>{if(mine.includes(s)||mine.length>=5)return;mine.push(s);b.disabled=true;$('#rkMine').textContent=mine.join(' < ');if(mine.length===5)check()};box.appendChild(b)});
+  function check(){const exp=[...set].sort((a,b)=>EL[a].chi-EL[b].chi);const ok=mine.join()===exp.join();S.rank={mine:mine.join(' < '),ok};
+    fb('fb-rk',ok?'ok':'warn',ok?`${OK}${exp.map(s=>s+' ('+fr(EL[s].chi)+')').join(' < ')}.`:`${KO}Relis les valeurs : ${exp.map(s=>s+' '+fr(EL[s].chi)).join(' ; ')}. Recommence.`)}
+  $('#rkReset').onclick=()=>{mine=[];$('#rkMine').textContent='—';$$('button',box).forEach(b=>b.disabled=false);fb('fb-rk','','')};
+}
+mcq('q-halo','halo','Pourquoi les halogènes (colonne 17) sont-ils plus électronégatifs que les alcalins (colonne 1) ?',[
+ {t:'Les halogènes ont moins de protons que les alcalins, donc ils retiennent mieux leurs électrons.',fb:'C\'est l\'inverse : dans une même ligne, le nombre de protons (Z) augmente de gauche à droite.'},
+ {t:'Un halogène a 7 électrons de valence : il lui en manque un pour saturer sa couche, donc il attire fortement les électrons. Un alcalin n\'en a qu\'un, qu\'il cède facilement.',ok:1,fb:'Dans une même période, la charge du noyau augmente alors que les électrons de valence restent sur la même couche : ils sont de plus en plus attirés.'},
+ {t:'Les alcalins ont une couche de valence saturée, donc ils n\'attirent pas d\'électrons.',fb:'Un alcalin n\'a qu\'un électron de valence : sa couche est très loin d\'être saturée.'},
+ {t:'Les halogènes sont des gaz, les alcalins sont des solides.',fb:'L\'état physique d\'un corps simple ne décide pas de la tendance d\'un atome à attirer les électrons d\'une liaison.'}]);
+mcq('q-noble','noble','Pourquoi n\'y a-t-il pas de valeur d\'électronégativité pour He, Ne et Ar ?',[
+ {t:'Leur électronégativité vaut zéro, car ils n\'ont pas d\'électrons.',fb:'Ils en ont (2 pour He, 10 pour Ne, 18 pour Ar).'},
+ {t:'Ce sont des gaz : on ne peut pas mesurer leur électronégativité.',fb:'H<sub>2</sub>, N<sub>2</sub>, O<sub>2</sub>, F<sub>2</sub>, Cl<sub>2</sub> sont aussi des gaz et leurs atomes ont une valeur de χ.'},
+ {t:'Leur couche de valence est déjà saturée (duet ou octet) : ils ne forment pas de liaison covalente dans les conditions usuelles, donc la notion d\'atome qui attire les électrons d\'une liaison n\'a pas de sens pour eux.',ok:1,fb:'L\'électronégativité décrit un atome <i>engagé dans une liaison</i>.'}]);
+
+/* ======================= 3 · Liaison polarisée ======================= */
+const B1=[['C','C'],['C','H'],['C','N'],['C','O'],['C','Mg'],['H','Cl'],['O','H'],['N','H']];
+{const t=$('#tb1');t.innerHTML='<tr><th>Liaison</th><th>Valeurs de χ</th><th>Δχ</th><th>Atome le plus électronégatif</th><th></th></tr>'+B1.map(([a,b],i)=>`<tr><td><b>${a}–${b}</b></td><td class="mute">χ(${a}) = ${fr(EL[a].chi)}<br>χ(${b}) = ${fr(EL[b].chi)}</td><td><input class="n" type="text" inputmode="decimal" data-i="${i}" aria-label="Écart d'électronégativité de la liaison ${a}–${b}" placeholder="0,00"></td><td><select data-i="${i}" aria-label="Atome le plus électronégatif de ${a}–${b}"><option value="">…</option><option value="a">${a}</option><option value="b">${b}</option><option value="eq">égalité</option></select></td><td id="r1-${i}" aria-live="polite"></td></tr>`).join('');
+  function chk(i){const [a,b]=B1[i];const dx=parseFloat(($(`input[data-i="${i}"]`).value||'').replace(',','.')),sel=$(`select[data-i="${i}"]`).value;const cell=$('#r1-'+i);
+    if(isNaN(dx)||!sel){cell.textContent='';return}
+    const tv=dchi(a,b);const okD=Math.abs(dx-tv)<=.015;const ex=EL[a].chi===EL[b].chi?'eq':EL[a].chi>EL[b].chi?'a':'b';const okE=sel===ex;
+    S.b1[i]={dx,sel,ok:okD&&okE};cell.innerHTML=okD&&okE?'<span class="okc">✓</span>':`<span class="wc">✗ ${okD?'atome ?':'Δχ ?'}</span>`;
+    const n=Object.values(S.b1).filter(x=>x.ok).length;fb('fb-1',n===B1.length?'ok':'',n===B1.length?`${OK}Les 8 liaisons sont traitées. Observe : C–C (Δχ = 0) et C–H (0,35) ont de petits écarts ; C–N (0,49), C–O (0,89), H–Cl (0,96) en ont de grands.`:`${n}/${B1.length} liaisons justes.`)}
+  $$('#tb1 input,#tb1 select').forEach(e=>e.addEventListener('change',()=>chk(+e.dataset.i)));
+  $('#showChi').onclick=()=>{const h=$('#chiRef');h.hidden=!h.hidden;if(!h.hidden)ptTable(h,{reveal:true})};
+}
+const thr=$('#thr');
+function chkThr(){const s=+thr.value;$('#thrV').textContent=fr(s);S.thr.val=s;
+  const hOK=dchi('C','H')<=s,nOK=dchi('C','N')>s;
+  if(!hOK)fb('fb-2','warn',`${KO}Avec ${fr(s)}, la liaison C–H (Δχ = 0,35) serait <b>polaire</b>. Or tu sais qu'elle est apolaire : monte le seuil.`);
+  else if(!nOK)fb('fb-2','warn',`${KO}Avec ${fr(s)}, la liaison C–N (Δχ = 0,49) serait <b>apolaire</b>. Or tu sais qu'elle est polaire : baisse le seuil.`);
+  else{S.thr.ok=true;fb('fb-2','ok',`${OK}Avec ${fr(s)}, C–H est apolaire et C–N est polaire. Mais tout seuil entre 0,35 et 0,49 conviendrait : ces deux liaisons ne suffisent pas à fixer la valeur. Ton manuel retient <b>0,4</b> : on garde cette valeur.`)}}
+thr.oninput=chkThr;
+const B3=[['C','C'],['C','H'],['C','O'],['C','Mg']];
+{const t=$('#tb3');t.innerHTML='<tr><th>Liaison</th><th>Δχ</th><th>Je dis qu\'elle est…</th><th></th></tr>'+B3.map(([a,b],i)=>`<tr><td><b>${a}–${b}</b></td><td>${fr(dchi(a,b))}</td><td><select data-i="${i}" aria-label="Caractère de la liaison ${a}–${b}"><option value="">…</option><option value="p">polaire</option><option value="a">apolaire</option></select></td><td id="r3-${i}"></td></tr>`).join('');
+  $$('#tb3 select').forEach(s=>s.onchange=()=>{const i=+s.dataset.i,[a,b]=B3[i],d=dchi(a,b),want=d>SEUIL?'p':'a';const ok=s.value===want;S.b3[i]={v:s.value,ok};
+    $('#r3-'+i).innerHTML=ok?`<span class="okc">✓</span> <span class="small mute">Δχ = ${fr(d)} ${d>SEUIL?'>':'<'} 0,4</span>`:`<span class="wc">✗</span> <span class="small mute">compare ${fr(d)} à 0,4</span>`;
+    const n=Object.values(S.b3).filter(x=>x.ok).length;fb('fb-3',n===B3.length?'ok':'',n===B3.length?`${OK}Remarque : dans C–Mg, c'est le <b>carbone</b> le plus électronégatif (2,55 contre 1,31) : il porte δ<sup>−</sup>. Les liaisons avec les métaux ne suivent pas l'intuition « C est toujours δ<sup>+</sup> ».`:'')})}
+const B4=[['H','Cl'],['C','O'],['O','H'],['C','C']];let rp=0;
+function renderRep(){const [a,b]=B4[rp];const L=$('#rpL').value,R=$('#rpR').value;const lbl=v=>v==='+'?'δ+':v==='-'?'δ−':'';const col=v=>v==='+'?css('--pos'):css('--neg');
+  const tx=(x,v)=>v==='+'||v==='-'?`<text x="${x}" y="30" text-anchor="middle" font-size="20" font-weight="800" fill="${col(v)}">${lbl(v)}</text>`:'';
+  $('#rpSvg').innerHTML=`<svg class="rep" viewBox="0 0 240 80" width="240" role="img" aria-label="Liaison ${a}–${b} avec charges partielles">${tx(60,L)}${tx(180,R)}<text x="60" y="64" text-anchor="middle" font-size="26" font-weight="700" fill="${css('--ink')}">${a}</text><line x1="86" y1="58" x2="154" y2="58" stroke="${css('--ink')}" stroke-width="2.5"/><text x="180" y="64" text-anchor="middle" font-size="26" font-weight="700" fill="${css('--ink')}">${b}</text></svg>`;
+  if(!L||!R){fb('fb-4','','');return}
+  const [x,y]=B4[rp];const d=dchi(x,y),pol=d>SEUIL;let want;if(!pol)want=['0','0'];else if(EL[x].chi>EL[y].chi)want=['-','+'];else want=['+','-'];
+  const ok=L===want[0]&&R===want[1];S.rep[x+y]=ok;
+  fb('fb-4',ok?'ok':'warn',ok?`${OK}${pol?`Δχ = ${fr(d)} > 0,4 : la liaison est polarisée. L'atome le plus électronégatif (${EL[x].chi>EL[y].chi?x:y}) porte δ<sup>−</sup>, l'autre δ<sup>+</sup>.`:`Δχ = ${fr(d)} < 0,4 : liaison apolaire, aucune charge partielle.`}`:`${KO}${pol?`Δχ = ${fr(d)} > 0,4 : la liaison est polarisée. Quel atome attire le plus les électrons ?`:`Δχ = ${fr(d)} < 0,4 : la liaison est-elle polarisée ?`}`)}
+seg($('#rpBond'),B4.map((x,i)=>({t:x[0]+'–'+x[1],v:i})),0,v=>{rp=v;$('#rpL').value='';$('#rpR').value='';renderRep()});
+$('#rpL').onchange=renderRep;$('#rpR').onchange=renderRep;
+onShow.lia=()=>renderRep();
+/* graphique des seuils */
+const CHB=[['C','C'],['P','H'],['C','S'],['B','H'],['Si','H'],['C','H'],['S','H'],['C','N'],['C','Cl'],['N','H'],['C','O'],['H','Cl'],['O','H'],['C','Mg'],['C','F'],['Na','Cl']].map(([a,b])=>({a,b,d:dchi(a,b)}));
+CHB.sort((x,y)=>x.d-y.d);
+redrawChart=()=>{const s=+$('#sl').value;$('#sV').textContent=fr(s);const X=d=>40+d/2.5*590,lv=[150,122,94,66];
+  let h=`<rect x="${X(0)}" y="10" width="${X(s)-X(0)}" height="160" fill="${css('--accent')}" opacity=".08"/><rect x="${X(s)}" y="10" width="${X(2.5)-X(s)}" height="160" fill="${css('--neg')}" opacity=".08"/>
+   <text x="${X(0)+4}" y="26" font-size="12" fill="${css('--mute')}">apolaire (Δχ ≤ seuil)</text><text x="${X(2.5)-4}" y="26" font-size="12" text-anchor="end" fill="${css('--mute')}">polaire (Δχ &gt; seuil)</text>
+   <line x1="${X(0)}" y1="178" x2="${X(2.5)}" y2="178" stroke="${css('--mute')}"/>`;
+  for(let k=0;k<=5;k++)h+=`<line x1="${X(k/2)}" y1="178" x2="${X(k/2)}" y2="183" stroke="${css('--mute')}"/><text x="${X(k/2)}" y="198" font-size="11" text-anchor="middle" fill="${css('--mute')}">${fr(k/2,1)}</text>`;
+  h+=`<text x="${X(2.5)}" y="209" font-size="11" text-anchor="end" fill="${css('--mute')}">Δχ</text>`;
+  const chg=[];
+  CHB.forEach((b,i)=>{const y=lv[i%4],x=X(b.d);const was=b.d>SEUIL,now=b.d>s,diff=was!==now;if(diff)chg.push(b.a+'–'+b.b);
+    h+=`<line x1="${x}" y1="${y}" x2="${x}" y2="178" stroke="${css('--line')}"/><circle cx="${x}" cy="${y}" r="${diff?7:5}" fill="${diff?css('--warn'):css('--accent')}" stroke="${css('--ink')}" stroke-width="${diff?2:0}"/><text x="${x+9}" y="${y+4}" font-size="11" fill="${css('--ink')}">${b.a}–${b.b}</text>`});
+  h+=`<line x1="${X(s)}" y1="10" x2="${X(s)}" y2="178" stroke="${css('--ink')}" stroke-width="2" stroke-dasharray="5 4"/>`;
+  $('#chart').innerHTML=h;
+  $('#chChg').innerHTML=chg.length?`Par rapport au seuil de 0,4, <b>changent de catégorie</b> (points orange) : ${chg.join(', ')}.`:'Avec ce seuil, aucune liaison ne change de catégorie par rapport à 0,4.';
+  S.seuilCh=chg.join(', ')};
+$('#sl').oninput=()=>redrawChart();
+mcq('q-seuil','seuil','Que dire du seuil de 0,4 ?',[
+ {t:'C\'est une valeur mesurée qui sépare exactement deux sortes de liaisons.',fb:'Δχ varie de façon continue : il n\'y a pas de saut de comportement à 0,4.'},
+ {t:'C\'est une convention commode : la polarisation est progressive, et les liaisons proches du seuil (C–H, S–H) sont classées de façon fragile. Le programme demande de déterminer le caractère polaire à partir de χ, sans fixer de valeur.',ok:1,fb:'À l\'autre extrémité, quand Δχ est très grand (Na–Cl : 2,23), les électrons de la liaison sont presque entièrement du côté d\'un atome : on tend vers la formation d\'ions.'},
+ {t:'C\'est une loi de conservation, comme celle de la charge.',fb:'Rien ne se conserve ici : c\'est un choix de classement.'}]);
+
+/* ======================= 4 · Molécules : situation ======================= */
+const vMol=new Viewer($('#cv-mol'));vMol.setMol(MOLS.CH4);
+seg($('#mSel'),ORDER6.map(i=>({t:MOLS[i].f,v:i})),'CH4',v=>vMol.setMol(MOLS[v]));
+$('#tbData').innerHTML='<tr><th>Nom</th><th>Formule</th><th>Polaire</th><th>Apolaire</th></tr>'+ORDER6.map(id=>{const m=MOLS[id];return `<tr><td>${m.name}</td><td>${m.f}</td><td>${m.known==='polaire'?'×':''}</td><td>${m.known==='apolaire'?'×':''}</td></tr>`}).join('');
+$('#obs').oninput=e=>{S.obs=e.target.value};$('#qm').oninput=e=>{S.qm=e.target.value};
+const HYPO=['uniquement de la géométrie de la molécule','uniquement de la polarité de ses liaisons','de la polarité de ses liaisons <b>et</b> de la façon dont elles sont disposées dans l\'espace','du nombre d\'atomes qu\'elle contient'];
+{const box=$('#hypo');HYPO.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML=t;b.setAttribute('aria-pressed','false');b.onclick=()=>{$$('button',box).forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');S.hypo=i;fb('fb-hy','','Hypothèse enregistrée. Tu la mettras à l\'épreuve aux étapes 6 et 7.')};box.appendChild(b)})}
+
+/* ======================= 5 · Barycentres ======================= */
+{ // Étape 1 : dipôle et plusieurs charges
+  const cv=$('#cv-dip');let mode=1;
+  function sys(a){
+    if(mode===1)return [[-a/2,0,1],[a/2,0,-1]];
+    if(mode===2)return [[0,0,2],[-a,0,-1],[a,0,-1]];
+    const h=52.25*RAD;return [[0,0,-2],[a*Math.sin(h),-a*Math.cos(h),1],[-a*Math.sin(h),-a*Math.cos(h),1]];
+  }
+  function bar(ch,sg){let s=0,x=0,y=0;ch.forEach(c=>{if(Math.sign(c[2])===sg){s+=Math.abs(c[2]);x+=c[0]*Math.abs(c[2]);y+=c[1]*Math.abs(c[2])}});return [x/s,y/s]}
+  redrawDip=()=>{const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;const dpr=window.devicePixelRatio||1;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+    const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+    const a=+$('#dpA').value;$('#dpAV').textContent=fr(a,1);const ch=sys(a);const U=Math.min(60,w*.4/3);
+    const mx=ch.reduce((s,v)=>s+v[0],0)/ch.length,my=ch.reduce((s,v)=>s+v[1],0)/ch.length;const X=x=>w/2+(x-mx)*U,Y=y=>h/2-(y-my)*U;
+    c.strokeStyle=css('--line');c.lineWidth=1;ch.forEach(v=>{if(v!==ch[0]){c.beginPath();c.moveTo(X(ch[0][0]),Y(ch[0][1]));c.lineTo(X(v[0]),Y(v[1]));c.stroke()}});
+    ch.forEach(v=>{const neg=v[2]<0,r=12+4*(Math.abs(v[2])-1);c.fillStyle=css(neg?'--neg':'--pos');c.beginPath();c.arc(X(v[0]),Y(v[1]),r,0,7);c.fill();c.fillStyle='#fff';c.font='800 18px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(neg?'−':'+',X(v[0]),Y(v[1])+1)});
+    const gp=bar(ch,1),gn=bar(ch,-1),d=Math.hypot(gp[0]-gn[0],gp[1]-gn[1]);const same=d<1e-6;
+    c.lineWidth=3;c.strokeStyle=css('--pos');c.beginPath();c.arc(X(gp[0]),Y(gp[1]),20,0,7);c.stroke();
+    c.strokeStyle=css('--neg');const gx=X(gn[0]),gy=Y(gn[1]);c.beginPath();c.moveTo(gx,gy-24);c.lineTo(gx+24,gy);c.lineTo(gx,gy+24);c.lineTo(gx-24,gy);c.closePath();c.stroke();
+    lab(c,same?'G+ = G−':'G+',X(gp[0])+(same?26:-24),Y(gp[1])-20,css('--pos'),same?'left':'right');if(!same)lab(c,'G−',gx+26,gy+22,css('--neg'),'left');
+    const msg=mode===1?(a<.05?'Les deux charges sont confondues (a = 0) : il n\'y a plus de dipôle.':`G<sup>+</sup> et G<sup>−</sup> sont séparés de ${fr(d,1)} : c'est un <b>dipôle</b>.`):
+      mode===2?`G<sup>+</sup> et G<sup>−</sup> sont <b>confondus</b>, quelle que soit la valeur de a : ce système n'est pas un dipôle, bien qu'il contienne des charges de signes opposés.`:
+      (a<.05?'Toutes les charges sont confondues : pas de dipôle.':`G<sup>+</sup> (milieu des deux charges +) et G<sup>−</sup> sont séparés de ${fr(d,2)} : c'est un <b>dipôle</b>.`);
+    S.dip={mode,a,d,same};fb('fb-dip',same||a<.05?'warn':'ok',msg)};
+  seg($('#dpMode'),[{t:'1 charge + , 1 charge −',v:1},{t:'+ au centre, 2 charges − alignées',v:2},{t:'− au centre, 2 charges + à 104,5°',v:3}],1,v=>{mode=v;redrawDip()});
+  $('#dpA').oninput=()=>redrawDip();
+  mcq('q-dip','dip','Que faut-il comparer pour savoir si un ensemble de charges se comporte comme un dipôle ?',[
+   {t:'Le nombre de charges positives et le nombre de charges négatives.',fb:'Le système « + au centre, 2 charges − » a des charges des deux signes sans former de dipôle.'},
+   {t:'La position du barycentre des charges positives et celle du barycentre des charges négatives.',ok:1,fb:'Elles doivent être distinctes : la distance a entre G<sup>+</sup> et G<sup>−</sup> est non nulle.'},
+   {t:'La distance entre les deux charges les plus proches.',fb:'Dans le système à trois charges, cette distance n\'est jamais nulle, et pourtant G<sup>+</sup> et G<sup>−</sup> peuvent coïncider.'}]);
+}
+{ // Étape 2 : barycentres dans HCl, CO2, H2O
+  const GM=['HCl','CO2','H2O'];let bm='HCl',bmode='neg';const vBar=new Viewer($('#cv-bar'));
+  const st=id=>S.bar[id]||(S.bar[id]={neg:[],pos:[],placed:false,conf:'',pol:'',done:false});
+  $('#p-bar .card:last-child').insertAdjacentHTML('beforeend','<div id="q-rule" hidden></div>');
+  function sync(){const m=MOLS[bm],s=st(bm);vBar.setMol(m);vBar.sel={neg:new Set(s.neg),pos:new Set(s.pos)};if(s.placed){const q=charges(m),G=barycentres(m,q);vBar.q=q;vBar.gp=G.gp;vBar.gn=G.gn}}
+  function toggle(k,i){const s=st(bm);if(s.placed)return;const a=s[k],p=a.indexOf(i);if(p>=0)a.splice(p,1);else a.push(i);s.check=false;vBar.sel={neg:new Set(s.neg),pos:new Set(s.pos)};render()}
+  vBar.onPick=i=>toggle(bmode,i);
+  const same=(a,b)=>a.length===b.length&&[...a].sort().join()===[...b].sort().join();
+  function render(){
+    const m=MOLS[bm],s=st(bm),q=charges(m),negT=[],posT=[];q.forEach((v,i)=>{if(v<-1e-9)negT.push(i);else if(v>1e-9)posT.push(i)});
+    const G=barycentres(m,q);
+    const chips=(k,cls)=>`<div class="opts" data-k="${k}">${m.atoms.map((a,i)=>`<button type="button" class="chip ${cls}" data-i="${i}" aria-pressed="${s[k].includes(i)}" ${s.placed?'disabled':''}>${a[0]}<sub>${i+1}</sub></button>`).join('')}</div>`;
+    let h=`<p class="small"><b>${m.f}</b> — ${m.name}</p><ul class="small" style="margin:4px 0 8px;padding-left:18px">${bondTypes(m).map(t=>`<li>${t.a}${bsym(t.o)}${t.b} : Δχ = ${fr(dchi(t.a,t.b))} → ${polarBond(t.a,t.b)?'<b>polarisée</b>':'apolaire'}</li>`).join('')}</ul>`;
+    h+=`<div class="small">Atomes qui portent δ<sup>−</sup> :</div>${chips('neg','sn')}<div class="small">Atomes qui portent δ<sup>+</sup> :</div>${chips('pos','sp')}`;
+    if(!s.placed){h+=`<div class="row small">Clic dans le modèle : <div class="seg" id="bMode"><button type="button" data-v="neg" aria-pressed="${bmode==='neg'}">δ−</button><button type="button" data-v="pos" aria-pressed="${bmode==='pos'}">δ+</button></div></div><div class="btns"><button class="btn" id="bGo" type="button">Vérifier et placer G<sup>+</sup> et G<sup>−</sup></button></div><div class="fb" id="bFb" aria-live="polite">${s.msg||''}</div>`}
+    else{
+      h+=`<div class="fb ok">${OK}G<sup>+</sup> (cercle) et G<sup>−</sup> (losange) sont placés dans le modèle (distance : ${fr(G.d)} Å).</div><p class="small"><b>G<sup>+</sup> et G<sup>−</sup> sont-ils confondus ?</b></p><div class="seg" id="bConf"><button type="button" data-v="oui" aria-pressed="${s.conf==='oui'}">oui</button><button type="button" data-v="non" aria-pressed="${s.conf==='non'}">non</button></div>`;
+      if(s.conf){const okC=(s.conf==='oui')===!G.polar;h+=`<div class="fb ${okC?'ok':'warn'}">${okC?OK:KO}${okC?(G.polar?'Ils sont distincts.':'Ils coïncident.'):'Regarde les deux marqueurs en faisant tourner le modèle.'}</div>`;
+        if(okC){h+=`<p class="small"><b>Donc la molécule est :</b></p><div class="seg" id="bPol"><button type="button" data-v="polaire" aria-pressed="${s.pol==='polaire'}">polaire</button><button type="button" data-v="apolaire" aria-pressed="${s.pol==='apolaire'}">apolaire</button></div>`;
+          if(s.pol){const okP=(s.pol==='polaire')===G.polar;s.done=okP;h+=`<div class="fb ${okP?'ok':'warn'}">${okP?OK:KO}${okP?(G.polar?`Le barycentre des charges négatives n'est pas au même endroit que celui des charges positives : dipôle, molécule <b>polaire</b>.`:`Les liaisons sont polarisées, mais leurs effets se compensent par la géométrie : molécule <b>apolaire</b>.`):'Relis la règle : distincts ⇒ dipôle.'}</div>`}}}
+    }
+    $('#bPanel').innerHTML=h;
+    $$('#bPanel .opts button').forEach(b=>b.onclick=()=>toggle(b.parentElement.dataset.k,+b.dataset.i));
+    const bm_=$('#bMode');if(bm_)$$('button',bm_).forEach(b=>b.onclick=()=>{bmode=b.dataset.v;$$('button',bm_).forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+    const go_=$('#bGo');if(go_)go_.onclick=()=>{
+      const okN=same(s.neg,negT),okP=same(s.pos,posT);
+      if(okN&&okP){s.placed=true;s.msg='';const G2=barycentres(m,q);vBar.q=q;vBar.gp=G2.gp;vBar.gn=G2.gn;render()}
+      else{let t=KO;if(!okN)t+=`Pour δ<sup>−</sup> : tu as désigné ${s.neg.length} atome(s), le modèle en attend ${negT.length}. `;if(!okP)t+=`Pour δ<sup>+</sup> : tu as désigné ${s.pos.length} atome(s), le modèle en attend ${posT.length}. `;t+='Rappel : dans chaque liaison polarisée, l\'atome le plus électronégatif porte δ<sup>−</sup>, l\'autre δ<sup>+</sup>.';s.msg=t;fb('bFb','warn',t)}};
+    const bc=$('#bConf');if(bc)$$('button',bc).forEach(b=>b.onclick=()=>{s.conf=b.dataset.v;s.pol='';render()});
+    const bp=$('#bPol');if(bp)$$('button',bp).forEach(b=>b.onclick=()=>{s.pol=b.dataset.v;render();ruleCheck()});
+  }
+  function ruleCheck(){if(GM.every(id=>st(id).done)){const r=$('#q-rule');if(r.hidden){r.hidden=false;mcq('q-rule','rule','Bilan : quelle règle permet de conclure ?',[
+    {t:'Une molécule est polaire dès qu\'elle contient une liaison polarisée.',fb:'CO<sub>2</sub> contient des liaisons polarisées C=O et pourtant elle est apolaire.'},
+    {t:'Une molécule est polaire lorsque G<sup>+</sup> et G<sup>−</sup> sont distincts ; elle est apolaire quand ils sont confondus (ou qu\'il n\'y a aucune liaison polarisée).',ok:1,fb:'C\'est la méthode que tu appliques à l\'atelier : liaisons, puis géométrie.'},
+    {t:'Une molécule est polaire lorsqu\'elle a un atome central.',fb:'CO<sub>2</sub> et CH<sub>4</sub> ont un atome central et sont apolaires.'}])}}}
+  seg($('#bSel'),GM.map(i=>({t:MOLS[i].f,v:i})),'HCl',v=>{bm=v;sync();render()});
+  sync();render();
+  onShow.bar=()=>ruleCheck();
+}
+
+/* ======================= 6 · Atelier ======================= */
+const WHY={none:'aucune liaison polarisée',comp:'des liaisons polarisées qui se compensent par la géométrie',nocomp:'des liaisons polarisées qui ne se compensent pas'};
+const vAtl=new Viewer($('#cv-atl'));let am='HCl';
+const aSt=id=>S.atl[id]||(S.atl[id]={dx:{},cls:{},ok:{},pred:'',cert:3,why:'',locked:false,rev:false,err:''});
+const molInfo=id=>{const m=MOLS[id],q=charges(m),G=barycentres(m,q);const nb=bondTypes(m).filter(t=>polarBond(t.a,t.b)).length;return {m,q,G,nb,res:G.polar?'polaire':'apolaire',why:nb===0?'none':G.polar?'nocomp':'comp'}};
+function atlSet(id){am=id;vAtl.setMol(MOLS[id]);const s=aSt(id);if(s.rev){const I=molInfo(id);vAtl.q=I.q;vAtl.gp=I.G.gp;vAtl.gn=I.G.gn}renderAtl()}
+seg($('#aSel'),ORDER12.map(i=>({t:MOLS[i].f,v:i})),am,atlSet);
+function renderAtl(){
+  const I=molInfo(am),m=I.m,s=aSt(am),types=bondTypes(m);
+  let h=`<p class="small"><b>${m.f}</b> — ${m.name}</p><h3 style="margin-top:.2rem">1 · Les liaisons</h3><div class="tw"><table class="t"><tr><th>Liaison</th><th>χ</th><th>Δχ</th><th>Je dis…</th><th></th></tr>${types.map(t=>`<tr><td><b>${t.a}${bsym(t.o)}${t.b}</b></td><td class="mute">${fr(EL[t.a].chi)} ; ${fr(EL[t.b].chi)}</td><td><input class="n" type="text" inputmode="decimal" data-k="${t.key}" value="${s.dx[t.key]||''}" aria-label="Δχ de la liaison ${t.a}${bsym(t.o)}${t.b}"></td><td><select data-k="${t.key}" aria-label="Caractère de la liaison ${t.a}${bsym(t.o)}${t.b}"><option value="">…</option><option value="p"${s.cls[t.key]==='p'?' selected':''}>polaire</option><option value="a"${s.cls[t.key]==='a'?' selected':''}>apolaire</option></select></td><td id="ar-${t.key}"></td></tr>`).join('')}</table></div><div class="fb" id="af1" aria-live="polite"></div>`;
+  h+='<h3>2 · Ma prévision</h3>';
+  if(s.locked)h+=`<div class="fb">Prévision enregistrée : molécule <b>${s.pred}</b> (certitude ${s.cert}/5) car il y a ${WHY[s.why]}.</div>`;
+  else h+=`<div class="seg" id="apPred" role="group" aria-label="Prévision"><button type="button" data-v="polaire" aria-pressed="${s.pred==='polaire'}">polaire</button><button type="button" data-v="apolaire" aria-pressed="${s.pred==='apolaire'}">apolaire</button></div> <label class="small">Certitude <select id="apCert">${[1,2,3,4,5].map(n=>`<option${n===s.cert?' selected':''}>${n}</option>`).join('')}</select></label>
+   <p class="small" style="margin:6px 0 2px">Parce qu'il y a… </p><div class="opts v" id="apWhy">${Object.keys(WHY).map(k=>`<button type="button" data-v="${k}" aria-pressed="${s.why===k}">${WHY[k]}</button>`).join('')}</div><div class="btns"><button class="btn" id="apGo" type="button">Enregistrer ma prévision</button></div><div class="fb" id="apFb"></div>`;
+  h+='<h3>3 · Vérifier avec les barycentres</h3><div id="aRes"></div>';
+  $('#aPanel').innerHTML=h;
+  const rowOK=k=>s.ok[k];const gate=()=>types.every(t=>rowOK(t.key));
+  function row(k,quiet){const t=types.find(x=>x.key===k);const dx=parseFloat((s.dx[k]||'').replace(',','.')),c=s.cls[k];const cell=$('#ar-'+k);if(isNaN(dx)||!c){cell.textContent='';s.ok[k]=false;return}
+    const d=dchi(t.a,t.b),okD=Math.abs(dx-d)<=.015,okC=c===(d>SEUIL?'p':'a');s.ok[k]=okD&&okC;
+    cell.innerHTML=s.ok[k]?'<span class="okc">✓</span>':`<span class="wc">✗ ${okD?'à comparer à 0,4':'Δχ ?'}</span>`;
+    const n=types.filter(x=>s.ok[x.key]).length;fb('af1',n===types.length?'ok':'',n===types.length?`${OK}${types.filter(x=>polarBond(x.a,x.b)).length?'Il y a des liaisons polarisées : leur disposition dans l\'espace va décider.':'Aucune liaison n\'est polarisée.'}`:`${n}/${types.length} liaisons justes.`)}
+  $$('#aPanel input[data-k],#aPanel select[data-k]').forEach(e=>e.addEventListener('change',()=>{const k=e.dataset.k;if(e.tagName==='INPUT')s.dx[k]=e.value;else s.cls[k]=e.value;row(k);if(!s.locked)checkGo()}));
+  types.forEach(t=>row(t.key,true));
+  function checkGo(){const b=$('#apGo');if(b){b.disabled=!(s.pred&&s.why&&gate())}}
+  if(!s.locked){
+    $$('#apPred button').forEach(b=>b.onclick=()=>{s.pred=b.dataset.v;$$('#apPred button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));checkGo()});
+    $$('#apWhy button').forEach(b=>b.onclick=()=>{s.why=b.dataset.v;$$('#apWhy button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));checkGo()});
+    $('#apCert').onchange=e=>{s.cert=+e.target.value};
+    $('#apGo').onclick=()=>{s.locked=true;renderAtl();tableAtl()};checkGo();
+    const b=$('#apGo');if(b&&!gate())fb('apFb','','Termine d\'abord l\'étude des liaisons (1), puis choisis ta prévision et sa raison.');
+  }
+  const R=$('#aRes');
+  if(!s.locked)R.innerHTML='<p class="small mute">Enregistre d\'abord ta prévision.</p>';
+  else if(!s.rev){R.innerHTML='<div class="btns"><button class="btn" id="aRev" type="button">Placer δ+, δ−, G<sup>+</sup> et G<sup>−</sup></button></div>';$('#aRev').onclick=()=>{s.rev=true;vAtl.q=I.q;vAtl.gp=I.G.gp;vAtl.gn=I.G.gn;renderAtl();tableAtl()}}
+  else{
+    const pOK=s.pred===I.res,wOK=s.why===I.why;
+    let t=I.nb===0?`Aucune liaison n'est polarisée : pas de charges partielles, donc pas de G<sup>+</sup> ni de G<sup>−</sup>. La molécule est <b>apolaire</b>.`:`G<sup>+</sup> et G<sup>−</sup> sont ${I.G.polar?`<b>distincts</b> (séparés de ${fr(I.G.d)} Å)`:'<b>confondus</b>'} : la molécule est <b>${I.res}</b>.`;
+    let v='';
+    if(pOK&&wOK)v=`${OK}Ta prévision et ton raisonnement sont justes.`;
+    else if(pOK)v=`<span class="wc">Bonne conclusion, mais pour une autre raison.</span> Ici : ${WHY[I.why]}.`;
+    else v=`<span class="wc">Ta prévision était « ${s.pred} » : elle est infirmée.</span> D'où vient l'écart ?<div class="opts" id="aErr">${['Je me suis trompé sur le Δχ d\'une liaison','J\'ai pensé qu\'une liaison polarisée rend toujours la molécule polaire','J\'ai oublié de tenir compte de la géométrie'].map(x=>`<button type="button" aria-pressed="${s.err===x}">${x}</button>`).join('')}</div>`;
+    if(s.cert>=4&&!pOK)v+='<br><span class="wc">Tu étais très confiant : qu\'est-ce que cette erreur t\'apprend ?</span>';
+    let k='';if(m.known){k=`<br>Donnée de l'étape 4 : <b>${m.known}</b> → ${m.known===I.res?'<span class="okc">le modèle est en accord avec l\'expérience</span>':'<span class="wc">désaccord</span>'}.`}
+    R.innerHTML=`<div class="fb ${pOK?'ok':'warn'}">${t}<br>${v}${k}</div>`;
+    $$('#aErr button').forEach(b=>b.onclick=()=>{s.err=b.textContent;$$('#aErr button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  }
+}
+function tableAtl(){
+  $('#tbAtl').innerHTML='<tr><th>Nom</th><th>Formule</th><th>Polaire</th><th>Apolaire</th><th>Ma prévision</th></tr>'+ORDER12.map(id=>{const m=MOLS[id],s=S.atl[id],I=molInfo(id);const rev=s&&s.rev;
+    const pv=s&&s.locked?`${s.pred} (${s.cert}/5)${rev?(s.pred===I.res?' <span class="okc">✓</span>':' <span class="wc">✗</span>'):''}`:'—';
+    return `<tr><td>${m.name}</td><td>${m.f}</td><td>${rev&&I.res==='polaire'?'×':''}</td><td>${rev&&I.res==='apolaire'?'×':''}</td><td>${pv}</td></tr>`}).join('');
+  const n=ORDER12.filter(id=>S.atl[id]&&S.atl[id].rev).length,ok=ORDER12.filter(id=>S.atl[id]&&S.atl[id].rev&&S.atl[id].pred===molInfo(id).res).length;
+  $('#atlProg').textContent=`${n}/12 molécules traitées${n?` · ${ok}/${n} prévisions justes`:''}.`}
+atlSet('HCl');tableAtl();
+
+/* ======================= 7 · Test expérimental ======================= */
+const LIQ=[{id:'H2O',n:'eau',D:12},{id:'CH2Cl2',n:'dichlorométhane',D:10},{id:'CHCl3',n:'trichlorométhane',D:7},{id:'CCl4',n:'tétrachlorométhane',D:0},{id:'C6H12',n:'cyclohexane',f:'C<sub>6</sub>H<sub>12</sub>',D:0}];
+LIQ.forEach(l=>{l.f=l.f||MOLS[l.id].f});
+const X=S.exp;Object.assign(X,{liq:'H2O',rod:false,sign:'-',theo:false,read:{},ver:{},c6:{pred:'',why:'',cert:3,locked:false}});
+const liq=()=>LIQ.find(l=>l.id===X.liq);
+const stats=a=>{const n=a.length,m=a.reduce((s,v)=>s+v,0)/n;const sd=n>1?Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(n-1)):0;return {n,m,u:n>1?sd/Math.sqrt(n):0}};
+redrawExp=()=>{const cv=$('#cv-exp'),w=cv.clientWidth,h=cv.clientHeight;if(!w)return;const dpr=window.devicePixelRatio||1;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+  const pm=Math.min(5,w/70),xj=w*.32,y0=34,y1=h-62,L=liq();const Dm=X.rod?L.D:0;
+  c.fillStyle=css('--stick');c.fillRect(xj-12,8,24,16);c.fillRect(xj-3,22,6,12);
+  c.strokeStyle=css('--accent');c.lineWidth=3;c.lineCap='round';c.beginPath();for(let y=y0;y<=y1;y+=4){const t=(y-y0)/(y1-y0);const x=xj+Dm*t*t*pm;y===y0?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();
+  const rx=xj+(X.rod?16:48)*pm,ry=(y0+y1)/2;c.save();c.translate(rx,ry);c.rotate(-.15);c.fillStyle=css('--stick');c.fillRect(0,-8,w,16);c.restore();
+  c.fillStyle=css('--card');c.strokeStyle=css('--ink');c.lineWidth=1.5;c.beginPath();c.arc(rx-2,ry+1,12,0,7);c.fill();c.stroke();c.fillStyle=css(X.sign==='-'?'--neg':'--pos');c.font='800 20px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(X.sign==='-'?'−':'+',rx-2,ry+1);
+  c.fillStyle=css('--mute');c.font='12px system-ui,sans-serif';c.textAlign='left';c.fillText(X.rod?'baguette près du filet':'baguette éloignée',Math.min(rx+16,w-130),ry+34);
+  const yr=y1+16;c.strokeStyle=css('--ink');c.lineWidth=1;c.beginPath();c.moveTo(xj-4*pm,yr);c.lineTo(xj+20*pm,yr);c.stroke();c.fillStyle=css('--ink');c.font='11px system-ui,sans-serif';c.textAlign='center';c.textBaseline='top';
+  for(let k=-4;k<=20;k++){const x=xj+k*pm;c.beginPath();c.moveTo(x,yr);c.lineTo(x,yr+(k%5===0?9:5));c.stroke();if(k%5===0&&k>=0)c.fillText(String(k),x,yr+11)}
+  c.textAlign='left';c.fillText('écart (mm)',xj+20*pm+6,yr-3);
+  c.fillStyle=css('--accent');c.beginPath();const xe=xj+Dm*pm;c.moveTo(xe,y1+2);c.lineTo(xe-5,y1-8);c.lineTo(xe+5,y1-8);c.fill()};
+function renderExp(){
+  const L=liq(),r=X.read[L.id]||(X.read[L.id]=[]);const isC6=L.id==='C6H12',c6=X.c6;
+  let h=`<p class="small"><b>${L.n}</b> (${L.f})${L.id==='CCl4'?' — produit toxique, interdit au lycée : la mesure est simulée.':''}</p>`;
+  if(isC6&&!c6.locked){
+    h+=`<div class="fb">Cyclohexane C<sub>6</sub>H<sub>12</sub> : chaque atome de carbone est lié à deux autres atomes de carbone et à deux atomes d'hydrogène. <b>Prévois avant de mesurer</b> (sans la géométrie détaillée).</div><div class="seg" id="c6p"><button type="button" data-v="polaire" aria-pressed="${c6.pred==='polaire'}">polaire</button><button type="button" data-v="apolaire" aria-pressed="${c6.pred==='apolaire'}">apolaire</button></div><div class="opts v" id="c6w">${Object.keys(WHY).map(k=>`<button type="button" data-v="${k}" aria-pressed="${c6.why===k}">${WHY[k]}</button>`).join('')}</div><div class="btns"><button class="btn" id="c6go" type="button" ${c6.pred&&c6.why?'':'disabled'}>Enregistrer ma prévision</button></div>`;
+    $('#xPanel').innerHTML=h;
+    const upd=()=>{$('#c6go').disabled=!(c6.pred&&c6.why)};
+    $$('#c6p button').forEach(b=>b.onclick=()=>{c6.pred=b.dataset.v;$$('#c6p button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));upd()});
+    $$('#c6w button').forEach(b=>b.onclick=()=>{c6.why=b.dataset.v;$$('#c6w button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));upd()});
+    $('#c6go').onclick=()=>{c6.locked=true;renderExp();tableExp()};return}
+  const st=r.length?stats(r):null;
+  h+=`<div class="btns"><button class="btn" id="xMes" type="button" ${X.rod?'':'disabled'}>Lire l'écart</button><button class="btn sec" id="xClr" type="button">Effacer mes mesures</button></div>`;
+  if(!X.rod)h+='<p class="small mute">Approche la baguette pour pouvoir mesurer.</p>';
+  h+=`<div class="small">Mesures (mm) : <b>${r.length?r.map(v=>fr(v,1)).join(' ; '):'—'}</b><br>${st&&st.n>=2?`Moyenne : <b>${fr(st.m,1)} ± ${fr(st.u,1)} mm</b> (graduation de la règle : 1 mm)`:'Fais au moins 3 mesures.'}</div>`;
+  h+=`<p class="small" style="margin:8px 0 2px"><b>Verdict :</b> le filet de ${L.n} est-il dévié ?</p><div class="seg" id="xV"><button type="button" data-v="devie" aria-pressed="${X.ver[L.id]==='devie'}">dévié</button><button type="button" data-v="non" aria-pressed="${X.ver[L.id]==='non'}">pas dévié</button></div><div class="fb" id="xFb" aria-live="polite"></div>`;
+  $('#xPanel').innerHTML=h;
+  $('#xMes').onclick=()=>{if(r.length>=8){toast('8 mesures maximum');return}r.push(Bruit.appliquer(X.rod?L.D:0,120));renderExp();tableExp()};
+  $('#xClr').onclick=()=>{X.read[L.id]=[];X.ver[L.id]='';renderExp();tableExp()};
+  $$('#xV button').forEach(b=>b.onclick=()=>{
+    if(!r.length||r.length<3){fb('xFb','warn','Fais d\'abord au moins 3 mesures avec la baguette approchée.');return}
+    X.ver[L.id]=b.dataset.v;$$('#xV button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    const s2=stats(r),dev=s2.m>2,truth=L.D>0;const ok=(b.dataset.v==='devie')===dev;
+    let t=dev?`Écart moyen ${fr(s2.m,1)} ± ${fr(s2.u,1)} mm : bien supérieur à la graduation et à l'incertitude. Le filet est <b>dévié</b> : le liquide est formé de molécules <b>polaires</b>.`:`Écart moyen ${fr(s2.m,1)} ± ${fr(s2.u,1)} mm : du même ordre que l'incertitude de lecture. On ne peut pas conclure à une déviation : le liquide est formé de molécules <b>apolaires</b>.`;
+    fb('xFb',ok?'ok':'warn',(ok?OK:KO)+(ok?t:'Compare ton écart moyen à la graduation de la règle (1 mm) et à l\'incertitude.'));tableExp();
+    if(ok&&truth===dev){/* ok */}});
+  const old=X.ver[L.id];if(old){}
+}
+function tableExp(){
+  const rows=LIQ.map(l=>{const m=MOLS[l.id];let pred='—',model='—';
+    if(l.id==='C6H12'){pred=X.c6.locked?X.c6.pred:'—';model='apolaire (liaisons C–C et C–H apolaires)'}
+    else{const a=S.atl[l.id];pred=a&&a.locked?a.pred:'<span class="mute">non faite (étape 6)</span>';model=molInfo(l.id).res}
+    const r=X.read[l.id]||[];const v=X.ver[l.id];const expv=v==='devie'?'polaire':v==='non'?'apolaire':'—';
+    const modelRes=l.id==='C6H12'?'apolaire':molInfo(l.id).res;
+    const acc=expv==='—'?'':expv===modelRes?'<span class="okc">modèle validé</span>':'<span class="wc">désaccord</span>';
+    return `<tr><td>${l.n}<br><span class="mute small">${l.f}</span></td><td>${pred}</td><td>${model}</td><td>${r.length>=2?fr(stats(r).m,1)+' mm':'—'}</td><td>${expv}</td><td>${acc}</td></tr>`}).join('');
+  $('#tbExp').innerHTML='<tr><th>Liquide</th><th>Ma prévision</th><th>Modèle (géométrie + liaisons)</th><th>Écart mesuré</th><th>Expérience</th><th>Bilan</th></tr>'+rows;
+  const done=LIQ.every(l=>X.ver[l.id]);const fin=$('#xFinal');
+  if(done&&!fin.dataset.on){fin.dataset.on='1';finalExp()}
+}
+function finalExp(){
+  const hy=S.hypo;const txt=[
+    'Infirmée : CH<sub>4</sub> et CH<sub>2</sub>Cl<sub>2</sub> ont la même géométrie (tétraédrique) mais l\'un est apolaire, l\'autre polaire.',
+    'Infirmée : CO<sub>2</sub> et CCl<sub>4</sub> ont des liaisons polarisées, mais sont apolaires.',
+    'Confirmée, et précisée : ce qui compte est la compensation ou non des effets des liaisons polarisées, c\'est-à-dire la position relative de G<sup>+</sup> et G<sup>−</sup>.',
+    'Infirmée : CO<sub>2</sub> et H<sub>2</sub>O ont trois atomes chacune, l\'une est apolaire, l\'autre polaire.'][hy];
+  $('#xFinal').innerHTML=`<h3>Retour sur mon hypothèse</h3><div class="fb ${hy===2?'ok':'warn'}">${typeof hy==='number'?`Ton hypothèse (étape 4) : la polarité dépend ${HYPO[hy]}.<br>${txt}`:'Tu n\'avais pas formulé d\'hypothèse à l\'étape 4 : formule-la maintenant dans ton carnet.'}</div><div id="q-lim"></div><div id="q-ori"></div>`;
+  mcq('q-ori','ori','Pourquoi un filet de liquide polaire est-il attiré par la baguette, quel que soit le signe de sa charge ?',[
+   {t:'Parce que les molécules polaires portent une charge globale non nulle.',fb:'Une molécule polaire est globalement neutre : elle porte seulement des charges partielles de signes opposés.'},
+   {t:'Les molécules polaires s\'orientent : leur côté δ de signe opposé à la baguette est plus proche d\'elle, l\'attraction l\'emporte sur la répulsion.',ok:1,fb:'C\'est le modèle du dipôle : les deux côtés sont chargés, mais pas à la même distance de la baguette.'},
+   {t:'Parce que le liquide est conducteur.',fb:'Le dichlorométhane n\'est pas conducteur et il est pourtant dévié.'}]);
+  mcq('q-lim','lim','Quelle limite le modèle « liaisons + géométrie + barycentres » présente-t-il ?',[
+   {t:'Aucune : il donne la valeur exacte de la polarité de toute molécule.',fb:'Il classe en polaire ou apolaire ; il ne mesure pas l\'intensité de la polarité.'},
+   {t:'Le seuil de 0,4 est conventionnel, les charges partielles sont schématiques et la géométrie est idéalisée : le modèle classe, il ne mesure pas l\'intensité de la polarité.',ok:1,fb:'Pour les molécules étudiées ici, il est en accord avec toutes les données.'},
+   {t:'Il ne marche que pour les molécules à un seul atome central.',fb:'La méthode (liaisons, géométrie, barycentres) s\'applique à toute molécule dont on connaît la géométrie.'}]);
+}
+seg($('#xSel'),LIQ.map(l=>({t:l.n,v:l.id})),'H2O',v=>{X.liq=v;renderExp();redrawExp()});
+$('#xRod').onchange=e=>{X.rod=e.target.checked;renderExp();redrawExp()};
+$('#xTheo').checked=!Bruit.actif();
+$('#xTheo').onchange=e=>{Bruit.theorique(e.target.checked)};
+seg($('#xSign'),[{t:'baguette −',v:'-'},{t:'baguette +',v:'+'}],'-',v=>{X.sign=v;redrawExp()});
+onShow.exp=()=>{renderExp();tableExp();redrawExp()};
+renderExp();tableExp();
+
+/* ======================= 8 · Carnet ======================= */
+const STEPS=['Écrire le schéma de Lewis et en déduire la géométrie de la molécule','Calculer Δχ pour chaque liaison et le comparer au seuil','S\'il n\'y a aucune liaison polarisée : la molécule est apolaire (fin)','Sinon, repérer les atomes δ− (plus électronégatifs) et δ+','Placer les barycentres G+ et G− des charges partielles','G+ et G− confondus : apolaire ; distincts : polaire'];
+{const host=$('#mapHost');const shuf=[3,0,5,2,4,1];host.innerHTML=STEPS.map((_,i)=>`<div class="node"><b>${i+1}</b><select data-i="${i}" aria-label="Étape ${i+1}"><option value="">…</option>${shuf.map(k=>`<option value="${k}">${STEPS[k]}</option>`).join('')}</select><span id="mp-${i}" class="small"></span></div>${i<5?'<div class="mute" style="text-align:center;line-height:1" aria-hidden="true">↓</div>':''}`).join('');
+  $('#mapCheck').onclick=()=>{let n=0;const got=[];$$('#mapHost select').forEach(s=>{const i=+s.dataset.i;const ok=s.value!==''&&+s.value===i;got.push(s.value);$('#mp-'+i).innerHTML=s.value===''?'':ok?'<span class="okc">✓</span>':'<span class="wc">✗</span>';if(ok)n++});S.map=n;
+    fb('mapFb',n===6?'ok':'warn',n===6?`${OK}Tu peux maintenant écrire ta synthèse.`:`${n}/6 étapes bien placées. Question-guide : que faut-il connaître <i>avant</i> de parler de barycentres ?`)}}
+const VOC=[['électronégativité'],['polarisée','polaire'],['charge partielle','charges partielles'],['δ'],['barycentre'],['géométrie','symétrie','symétrique'],['dipôle']];
+$('#synth').oninput=e=>{S.synth=e.target.value;const t=e.target.value.toLowerCase();const n=VOC.filter(g=>g.some(w=>t.includes(w))).length;$('#vocab').textContent=`Vocabulaire repéré : ${n}/${VOC.length} (électronégativité, polarisée/polaire, charges partielles, δ, barycentre, géométrie/symétrie, dipôle).`};
+function notebook(){
+  const L=[];const P=S.prev;const rows=Object.values(S.b1).filter(x=>x.ok).length;
+  L.push('CARNET — Polarité des liaisons et des molécules','','PARTIE A · LA LIAISON');
+  L.push('Problématique : '+(S.q||'(non rédigée)'));
+  L.push(P.done?`Prévision d'électronégativité : période → ${NAME[P.per]} (certitude ${P.cPer}/5) ${P.okP?'confirmé':'infirmé'} ; groupe → ${NAME[P.grp]} (certitude ${P.cGrp}/5) ${P.okG?'confirmé':'infirmé'}.`:'Prévision d\'électronégativité : non faite.');
+  if(S.rank.mine)L.push('Classement croissant de χ : '+S.rank.mine+(S.rank.ok?' (juste)':' (à revoir)'));
+  L.push(`Calculs de Δχ : ${rows}/8 liaisons justes.`);
+  L.push(`Seuil proposé : ${fr(S.thr.val)} (${S.thr.ok?'compatible avec C–H apolaire et C–N polaire':'non validé'}) ; seuil du manuel : 0,4 (convention).`);
+  const n3=Object.values(S.b3).filter(x=>x.ok).length;L.push(`Liaisons classées polaires/apolaires : ${n3}/4 justes.`);
+  if(S.seuilCh!==undefined)L.push('Dernier seuil essayé : liaisons qui changent de catégorie par rapport à 0,4 : '+(S.seuilCh||'aucune')+'.');
+  if(S.mcq.seuil)L.push('Le seuil est : '+S.mcq.seuil.t.replace(/<[^>]+>/g,'')+(S.mcq.seuil.ok?' (juste)':' (à revoir)'));
+  L.push('','PARTIE B · LA MOLÉCULE');
+  L.push('Ce que je remarque : '+(S.obs||'(rien noté)'));L.push('Problématique : '+(S.qm||'(non rédigée)'));
+  L.push('Mon hypothèse : '+(typeof S.hypo==='number'?'la polarité dépend '+HYPO[S.hypo].replace(/<[^>]+>/g,''):'(non formulée)'));
+  const bar=['HCl','CO2','H2O'].map(id=>{const b=S.bar[id];return MOLS[id].f.replace(/<[^>]+>/g,'')+' : '+(b&&b.done?molInfo(id).res:'à faire')}).join(' ; ');L.push('Barycentres : '+bar);
+  const at=ORDER12.filter(id=>S.atl[id]&&S.atl[id].locked).map(id=>{const s=S.atl[id],I=molInfo(id);return `  - ${MOLS[id].f.replace(/<[^>]+>/g,'')} : prévu ${s.pred} (certitude ${s.cert}/5)${s.rev?' → modèle : '+I.res+(s.pred===I.res?' ✓':' ✗'+(s.err?' ('+s.err+')':'')):''}`});
+  L.push('Atelier ('+at.length+'/12) :');L.push(...(at.length?at:['  (rien)']));
+  const ex=LIQ.filter(l=>X.ver[l.id]).map(l=>{const st=stats(X.read[l.id]);return `  - ${l.n} : ${fr(st.m,1)} ± ${fr(st.u,1)} mm → ${X.ver[l.id]==='devie'?'polaire':'apolaire'}`});
+  L.push('Test expérimental :');L.push(...(ex.length?ex:['  (non réalisé)']));
+  L.push('','SYNTHÈSE');L.push(S.synth||'(non rédigée)');
+  if(S.map!=null)L.push('','Carte mentale : '+S.map+'/6 étapes bien placées.');
+  return L.join('\n');
+}
+function renderNotebook(){$('#nbPre').textContent=notebook()}
+onShow.car=renderNotebook;
+$('#copyNb').onclick=async()=>{renderNotebook();try{await navigator.clipboard.writeText($('#nbPre').textContent);toast('Carnet copié')}catch(e){const r=document.createRange();r.selectNodeContents($('#nbPre'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Sélectionné : copie-le avec Ctrl+C')}};
+
+/* ======================= Démarrage ======================= */
+renderChartInit();
+function renderChartInit(){redrawChart()}
+setTimeout(redrawAll,60);window.addEventListener('load',redrawAll);
+})();
+</script>
+</body>
+</html>
