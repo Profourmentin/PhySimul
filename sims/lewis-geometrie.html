@@ -51,7 +51,8 @@ label{font-size:.92rem}
 table.t{border-collapse:collapse;width:100%;font-size:.88rem}
 table.t th,table.t td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
 table.t th{color:var(--mute);font-weight:600}
-.stage{background:var(--stage);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative}
+.stagemsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;font-size:.95rem;color:var(--mute);pointer-events:none}
 canvas.cv{display:block;width:100%;height:340px;touch-action:none;cursor:grab}
 canvas.cv:active{cursor:grabbing}
 svg.lewis{display:block;width:100%;height:auto;max-height:420px;background:var(--stage);border:1px solid var(--line);border-radius:12px}
@@ -163,7 +164,7 @@ input[type=range]{min-height:44px}
     <p class="small mute">Autour de l'atome central, les doublets liants et non liants exercent des forces électriques répulsives. Ils se placent de façon à minimiser cette répulsion. Une liaison multiple compte pour <b>une seule direction</b>.</p>
     <div class="grid2">
       <div>
-        <div class="stage"><canvas class="cv" id="cv-lab" aria-label="Modèle 3D des directions des doublets autour de l'atome central. Glisser pour tourner."></canvas></div>
+        <div class="stage"><canvas class="cv" id="cv-lab" aria-label="Modèle 3D des directions des doublets autour de l'atome central. Glisser pour tourner."></canvas><div class="stagemsg" id="labMsg" role="status"></div></div>
         <div class="row small">
           <label class="chk"><input type="checkbox" id="lab-auto" checked> Rotation automatique</label>
           <label class="chk"><input type="checkbox" id="lab-hidelp"> Masquer les doublets non liants (voir seulement les atomes)</label>
@@ -772,8 +773,10 @@ const Lab=(()=>{
     }
     return {atoms,bonds,lobes};
   }
+  function msg(){const m=$('#labMsg');if(!m)return;
+    m.textContent=ranOnce?'':(mode==='ent'?'Les doublets apparaîtront ici et se repousseront. Fais d\'abord ta prévision, puis clique sur « Valider ma prévision et lancer ».':'Règle les curseurs, puis clique sur « Lancer la répulsion » : les doublets apparaîtront ici.')}
   function setup(){
-    dirs();P=randDirs(b+l);w=weights();iter=0;running=true;ranOnce=true;v.setScene(scene(),1.9);
+    dirs();P=randDirs(b+l);w=weights();iter=0;running=true;ranOnce=true;msg();v.setScene(scene(),1.9);
   }
   v.tick=function(){
     if(!running)return;
@@ -817,7 +820,7 @@ const Lab=(()=>{
     <div id="labNote" hidden><label for="labTxt" class="small"><b>Ce que cet accord ou cet écart m'apprend</b> (une phrase)</label><textarea id="labTxt" rows="2"></textarea></div>`;
     $('#labTxt').addEventListener('input',e=>{if(mode==='ent'){S.labNote[ent.id]=e.target.value;nbRefresh()}});
     $('#labSel').value=mode==='free'?'free':ent.id;$('#labW').checked=weighted;
-    $('#labSel').addEventListener('change',e=>{if(e.target.value==='free')mode='free';else{mode='ent';ent=byId(e.target.value)}form();$('#labFb').textContent='';$('#labFb').className='fb';dirs();P=randDirs(b+l);w=weights();ranOnce=false;running=false;v.setScene({atoms:[],bonds:[],lobes:[]});$('#labRead').innerHTML=''});
+    $('#labSel').addEventListener('change',e=>{if(e.target.value==='free')mode='free';else{mode='ent';ent=byId(e.target.value)}form();$('#labFb').textContent='';$('#labFb').className='fb';dirs();P=randDirs(b+l);w=weights();ranOnce=false;running=false;v.setScene({atoms:[],bonds:[],lobes:[]});msg();$('#labRead').innerHTML=''});
     $('#labW').addEventListener('change',e=>{weighted=e.target.checked;if(ranOnce){setup()}});
     form();
   }
@@ -849,7 +852,7 @@ const Lab=(()=>{
       $('#fGo').addEventListener('click',()=>{upd();setup()});
     }
   }
-  panel();
+  panel();msg();
   $('#lab-auto').addEventListener('change',e=>v.auto=e.target.checked);
   $('#lab-hidelp').addEventListener('change',e=>{hide=e.target.checked;if(P.length)v.setScene(scene())});
   return {v,setEntity(id){if(id){mode='ent';ent=byId(id)}panel()},setWeighted(x){weighted=x;const c=$('#labW');if(c)c.checked=x},_state:()=>({b,l,P,E,running}),run:setup,anglesInfo};
