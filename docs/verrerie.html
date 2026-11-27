@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gamme Verrerie · Simulabo PhCh</title>
+<meta name="description" content="Galerie de référence de la verrerie et du matériel de laboratoire dessinés pour les simulations de chimie : pièces réglables, solutions, montages de titrage, de reflux et de filtration.">
+<link rel="stylesheet" href="../shared/simulabo.css">
+<style>
+/* Styles propres à cette page de référence : le reste vient du socle. */
+.atelier { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: start; }
+.vitrine { position: sticky; top: 12px; }
+.vitrine svg.verrerie { width: 100%; height: 380px; display: block; }
+.vitrine h3 { margin: 4px 0 2px; }
+.vitrine p { margin: 0; color: var(--muted); font-size: 15px; }
+.reglages { display: grid; gap: 12px; margin-top: 12px; }
+.champ { display: grid; gap: 6px; font-size: 15px; }
+.champ label { font-weight: 600; }
+.champ select, .champ input[type="text"] { min-height: var(--tap); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); padding: 0 10px; font: inherit; width: 100%; }
+.champ.case { display: flex; align-items: center; gap: 10px; min-height: var(--tap); }
+.champ.case input { width: 22px; height: 22px; accent-color: var(--accent); }
+.famille { font: 600 12px/1 var(--font-data); letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+.pieces { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin-bottom: 18px; }
+.piece { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px 8px; min-width: 0; height: auto; }
+.piece svg.verrerie { width: 100%; height: 88px; }
+.piece span { font-size: 13px; line-height: 1.25; text-align: center; }
+.piece[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.montages { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; }
+.montages svg.verrerie { width: 100%; height: auto; display: block; }
+.interrupteurs { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.interrupteurs label { display: flex; align-items: center; gap: 8px; min-height: var(--tap); }
+.interrupteurs input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); }
+.teintes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.teintes div { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); padding: 8px 10px; font-size: 14px; line-height: 1.3; }
+.teintes svg { flex: 0 0 38px; width: 38px; height: 38px; }
+@media (max-width: 820px) {
+  .atelier { grid-template-columns: minmax(0, 1fr); }
+  .vitrine { position: static; }
+  .vitrine svg.verrerie { height: 300px; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#ref">Aller à la galerie</a>
+<div class="wrap">
+  <p class="crumb"><a href="../index.html">← Catalogue des simulations</a></p>
+
+  <header>
+    <p class="kicker" data-theme="matiere">Référence visuelle · Chimie</p>
+    <h1>Gamme Verrerie</h1>
+    <p class="sub">La verrerie et le matériel de laboratoire du lycée, dessinés une fois pour toutes en SVG : mêmes traits, mêmes couleurs de solutions, thème clair et sombre. Toute simulation de chimie les prend dans <code>shared/verrerie.js</code>. Règles de dessin, options de chaque pièce et liste des simulations à migrer : <code>docs/verrerie.md</code>.</p>
+  </header>
+
+  <main id="ref" style="display:flex;flex-direction:column;gap:24px;width:100%">
+    <section aria-labelledby="h-atelier">
+      <h2 id="h-atelier">Les pièces</h2>
+      <div class="atelier" style="margin-top:12px">
+        <div class="card vitrine" aria-live="polite">
+          <div id="grand"></div>
+          <h3 id="grand-nom"></h3>
+          <p id="grand-options"></p>
+          <div class="reglages" id="reglages"></div>
+        </div>
+        <div id="catalogue"></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-montages">
+      <h2 id="h-montages">Les montages</h2>
+      <p class="sub" style="margin-bottom:12px">Trois montages que les élèves doivent savoir schématiser et légender. En mode « légendes », les traits sont horizontaux et le texte est aligné, comme sur les schémas de TP.</p>
+      <div class="montages">
+        <div class="card">
+          <h3>Titrage direct</h3>
+          <div id="m-titrage"></div>
+          <div id="t-vol"></div>
+          <div class="interrupteurs"><label><input type="checkbox" id="t-leg" checked> Légendes</label></div>
+        </div>
+        <div class="card">
+          <h3>Chauffage à reflux</h3>
+          <div id="m-reflux"></div>
+          <div class="interrupteurs">
+            <label><input type="checkbox" id="r-leg" checked> Légendes</label>
+            <label><input type="checkbox" id="r-chauf" checked> Chauffe-ballon en marche</label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Filtration sous vide</h3>
+          <div id="m-filtration"></div>
+          <div class="interrupteurs">
+            <label><input type="checkbox" id="f-leg" checked> Légendes</label>
+            <label><input type="checkbox" id="f-solide" checked> Solide sur le filtre</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-teintes">
+      <h2 id="h-teintes">Les solutions</h2>
+      <p class="sub" style="margin-bottom:12px">Sept teintes de liquide, distinctes entre elles en clair et en sombre. Chacune a un trait plus soutenu que son aplat pour que le niveau reste lisible. La couleur ne porte jamais seule l'information : la consigne et la légende nomment la solution.</p>
+      <div class="teintes" id="teintes"></div>
+    </section>
+  </main>
+
+  <footer class="sim-footer">
+    <span>Simulabo PhCh · référence visuelle libre d'accès, fonctionne hors ligne.</span>
+    <a href="../index.html">Retour au catalogue</a>
+  </footer>
+</div>
+
+<script src="../shared/simulabo.js"></script>
+<script src="../shared/verrerie.js"></script>
+<script>
+(function () {
+  var S = Simulabo, V = Verrerie;
+  function $(id) { return document.getElementById(id); }
+
+  /* Options réglables de chaque pièce. k : option de Verrerie ; f : conversion de la valeur du curseur. */
+  var SOL = V.solutions();
+  function pct(def, min, max) { return { k: "niveau", t: "curseur", l: "Niveau", unit: "%", min: min == null ? 0 : min, max: max == null ? 100 : max, step: 1, def: def, f: function (v) { return v / 100; } }; }
+  function solc(def) { return { k: "solution", t: "choix", l: "Solution", def: def }; }
+  var REG = {
+    eprouvette: [pct(55), solc("cuivre")],
+    fiole: [pct(60, 20, 100), solc("cuivre"), { k: "bouchon", t: "case", l: "Bouchon", def: false }],
+    pipetteJaugee: [pct(50), solc("cuivre")],
+    pipetteGraduee: [pct(50), solc("cuivre")],
+    burette: [{ k: "volume", t: "curseur", l: "Volume lu", unit: "mL", min: 0, max: 25, step: 0.1, def: 6, digits: 1, f: function (v) { return v; } }, solc("permanganate")],
+    balance: [{ k: "lecture", t: "texte", l: "Affichage", def: "12,34 g" }],
+    thermometre: [{ k: "temperature", t: "curseur", l: "Température", unit: "°C", min: 0, max: 110, step: 1, def: 78, f: function (v) { return v; } }],
+    becher: [pct(55), solc("cuivre")],
+    erlenmeyer: [pct(40), solc("jaune")],
+    tubeEssai: [pct(50), solc("vert")],
+    verreMontre: [{ k: "solide", t: "case", l: "Solide", def: true }],
+    entonnoir: [{ k: "filtre", t: "case", l: "Papier filtre", def: true }, pct(50), solc("fer")],
+    ballon: [pct(40), solc("organique")],
+    ampoule: [{ k: "haut", t: "curseur", l: "Phase haute", unit: "%", min: 5, max: 60, step: 1, def: 30, f: function (v) { return v / 100; } },
+              { k: "bas", t: "curseur", l: "Phase basse", unit: "%", min: 5, max: 60, step: 1, def: 30, f: function (v) { return v / 100; } }],
+    cuveCCM: [{ k: "front", t: "curseur", l: "Front de l'éluant", unit: "%", min: 30, max: 100, step: 1, def: 70, f: function (v) { return v / 100; } }],
+    fioleVide: [pct(15), solc("eau")],
+    buchner: [{ k: "solide", t: "case", l: "Solide sur le filtre", def: true }, pct(25), solc("eau")],
+    agitateur: [{ k: "actif", t: "case", l: "En marche", def: true }],
+    chauffeBallon: [{ k: "actif", t: "case", l: "En marche", def: true }]
+  };
+  function defauts(id) { var o = {}; (REG[id] || []).forEach(function (c) { o[c.k] = c.f ? c.f(c.def) : c.def; }); return o; }
+
+  /* Catalogue des pièces, par famille */
+  var cat = $("catalogue"), h = "";
+  V.familles().forEach(function (f) {
+    h += '<p class="famille">' + f.nom.toUpperCase() + '</p><div class="pieces">';
+    f.pieces.forEach(function (id) {
+      var o = defauts(id); o.decoratif = true;
+      h += '<button type="button" class="piece" data-id="' + id + '" aria-pressed="false">' + V.svg(id, o) + "<span>" + V.nom(id) + "</span></button>";
+    });
+    h += "</div>";
+  });
+  cat.innerHTML = h;
+
+  var cur = null, etat = {};
+  function dessiner() {
+    var o = { alt: V.nom(cur) };
+    (REG[cur] || []).forEach(function (c) { o[c.k] = c.f ? c.f(etat[c.k]) : etat[c.k]; });
+    $("grand").innerHTML = V.svg(cur, o);
+  }
+  function choisir(id) {
+    cur = id; etat = {};
+    var host = $("reglages"); host.innerHTML = "";
+    (REG[id] || []).forEach(function (c, i) {
+      etat[c.k] = c.def;
+      var zone = document.createElement("div"); host.appendChild(zone);
+      if (c.t === "curseur") {
+        S.slider(zone, { label: c.l, unit: c.unit, min: c.min, max: c.max, step: c.step, value: c.def, digits: c.digits || 0, onInput: function (v) { etat[c.k] = v; dessiner(); } });
+      } else if (c.t === "choix") {
+        zone.className = "champ";
+        zone.innerHTML = '<label for="r' + i + '">' + c.l + '</label><select id="r' + i + '">' + SOL.map(function (s) { return '<option value="' + s.id + '"' + (s.id === c.def ? " selected" : "") + ">" + s.nom + "</option>"; }).join("") + "</select>";
+        zone.querySelector("select").addEventListener("change", function (e) { etat[c.k] = e.target.value; dessiner(); });
+      } else if (c.t === "case") {
+        zone.className = "champ case";
+        zone.innerHTML = '<input type="checkbox" id="r' + i + '"' + (c.def ? " checked" : "") + '><label for="r' + i + '">' + c.l + "</label>";
+        zone.querySelector("input").addEventListener("change", function (e) { etat[c.k] = e.target.checked; dessiner(); });
+      } else if (c.t === "texte") {
+        zone.className = "champ";
+        zone.innerHTML = '<label for="r' + i + '">' + c.l + '</label><input type="text" id="r' + i + '" maxlength="9" value="' + c.def + '">';
+        zone.querySelector("input").addEventListener("input", function (e) { etat[c.k] = e.target.value; dessiner(); });
+      }
+    });
+    $("grand-nom").textContent = V.nom(id);
+    $("grand-options").textContent = "Options : " + V.options(id) + ".";
+    Array.prototype.forEach.call(cat.querySelectorAll(".piece"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-id") === id ? "true" : "false"); });
+    dessiner();
+  }
+  cat.addEventListener("click", function (e) { var b = e.target.closest(".piece"); if (b) choisir(b.getAttribute("data-id")); });
+
+  /* Montages */
+  var vol = S.slider("#t-vol", { label: "Volume versé", unit: "mL", min: 0, max: 25, step: 0.1, value: 8.4, digits: 1, onInput: titrage });
+  function titrage() { $("m-titrage").innerHTML = V.montage("titrage", { volume: vol.get(), legendes: $("t-leg").checked }); }
+  function reflux() { $("m-reflux").innerHTML = V.montage("reflux", { legendes: $("r-leg").checked, chauffe: $("r-chauf").checked }); }
+  function filtration() { $("m-filtration").innerHTML = V.montage("filtration", { legendes: $("f-leg").checked, solide: $("f-solide").checked }); }
+  ["t-leg"].forEach(function (i) { $(i).addEventListener("change", titrage); });
+  ["r-leg", "r-chauf"].forEach(function (i) { $(i).addEventListener("change", reflux); });
+  ["f-leg", "f-solide"].forEach(function (i) { $(i).addEventListener("change", filtration); });
+
+  /* Solutions */
+  $("teintes").innerHTML = SOL.map(function (s) {
+    return '<div><svg class="verrerie" viewBox="0 0 38 38" aria-hidden="true"><rect x="2" y="2" width="34" height="34" rx="8" fill="var(--v-' + s.id + ')"/><rect x="2" y="2" width="34" height="34" rx="8" fill="none" stroke="var(--v-' + s.id + '-t)" stroke-width="2.4"/></svg><span>' + s.nom + "</span></div>";
+  }).join("");
+
+  V.css();
+  /* Sur téléphone, les légendes des montages sont trop petites : désactivées au départ, la case les active. */
+  if (window.innerWidth < 600) { ["t-leg", "r-leg", "f-leg"].forEach(function (i) { $(i).checked = false; }); }
+  titrage(); reflux(); filtration();
+  choisir("burette");
+})();
+</script>
+</body>
+</html>
