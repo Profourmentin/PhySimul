@@ -11,10 +11,12 @@ index.html                    page d'accueil et catalogue
 sims/                         une simulation = un fichier HTML autonome
 shared/simulabo.css           socle CSS commun (jetons, composants, clair/sombre)
 shared/simulabo.js            socle JavaScript commun (curseurs, afficheurs, tableau de mesures…)
+shared/verrerie.js            gamme Verrerie : matériel de labo dessiné en SVG (référence visuelle des simulations de chimie)
 templates/simulation.html     gabarit d'une nouvelle simulation
 tools/new-sim.py              crée une simulation et l'inscrit au catalogue
 tools/check.py                contrôle de cohérence du site
 docs/socle.md                 mode d'emploi du socle et règles de charte
+docs/verrerie.md, verrerie.html   gamme Verrerie : règles, pièces, simulations à migrer, galerie interactive
 enseignants/index.html        espace enseignant : liste des fiches d'activités
 enseignants/enseignants.css   styles communs de l'espace (aucune ressource externe)
 enseignants/fiches/           une fiche enseignant = un fichier HTML

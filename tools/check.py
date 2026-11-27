@@ -239,6 +239,55 @@ def check_sims(rep):
                 rep.warn(where, "redéfinit les jetons de couleur : utiliser ceux du socle")
 
 
+def check_verrerie(rep):
+    """Gamme Verrerie (shared/verrerie.js, docs/verrerie.md) : cohérence clair/sombre, pas de couleur dans les formes,
+    pièces et montages documentés, pages de documentation sans ressource externe."""
+    f = ROOT / "shared" / "verrerie.js"
+    if not f.is_file():
+        return
+    where = "shared/verrerie.js"
+    text = f.read_text(encoding="utf-8")
+
+    def bloc(nom):
+        m = re.search(r"var %s = \[(.*?)\];" % nom, text, re.S)
+        return m.group(1) if m else None
+
+    clair, sombre = bloc("CLAIR"), bloc("SOMBRE")
+    if clair is None or sombre is None:
+        rep.err(where, "tableaux CLAIR et SOMBRE des jetons de couleur introuvables")
+        return
+    v_clair = set(re.findall(r'"(--v-[a-z-]+):', clair))
+    v_sombre = set(re.findall(r'"(--v-[a-z-]+):', sombre))
+    if v_clair != v_sombre:
+        rep.err(where, "variables --v-* différentes entre le thème clair et le thème sombre : " + ", ".join(sorted(v_clair ^ v_sombre)))
+    utilisees = set(re.findall(r"var\((--v-[a-z-]+)\)", text)) | set(re.findall(r'"(--v-[a-z-]+)"', text))
+    inconnues = utilisees - v_clair
+    if inconnues:
+        rep.err(where, "variable(s) utilisée(s) mais non définies : " + ", ".join(sorted(inconnues)))
+    # Aucune couleur codée dans les formes : les valeurs vivent uniquement dans CLAIR et SOMBRE.
+    reste = text.replace(clair, "").replace(sombre, "")
+    reste = re.sub(r"/\*.*?\*/", "", reste, flags=re.S)
+    if re.search(r"#[0-9A-Fa-f]{3,8}\b|\brgba?\(|\bhsla?\(", reste):
+        rep.err(where, "couleur codée en dur hors des jetons CLAIR / SOMBRE (utiliser une variable --v-*)")
+    # Pièces et montages documentés.
+    doc = ROOT / "docs" / "verrerie.md"
+    if not doc.is_file():
+        rep.err("docs/verrerie.md", "documentation de la gamme manquante")
+    else:
+        d = doc.read_text(encoding="utf-8")
+        for nom in re.findall(r"^  P\.([A-Za-z]+) = function", text, re.M):
+            if f"| `{nom}` |" not in d: rep.err("docs/verrerie.md", f"pièce « {nom} » absente du tableau des pièces")
+        for nom in re.findall(r"^  MONTAGES\.([a-z]+) = function", text, re.M):
+            if f'montage("{nom}"' not in d: rep.err("docs/verrerie.md", f"montage « {nom} » non documenté")
+    # Pages de documentation (galerie) : mêmes règles de fond que les simulations.
+    for page in sorted((ROOT / "docs").glob("*.html")):
+        w = f"docs/{page.name}"
+        p = parse(page)
+        if p.lang != "fr": rep.err(w, "attribut lang=\"fr\" manquant")
+        if p.external: rep.err(w, "ressource externe : " + ", ".join(sorted(set(p.external))))
+        if p.imgs_without_alt: rep.err(w, f"{p.imgs_without_alt} image(s) sans attribut alt")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--strict", action="store_true", help="les avertissements font échouer le contrôle")
@@ -257,6 +306,7 @@ def main() -> int:
     by_id, _ = check_catalogue(rep)
     check_fiches(rep, by_id)
     check_sims(rep)
+    check_verrerie(rep)
 
     for line in rep.errors + rep.warnings:
         print(line)

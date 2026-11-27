@@ -9,6 +9,7 @@ Le socle garantit que toutes les simulations ont la même identité, la même er
 | `templates/simulation.html` | Gabarit complet et fonctionnel, qui sert de point de départ |
 | `shared/bruit.js` | Bruit de mesure commun à toutes les animations : niveau global réglable (0,5 % par défaut) et interrupteur « Modèle théorique » |
 | `shared/glyphs.js` | Catalogue des vignettes SVG de l'accueil (un glyphe par simulation, voir `docs/glyphes.md`) |
+| `shared/verrerie.js` | Gamme Verrerie : pièces de laboratoire et montages dessinés en SVG, clair et sombre. Référence visuelle de toute simulation de chimie (voir `docs/verrerie.md` et la galerie `docs/verrerie.html`) |
 | `tools/new-sim.py` | Crée la simulation depuis le gabarit et l'inscrit au catalogue |
 | `tools/check.py` | Contrôle de cohérence (catalogue, fichiers, charte, accessibilité mécanique) |
 | `tools/github-actions-check.yml` | Lance le contrôle à chaque pull request (à installer par le propriétaire du dépôt) |
@@ -90,6 +91,7 @@ Règles pour une nouvelle simulation :
 ## Conventions communes
 
 - **Une couleur = une grandeur** sur tout le site (variables `--c-force`, `--c-vitesse`, `--c-position`, `--c-energie`, `--c-temps`).
+- **Verrerie et matériel de chimie** : on prend les pièces dans `shared/verrerie.js` au lieu de les redessiner ; les couleurs des solutions viennent des variables `--v-*` de la gamme (`docs/verrerie.md`).
 - **Une couleur de thème** par domaine du programme (`--t-matiere`, `--t-mouvement`, `--t-energie`, `--t-ondes`), reprise par la pastille du `kicker`.
 - **Nombres à la française** : virgule décimale, vrai signe moins, espace fine avant l'unité.
 - **Symboles et unités jamais en majuscules forcées** : `text-transform: uppercase` transformerait « mV » en « MV » (mégavolt) ou « Hz » en « HZ ». Le socle ne l'applique donc ni aux libellés des afficheurs ni aux en-têtes de tableau.
