@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Titrage colorimétrique · fiche enseignant · Simulabo PhCh</title>
+<link rel="stylesheet" href="../../shared/fonts.css">
+<link rel="stylesheet" href="../enseignants.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="wrap">
+  <div class="topbar">
+    <a href="../index.html">← Espace enseignant</a>
+    <nav aria-label="Navigation">
+      <a href="../../sims/titrage.html">Ouvrir la simulation</a>
+      <a href="../../index.html">Catalogue</a>
+    </nav>
+  </div>
+
+  <header class="head">
+    <p class="kicker">Fiche enseignant · Physique-chimie · Première spécialité</p>
+    <h1>Titrage colorimétrique : doser les ions fer (II)</h1>
+    <p class="lead">L'élève part d'une situation (flacon à l'étiquette effacée), prévoit le volume équivalent, prépare la burette et la pipette comme au laboratoire, repère le virage, calcule c₁ et son incertitude, puis confronte son résultat à sa prévision et à la valeur de référence avant de conclure.</p>
+    <ul class="chips" aria-label="Repères">
+      <li>Première, voie générale, spécialité</li>
+      <li>Constitution et transformations de la matière</li>
+      <li>45 min (à confirmer en classe)</li>
+      <li>Ordinateur ou tablette, calculatrice, papier</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" href="../../sims/titrage.html">Ouvrir la simulation</a>
+      <button class="btn" type="button" id="print">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sur cette page">
+    <p class="kicker">Sur cette page</p>
+    <ol>
+      <li><a href="#programme">Programme visé</a></li>
+      <li><a href="#deroule">Déroulé</a></li>
+      <li><a href="#competences">Couverture des compétences</a></li>
+      <li><a href="#reponses">Réponses attendues</a></li>
+      <li><a href="#difficultes">Difficultés fréquentes</a></li>
+      <li><a href="#acces">Accessibilité et mise en œuvre</a></li>
+      <li><a href="#limites">Limites et prolongements</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main id="contenu">
+    <section id="programme" aria-labelledby="h-programme">
+      <h2 id="h-programme">Programme visé</h2>
+      <p>Programme de physique-chimie de la classe de Première, enseignement de spécialité (BO spécial n° 1 du 22 janvier 2019), thème « Constitution et transformations de la matière », rubrique sur le suivi et la modélisation des transformations chimiques (titrages). <span class="verify">À vérifier dans le BO : l'intitulé exact de la rubrique et les capacités ci-dessous, reformulées ici et non citées.</span></p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Notion ou capacité (reformulée)</th><th scope="col">Où dans l'activité</th></tr></thead>
+          <tbody>
+            <tr><td>Écrire l'équation d'une réaction d'oxydoréduction à partir des demi-équations <span class="verify">À vérifier dans le BO</span></td><td>Étape 2 · Réaction</td></tr>
+            <tr><td>Mettre en œuvre un titrage direct avec repérage de l'équivalence par changement de couleur <span class="verify">À vérifier dans le BO</span></td><td>Étapes 4 à 7 · burette, prélèvement, titrage rapide et précis</td></tr>
+            <tr><td>Établir la relation entre les quantités de matière des réactifs à l'équivalence et en déduire une concentration <span class="verify">À vérifier dans le BO</span></td><td>Étape 8 · tableau d'avancement, c₁ = 5 · c₂ · V<sub>E</sub> / V₁</td></tr>
+            <tr><td>Estimer une incertitude-type sur une série de mesures et comparer à une valeur de référence (compétence VAL du préambule : « estimer une incertitude, comparer à une valeur de référence »)</td><td>Étape 8 · calcul de u(V<sub>E</sub>), jugement de l'écart</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="deroule" aria-labelledby="h-deroule">
+      <h2 id="h-deroule">Déroulé</h2>
+      <p>Parcours guidé en 9 étapes, converti en place à partir de l'ancien parcours en 8 étapes. Les étapes sont consultables en arrière à tout moment ; quatre verrous restent, tous liés à la logique du TP : l'équation (étape 2) avant le protocole, le matériel avant la manipulation, au moins un titrage avant l'exploitation, c₁ calculée avant la conclusion. La prévision, elle, n'est pas obligatoire : sans elle, l'étape 8 confronte la mesure à l'encadrement tiré de l'énoncé. Les compétences sont codées par tâche : APP, ANA, RÉA, VAL, COM (<code>docs/specs/methode-scientifique.md</code>).</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Étape</th><th scope="col">Compétence</th><th scope="col">Ce que fait l'élève</th><th scope="col">Trace attendue</th></tr></thead>
+          <tbody>
+            <tr><td>1. Situation</td><td>APP</td><td>Lit la situation, classe quatre grandeurs (connue, à mesurer, cherchée), reformule la problématique.</td><td>Tableau juste ; une phrase de problématique</td></tr>
+            <tr><td>2. Réaction</td><td>RÉA</td><td>Écrit l'équation à partir des demi-équations (électrons, ajustement).</td><td>5 Fe²⁺ + MnO₄⁻ + 8 H⁺ → 5 Fe³⁺ + Mn²⁺ + 4 H₂O</td></tr>
+            <tr><td>3. Protocole</td><td>ANA</td><td>Prévoit un intervalle pour V<sub>E</sub> avec un degré de certitude ; justifie le titrage rapide ; choisit le matériel (cases à cocher, matériel inadapté refusé avec raison).</td><td>Intervalle enregistré ; choix du matériel</td></tr>
+            <tr><td>4. Burette</td><td>RÉA</td><td>Rince, remplit, chasse la bulle, règle le zéro, œil au niveau du ménisque.</td><td>Burette prête, zéro réglé</td></tr>
+            <tr><td>5. Prélèvement</td><td>RÉA</td><td>Prélève 10,0 mL à la pipette jaugée avec propipette, ajuste à la loupe, vide sans souffler.</td><td>Erlenmeyer prêt sous la burette</td></tr>
+            <tr><td>6. Titrage rapide</td><td>RÉA</td><td>Verse mL par mL pour repérer la zone du virage.</td><td>Encadrement du virage (ex. 8 à 9 mL)</td></tr>
+            <tr><td>7. Titrage précis</td><td>RÉA</td><td>Verse goutte à goutte, repère le virage, lit la burette à la loupe, répète au moins 3 fois.</td><td>Volumes V<sub>E</sub> lus (graduation 0,1 mL, lecture à 0,05 mL)</td></tr>
+            <tr><td>8. Résultats</td><td>RÉA, VAL</td><td>Complète le tableau d'avancement, calcule c₁, calcule u(V<sub>E</sub>) = s/√n (RÉA) ; relit sa prévision ; juge l'écart avec la référence (VAL) ; explore l'évolution du système.</td><td>c₁ ± u ; jugement de l'écart</td></tr>
+            <tr><td>9. Conclusion</td><td>COM</td><td>Rédige une conclusion ; copie ou imprime le carnet ; copie le lien de la situation.</td><td>Carnet : problématique, prévision, mesures, résultat, conclusion</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="competences" aria-labelledby="h-competences">
+      <h2 id="h-competences">Couverture des compétences</h2>
+      <p>Lecture structurelle de la page, sans passage en classe.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Compétence</th><th scope="col">Dans la page</th><th scope="col">À prévoir hors page</th></tr></thead>
+          <tbody>
+            <tr><td>APP · S'approprier</td><td>Étape 1 : classer les grandeurs, reformuler la problématique. Pas de schéma du montage à légender (prévu avec la nouvelle verrerie).</td><td>Faire schématiser le montage de titrage sur papier avant de commencer.</td></tr>
+            <tr><td>ANA · Analyser / Raisonner</td><td>Étape 3 : prévision de V<sub>E</sub> avec certitude, justification du titrage rapide, choix du matériel.</td><td>Faire justifier à l'oral le choix d'un titrage direct.</td></tr>
+            <tr><td>RÉA · Réaliser</td><td>Étapes 2, 4 à 8 : équation, gestes, mesures, calculs, écart-type.</td><td>—</td></tr>
+            <tr><td>VAL · Valider</td><td>Étape 8 : relecture de la prévision, jugement de l'écart (2 u), causes possibles d'erreur.</td><td>Discuter une erreur systématique (bulle, rinçage) : la dispersion ne la détecte pas.</td></tr>
+            <tr><td>COM · Communiquer</td><td>Étape 9 : conclusion rédigée, carnet copiable et imprimable, lien de la situation.</td><td>Échange entre pairs : comparer les c₁ obtenus pour une même situation.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reponses" aria-labelledby="h-reponses">
+      <h2 id="h-reponses">Réponses attendues</h2>
+      <details class="reponses">
+        <summary>Afficher les réponses attendues<small>Repliées par défaut pour que la fiche puisse être projetée sans les montrer.</small></summary>
+        <div class="inner">
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th scope="col">Étape</th><th scope="col">Réponse attendue</th><th scope="col">Remarque</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>c₁ cherchée ; c₂ et V₁ connues ; V<sub>E</sub> à mesurer</td><td>Les quatre lignes doivent être justes.</td></tr>
+                <tr><td>2</td><td>5 Fe²⁺ + MnO₄⁻ + 8 H⁺ → 5 Fe³⁺ + Mn²⁺ + 4 H₂O ; MnO₄⁻ est l'oxydant</td><td>Le bouton « Afficher la correction » existe.</td></tr>
+                <tr><td>3</td><td>V<sub>E</sub> = c₁ · V₁ / (5 · c₂) : de 5,0 mL (c₁ = 0,050) à 12,0 mL (c₁ = 0,120)</td><td>Un intervalle plus étroit est accepté ; un écart de plus de 15 % avec ces bornes déclenche un rappel de la relation, sans blocage.</td></tr>
+                <tr><td>8</td><td>Tableau : 5 ; 1 ; 5 ; 5. c₁ = 5 · c₂ · V<sub>E</sub> / V₁ (0,1 mol·L⁻¹ × V<sub>E</sub> en mL / 10). u(V<sub>E</sub>) = s/√n</td><td>c₁ accepté à 2 % ; u accepté à 5 % ou 0,0015 mL.</td></tr>
+                <tr><td>8 · VAL</td><td>Écart compatible si |V<sub>E</sub> − V<sub>E,réf</sub>| ≤ 2 u(V<sub>E</sub>) (≤ 0,10 mL avec un seul titrage)</td><td>Repère pédagogique, pas un test statistique. <span class="verify">À valider : le critère 2 u relève plutôt du niveau Terminale ; à confirmer dans le BO de Première.</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="difficultes" aria-labelledby="h-difficultes">
+      <h2 id="h-difficultes">Difficultés fréquentes et réponses de la page</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Obstacle attendu</th><th scope="col">Comment il se manifeste</th><th scope="col">Ce que fait la page</th></tr></thead>
+          <tbody>
+            <tr><td>Confondre c₁ et V<sub>E</sub> ; oublier le facteur 5</td><td>Prévision de V<sub>E</sub> hors de l'intervalle attendu</td><td>Rappel de n(Fe²⁺) = 5 × n(MnO₄⁻) à l'enregistrement, puis relecture à l'étape 8.</td></tr>
+            <tr><td>Burette ou pipette non rincée</td><td>Écart systématique d'environ 3 %</td><td>Message à l'action, puis cause listée en fin d'exploitation, après le jugement de l'élève.</td></tr>
+            <tr><td>Confondre « compatible » et « exact »</td><td>« Mon écart est petit, donc ma méthode est bonne »</td><td>Rappel que la dispersion ne détecte pas une erreur de méthode.</td></tr>
+            <tr><td>Lecture avec parallaxe, bulle d'air oubliée</td><td>V<sub>E</sub> trop grand ou trop petit</td><td>Refus de la lecture, œil au niveau, vérification sous le robinet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="acces" aria-labelledby="h-acces">
+      <h2 id="h-acces">Accessibilité et mise en œuvre</h2>
+      <p>Vérifié : commandes accessibles au clavier, cibles de 44 px, information jamais portée par la couleur seule, mode clair et sombre, pas de défilement horizontal à 390 px, aucune ressource externe.</p>
+      <p class="note"><b>Ce qui n'a pas été fait :</b> test avec un lecteur d'écran, passage en classe, test sur appareils réels. Les textes saisis par l'élève ne sont pas conservés si la page est rechargée : le carnet doit être copié ou imprimé avant de quitter.</p>
+      <p>Pistes de mise en œuvre (suggestions, à adapter) :</p>
+      <ul class="plain">
+        <li>En binôme : l'un manipule, l'autre vérifie les gestes avec la liste de la page.</li>
+        <li>Même situation pour toute la classe grâce au lien « copier le lien de la situation » (<code>#sit=n</code>) : comparer les c₁. La situation est codée dans le lien, un élève curieux peut en retrouver la concentration.</li>
+        <li>Avant la séance réelle, comme préparation du TP de titrage au laboratoire.</li>
+      </ul>
+    </section>
+
+    <section id="limites" aria-labelledby="h-limites">
+      <h2 id="h-limites">Limites du modèle et prolongements</h2>
+      <p>Limites à dire aux élèves :</p>
+      <ul class="plain">
+        <li>Une goutte vaut 0,05 mL en moyenne avec une petite dispersion ; la couleur suit la loi de Beer-Lambert.</li>
+        <li>L'incertitude calculée est celle de répétabilité ; elle ne détecte pas une erreur systématique.</li>
+        <li>Les gestes (rinçage, parallaxe, bulle) modifient le résultat de manière simple et connue.</li>
+      </ul>
+      <p>Prolongements possibles :</p>
+      <ul class="plain">
+        <li>Titrage réel au laboratoire avec le même protocole, puis comparaison avec le virtuel.</li>
+        <li>Titrage avec suivi pH-métrique ou conductimétrique (hors modèle de la page).</li>
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="h-sources">
+      <h2 id="h-sources">Sources</h2>
+      <p class="note"><b>À vérifier avant diffusion :</b> la rubrique « titrages » du programme de Première spécialité (reformulée de mémoire, non citée), le critère 2 u. Les compétences APP, ANA, RÉA, VAL, COM sont citées du préambule, vérifié sur les annexes de Seconde et de Première spécialité.</p>
+      <ul class="plain">
+        <li>Programme de physique-chimie, classe de Première, enseignement de spécialité, BO spécial n° 1 du 22 janvier 2019, ministère de l'Éducation nationale.</li>
+        <li><code>docs/specs/methode-scientifique.md</code> du dépôt.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span>Simulabo PhCh · Espace enseignant · fiche rédigée le 28/11/2026</span>
+    <span class="noprint"><a href="../index.html">Toutes les fiches</a></span>
+  </footer>
+</div>
+<script>
+(function () {
+  var b = document.getElementById("print");
+  if (b) b.addEventListener("click", function () { window.print(); });
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = [].filter.call(document.querySelectorAll("details:not([open])"), function (d) { d.open = true; return true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); closed = []; });
+})();
+</script>
+</body>
+</html>

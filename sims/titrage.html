@@ -227,6 +227,25 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 30px; ma
 .zoomwrap { display: grid; grid-template-columns: minmax(120px, 170px) 1fr; gap: 10px; align-items: start; width: 100%; }
 .zoom { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; display: block; background: var(--bg); }
 @media (max-width: 560px) { .zoomwrap { grid-template-columns: 1fr; } .zoom { max-width: 220px; } }
+/* Puces de compétence (APP · ANA · RÉA · VAL · COM) : neutres, le code est toujours suivi d'un verbe d'action */
+.comp { display: inline-block; padding: 1px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font: 600 12px/1.5 var(--font-data); letter-spacing: .04em; vertical-align: middle; white-space: nowrap; }
+.comp abbr { text-decoration: none; font-weight: 700; color: var(--ink); }
+.comp + .comp { margin-left: 4px; }
+.comps { margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+@media (forced-colors: active) { .comp { border-color: CanvasText; } }
+.doc { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 14px; background: var(--bg); }
+.doc p { margin: 0 0 6px; } .doc p:last-child { margin-bottom: 0; }
+textarea.txt { width: 100%; min-height: 5.5em; font: 400 15px/1.5 var(--font-body); padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); resize: vertical; }
+select.sel { font: 500 15px var(--font-body); padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); min-height: 40px; }
+.sec { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.cf.num { width: 6em; text-align: right; }
+#printZone { display: none; }
+@media print {
+  body > .wrap { display: none !important; }
+  #printZone { display: block; color: #000; background: #fff; font: 12pt/1.45 var(--font-body); }
+  #printZone h1 { font-size: 18pt; } #printZone h2 { font-size: 13pt; margin: 14px 0 4px; }
+  #printZone table { border-collapse: collapse; } #printZone td, #printZone th { border: 1px solid #000; padding: 3px 8px; }
+}
 hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }
 details { color: var(--muted); font-size: 14px; }
 details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
@@ -241,7 +260,7 @@ footer { color: var(--muted); font-size: 13px; }
     <a class="back" href="../index.html">← Catalogue des simulations</a>
     <p class="kicker">TP de physique-chimie · Première spécialité</p>
     <h1>Titrage colorimétrique</h1>
-    <p class="sub">Dose les ions fer (II) d'une solution avec du permanganate de potassium. Prépare la verrerie, repère le virage, puis calcule la concentration et son incertitude.</p>
+    <p class="sub">Dose les ions fer (II) d'une solution avec du permanganate de potassium. Tu pars d'une situation, tu prévois le résultat, tu prépares la verrerie et tu repères le virage ; puis tu calcules la concentration et son incertitude, tu confrontes ton résultat à ta prévision et à la référence, et tu conclus.</p>
   </header>
 
   <ol class="steps" id="steps" aria-label="Étapes du TP"></ol>
@@ -376,15 +395,17 @@ footer { color: var(--muted); font-size: 13px; }
   <details>
     <summary>Hypothèses du modèle</summary>
     <ul>
-      <li>Titrant : permanganate de potassium, c₂ = 2,00×10⁻² mol·L⁻¹. Solution titrée : sulfate de fer (II) acidifié, V₁ = 10,0 mL. La concentration c₁ est tirée au hasard à chaque séance.</li>
+      <li>Titrant : permanganate de potassium, c₂ = 2,00×10⁻² mol·L⁻¹. Solution titrée : sulfate de fer (II) acidifié, V₁ = 10,0 mL. La concentration c₁ est tirée au hasard à chaque séance, entre 0,050 et 0,120 mol·L⁻¹ ; le lien <code>#sit=n</code> (n de 0 à 70) rouvre une situation précise.</li>
       <li>Une goutte vaut 0,05 mL en moyenne, avec une petite dispersion. La pipette jaugée a une tolérance de ± 0,02 mL.</li>
       <li>La couleur est calculée à partir de la concentration en ions permanganate en excès (loi de Beer-Lambert). Sans papier blanc, la couleur est vue un peu plus tard.</li>
       <li>Gestes : une burette non rincée avec le titrant ou une pipette non rincée avec la solution à titrer diluent de 3 % environ. Un ménisque n'est validé que si l'œil est à la hauteur du trait (parallaxe). Le volume d'une demi-goutte rincée à la pissette ajoute un peu d'eau, sans changer les quantités de matière.</li>
       <li>L'incertitude-type calculée est celle de répétabilité : u(V<sub>E</sub>) = s / √n. Elle ne détecte pas une erreur systématique (bulle d'air, par exemple).</li>
+      <li>Jugement de l'écart : un écart sur V<sub>E</sub> inférieur à 2 u(V<sub>E</sub>) est dit du même ordre que la dispersion ; avec un seul titrage, on compare à 0,10 mL (deux lectures de ± 0,05 mL). C'est un repère pédagogique, pas un test statistique.</li>
     </ul>
   </details>
   <footer>Simulabo PhCh · Aucun compte · aucune donnée collectée</footer>
 </div>
+<div id="printZone" aria-hidden="true"></div>
 
 <script>
 (function () {
@@ -409,23 +430,36 @@ footer { color: var(--muted); font-size: 13px; }
   function yOf(r) { return Y0 + K * r; }
 
   var STEPS = [
+    { t: "Situation", h: "S'approprier la situation" },
     { t: "Réaction", h: "Comprendre la réaction du titrage" },
-    { t: "Matériel", h: "Choisir le matériel" },
+    { t: "Protocole", h: "Prévoir et choisir le protocole" },
     { t: "Burette", h: "Préparer la burette" },
     { t: "Prélèvement", h: "Prélever la solution à titrer" },
     { t: "Titrage rapide", h: "Titrage rapide : repérer le virage" },
     { t: "Titrage précis", h: "Titrage précis, goutte à goutte" },
-    { t: "Résultats", h: "Exploiter les résultats" }
+    { t: "Résultats", h: "Exploiter et valider les résultats" },
+    { t: "Conclusion", h: "Conclure et garder une trace" }
   ];
+  var COMP_ABBR = { app: "APP", ana: "ANA", rea: "RÉA", val: "VAL", com: "COM" };
+  var COMP_NAME = { app: "S'approprier", ana: "Analyser / Raisonner", rea: "Réaliser", val: "Valider", com: "Communiquer" };
+  function comp(code, verb) { return '<span class="comp" data-comp="' + code + '"><abbr title="' + COMP_NAME[code] + '">' + COMP_ABBR[code] + '</abbr> · ' + verb + '</span>'; }
+  // puces de l'étape (une ou deux) ; l'étape « Résultats » porte ses puces section par section
+  var STEP_COMPS = [[["app", "Reformuler la problématique"]], [["rea", "Écrire les équations"]], [["ana", "Prévoir et choisir le protocole"]],
+    [["rea", "Mettre en œuvre le protocole"]], [["rea", "Mettre en œuvre le protocole"]], [["rea", "Mesurer"]], [["rea", "Mesurer"]], [], [["com", "Conclure"]]];
+  function compBar(i) { var c = STEP_COMPS[i] || []; return c.length ? '<p class="comps">' + c.map(function (x) { return comp(x[0], x[1]); }).join("") + '</p>' : ""; }
+  function esc(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  var SIT_MAX = 70;   // la situation (c1 = 0,050 + n/1000 mol/L) est fixée par le lien #sit=n : l'enseignant peut partager une situation précise
+  function readSit() { var m = /(?:^|[#&])sit=(\d+)/.exec(location.hash || ""), n = m ? Number(m[1]) : NaN; return (n >= 0 && n <= SIT_MAX) ? n : Math.floor(Math.random() * (SIT_MAX + 1)); }
 
   /* ---------- état ---------- */
   var S;
   function newFlask() { return { has: false, bar: false, placed: false, Vs: V1N, thr: 1, poured: 0, w: 0, kp: 1, washed: false }; }
   function r3(x) { return Math.round(x * 1000) / 1000; }
-  function newSession() {
+  function newSession(sit) {
+    if (sit == null) sit = Math.floor(Math.random() * (SIT_MAX + 1));
     S = {
-      step: 0, maxStep: 0, done: [],
-      c1: Math.round(rnd(0.050, 0.120) * 1000) / 1000,     // concentration cachée, mol/L
+      step: 0, maxStep: 1, done: [], sit: sit,
+      c1: Math.round((0.050 + sit / 1000) * 1000) / 1000,     // concentration cachée, mol/L
       form: {}, eq: { res: {}, done: false },
       picks: {}, matOK: false, matBad: {},
       bu: { rW: false, rT: 0, filled: false, level: 0, bubble: false, checked: false, purged: false, zeroOK: false, anim: null, fun: false, pend: null, eff: 1 },
@@ -435,7 +469,12 @@ footer { color: var(--muted); font-size: 13px; }
       stir: 0, paper: false, aide: false,
       rapid: { rows: [], zone: null },
       pr: { reading: false, recorded: false, runs: [] },
-      res: { tabOK: false, tabRes: {}, c1OK: false, evolV: 0 },
+      res: { tabOK: false, tabRes: {}, c1OK: false, evolV: 0, uOK: false },
+      app: { tbl: {}, tblRes: null, saved: false },
+      prev: { saved: false, cert: 0 },
+      proto: { why: null },
+      val: { prev: null, gap: null },
+      concl: { saved: false, fb: false, copied: 0 },
       msg: null
     };
   }
@@ -539,6 +578,79 @@ footer { color: var(--muted); font-size: 13px; }
   }
 
   /* ---------- panneaux ---------- */
+  var QUANT = [
+    ["c1", "c₁ : concentration en ions Fe<sup>2+</sup> de la solution à titrer", "cherchée", "C'est la grandeur qu'on veut connaître : l'étiquette est effacée, on ne la connaît qu'à peu près."],
+    ["c2", "c₂ : concentration en ions MnO<sub>4</sub><sup>−</sup> de la solution titrante", "connue", "Elle est donnée dans l'énoncé : c₂ = 2,00×10⁻² mol·L⁻¹."],
+    ["v1", "V₁ : volume de la prise d'essai de solution à titrer", "connue", "Il est donné dans l'énoncé : on prélève 10,0 mL avec une pipette jaugée."],
+    ["ve", "V<sub>E</sub> : volume de solution titrante versé à l'équivalence", "à mesurer", "On ne le connaît pas à l'avance : on le lit sur la burette pendant le titrage."]
+  ];
+  function appDone() { return S.app.saved && S.app.tblRes && QUANT.every(function (q) { return S.app.tblRes[q[0]]; }); }
+  function panelSituation() {
+    var a = S.app, r = a.tblRes;
+    var h = '<div class="doc"><p><b>Situation.</b> Un flacon contient une solution aqueuse de sulfate de fer (II), acidifiée. Son étiquette est en partie effacée : on lit seulement que la concentration en ions fer (II) est <b>comprise entre 5,0×10⁻² et 1,2×10⁻¹ mol·L⁻¹</b>.</p>' +
+      '<p>Pour la déterminer, on dose les ions ' + F2 + ' avec une solution de permanganate de potassium (violette) de concentration <b>c₂ = 2,00×10⁻² mol·L⁻¹</b>. On prélève <b>V₁ = 10,0 mL</b> de solution à titrer.</p></div>' +
+      '<div class="sec"><h3>1. Repère les grandeurs</h3><p class="small">Pour chaque grandeur, dis si elle est connue, à mesurer ou cherchée.</p><div class="tablewrap"><table class="data av"><caption class="sr">Grandeurs du titrage</caption><thead><tr><th>Grandeur</th><th>Statut</th></tr></thead><tbody>' +
+      QUANT.map(function (q) {
+        var st = r ? (r[q[0]] ? " good" : " bad") : "", v = S.form["t_" + q[0]] || "";
+        return '<tr><td>' + q[1] + '</td><td><select class="sel' + st + '" data-f="t_' + q[0] + '" aria-label="Statut de ' + q[0] + '">' + ["", "connue", "à mesurer", "cherchée"].map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + '>' + (o || "—") + '</option>'; }).join("") + '</select>' + (r ? (r[q[0]] ? ' <span aria-hidden="true">✓</span><span class="sr"> juste</span>' : '<div class="small">' + q[3] + '</div>') : "") + '</td></tr>';
+      }).join("") + '</tbody></table></div><div class="row">' + btn("appCheck", "Vérifier mes réponses", { cls: "primary" }) + '</div></div>' +
+      '<div class="sec"><h3>2. Reformule la problématique</h3><p class="small">Écris, avec tes mots, la question à laquelle le titrage doit répondre.</p>' +
+      '<label class="sr" for="prob">Ma problématique</label><textarea id="prob" class="txt" data-f="prob" placeholder="Comment… ?">' + esc(S.form.prob || "") + '</textarea>' +
+      '<div class="row">' + btn("appSave", a.saved ? "Mettre à jour ma problématique" : "Enregistrer ma problématique", { cls: "primary" }) + '</div>' +
+      (a.saved ? '<p class="small">Une formulation possible : « Comment déterminer la concentration c₁ en ions fer (II) de cette solution ? ». Compare avec la tienne : as-tu nommé la grandeur cherchée ?</p>' : "") + '</div>' +
+      '<div class="row">' + btn("go", "Étape suivante : la réaction", { val: 1, cls: "primary" }) + '</div>';
+    return h;
+  }
+  function prevLocked() { return S.pr.runs.length > 0; }
+  function panelProtocole() {
+    var P = S.prev, lock = prevLocked(), cl = ["Pas sûr·e", "Plutôt sûr·e", "Sûr·e"];
+    var h = '<div class="sec" style="border-top:0;padding-top:0"><h3>1. Prévois le volume équivalent</h3>' +
+      '<p class="lead">Avec V₁ = 10,0 mL et c₂ = 2,00×10⁻² mol·L⁻¹, et c₁ entre 0,050 et 0,120 mol·L⁻¹ : entre quelles valeurs se trouve V<sub>E</sub> ?</p>' +
+      '<p class="small">Indice : les coefficients de l\'équation de l\'étape 2 relient les quantités de matière à l\'équivalence. Fais ta prévision avant de manipuler : tu la reliras à la fin.</p>' +
+      '<div class="row"><label class="small" for="vmin">V<sub>E</sub> entre</label><input id="vmin" class="cf num" data-f="vmin" inputmode="decimal" autocomplete="off" value="' + esc(S.form.vmin || "") + '"' + (lock ? " disabled" : "") + '><label class="small" for="vmax">mL et</label><input id="vmax" class="cf num" data-f="vmax" inputmode="decimal" autocomplete="off" value="' + esc(S.form.vmax || "") + '"' + (lock ? " disabled" : "") + '><span class="small">mL</span></div>' +
+      '<div class="row"><span class="small">Je suis :</span><div class="seg" role="group" aria-label="Degré de certitude">' + cl.map(function (l, i) { return btn("prevCert", l, { val: i + 1, pressed: P.cert === i + 1, dis: lock }); }).join("") + '</div></div>' +
+      '<div class="row">' + btn("prevSave", P.saved ? "Mettre à jour ma prévision" : "Enregistrer ma prévision", { cls: "primary", dis: lock }) + (P.saved ? '<span class="small">✓ Prévision enregistrée : ' + fmt(P.vmin, 1) + ' à ' + fmt(P.vmax, 1) + ' mL.</span>' : "") + '</div></div>' +
+      '<div class="sec"><h3>2. Choisis ta stratégie</h3><fieldset><legend>Pourquoi commencer par un titrage rapide, mL par mL ?</legend><div class="opts" style="flex-direction:column">' +
+      [["a", "Pour repérer la zone du virage, puis verser goutte à goutte seulement près de l'équivalence."], ["b", "Pour connaître la concentration avec précision dès le premier essai."], ["c", "Pour rincer la burette avec la solution titrante."]].map(function (o) {
+        return '<label class="check"><input type="radio" name="why" data-act="protoWhy" data-val="' + o[0] + '"' + (S.proto.why === o[0] ? " checked" : "") + '><span>' + o[1] + '</span></label>';
+      }).join("") + '</div></fieldset></div>' +
+      '<div class="sec"><h3>3. Choisis le matériel</h3>' + panelMateriel() + '</div>';
+    return h;
+  }
+
+  /* ---------- carnet (COM) ---------- */
+  function carnetData() {
+    var sec = [], P = S.prev, R = S.pr.runs, st = R.length ? stats() : null;
+    sec.push(["Situation", "Dosage des ions fer (II) par le permanganate de potassium : c₂ = 2,00×10⁻² mol/L, V₁ = 10,0 mL. Situation n° " + S.sit + "."]);
+    sec.push(["Problématique", String(S.form.prob || "").trim() || "(non rédigée)"]);
+    sec.push(["Ma prévision", P.saved ? "V_E entre " + fmt(P.vmin, 1) + " et " + fmt(P.vmax, 1) + " mL (" + (["certitude non précisée", "pas sûr·e", "plutôt sûr·e", "sûr·e"][P.cert || 0]) + ")." : "(non faite avant la manipulation)"]);
+    sec.push(["Mes mesures", R.length ? R.map(function (r, i) { return "Titrage " + (i + 1) + " : V_E = " + fmt(r.v, 2) + " mL"; }).join("\n") : "(aucune)"]);
+    if (st) {
+      var c = 5 * C2 * st.m / V1N, line = "V_E moyen = " + fmt(st.m, 2) + " mL";
+      if (S.res.c1OK) line += "\nc₁ = " + (S.res.uOK && st.u > 0 ? fmtUnc(c, c * st.u / st.m) : fmt(c, 4)) + " mol/L" + (S.res.uOK ? "  (u(V_E) = " + fmt(st.u, 3) + " mL)" : "");
+      else line += "\nc₁ : non calculée";
+      sec.push(["Mon résultat", line]);
+      if (S.res.c1OK && S.val.gap) sec.push(["Valeur de référence", "c₁,réf = " + fmt(S.c1, 3) + " mol/L ; écart relatif " + fmt(Math.abs(c - S.c1) / S.c1 * 100, 1) + " %."]);
+    }
+    sec.push(["Ma conclusion", String(S.form.concl || "").trim() || "(non rédigée)"]);
+    return sec;
+  }
+  function carnetText() { return "Carnet de titrage colorimétrique\n\n" + carnetData().map(function (x) { return "## " + x[0] + "\n" + x[1]; }).join("\n\n"); }
+  function carnetHtml() { return "<h1>Carnet de titrage colorimétrique</h1>" + carnetData().map(function (x) { return "<h2>" + esc(x[0]) + '</h2><p style="white-space:pre-wrap">' + esc(x[1]) + "</p>"; }).join(""); }
+  function panelConclusion() {
+    var C = S.concl, ok = String(S.form.concl || "").trim().length >= 40;
+    return '<div class="sec" style="border-top:0;padding-top:0"><h3>1. Rédige ta conclusion</h3>' +
+      '<p class="small">En quelques phrases : donne la valeur de c₁ (avec son incertitude si tu l\'as calculée), dis si elle est cohérente avec ta prévision et avec la valeur de référence, et nomme une cause possible d\'écart.</p>' +
+      '<label class="sr" for="concl">Ma conclusion</label><textarea id="concl" class="txt" data-f="concl" placeholder="Le titrage donne c₁ = … Cette valeur est… car…">' + esc(S.form.concl || "") + '</textarea>' +
+      '<div class="row">' + btn("conclSave", C.saved ? "Mettre à jour ma conclusion" : "Enregistrer ma conclusion", { cls: "primary" }) + (C.saved ? '<span class="small">✓ Conclusion enregistrée.</span>' : "") + '</div></div>' +
+      '<div class="sec"><h3>2. Garde une trace de ta démarche</h3><p class="small">Le carnet réunit ta problématique, ta prévision, tes mesures, ton résultat et ta conclusion. Rien n\'est envoyé : tout reste sur cet appareil.</p>' +
+      '<div class="row">' + btn("copyCarnet", "Copier le carnet", { cls: "primary" }) + btn("printCarnet", "Imprimer le carnet", {}) + btn("copyLink", "Copier le lien de la situation", {}) + '</div>' +
+      (C.fb ? '<label class="small" for="carnetFb">La copie automatique n\'est pas disponible : sélectionne ce texte (Ctrl+A) puis copie-le (Ctrl+C).</label><textarea id="carnetFb" class="txt" readonly style="min-height:9em">' + esc(carnetText()) + '</textarea>' : "") +
+      '<details><summary>Aperçu du carnet</summary><div class="doc" id="carnetPrev" style="white-space:pre-wrap">' + esc(carnetText()) + '</div></details>' +
+      '<p class="small">Le lien rouvre la même solution à titrer (utile pour comparer des résultats entre élèves ou refaire le titrage). Attention : la situation est codée dans le lien.</p></div>' +
+      '<div class="row">' + btn("restart", "Recommencer avec une nouvelle solution", {}) + '</div>';
+  }
+
   function panelReaction() {
     var e = S.eq, r = e.res, c = function (n) { return r[n] === true ? " good" : r[n] === false ? " bad" : ""; };
     var ox = S.form.ox || "";
@@ -560,7 +672,7 @@ footer { color: var(--muted); font-size: 13px; }
       '<div class="eqn"><span class="sp">' + cf("e", "coefficient devant Fe2+", c("e")) + ' ' + F2 + ' + ' + MN + ' + ' + cf("f", "coefficient devant H+", c("f")) + ' ' + HP + '</span><span>→</span><span class="sp">' + cf("g", "coefficient devant Fe3+", c("g")) + ' ' + F3 + ' + ' + M2 + ' + ' + cf("h", "coefficient devant H2O", c("h")) + ' ' + H2O + '</span></div>' +
       '<p class="small">Astuce : les électrons captés par ' + MN + ' viennent des ions ' + F2 + '. Il faut le même nombre d\'électrons des deux côtés.</p></fieldset>' +
       '<div class="row">' + btn("eqCheck", "Vérifier mes réponses", { cls: "primary", dis: e.done }) + btn("eqSolve", "Voir la correction", { cls: "ghost", dis: e.done }) +
-      btn("go", "Étape suivante : le matériel", { val: 1, cls: "primary", dis: !e.done }) + '</div>';
+      btn("go", "Étape suivante : le protocole", { val: 2, cls: "primary", dis: !e.done }) + '</div>';
     return h;
   }
 
@@ -598,14 +710,14 @@ footer { color: var(--muted); font-size: 13px; }
           '<svg viewBox="0 0 46 58" aria-hidden="true">' + ICONS[m.id] + '</svg><span>' + m.n + '</span>' + (m.s ? '<small>' + m.s + '</small>' : "") + '</button></li>';
       }).join("") + '</ul>' +
       '<p class="small">Tu peux choisir un erlenmeyer ou un bécher pour la solution à titrer.</p>' +
-      '<div class="row">' + btn("matCheck", "Valider mon choix", { cls: "primary", dis: S.matOK }) + btn("go", "Étape suivante : la burette", { val: 2, cls: "primary", dis: !S.matOK }) + '</div>';
+      '<div class="row">' + btn("matCheck", "Valider mon choix", { cls: "primary", dis: S.matOK }) + btn("go", "Étape suivante : la burette", { val: 3, cls: "primary", dis: !S.matOK }) + '</div>';
     return h;
   }
 
   function panelBurette() {
     var b = S.bu, bubOK = b.checked && !(b.bubble && !b.purged);
     var flags = [b.fun || b.filled, b.rW || b.filled, b.rT >= 1 || b.filled, b.filled, b.filled && !b.fun, bubOK, b.zeroOK], cur = firstCur(flags);
-    var l = '<p class="lead">Prépare la burette comme au laboratoire. Chaque geste a une raison, et un oubli a une conséquence.</p><ol class="tasks">';
+    var l = (S.prev.saved ? "" : '<p class="msg info"><span>Tu n\'as pas encore prévu V<sub>E</sub> (étape 3). Fais-le avant de manipuler : tu pourras relire ta prévision à la fin.</span></p>') + '<p class="lead">Prépare la burette comme au laboratoire. Chaque geste a une raison, et un oubli a une conséquence.</p><ol class="tasks">';
     l += task(1, b.fun || b.filled, cur === 0, "Pose le bécher de récupération sous la burette, puis l'entonnoir à liquide sur la burette.", "L'entonnoir évite de renverser du liquide. Le bécher recueille les rinçages.", btn("buFun", "Poser l'entonnoir à liquide", { dis: b.fun || b.filled }));
     l += task(2, b.rW, cur === 1, "Rince la burette à l'eau distillée.", "Pour nettoyer la verrerie : on verse environ 5 mL, on fait rouler la burette, puis on vide par le robinet.",
       btn("buPour", "Verser ≈ 5 mL d'eau distillée", { val: "eau", dis: !b.fun || !!b.pend || b.filled }) + btn("buRinse", "Faire rouler et vider par le robinet", { dis: b.pend !== "eau" }));
@@ -618,7 +730,7 @@ footer { color: var(--muted); font-size: 13px; }
     l += task(6, bubOK, cur === 5 || (b.checked && b.bubble && !b.purged), "Vérifie qu'il n'y a pas de bulle d'air sous le robinet.", "Une bulle fausse le volume lu : elle se remplit à la place de la solution.", ctl);
     l += task(7, b.zeroOK, cur === 6, "Mets le bas du ménisque sur le zéro.", "Lis sur la loupe, l'œil à la hauteur du ménisque. Il reste du liquide à vider dans le bécher de récupération.", b.filled ? zeroBlock() : "");
     l += '</ol>';
-    l += '<div class="row">' + btn("go", "Étape suivante : le prélèvement", { val: 3, cls: "primary", dis: !b.zeroOK }) + '</div>';
+    l += '<div class="row">' + btn("go", "Étape suivante : le prélèvement", { val: 4, cls: "primary", dis: !b.zeroOK }) + '</div>';
     return l;
   }
 
@@ -664,7 +776,7 @@ footer { color: var(--muted); font-size: 13px; }
       btn("pwWait", "Attendre 15 s, pointe contre la paroi", { dis: !p.draining || p.done }) + btn("pwLoc", "Retirer la pipette tout de suite", { val: "rest", dis: !p.draining || p.done }) + btn("pwBlow", "Souffler la dernière goutte", { dis: !p.draining || p.done }));
     l += task(7, f.bar, cur === 5, "Ajoute le barreau aimanté.", "Il permet d'agiter pendant le titrage.", btn("pwBar", "Ajouter le barreau", { dis: !f.has || f.bar }));
     l += task(8, f.placed, cur === 6, "Place l'erlenmeyer sur l'agitateur, la pointe de la burette dans le col.", "Sans cela, la solution titrante tomberait à côté.", btn("pwPlace", "Placer l'erlenmeyer", { dis: !(f.has && f.bar) || f.placed }));
-    l += '</ol></div><div class="row">' + btn("go", "Étape suivante : le titrage rapide", { val: 4, cls: "primary", dis: !(f.has && f.bar && f.placed) }) + '</div>';
+    l += '</ol></div><div class="row">' + btn("go", "Étape suivante : le titrage rapide", { val: 5, cls: "primary", dis: !(f.has && f.bar && f.placed) }) + '</div>';
     return l;
   }
 
@@ -705,7 +817,7 @@ footer { color: var(--muted); font-size: 13px; }
     h += task(4, P.recorded, titrating && !P.recorded, "Relève le volume équivalent sur la burette.", "Lis le bas du ménisque avec la loupe. Précision : 0,05 mL.", rd);
     h += '</ol>';
     if (P.runs.length) h += runsTable();
-    h += '<div class="row">' + btn("nextRun", "Faire un autre titrage", { dis: !P.recorded }) + btn("go", "Exploiter mes résultats", { val: 6, cls: "primary", dis: !P.runs.length }) + '</div>' +
+    h += '<div class="row">' + btn("nextRun", "Faire un autre titrage", { dis: !P.recorded }) + btn("go", "Exploiter mes résultats", { val: 7, cls: "primary", dis: !P.runs.length }) + '</div>' +
       '<p class="small">Pour estimer l\'incertitude, fais au moins 3 titrages.</p>';
     return h;
   }
@@ -777,22 +889,46 @@ footer { color: var(--muted); font-size: 13px; }
         '<div class="row"><label for="c1In" class="small">c₁ =</label><input id="c1In" class="cf wide' + (e.c1OK ? " good" : "") + '" data-f="c1" inputmode="decimal" autocomplete="off" value="' + (S.form.c1 || "") + '" placeholder="ex. 0,085"' + (e.c1OK ? " disabled" : "") + '><span class="small">mol·L⁻¹</span>' + btn("c1Check", "Vérifier", { cls: "primary", dis: e.c1OK }) + '</div>';
     }
     if (e.c1OK) {
-      var unc = "";
+      var uc = st.n >= 2 ? cexp * st.u / VE : NaN, uShown = st.n < 2 || e.uOK;
+      h += '<p class="msg ok"><span>Bien vu. c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹.</span></p>' +
+        '<hr><h3>3. Incertitude sur V<sub>E</sub></h3>';
       if (st.n >= 2) {
-        var uc = cexp * st.u / VE;
-        unc = '<h3>3. Incertitude-type</h3><p class="small">Avec ' + st.n + ' mesures, on estime la dispersion avec l\'écart-type expérimental s, puis l\'incertitude-type u(V<sub>E</sub>) = s / √n.</p>' +
-          '<div class="tablewrap"><table class="data"><tbody>' +
+        h += '<p class="comps">' + comp("rea", "Calculer") + '</p><p class="small">Tes ' + st.n + ' volumes ne sont pas identiques : cette dispersion est une information. Calcule l\'écart-type expérimental s de tes valeurs de V<sub>E</sub>, puis l\'incertitude-type u(V<sub>E</sub>) = s / √' + st.n + '.</p>' +
+          '<div class="row"><label for="uIn" class="small">u(V<sub>E</sub>) =</label><input id="uIn" class="cf wide' + (e.uOK ? " good" : "") + '" data-f="u" inputmode="decimal" autocomplete="off" value="' + esc(S.form.u || "") + '" placeholder="ex. 0,04"' + (e.uOK ? " disabled" : "") + '><span class="small">mL</span>' + btn("uCheck", "Vérifier", { cls: "primary", dis: e.uOK }) + '</div>';
+        if (e.uOK) h += '<div class="tablewrap"><table class="data"><tbody>' +
           '<tr><td>Moyenne V<sub>E</sub></td><td>' + fmt(st.m, 3) + ' mL</td></tr>' +
           '<tr><td>Écart-type expérimental s</td><td>' + fmt(st.s, 3) + ' mL</td></tr>' +
           '<tr><td>u(V<sub>E</sub>) = s / √' + st.n + '</td><td>' + fmt(st.u, 3) + ' mL</td></tr>' +
           '<tr><td>u(c₁) = c₁ · u(V<sub>E</sub>) / V<sub>E</sub></td><td>' + fmt(uc, 4) + ' mol·L⁻¹</td></tr></tbody></table></div>' +
           '<p class="res"><b>c₁ = ' + fmtUnc(cexp, uc) + ' mol·L⁻¹</b></p>' +
           (st.s === 0 ? '<p class="small">Tes valeurs sont toutes égales : s = 0. Pense aussi à la précision de lecture de la burette (± 0,05 mL).</p>' : '<p class="small">Cette incertitude traduit seulement la dispersion de tes mesures. Elle ne détecte pas une erreur de méthode.</p>');
-      } else unc = '<p class="small">Avec un seul titrage, on ne peut pas estimer l\'incertitude. Fais au moins 3 titrages pour calculer s et u(V<sub>E</sub>).</p><p class="res"><b>c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹</b></p>';
-      var gap = Math.abs(cexp - S.c1) / S.c1 * 100;
-      h += '<p class="msg ok"><span>Bien vu. c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹.</span></p>' + unc +
-        '<hr><h3>Comparaison avec la valeur de référence</h3><p class="lead">L\'étiquette du flacon indique c₁ = <b>' + fmt(S.c1, 3) + ' mol·L⁻¹</b>. Ton écart relatif est de <b>' + fmt(gap, 1) + ' %</b> : ' +
-        (gap < 2 ? "très bon résultat." : gap < 5 ? "résultat correct. Cherche ce qui peut l'expliquer." : "écart important. Regarde les causes possibles ci-dessous.") + '</p>' + debrief();
+      } else h += '<p class="small">Avec un seul titrage, on ne peut pas estimer la dispersion. Fais au moins 3 titrages pour calculer s et u(V<sub>E</sub>).</p><p class="res"><b>c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹</b></p>';
+
+      // VAL 1 : relire la prévision
+      var P = S.prev, lo = P.saved ? P.vmin : 0.050 * V1N / (5 * C2), hi = P.saved ? P.vmax : 0.120 * V1N / (5 * C2);
+      var pos = VE < lo ? "below" : VE > hi ? "above" : "in", va = S.val.prev;
+      var posTxt = { in: "dans cet intervalle", above: "au-dessus de cet intervalle", below: "au-dessous de cet intervalle" };
+      h += '<hr><h3>4. Confronte ta mesure à ta prévision</h3><p class="comps">' + comp("val", P.saved ? "Relire ma prévision" : "Confronter à l'encadrement attendu") + '</p>' +
+        (P.saved ? '<p class="lead">À l\'étape 3, tu avais prévu <b>V<sub>E</sub> entre ' + fmt(lo, 1) + ' et ' + fmt(hi, 1) + ' mL</b> (' + ["", "pas sûr·e", "plutôt sûr·e", "sûr·e"][P.cert || 0].replace(/^$/, "certitude non précisée") + '). Tu as mesuré <b>' + fmt(VE, 2) + ' mL</b>.</p>'
+          : '<p class="lead">Tu n\'as pas enregistré de prévision à l\'étape 3. À partir de l\'énoncé (c₁ entre 0,050 et 0,120 mol·L⁻¹), V<sub>E</sub> devait se trouver entre <b>' + fmt(lo, 1) + ' et ' + fmt(hi, 1) + ' mL</b>. Tu as mesuré <b>' + fmt(VE, 2) + ' mL</b>.</p>') +
+        '<p class="small">Où se situe ta mesure ?</p><div class="seg" role="group" aria-label="Position de la mesure par rapport à la prévision">' +
+        [["below", "Plus bas"], ["in", "Dans l'intervalle"], ["above", "Plus haut"]].map(function (o) { return btn("valPrev", o[1], { val: o[0], pressed: va === o[0] }); }).join("") + '</div>';
+      if (va) h += '<p class="msg info"><span>' + (va === pos ? "Oui : " : "Relis les deux nombres : ") + 'ta mesure V<sub>E</sub> = ' + fmt(VE, 2) + ' mL est <b>' + posTxt[pos] + '</b> [' + fmt(lo, 1) + ' ; ' + fmt(hi, 1) + '] mL. ' +
+        (pos === "in" ? (P.saved && P.cert === 1 ? "Tu n\'étais pas sûr·e : ta prévision se confirme." : "Ta prévision et ta mesure sont cohérentes.") : "Cherche l\'origine de l\'écart : ton calcul de prévision (revois c₁ · V₁ = 5 · c₂ · V<sub>E</sub>) ou ta manipulation ?" + (P.saved && P.cert === 3 ? " Tu étais sûr·e de toi : c\'est une bonne occasion de revoir ta méthode." : "")) + '</span></p>';
+
+      // VAL 2 : juger l'écart avec la référence
+      var gapV = Math.abs(VE - VEt), crit = (st.n >= 2 && st.u > 0) ? 2 * st.u : 0.10, compat = gapV <= crit, ga = S.val.gap;
+      h += '<hr><h3>5. Juge l\'écart avec la valeur de référence</h3><p class="comps">' + comp("val", "Juger un écart") + '</p>';
+      if (!uShown) h += '<p class="small">Calcule d\'abord u(V<sub>E</sub>) (section 3) : c\'est elle qui te permet de juger.</p>';
+      else {
+        var gap = Math.abs(cexp - S.c1) / S.c1 * 100;
+        h += '<p class="lead">La fiche de préparation du flacon indique c₁ = <b>' + fmt(S.c1, 3) + ' mol·L⁻¹</b>. Ton résultat est c₁ = ' + fmt(cexp, 4) + ' mol·L⁻¹ : écart relatif <b>' + fmt(gap, 1) + ' %</b>, soit <b>' + fmt(gapV, 2) + ' mL</b> sur V<sub>E</sub>.</p>' +
+          '<p class="small">' + (st.n >= 2 && st.u > 0 ? 'Repère : la dispersion de tes mesures donne 2 u(V<sub>E</sub>) = <b>' + fmt(crit, 2) + ' mL</b>.' : 'Repère : avec ' + (st.n >= 2 ? 'des valeurs identiques' : 'un seul titrage') + ', on compare à la précision de lecture de la burette : deux lectures de ± 0,05 mL, soit environ <b>0,10 mL</b>.') + ' Un écart de cet ordre peut s\'expliquer par la dispersion seule.</p>' +
+          '<p class="small">Ton écart est-il compatible avec l\'incertitude de tes mesures ?</p><div class="seg" role="group" aria-label="Jugement sur l\'écart">' + [["oui", "Oui, compatible"], ["non", "Non, trop grand"]].map(function (o) { return btn("valGap", o[1], { val: o[0], pressed: ga === o[0] }); }).join("") + '</div>';
+        if (ga) h += '<p class="msg info"><span>Ton écart (' + fmt(gapV, 3) + ' mL) est ' + (compat ? 'inférieur à' : 'supérieur à') + ' ' + fmt(crit, 3) + ' mL : ' + (compat ? 'il est du même ordre que la dispersion, ton résultat est <b>compatible</b> avec la référence.' : 'la dispersion seule ne l\'explique pas. Il faut chercher une cause <b>systématique</b> dans la manipulation.') +
+          ((ga === "oui") === compat ? "" : ' Tu avais répondu l\'inverse : compare à nouveau les deux nombres.') + ' Compatible ne veut pas dire exact : la dispersion ne détecte pas une erreur de méthode.</span></p>' +
+          '<h3>Causes possibles d\'un écart</h3>' + debrief().replace('<h3>Ce qui a pu fausser ta mesure</h3>', '');
+      }
     }
 
     // évolution du système
@@ -825,7 +961,7 @@ footer { color: var(--muted); font-size: 13px; }
   }
 
   /* ---------- rendu ---------- */
-  var PANELS = [panelReaction, panelMateriel, panelBurette, panelPipette, panelRapide, panelPrecis, panelResultats];
+  var PANELS = [panelSituation, panelReaction, panelProtocole, panelBurette, panelPipette, panelRapide, panelPrecis, panelResultats, panelConclusion];
   function renderSteps() {
     $("steps").innerHTML = STEPS.map(function (s, i) {
       var locked = i > S.maxStep;
@@ -836,7 +972,7 @@ footer { color: var(--muted); font-size: 13px; }
     var a = document.activeElement, key = a && a.getAttribute && a.getAttribute("data-act") ? a.getAttribute("data-act") + "|" + (a.getAttribute("data-val") || "") : null;
     $("panelEyebrow").textContent = "Étape " + (S.step + 1) + " sur " + STEPS.length;
     $("panelTitle").textContent = STEPS[S.step].h;
-    $("panelBody").innerHTML = PANELS[S.step]();
+    $("panelBody").innerHTML = compBar(S.step) + PANELS[S.step]();
     if (key) {
       var p = key.split("|"), n = $("panelBody").querySelector('[data-act="' + p[0] + '"]' + (p[1] ? '[data-val="' + p[1] + '"]' : "") + ":not(:disabled)");
       if (n) n.focus();
@@ -844,9 +980,9 @@ footer { color: var(--muted); font-size: 13px; }
   }
   function renderObs() {
     var m = mix(), h = "";
-    if (S.step >= 4 && m) {
+    if (S.step >= 5 && S.step <= 6 && m) {
       h = '<div class="row2"><span><span class="l">Couleur du milieu</span><b>' + colorWord(m) + '</b></span><span><span class="l">Agitation</span><b>' + ["arrêt", "lente", "modérée", "rapide"][S.stir] + '</b></span>' + (S.paper ? '<span><span class="l">Papier blanc</span><b>posé</b></span>' : "") + '</div>';
-    } else h = '<span class="l">Observation</span>' + (S.step < 1 ? "Choisis le matériel à l'étape 2 : la paillasse se remplira." : S.step < 4 ? "Prépare la verrerie. Le titrage commence à l'étape 5." : "Prépare l'erlenmeyer pour observer la couleur.");
+    } else h = '<span class="l">Observation</span>' + (S.step < 2 ? "Le matériel se choisit à l'étape 3 : la paillasse se remplira." : S.step < 5 ? "Prépare la verrerie. Le titrage commence à l'étape 6." : S.step > 6 ? "Le titrage est terminé : exploite tes mesures." : "Prépare l'erlenmeyer pour observer la couleur.");
     $("obs").innerHTML = h;
   }
 
@@ -863,7 +999,7 @@ footer { color: var(--muted); font-size: 13px; }
   }
   function drawLoupe() {
     var g = $("gLoupe"), b = S.bu;
-    if (!(b.filled && S.step >= 2 && S.step <= 5)) { g.innerHTML = ""; return; }
+    if (!(b.filled && S.step >= 3 && S.step <= 6)) { g.innerHTML = ""; return; }
     var r = b.level, cx = 470, cy = 130, R = 72, P = 100, s = "";
     s += '<defs><clipPath id="lc"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>';
     s += '<line x1="289" y1="' + yOf(r).toFixed(1) + '" x2="' + (cx - R) + '" y2="' + cy + '" stroke="#8EA2AF" stroke-dasharray="3 4"/><circle cx="283" cy="' + yOf(r).toFixed(1) + '" r="2.5" fill="#EAF2F6"/>';
@@ -884,21 +1020,21 @@ footer { color: var(--muted); font-size: 13px; }
   }
   var timers = {};
   function updateScene() {
-    var P = S.picks, all = S.matOK || S.step >= 2;
+    var P = S.picks, all = S.matOK || S.step >= 3;
     var show = function (id, on) { $(id).style.display = on ? "" : "none"; };
-    var preview = S.step === 0 && !S.matOK;
+    var preview = S.step <= 1 && !S.matOK;
     $("gAll").style.opacity = preview ? ".25" : "1";
     var have = function (k) { return preview || P[k] || S.matOK; };
     show("gStand", have("potence")); show("gBurette", have("burette")); show("gStirrer", have("agit"));
     var cont = P.erlen || (S.matOK && P.erlen) ? "erlen" : (P.becher ? "becher" : (preview ? "erlen" : null));
     if (S.matOK) cont = P.erlen ? "erlen" : "becher";
-    var wasteOn = !preview && (S.step === 2 || (S.step === 5 && !S.flask.has && !S.bu.zeroOK));
+    var wasteOn = !preview && (S.step === 3 || (S.step === 6 && !S.flask.has && !S.bu.zeroOK));
     show("glassErlen", cont === "erlen" && !wasteOn); show("glassBecher", cont === "becher" && !wasteOn);
     show("fLiq", cont && S.flask.has && !wasteOn); show("fSurf", cont && S.flask.has && !wasteOn); show("fShade", cont && S.flask.has && !wasteOn);
     show("gPaper", S.paper && !!cont && !wasteOn);
     show("bar", !!cont && (S.flask.bar || preview) && !wasteOn);
     var b = S.bu, m = mix();
-    show("gWaste", wasteOn); show("gFunnel", !!b.fun && !preview); show("gBeak", !preview && S.step === 3); show("gPiss", !preview && S.matOK && S.step >= 2);
+    show("gWaste", wasteOn); show("gFunnel", !!b.fun && !preview); show("gBeak", !preview && S.step === 4); show("gPiss", !preview && S.matOK && S.step >= 3 && S.step <= 6);
     var wh = Math.min(70, S.waste * 1.6), wl = $("wLiq"), ws = $("wShade");
     wl.setAttribute("y", (538 - wh).toFixed(1)); wl.setAttribute("height", wh.toFixed(1)); ws.setAttribute("y", (538 - wh).toFixed(1)); ws.setAttribute("height", wh.toFixed(1));
     var bh = Math.min(56, S.pi.bV * 1.9), bl2 = $("bkLiq"), bs = $("bkShade");
@@ -923,7 +1059,7 @@ footer { color: var(--muted); font-size: 13px; }
     if (showB) tl.setAttribute("height", 42);
     var men = $("meniscus");
     if (b.filled && !water && !tit) { var ym = yOf(b.level); men.setAttribute("d", "M273 " + (ym - 2).toFixed(1) + " Q280 " + (ym + 3).toFixed(1) + " 287 " + (ym - 2).toFixed(1)); } else men.setAttribute("d", "");
-    show("gWarn", b.filled && !b.checked && S.step === 2);
+    show("gWarn", b.filled && !b.checked && S.step === 3);
     // flask
     var lq = $("fLiq");
     if (S.flask.has) {
@@ -977,24 +1113,54 @@ footer { color: var(--muted); font-size: 13px; }
     Object.keys(ANS).forEach(function (k) { var v = num(S.form[k]); if (isNaN(v)) miss++; r[k] = v === ANS[k]; if (!r[k]) ok = false; });
     r.ox = S.form.ox === "mno4"; if (!r.ox) ok = false;
     S.eq.res = r;
-    if (ok) { S.eq.done = true; unlock(1); say("ok", "Toutes les réponses sont justes. Tu peux passer au matériel."); }
+    if (ok) { S.eq.done = true; unlock(2); say("ok", "Toutes les réponses sont justes. Tu peux passer au protocole."); }
     else say("err", (miss ? "Il manque des réponses. " : "") + "Les cases rouges sont à corriger. Vérifie que les électrons sont en même nombre des deux côtés.");
     refresh();
   };
   A.eqSolve = function () {
     Object.keys(ANS).forEach(function (k) { S.form[k] = String(ANS[k]); S.eq.res[k] = true; });
-    S.form.ox = "mno4"; S.eq.res.ox = true; S.eq.done = true; unlock(1);
+    S.form.ox = "mno4"; S.eq.res.ox = true; S.eq.done = true; unlock(2);
     say("info", "Correction affichée. Relis-la : 5 ions " + F2 + " donnent 5 électrons, que capte 1 ion " + MN + ".");
     refresh();
   };
 
+  A.appCheck = function () {
+    var r = {}, ok = true, miss = 0;
+    QUANT.forEach(function (q) { var v = S.form["t_" + q[0]] || ""; if (!v) miss++; r[q[0]] = v === q[2]; if (!r[q[0]]) ok = false; });
+    S.app.tblRes = r;
+    if (appDone()) S.done[0] = true;
+    say(ok ? "ok" : "info", ok ? "Les quatre grandeurs sont bien repérées." : (miss ? "Il manque des réponses. " : "") + "Relis la situation pour les lignes à revoir : la ligne dit ce qu'on sait déjà et ce qu'on doit encore trouver.");
+    refresh();
+  };
+  A.appSave = function () {
+    var t = String(S.form.prob || "").trim();
+    if (t.length < 15) { say("warn", "Écris une phrase complète : quelle question veut-on résoudre ?"); return; }
+    S.app.saved = true; if (appDone()) S.done[0] = true;
+    say("ok", "Problématique enregistrée. Elle ira dans ton carnet."); refresh();
+  };
+  A.prevCert = function (el) { S.prev.cert = Number(el.getAttribute("data-val")); refresh(); };
+  A.prevSave = function () {
+    var a = num(S.form.vmin), b = num(S.form.vmax);
+    if (isNaN(a) || isNaN(b)) { say("warn", "Écris deux valeurs en mL, par exemple 4,0 et 11,0."); return; }
+    if (a >= b || a <= 0) { say("warn", "La plus petite valeur doit être strictement plus petite que la plus grande."); return; }
+    S.prev.vmin = a; S.prev.vmax = b; S.prev.saved = true;
+    var lo = 0.050 * V1N / (5 * C2), hi = 0.120 * V1N / (5 * C2);
+    if (Math.abs(a - lo) / lo > 0.15 || Math.abs(b - hi) / hi > 0.15) say("info", "Prévision enregistrée. Vérifie ton calcul avant de manipuler : à l'équivalence, n(" + F2 + ") = 5 × n(" + MN + "), donc c₁ · V₁ = 5 · c₂ · V<sub>E</sub>. Tu peux la modifier tant que tu n'as pas fini un titrage.");
+    else say("ok", "Prévision enregistrée. Tu la reliras après tes mesures.");
+    refresh();
+  };
+  A.protoWhy = function (el) {
+    var v = el.getAttribute("data-val"); S.proto.why = v;
+    say(v === "a" ? "ok" : "info", v === "a" ? "Oui : le titrage rapide donne la zone du virage (entre deux graduations de 1 mL). Le titrage précis, goutte à goutte, se fait ensuite seulement près de l'équivalence." : v === "b" ? "Le titrage rapide verse 1 mL à la fois : on ne peut pas repérer le virage à moins de 1 mL près. Cherche plutôt ce qu'il permet de repérer." : "Le rinçage de la burette se fait avant le remplissage, pas pendant le titrage. Cherche ce que l'on apprend en versant 1 mL à la fois.");
+    refresh();
+  };
   A.pick = function (el) { var id = el.getAttribute("data-val"); S.picks[id] = !S.picks[id]; S.matBad = {}; refresh(); };
   A.matCheck = function () {
     var P = S.picks, miss = [], bad = [];
     MATS.forEach(function (m) { if (m.t === "req" && !P[m.id]) miss.push(m.n); if (m.t === "no" && P[m.id]) bad.push(m); });
     if (!P.erlen && !P.becher) miss.push("un erlenmeyer (ou un bécher)");
     S.matBad = {}; bad.forEach(function (m) { S.matBad[m.id] = true; });
-    if (!miss.length && !bad.length) { S.matOK = true; unlock(2); say("ok", "Le matériel est complet et adapté. La paillasse est prête."); }
+    if (!miss.length && !bad.length) { S.matOK = true; unlock(3); say("ok", "Le matériel est complet et adapté. La paillasse est prête."); }
     else {
       var t = "";
       if (bad.length) t += "À retirer : " + bad.map(function (m) { return "<b>" + m.n + "</b> (" + m.why.toLowerCase() + ")"; }).join(" ") + " ";
@@ -1066,13 +1232,13 @@ footer { color: var(--muted); font-size: 13px; }
   };
   A.buZero = function () {
     var b = S.bu;
-    if (S.step === 2 && !b.checked) { say("warn", "Vérifie d'abord sous le robinet : y a-t-il une bulle d'air ?"); return; }
+    if (S.step === 3 && !b.checked) { say("warn", "Vérifie d'abord sous le robinet : y a-t-il une bulle d'air ?"); return; }
     if (b.fun) { sin("entonnoir", "L'entonnoir est resté sur la burette : <b>retire-le</b> avant d'ajuster le zéro. Une goutte tombant de l'entonnoir fausserait le niveau."); refresh(); return; }
     if (S.eye !== "niveau") { sin("parallaxe", "Tu n'as pas l'œil à la hauteur du ménisque : à cause de la <b>parallaxe</b>, tu ne peux pas juger s'il est sur le zéro. Place l'œil au niveau du trait."); refresh(); return; }
     if (b.level < -0.05) { say("err", "Le ménisque est encore au-dessus du zéro. Laisse couler un peu de liquide."); return; }
     if (b.level > 0.05) { say("err", "Tu as dépassé le zéro. Remplis la burette un peu et recommence."); return; }
     b.level = 0; b.zeroOK = true;
-    if (S.step === 2) { unlock(3); say("ok", b.bubble ? "Zéro réglé. Mais tu continues avec une bulle d'air : le volume lu sera trop grand." : "Zéro réglé. La burette est prête."); }
+    if (S.step === 3) { unlock(4); say("ok", b.bubble ? "Zéro réglé. Mais tu continues avec une bulle d'air : le volume lu sera trop grand." : "Zéro réglé. La burette est prête."); }
     else say("ok", "Zéro réglé.");
     refresh();
   };
@@ -1138,7 +1304,7 @@ footer { color: var(--muted); font-size: 13px; }
     sin("souffle", "On ne souffle pas dans une pipette jaugée : elle est étalonnée pour s'écouler librement, et la goutte restée dans la pointe fait partie du volume prévu. Tu as ajouté environ 0,04 mL en trop."); refresh();
   };
   A.pwBar = function () { S.flask.bar = true; say("info", "Le barreau aimanté est dans l'erlenmeyer. Place maintenant l'erlenmeyer sous la burette."); refresh(); };
-  A.pwPlace = function () { S.flask.placed = true; unlock(4); say("ok", "L'erlenmeyer est sur l'agitateur, la pointe de la burette dans le col. Tu peux titrer."); refresh(); };
+  A.pwPlace = function () { S.flask.placed = true; unlock(5); say("ok", "L'erlenmeyer est sur l'agitateur, la pointe de la burette dans le col. Tu peux titrer."); refresh(); };
 
   A.stir = function (el) {
     S.stir = Number(el.getAttribute("data-val"));
@@ -1160,7 +1326,7 @@ footer { color: var(--muted); font-size: 13px; }
   }
   A.pour1 = function () {
     var m = pour(1); if (!m) { if (S.stir !== 2) say("warn", "Mets l'agitation sur « Modérée » avant de verser."); return; }
-    if (S.step === 4) {
+    if (S.step === 5) {
       var R = S.rapid, v = Math.round(S.bu.level);
       R.rows.push({ v: v, w: colorWord(m) });
       if (m.persist && !R.zone) { R.zone = [v - 1, v]; say("ok", "La couleur ne disparaît plus : le virage a eu lieu entre " + fmt(v - 1, 0) + " et " + fmt(v, 0) + " mL."); }
@@ -1191,7 +1357,7 @@ footer { color: var(--muted); font-size: 13px; }
   A.toPrecise = function () {
     S.flask = newFlask(); S.eye = Math.random() < 0.5 ? "haut" : "bas";
     S.bu.zeroOK = false; S.pr.reading = false; S.pr.recorded = false;
-    unlock(5); S.step = 5; S.msg = null; renderMsg();
+    unlock(6); S.step = 6; S.msg = null; renderMsg();
     say("info", "L'erlenmeyer est vidé et rincé. Remets la burette à zéro, puis prélève une nouvelle prise d'essai."); refresh();
   };
   A.newSample = function () { sample(); S.flask.bar = true; S.flask.placed = true; say("info", "10,0 mL de solution sont dans l'erlenmeyer, avec son barreau, sous la burette."); refresh(); };
@@ -1206,7 +1372,7 @@ footer { color: var(--muted); font-size: 13px; }
     if (S.eye !== "niveau") { sin("parallaxe", "Tu lis la burette sans avoir l'œil à la hauteur du ménisque : la <b>parallaxe</b> fausse la lecture. Place l'œil au niveau du ménisque, puis relis."); refresh(); return; }
     if (Math.abs(v - S.bu.level) > 0.06) { say("err", "Ce n'est pas la valeur de la burette. Relis le bas du ménisque avec la loupe."); return; }
     S.pr.runs.push({ v: v, ve: veExact(S.flask.Vs) + (S.bu.bubble ? BUB : 0), paper: S.paper });
-    S.pr.reading = false; S.pr.recorded = true; unlock(6);
+    S.pr.reading = false; S.pr.recorded = true; unlock(7);
     say("ok", "Titrage n° " + S.pr.runs.length + " enregistré : V<sub>E</sub> = " + fmt(v, 2) + " mL." + (S.pr.runs.length < 3 ? " Fais-en d'autres pour estimer l'incertitude." : ""));
     refresh();
   };
@@ -1226,12 +1392,33 @@ footer { color: var(--muted); font-size: 13px; }
   A.c1Check = function () {
     var st = stats(), cexp = 5 * C2 * st.m / V1N, v = num(S.form.c1);
     if (isNaN(v)) { say("err", "Écris la valeur de c₁ en mol·L⁻¹, par exemple 0,085."); return; }
-    if (Math.abs(v - cexp) / cexp <= 0.02) { S.res.c1OK = true; unlock(7); say("ok", "C'est juste."); }
+    if (Math.abs(v - cexp) / cexp <= 0.02) { S.res.c1OK = true; unlock(8); say("ok", "C'est juste."); }
     else if (Math.abs(v / cexp - 10) < 0.2 || Math.abs(v / cexp - 0.1) < 0.02) say("err", "L'ordre de grandeur est faux. Vérifie les unités : les volumes sont en mL, la concentration en mol·L⁻¹.");
     else say("err", "Pas encore. Utilise c₁ = 5 × c₂ × V<sub>E</sub> / V₁ avec c₂ = 0,0200 mol·L⁻¹ et V₁ = 10,0 mL.");
     refresh();
   };
-  A.restart = function () { newSession(); renderMsg(); refresh(); };
+  A.uCheck = function () {
+    var st = stats(), v = num(S.form.u);
+    if (isNaN(v)) { say("err", "Écris la valeur de u(V<sub>E</sub>) en mL, par exemple 0,04."); return; }
+    if (Math.abs(v - st.u) <= Math.max(0.05 * st.u, 0.0015)) { S.res.uOK = true; say("ok", "C'est juste : u(V<sub>E</sub>) = s / √n = " + fmt(st.u, 3) + " mL."); }
+    else if (st.u > 0 && Math.abs(v / st.u - Math.sqrt(st.n)) < 0.15 * Math.sqrt(st.n)) say("err", "Tu as calculé s, pas u(V<sub>E</sub>) : divise s par √" + st.n + ".");
+    else say("err", "Pas encore. Calcule d'abord la moyenne, puis l'écart-type expérimental s (avec n − 1 au dénominateur), puis divise par √" + st.n + ".");
+    refresh();
+  };
+  A.valPrev = function (el) { S.val.prev = el.getAttribute("data-val"); refresh(); };
+  A.valGap = function (el) { S.val.gap = el.getAttribute("data-val"); refresh(); };
+  A.conclSave = function () {
+    if (String(S.form.concl || "").trim().length < 40) { say("warn", "Écris une conclusion un peu plus complète (au moins une ou deux phrases)."); return; }
+    S.concl.saved = true; S.done[8] = true; say("ok", "Conclusion enregistrée. Copie ou imprime ton carnet."); refresh();
+  };
+  function copyText(t, okMsg) {
+    var fb = function () { S.concl.fb = true; say("info", "La copie automatique n'est pas possible ici : copie le texte affiché ci-dessous."); refresh(); };
+    try { navigator.clipboard.writeText(t).then(function () { S.concl.fb = false; say("ok", okMsg); refresh(); }, fb); } catch (e) { fb(); }
+  }
+  A.copyCarnet = function () { copyText(carnetText(), "Carnet copié dans le presse-papiers."); };
+  A.copyLink = function () { copyText(location.href.split("#")[0] + "#sit=" + S.sit, "Lien copié : il rouvre la même solution à titrer."); };
+  A.printCarnet = function () { $("printZone").innerHTML = carnetHtml(); window.print(); };
+  A.restart = function () { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { } newSession(); renderMsg(); refresh(); };
 
   /* ---------- événements ---------- */
   document.addEventListener("click", function (e) {
@@ -1247,6 +1434,7 @@ footer { color: var(--muted); font-size: 13px; }
   document.addEventListener("input", function (e) {
     var t = e.target;
     if (t.hasAttribute("data-f")) S.form[t.getAttribute("data-f")] = t.value;
+    if (t.getAttribute("data-f") === "concl" && $("carnetPrev")) $("carnetPrev").textContent = carnetText();
     if (t.hasAttribute("data-evol")) {
       var V = Number(t.value), VEt = veExact(V1N), m = chem(V, V1N), col = colorOf(m);
       S.res.evolV = V; $("evolV").textContent = fmt(V, 1);
@@ -1267,7 +1455,7 @@ footer { color: var(--muted); font-size: 13px; }
     });
     st.addEventListener("pointerleave", function () { st.style.setProperty("--px", 0); st.style.setProperty("--py", 0); });
   })();
-  newSession(); buildTicks(); refresh();
+  newSession(readSit()); buildTicks(); refresh();
   window.__titrage = { get S() { return S; }, chem: chem, veExact: veExact, mix: mix, stats: stats, A: A };
 })();
 </script>
