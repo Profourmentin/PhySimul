@@ -84,32 +84,21 @@ sup, sub { line-height: 0; }
 .layout { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
 @media (min-width: 940px) { .layout { grid-template-columns: minmax(380px, 460px) 1fr; } .stagecol { position: sticky; top: 12px; } }
 
-/* Paillasse */
+/* Paillasse : la scène suit le thème de la page ; le matériel vient de la gamme (shared/verrerie.js) */
 .stagecol { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.stage { background: linear-gradient(180deg, var(--stage-a), var(--stage-b)); border-radius: 10px; border: 1px solid var(--line); overflow: hidden; }
+.stage { background: var(--surface); border-radius: 10px; border: 1px solid var(--line); overflow: hidden; }
 .stage svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
-.stage text { font-family: var(--font-data); fill: var(--stage-ink); }
-.bench { fill: #2A3944; }
-.glass { fill: url(#gGlass); stroke: #B9CBD6; stroke-width: 1.6; stroke-linejoin: round; }
-.metal { fill: url(#gMetalV); stroke: #5E7280; stroke-width: 1; }
-.rod { fill: url(#gMetal); stroke: #5E7280; stroke-width: 1; }
-.rim { fill: none; stroke: #B9CBD6; stroke-width: 1.4; }
-.shade { fill: url(#gLiqShade); pointer-events: none; }
-/* léger effet de profondeur : les objets de premier plan suivent le pointeur un peu plus que le fond */
+.stage svg text.sc { font: 500 12px var(--font-data); fill: var(--muted); }
+.stage svg text.scw { font: 600 13px var(--font-body); fill: var(--warn); }
+/* léger effet de profondeur : les objets de premier plan suivent le pointeur un peu plus que le fond (mouvement seul, sans ombre ni dégradé) */
 .l-back { transform: translate(calc(var(--px, 0) * -3px), calc(var(--py, 0) * -1px)); transition: transform .25s ease-out; }
 .l-front { transform: translate(calc(var(--px, 0) * 12px), calc(var(--py, 0) * 3px)); transition: transform .25s ease-out; }
 @media (prefers-reduced-motion: reduce) { .l-back, .l-front { transform: none; transition: none; } }
-.dark { fill: #2B3944; stroke: #1A252D; }
-.tickline { stroke: #B9CBD6; stroke-width: 1; }
-.halo { paint-order: stroke; stroke: var(--stage-a); stroke-width: 3px; stroke-linejoin: round; }
-#fLiq { transition: fill 1.6s ease, fill-opacity 1.6s ease; }
-#stream { stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 6 5; opacity: 0; }
+#stream { stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 6 5; opacity: 0; stroke: var(--v-permanganate-t); }
 #stream.on { opacity: 1; animation: flow .3s linear infinite; }
 @keyframes flow { to { stroke-dashoffset: -11; } }
-#drop { opacity: 0; }
+#drop { opacity: 0; fill: var(--v-permanganate-t); }
 @keyframes dropfall { 0% { transform: translateY(0); opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(var(--fall)); opacity: 0; } }
-#handle { transition: transform .2s; transform-box: view-box; transform-origin: 294px 357px; }
-#handle.open { transform: rotate(-75deg); }
 #bar { transform-box: fill-box; transform-origin: center; }
 #bar.s1 { animation: spin 1.5s ease-in-out infinite alternate; }
 #bar.s2 { animation: spin .6s ease-in-out infinite alternate; }
@@ -117,10 +106,9 @@ sup, sub { line-height: 0; }
 @keyframes spin { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
 #warnIco { animation: pulse 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes pulse { 50% { transform: scale(1.25); } }
-#knobPtr { transform-box: fill-box; transform-origin: center; }
 @media (prefers-reduced-motion: reduce) {
   #stream.on, #bar.s1, #bar.s2, #bar.s3, #warnIco { animation: none; }
-  #fLiq { transition: none; }
+}
 }
 
 .obs { background: var(--lcd-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; color: var(--lcd-fg); font: 500 14px/1.5 var(--font-data); min-height: 3.6em; }
@@ -178,9 +166,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 /* Matériel */
 .mats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; }
 .mat { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 10px 8px; font-weight: 500; font-size: 14px; line-height: 1.3; }
-.mat svg { width: 44px; height: 56px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
+.mat svg.verrerie { width: auto; max-width: 72px; height: 60px; stroke: none; }
 .mat[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); background: var(--info-bg); }
-.mat[aria-checked="true"] svg { color: var(--accent); }
 .mat small { color: var(--muted); font-weight: 400; }
 .mat.bad { border-color: var(--err); box-shadow: 0 0 0 2px var(--err); }
 
@@ -219,7 +206,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 30px; ma
 .legend svg { width: 34px; height: 10px; vertical-align: middle; margin-right: 6px; }
 .res { font-size: 18px; }
 .pipette { display: flex; gap: 14px; align-items: flex-start; }
-.pipette > svg { width: 80px; flex: 0 0 auto; position: sticky; top: 10px; }
+.pipette > svg { width: 64px; flex: 0 0 auto; position: sticky; top: 10px; }
 /* Gestes de paillasse : position de l'œil, loupe */
 .eyes { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
 .eyes button { font-size: 13px; padding: 6px 10px; min-height: 36px; }
@@ -268,116 +255,7 @@ footer { color: var(--muted); font-size: 13px; }
   <div class="layout">
     <div class="stagecol">
       <section class="stage" aria-label="Paillasse virtuelle">
-        <svg id="scene" viewBox="0 0 560 620" role="img" aria-label="Paillasse : une burette fixée à une potence, au-dessus d'un erlenmeyer posé sur un agitateur magnétique">
-          <defs>
-            <clipPath id="clipErlen"><path d="M262 410V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V410Z"/></clipPath>
-            <clipPath id="clipBecher"><path d="M214 420V528Q214 538 224 538H336Q346 538 346 528V420Z"/></clipPath>
-            <linearGradient id="gGlass" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".30"/><stop offset=".16" stop-color="#fff" stop-opacity=".08"/><stop offset=".6" stop-color="#fff" stop-opacity=".02"/><stop offset=".9" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".24"/></linearGradient>
-            <linearGradient id="gMetal" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6E8290"/><stop offset=".35" stop-color="#CBD8E0"/><stop offset="1" stop-color="#5E7280"/></linearGradient>
-            <linearGradient id="gMetalV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#B4C4CE"/><stop offset="1" stop-color="#788C99"/></linearGradient>
-            <linearGradient id="gBench" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3D505D"/><stop offset="1" stop-color="#202B33"/></linearGradient>
-            <linearGradient id="gLiqShade" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".3" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>
-            <radialGradient id="gShadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
-          </defs>
-          <rect class="bench" x="0" y="574" width="560" height="46" fill="url(#gBench)"/>
-          <line x1="0" y1="574.5" x2="560" y2="574.5" stroke="#6A808F" stroke-width="1" opacity=".6"/>
-          <g id="gAll">
-            <g id="gStand" class="l-back">
-              <ellipse cx="135" cy="602" rx="92" ry="8" fill="url(#gShadow)"/>
-              <rect class="metal" x="60" y="588" width="150" height="12" rx="3"/>
-              <rect class="rod" x="126" y="20" width="9" height="568"/>
-              <rect class="metal" x="120" y="140" width="21" height="22" rx="3"/>
-              <rect class="metal" x="141" y="146" width="128" height="9"/>
-              <rect class="metal" x="262" y="136" width="34" height="28" rx="5"/>
-              <circle cx="279" cy="150" r="3" fill="#2B3944"/>
-            </g>
-            <g id="gBurette">
-              <rect class="glass" x="271" y="38" width="18" height="306" rx="3"/>
-              <polygon class="glass" points="271,344 289,344 283,352 277,352"/>
-              <g id="ticks"></g>
-              <rect id="buLiq" x="273" y="90" width="14" height="0"/>
-              <rect id="buShade" class="shade" x="273" y="90" width="14" height="0"/>
-              <ellipse class="rim" cx="280" cy="38" rx="9" ry="2.4"/>
-              <rect id="tipLiq" x="278" y="344" width="4" height="0"/>
-              <ellipse id="bubble" cx="280" cy="372" rx="2.4" ry="3.6" fill="#EAF2F6" opacity="0"/>
-              <rect class="metal" x="266" y="352" width="28" height="10" rx="2"/>
-              <rect id="handle" class="metal" x="294" y="355" width="26" height="4" rx="1.5"/>
-              <path class="glass" d="M277 362V378L280 387L283 378V362Z"/>
-              <path id="meniscus" d="" fill="none" stroke="#EAF2F6" stroke-width="1.4"/>
-            </g>
-            <g id="gStirrer">
-              <ellipse cx="280" cy="604" rx="118" ry="9" fill="url(#gShadow)"/>
-              <rect class="dark" x="190" y="556" width="180" height="44" rx="6"/>
-              <rect x="180" y="540" width="200" height="16" rx="3" fill="#3A4A55" stroke="#1A252D"/>
-              <ellipse cx="280" cy="540" rx="100" ry="7" fill="#4A5D6B" stroke="#1A252D"/>
-              <circle cx="345" cy="580" r="11" fill="#55697A" stroke="#1A252D"/>
-              <line id="knobPtr" x1="345" y1="580" x2="345" y2="571" stroke="#EAF2F6" stroke-width="2" stroke-linecap="round"/>
-              <circle id="led" cx="215" cy="580" r="3.5" fill="#33423D"/>
-            </g>
-            <g id="gPaper">
-              <rect x="196" y="402" width="168" height="136" rx="6" fill="#FFFFFF" opacity=".93"/>
-              <rect x="176" y="538" width="208" height="3" fill="#FFFFFF"/>
-            </g>
-            <g id="gWaste">
-              <ellipse cx="280" cy="540" rx="46" ry="6" fill="url(#gShadow)"/>
-              <rect id="wLiq" x="247" y="520" width="66" height="0" fill="rgb(160,150,175)" fill-opacity=".5"/>
-              <rect id="wShade" class="shade" x="247" y="520" width="66" height="0"/>
-              <path d="M247 450V528Q247 538 257 538H303Q313 538 313 528V450Z" fill="url(#gGlass)"/>
-              <path d="M242 450H252M247 450V528Q247 538 257 538H303Q313 538 313 528V450M308 450H318" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
-              <ellipse class="rim" cx="280" cy="450" rx="33" ry="5"/>
-              <text x="280" y="566" text-anchor="middle" style="font-size:11px">récupération</text>
-            </g>
-            <g id="gFunnel">
-              <path d="M256 10H304L287 34V44H273V34Z" fill="url(#gGlass)"/>
-              <path d="M256 10H304L287 34V44H273V34Z" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
-              <ellipse class="rim" cx="280" cy="10" rx="24" ry="4"/>
-            </g>
-            <g id="gBeak" class="l-front">
-              <ellipse cx="440" cy="600" rx="40" ry="6" fill="url(#gShadow)"/>
-              <rect id="bkLiq" x="413" y="560" width="54" height="0" fill="rgb(196,224,190)" fill-opacity=".6"/>
-              <rect id="bkShade" class="shade" x="413" y="560" width="54" height="0"/>
-              <path d="M412 530V590Q412 598 420 598H460Q468 598 468 590V530Z" fill="url(#gGlass)"/>
-              <path d="M408 530H418M412 530V590Q412 598 420 598H460Q468 598 468 590V530M462 530H472" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
-              <ellipse class="rim" cx="440" cy="530" rx="28" ry="4"/>
-              <text x="440" y="616" text-anchor="middle" style="font-size:11px">à titrer</text>
-            </g>
-            <g id="gPiss" class="l-front">
-              <ellipse cx="516" cy="600" rx="26" ry="5" fill="url(#gShadow)"/>
-              <path d="M498 566Q498 560 506 560H526Q534 560 534 566V590Q534 598 526 598H506Q498 598 498 590Z" fill="url(#gGlass)"/>
-              <path d="M498 566Q498 560 506 560H526Q534 560 534 566V590Q534 598 526 598H506Q498 598 498 590Z" fill="none" stroke="#B9CBD6" stroke-width="1.8"/>
-              <path d="M512 560V548L526 538" fill="none" stroke="#B9CBD6" stroke-width="3" stroke-linecap="round"/>
-              <text x="516" y="616" text-anchor="middle" style="font-size:11px">eau dist.</text>
-            </g>
-            <g id="gFlask">
-              <rect id="fLiq" x="190" y="500" width="180" height="40" fill="rgb(196,224,190)" fill-opacity=".3"/>
-              <rect id="fShade" class="shade" x="190" y="500" width="180" height="0"/>
-              <ellipse id="fSurf" cx="280" cy="500" rx="30" ry="6" fill="rgb(196,224,190)" fill-opacity=".5" stroke="#fff" stroke-opacity=".3"/>
-              <g id="glassErlen">
-                <path d="M262 408V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V408Z" fill="url(#gGlass)"/>
-                <path d="M258 408H302M262 408V446L214 524Q208 538 224 538H336Q352 538 346 524L298 446V408" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
-                <ellipse class="rim" cx="280" cy="408" rx="21" ry="4"/>
-                <path d="M226 538Q280 548 334 538" fill="none" stroke="#B9CBD6" stroke-width="1" opacity=".45"/>
-              </g>
-              <g id="glassBecher">
-                <path d="M214 418V528Q214 538 224 538H336Q346 538 346 528V418Z" fill="url(#gGlass)"/>
-                <path d="M208 418H220M214 418V528Q214 538 224 538H336Q346 538 346 528V418M340 418H352" fill="none" stroke="#B9CBD6" stroke-width="1.8" stroke-linejoin="round"/>
-                <ellipse class="rim" cx="280" cy="418" rx="66" ry="7"/>
-                <path d="M226 538Q280 548 334 538" fill="none" stroke="#B9CBD6" stroke-width="1" opacity=".45"/>
-              </g>
-              <ellipse id="bar" cx="280" cy="533" rx="14" ry="3.2" fill="#F4F7F9" stroke="#8EA2AF"/>
-              <line id="stream" x1="280" y1="387" x2="280" y2="500" stroke="#9B2FB0"/>
-              <circle id="drop" cx="280" cy="392" r="3.2" fill="#9B2FB0"/>
-            </g>
-            <g id="gWarn">
-              <g id="warnIco">
-                <path d="M322 338 L341 372 L303 372 Z" fill="#F2A81D" stroke="#14222C" stroke-width="1.5" stroke-linejoin="round"/>
-                <text x="322" y="368" text-anchor="middle" style="fill:#14222C;font-weight:700;font-size:15px;font-family:var(--font-body)">!</text>
-              </g>
-              <text x="350" y="355" style="font-size:12px;fill:#F2A81D" class="halo">Regarde sous le robinet</text>
-            </g>
-            <g id="gLoupe"></g>
-          </g>
-        </svg>
+        <svg id="scene" class="verrerie" viewBox="0 0 560 620" role="img" aria-label="Paillasse : une burette fixée à un statif, au-dessus d'un erlenmeyer posé sur un agitateur magnétique"></svg>
       </section>
       <div class="obs" id="obs" aria-live="off"></div>
     </div>
@@ -407,6 +285,7 @@ footer { color: var(--muted); font-size: 13px; }
 </div>
 <div id="printZone" aria-hidden="true"></div>
 
+<script src="../shared/verrerie.js"></script>
 <script>
 (function () {
   "use strict";
@@ -417,7 +296,6 @@ footer { color: var(--muted); font-size: 13px; }
   var V1N = 10.0;           // mL, pipette jaugée
   var DROP = 0.05, DROP_SD = 0.004;   // mL
   var BUB = 0.20;           // mL perdus à remplir la pointe si une bulle y reste
-  var K = 10, Y0 = 90;      // px par mL, ordonnée du zéro dans la scène
 
   var F2 = 'Fe<sup>2+</sup>', F3 = 'Fe<sup>3+</sup>', MN = 'MnO<sub>4</sub><sup>−</sup>', M2 = 'Mn<sup>2+</sup>',
       HP = 'H<sup>+</sup>', H2O = 'H<sub>2</sub>O', EM = 'e<sup>−</sup>';
@@ -427,7 +305,6 @@ footer { color: var(--muted); font-size: 13px; }
   function r6(x) { return Math.round(x * 1e6) / 1e6; }
   function fmt(v, n) { return (v < 0 ? "−" : "") + Math.abs(v).toFixed(n).replace(".", ","); }
   function num(s) { s = String(s == null ? "" : s).trim().replace(/\s/g, "").replace(",", "."); return s === "" ? NaN : Number(s); }
-  function yOf(r) { return Y0 + K * r; }
 
   var STEPS = [
     { t: "Situation", h: "S'approprier la situation" },
@@ -444,7 +321,7 @@ footer { color: var(--muted); font-size: 13px; }
   var COMP_NAME = { app: "S'approprier", ana: "Analyser / Raisonner", rea: "Réaliser", val: "Valider", com: "Communiquer" };
   function comp(code, verb) { return '<span class="comp" data-comp="' + code + '"><abbr title="' + COMP_NAME[code] + '">' + COMP_ABBR[code] + '</abbr> · ' + verb + '</span>'; }
   // puces de l'étape (une ou deux) ; l'étape « Résultats » porte ses puces section par section
-  var STEP_COMPS = [[["app", "Reformuler la problématique"]], [["rea", "Écrire les équations"]], [["ana", "Prévoir et choisir le protocole"]],
+  var STEP_COMPS = [[], [["rea", "Écrire les équations"]], [["ana", "Prévoir et choisir le protocole"]],
     [["rea", "Mettre en œuvre le protocole"]], [["rea", "Mettre en œuvre le protocole"]], [["rea", "Mesurer"]], [["rea", "Mesurer"]], [], [["com", "Conclure"]]];
   function compBar(i) { var c = STEP_COMPS[i] || []; return c.length ? '<p class="comps">' + c.map(function (x) { return comp(x[0], x[1]); }).join("") + '</p>' : ""; }
   function esc(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
@@ -470,7 +347,7 @@ footer { color: var(--muted); font-size: 13px; }
       rapid: { rows: [], zone: null },
       pr: { reading: false, recorded: false, runs: [] },
       res: { tabOK: false, tabRes: {}, c1OK: false, evolV: 0, uOK: false },
-      app: { tbl: {}, tblRes: null, saved: false },
+      app: { tbl: {}, tblRes: null, saved: false, legRes: null },
       prev: { saved: false, cert: 0 },
       proto: { why: null },
       val: { prev: null, gap: null },
@@ -584,17 +461,39 @@ footer { color: var(--muted); font-size: 13px; }
     ["v1", "V₁ : volume de la prise d'essai de solution à titrer", "connue", "Il est donné dans l'énoncé : on prélève 10,0 mL avec une pipette jaugée."],
     ["ve", "V<sub>E</sub> : volume de solution titrante versé à l'équivalence", "à mesurer", "On ne le connaît pas à l'avance : on le lit sur la burette pendant le titrage."]
   ];
+  var LEG = [
+    ["Burette graduée", 237, 60, 266, 60], ["Robinet", 238, 292, 292, 290], ["Erlenmeyer", 262, 400, 312, 400], ["Barreau aimanté", 236, 449, 306, 446],
+    ["Agitateur magnétique", 280, 470, 336, 472], ["Statif", 50, 300, 92, 300], ["Pince", 120, 144, 120, 112]
+  ];
+  function legSvg() {
+    var m = Verrerie.montage("titrage", { volume: 0, agite: false, alt: "Montage de titrage dont les pièces sont numérotées de 1 à 7 : à légender" }), k = "";
+    LEG.forEach(function (l, i) {
+      k += '<path d="M' + l[1] + ',' + l[2] + ' L' + l[3] + ',' + l[4] + '" class="gld"/><circle cx="' + l[1] + '" cy="' + l[2] + '" r="2.4" class="gld-pt"/>' +
+        '<circle cx="' + l[3] + '" cy="' + l[4] + '" r="12" fill="var(--surface)" stroke="var(--v-trait)" stroke-width="2"/><text x="' + l[3] + '" y="' + (l[4] + 5.5) + '" text-anchor="middle" style="font:700 15px var(--font-body);fill:var(--ink)">' + (i + 1) + '</text>';
+    });
+    return m.replace("</svg>", k + "</svg>");
+  }
+  function legSection() {
+    var names = LEG.map(function (l) { return l[0]; }).sort(), r = S.app.legRes;
+    return '<div class="sec"><h3>2. Légende le montage</h3><p class="comps">' + comp("app", "Légender le schéma") + '</p><p class="small">Voici le montage d\'un titrage. Donne le nom de chaque pièce numérotée.</p>' +
+      '<div class="stage" style="max-width:560px">' + legSvg() + '</div><div class="tablewrap"><table class="data av"><caption class="sr">Légende du montage</caption><tbody>' +
+      LEG.map(function (l, i) {
+        var v = S.form["leg" + i] || "";
+        return '<tr><td>' + (i + 1) + '</td><td><select class="sel" data-f="leg' + i + '" aria-label="Pièce numéro ' + (i + 1) + '"><option value="">—</option>' + names.map(function (n) { return '<option' + (v === n ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
+          (r ? (r[i] ? ' <span aria-hidden="true">✓</span><span class="sr"> juste</span>' : ' <span class="small">à revoir</span>') : "") + '</td></tr>';
+      }).join("") + '</tbody></table></div><div class="row">' + btn("legCheck", "Vérifier la légende", { cls: "primary" }) + '</div></div>';
+  }
   function appDone() { return S.app.saved && S.app.tblRes && QUANT.every(function (q) { return S.app.tblRes[q[0]]; }); }
   function panelSituation() {
     var a = S.app, r = a.tblRes;
     var h = '<div class="doc"><p><b>Situation.</b> Un flacon contient une solution aqueuse de sulfate de fer (II), acidifiée. Son étiquette est en partie effacée : on lit seulement que la concentration en ions fer (II) est <b>comprise entre 5,0×10⁻² et 1,2×10⁻¹ mol·L⁻¹</b>.</p>' +
       '<p>Pour la déterminer, on dose les ions ' + F2 + ' avec une solution de permanganate de potassium (violette) de concentration <b>c₂ = 2,00×10⁻² mol·L⁻¹</b>. On prélève <b>V₁ = 10,0 mL</b> de solution à titrer.</p></div>' +
-      '<div class="sec"><h3>1. Repère les grandeurs</h3><p class="small">Pour chaque grandeur, dis si elle est connue, à mesurer ou cherchée.</p><div class="tablewrap"><table class="data av"><caption class="sr">Grandeurs du titrage</caption><thead><tr><th>Grandeur</th><th>Statut</th></tr></thead><tbody>' +
+      '<div class="sec"><h3>1. Repère les grandeurs</h3><p class="comps">' + comp("app", "Repérer les grandeurs") + '</p><p class="small">Pour chaque grandeur, dis si elle est connue, à mesurer ou cherchée.</p><div class="tablewrap"><table class="data av"><caption class="sr">Grandeurs du titrage</caption><thead><tr><th>Grandeur</th><th>Statut</th></tr></thead><tbody>' +
       QUANT.map(function (q) {
         var st = r ? (r[q[0]] ? " good" : " bad") : "", v = S.form["t_" + q[0]] || "";
         return '<tr><td>' + q[1] + '</td><td><select class="sel' + st + '" data-f="t_' + q[0] + '" aria-label="Statut de ' + q[0] + '">' + ["", "connue", "à mesurer", "cherchée"].map(function (o) { return '<option value="' + o + '"' + (v === o ? " selected" : "") + '>' + (o || "—") + '</option>'; }).join("") + '</select>' + (r ? (r[q[0]] ? ' <span aria-hidden="true">✓</span><span class="sr"> juste</span>' : '<div class="small">' + q[3] + '</div>') : "") + '</td></tr>';
       }).join("") + '</tbody></table></div><div class="row">' + btn("appCheck", "Vérifier mes réponses", { cls: "primary" }) + '</div></div>' +
-      '<div class="sec"><h3>2. Reformule la problématique</h3><p class="small">Écris, avec tes mots, la question à laquelle le titrage doit répondre.</p>' +
+      legSection() + '<div class="sec"><h3>3. Reformule la problématique</h3><p class="comps">' + comp("app", "Reformuler la problématique") + '</p><p class="small">Écris, avec tes mots, la question à laquelle le titrage doit répondre.</p>' +
       '<label class="sr" for="prob">Ma problématique</label><textarea id="prob" class="txt" data-f="prob" placeholder="Comment… ?">' + esc(S.form.prob || "") + '</textarea>' +
       '<div class="row">' + btn("appSave", a.saved ? "Mettre à jour ma problématique" : "Enregistrer ma problématique", { cls: "primary" }) + '</div>' +
       (a.saved ? '<p class="small">Une formulation possible : « Comment déterminer la concentration c₁ en ions fer (II) de cette solution ? ». Compare avec la tienne : as-tu nommé la grandeur cherchée ?</p>' : "") + '</div>' +
@@ -676,19 +575,9 @@ footer { color: var(--muted); font-size: 13px; }
     return h;
   }
 
-  var ICONS = {
-    burette: '<path d="M20 4V40M26 4V40"/><path d="M20 40L22 46H24L26 40"/><path d="M16 46H30M23 46V52"/><path d="M20 10H23M20 16H23M20 22H23M20 28H23M20 34H23"/>',
-    potence: '<path d="M10 52H34M16 52V4M16 12H36"/><circle cx="36" cy="12" r="3"/>',
-    erlen: '<path d="M18 6H28M19 6V22L7 46Q5 52 12 52H34Q41 52 39 46L27 22V6"/><path d="M12 42H34"/>',
-    becher: '<path d="M10 8V48Q10 52 14 52H32Q36 52 36 48V8M8 8H38"/><path d="M10 34H36"/>',
-    pipj: '<path d="M20 2H26V12M23 12V18M19 18Q19 24 19 28Q19 34 23 34Q27 34 27 28Q27 24 27 18M23 34V50L23 54"/><path d="M17 12H29"/>',
-    pipg: '<path d="M20 2H26V12M23 12V54"/><path d="M20 20H23M20 26H23M20 32H23M20 38H23M20 44H23"/><path d="M23 54V56"/>',
-    eprou: '<path d="M14 6V50Q14 54 18 54H28Q32 54 32 50V6M11 6H35"/><path d="M14 18H22M14 26H22M14 34H22M14 42H22"/>',
-    fiole: '<path d="M19 4H27V18Q40 26 40 40Q40 54 23 54Q6 54 6 40Q6 26 19 18Z"/><path d="M19 12H27"/>',
-    barreau: '<rect x="8" y="23" width="30" height="10" rx="5"/><path d="M14 28H32"/>',
-    agit: '<rect x="6" y="38" width="34" height="14" rx="3"/><path d="M4 38H42"/><circle cx="32" cy="45" r="3"/>',
-    thermo: '<path d="M20 6Q20 4 23 4Q26 4 26 6V36Q31 39 31 45Q31 52 23 52Q15 52 15 45Q15 39 20 36Z"/><path d="M23 14V44"/>'
-  };
+  // pictogrammes du choix du matériel : pièces de la gamme (shared/verrerie.js) ; chaque objet garde son libellé écrit
+  var GAMME = { burette: "burette", potence: "statif", erlen: "erlenmeyer", becher: "becher", pipj: "pipetteJaugee", pipg: "pipetteGraduee",
+    eprou: "eprouvette", fiole: "fiole", barreau: "barreau", agit: "agitateur", thermo: "thermometre" };
   var MATS = [
     { id: "burette", n: "Burette graduée 25 mL", t: "req" },
     { id: "potence", n: "Potence et pince", t: "req" },
@@ -707,7 +596,7 @@ footer { color: var(--muted); font-size: 13px; }
       '<ul class="mats" role="group" aria-label="Matériel disponible">' + MATS.map(function (m) {
         var on = !!S.picks[m.id];
         return '<li><button type="button" class="mat' + (S.matBad[m.id] ? " bad" : "") + '" role="checkbox" aria-checked="' + on + '" data-act="pick" data-val="' + m.id + '"' + (S.matOK ? " disabled" : "") + '>' +
-          '<svg viewBox="0 0 46 58" aria-hidden="true">' + ICONS[m.id] + '</svg><span>' + m.n + '</span>' + (m.s ? '<small>' + m.s + '</small>' : "") + '</button></li>';
+          Verrerie.svg(GAMME[m.id], m.id === "potence" ? { decoratif: true, marge: 4, hauteur: 120, base: 80 } : { decoratif: true, marge: 4 }) + '<span>' + m.n + '</span>' + (m.s ? '<small>' + m.s + '</small>' : "") + '</button></li>';
       }).join("") + '</ul>' +
       '<p class="small">Tu peux choisir un erlenmeyer ou un bécher pour la solution à titrer.</p>' +
       '<div class="row">' + btn("matCheck", "Valider mon choix", { cls: "primary", dis: S.matOK }) + btn("go", "Étape suivante : la burette", { val: 3, cls: "primary", dis: !S.matOK }) + '</div>';
@@ -737,21 +626,9 @@ footer { color: var(--muted); font-size: 13px; }
   var PBORE = 3.6;   // diamètre intérieur du col de la pipette (mm)
   function pipDmm() { return (S.pi.v - V1N) * 1000 / (Math.PI * Math.pow(PBORE / 2, 2)); }
   function pipetteSvg() {
-    var p = S.pi, liq = p.anim === "water" ? "rgba(150,210,235,.7)" : "rgba(150,205,140,.8)", t = '', y;
-    if (p.anim === "water" || p.anim === "sample") { t = '<rect x="37" y="130" width="6" height="96" fill="' + liq + '"/><path d="M37 226L40 238L43 226Z" fill="' + liq + '"/><path d="M29 118Q29 130 40 130Q51 130 51 118V98H29Z" fill="' + liq + '"/>'; }
-    else if (p.v > 0) {
-      var f = p.v / V1N;
-      y = p.v >= V1N ? 74 - (p.v - V1N) * 22 : 236 - f * 162; y = Math.max(40, y);
-      var ys = Math.max(y, 130);
-      t = '<rect x="37" y="' + ys.toFixed(1) + '" width="6" height="' + (226 - ys).toFixed(1) + '" fill="' + liq + '"/><path d="M37 226L40 238L43 226Z" fill="' + liq + '"/>';
-      if (y < 130) { var yb = Math.max(y, 98); t += '<path d="M29 ' + yb.toFixed(1) + 'H51V118Q51 130 40 130Q29 130 29 118Z" fill="' + liq + '"/>'; }
-      if (y < 98) t += '<rect x="35" y="' + y.toFixed(1) + '" width="10" height="' + (98 - y).toFixed(1) + '" fill="' + liq + '"/>';
-    }
-    return '<svg viewBox="0 0 80 250" role="img" aria-label="Pipette jaugée de 10 mL avec sa propipette">' + t +
-      '<rect x="22" y="4" width="36" height="34" rx="14" fill="var(--accent)" opacity=".85"/><text x="40" y="26" text-anchor="middle" style="font-size:11px;font-weight:700;fill:var(--accent-ink)">A S E</text>' +
-      '<path d="M34 38V96Q28 104 28 118Q28 130 40 130Q52 130 52 118Q52 104 46 96V38" fill="none" stroke="currentColor" stroke-width="2"/>' +
-      '<path d="M36 128V220L40 238L44 220V128" fill="none" stroke="currentColor" stroke-width="2"/>' +
-      '<line x1="28" y1="74" x2="52" y2="74" stroke="var(--err)" stroke-width="2.4"/></svg>';
+    var p = S.pi, sol = p.anim === "water" ? "eau" : "vert", niv = p.anim ? 0.5 : (p.v > 0 ? Math.min(1, p.v / V1N) : 0);
+    return '<svg class="verrerie" viewBox="-36 -366 72 372" role="img" aria-label="Pipette jaugée de 10 mL avec sa propipette">' +
+      Verrerie.g("pipetteJaugee", { niveau: niv, solution: sol, traits: 1 }, 0, 0) + Verrerie.g("propipette", {}, 0, -222) + '</svg>';
   }
   function panelPipette() {
     var p = S.pi, f = S.flask, tr = p.vTr !== null, atB = p.loc === "beaker";
@@ -987,111 +864,105 @@ footer { color: var(--muted); font-size: 13px; }
   }
 
   /* ---------- scène ---------- */
-  function buildTicks() {
-    var s = "";
-    for (var m = 0; m <= 25; m++) {
-      var y = yOf(m), L = m % 5 === 0 ? 9 : 5;
-      s += '<line class="tickline" x1="' + (271 - L) + '" x2="271" y1="' + y + '" y2="' + y + '"/>';
-      if (m % 5 === 0) s += '<text x="' + (271 - L - 4) + '" y="' + (y + 4) + '" text-anchor="end" style="font-size:11px">' + m + '</text>';
-    }
-    s += '<text x="226" y="' + (Y0 - 24) + '" style="font-size:11px;fill:#8EA2AF">mL</text>';
-    $("ticks").innerHTML = s;
-  }
-  function drawLoupe() {
-    var g = $("gLoupe"), b = S.bu;
-    if (!(b.filled && S.step >= 3 && S.step <= 6)) { g.innerHTML = ""; return; }
-    var r = b.level, cx = 470, cy = 130, R = 72, P = 100, s = "";
-    s += '<defs><clipPath id="lc"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>';
-    s += '<line x1="289" y1="' + yOf(r).toFixed(1) + '" x2="' + (cx - R) + '" y2="' + cy + '" stroke="#8EA2AF" stroke-dasharray="3 4"/><circle cx="283" cy="' + yOf(r).toFixed(1) + '" r="2.5" fill="#EAF2F6"/>';
-    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 2) + '" fill="#0F1A21" stroke="#B9CBD6" stroke-width="2"/><g clip-path="url(#lc)">';
-    s += '<rect x="' + (cx - 30) + '" y="' + (cy - R) + '" width="60" height="' + (2 * R) + '" fill="rgba(255,255,255,.07)"/>';
-    s += '<rect x="' + (cx - 29) + '" y="' + cy + '" width="58" height="' + R + '" fill="rgb(122,28,140)" fill-opacity=".85"/>';
+  /* Géométrie de la scène (px). La graduation de la burette est celle de la gamme : 0 mL à −282, 25 mL à −50 (origine : la pointe). */
+  var GROUND = 560, FRONT = 590, AX = 300, ST = 70, ER_H = 124, Y_BUR = GROUND - 24 - ER_H - 18;
+  var BU0 = -282, BUK = 232 / 25;
+  function yOf(r) { return Y_BUR + BU0 + BUK * r; }
+  var FL = null;     // écoulement en cours : { big: bool, n: nombre de gouttes }
+  var timers = {};
+
+  function loupeSvg() {
+    var b = S.bu;
+    if (!(b.filled && S.step >= 3 && S.step <= 6)) return "";
+    var r = b.level, cx = 470, cy = 130, R = 72, P = 100, s = "", ym = yOf(Math.max(r, -1.4));
+    s += '<clipPath id="lc"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath>';
+    s += '<line x1="' + (AX + 8) + '" y1="' + ym.toFixed(1) + '" x2="' + (cx - R) + '" y2="' + cy + '" class="gld"/><circle cx="' + (AX + 8) + '" cy="' + ym.toFixed(1) + '" r="2.5" class="gld-pt"/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R + 2) + '" fill="var(--surface)" stroke="var(--v-trait)" stroke-width="2.5"/><g clip-path="url(#lc)">';
+    s += '<rect x="' + (cx - 30) + '" y="' + (cy - R) + '" width="60" height="' + (2 * R) + '" fill="var(--v-verre)"/>';
+    s += '<rect x="' + (cx - 29) + '" y="' + cy + '" width="58" height="' + R + '" fill="var(--v-permanganate)"/>';
     for (var i = Math.ceil((r - 0.75) * 10); i <= Math.floor((r + 0.75) * 10); i++) {
       var q = i / 10; if (q < -1e-9) continue;
       var y = cy + (q - r) * P, isInt = Math.abs(q - Math.round(q)) < 1e-6, isHalf = Math.abs(q * 2 - Math.round(q * 2)) < 1e-6, L = isInt ? 26 : isHalf ? 18 : 11;
       var cv = S.eye === "haut" ? 4 : S.eye === "bas" ? -4 : 0;
-      s += '<path d="M' + (cx - 30) + ' ' + y.toFixed(1) + ' Q' + (cx - 30 + L / 2) + ' ' + (y + cv).toFixed(1) + ' ' + (cx - 30 + L) + ' ' + y.toFixed(1) + '" fill="none" stroke="#EAF2F6" stroke-width="' + (isInt ? 2 : 1.2) + '"/>';
-      if (isInt) s += '<text x="' + (cx - 30 + L + 5) + '" y="' + (y + 5).toFixed(1) + '" class="halo" style="font-size:15px;font-weight:600">' + Math.round(q) + '</text>';
+      s += '<path d="M' + (cx - 30) + ' ' + y.toFixed(1) + ' Q' + (cx - 30 + L / 2) + ' ' + (y + cv).toFixed(1) + ' ' + (cx - 30 + L) + ' ' + y.toFixed(1) + '" fill="none" stroke="var(--v-trait)" stroke-width="' + (isInt ? 2 : 1.4) + '" stroke-linecap="round"/>';
+      if (isInt) s += '<text x="' + (cx - 30 + L + 5) + '" y="' + (y + 5).toFixed(1) + '" style="font:600 15px var(--font-data);fill:var(--ink)">' + Math.round(q) + '</text>';
     }
-    s += '<path d="M' + (cx - 29) + ' ' + (cy - 9) + ' Q' + cx + ' ' + (cy + 9) + ' ' + (cx + 29) + ' ' + (cy - 9) + '" fill="none" stroke="#EAF2F6" stroke-width="2"/></g>';
-    s += '<path d="M' + (cx - R * 0.72).toFixed(1) + ' ' + (cy - R * 0.45).toFixed(1) + ' A' + R + ' ' + R + ' 0 0 1 ' + (cx - R * 0.15).toFixed(1) + ' ' + (cy - R * 0.95).toFixed(1) + '" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>';
-    s += '<text x="' + cx + '" y="' + (cy + R + 22) + '" text-anchor="middle" style="font-size:11px;fill:#8EA2AF">loupe ' + (S.eye === "niveau" ? "(œil au niveau)" : "(parallaxe !)") + '</text>';
-    g.innerHTML = s;
+    s += '<path d="M' + (cx - 29) + ' ' + (cy - 9) + ' Q' + cx + ' ' + (cy + 9) + ' ' + (cx + 29) + ' ' + (cy - 9) + '" fill="none" stroke="var(--v-permanganate-t)" stroke-width="2.5" stroke-linecap="round"/></g>';
+    s += '<path d="M' + (cx - R * 0.72).toFixed(1) + ' ' + (cy - R * 0.45).toFixed(1) + ' A' + R + ' ' + R + ' 0 0 1 ' + (cx - R * 0.15).toFixed(1) + ' ' + (cy - R * 0.95).toFixed(1) + '" class="gr"/>';
+    s += '<text class="sc" x="' + cx + '" y="' + (cy + R + 22) + '" text-anchor="middle">loupe ' + (S.eye === "niveau" ? "(œil au niveau)" : "(parallaxe !)") + '</text>';
+    return s;
   }
-  var timers = {};
-  function updateScene() {
-    var P = S.picks, all = S.matOK || S.step >= 3;
-    var show = function (id, on) { $(id).style.display = on ? "" : "none"; };
+  var ERLEN_D = "M-14,-122 V-82 L-48,-6 Q-50,0 -42,0 H42 Q50,0 48,-6 L14,-82 V-122 Z";
+  var BECHER_D = "M-48,-110 V-6 Q-48,0 -42,0 H42 Q48,0 48,-6 V-110 Z";
+  function drawScene() {
+    var Pk = S.picks, b = S.bu, f = S.flask, m = mix(), g = Verrerie.g, out = "";
     var preview = S.step <= 1 && !S.matOK;
-    $("gAll").style.opacity = preview ? ".25" : "1";
-    var have = function (k) { return preview || P[k] || S.matOK; };
-    show("gStand", have("potence")); show("gBurette", have("burette")); show("gStirrer", have("agit"));
-    var cont = P.erlen || (S.matOK && P.erlen) ? "erlen" : (P.becher ? "becher" : (preview ? "erlen" : null));
-    if (S.matOK) cont = P.erlen ? "erlen" : "becher";
-    var wasteOn = !preview && (S.step === 3 || (S.step === 6 && !S.flask.has && !S.bu.zeroOK));
-    show("glassErlen", cont === "erlen" && !wasteOn); show("glassBecher", cont === "becher" && !wasteOn);
-    show("fLiq", cont && S.flask.has && !wasteOn); show("fSurf", cont && S.flask.has && !wasteOn); show("fShade", cont && S.flask.has && !wasteOn);
-    show("gPaper", S.paper && !!cont && !wasteOn);
-    show("bar", !!cont && (S.flask.bar || preview) && !wasteOn);
-    var b = S.bu, m = mix();
-    show("gWaste", wasteOn); show("gFunnel", !!b.fun && !preview); show("gBeak", !preview && S.step === 4); show("gPiss", !preview && S.matOK && S.step >= 3 && S.step <= 6);
-    var wh = Math.min(70, S.waste * 1.6), wl = $("wLiq"), ws = $("wShade");
-    wl.setAttribute("y", (538 - wh).toFixed(1)); wl.setAttribute("height", wh.toFixed(1)); ws.setAttribute("y", (538 - wh).toFixed(1)); ws.setAttribute("height", wh.toFixed(1));
-    var bh = Math.min(56, S.pi.bV * 1.9), bl2 = $("bkLiq"), bs = $("bkShade");
-    bl2.setAttribute("y", (598 - bh).toFixed(1)); bl2.setAttribute("height", bh.toFixed(1)); bs.setAttribute("y", (598 - bh).toFixed(1)); bs.setAttribute("height", bh.toFixed(1));
-    // burette
-    var bl = $("buLiq"), tl = $("tipLiq"), bub = $("bubble");
-    var water = b.anim === "water", tit = b.anim === "titrant";
-    if (water || tit) {
-      bl.setAttribute("y", yOf(8)); bl.setAttribute("height", 342 - yOf(8)); bl.setAttribute("fill", water ? "rgb(150,210,235)" : "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".7");
-      tl.setAttribute("height", 0);
-    } else if (b.pend) {
-      bl.setAttribute("y", 294); bl.setAttribute("height", 50); bl.setAttribute("fill", b.pend === "eau" ? "rgb(150,210,235)" : "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".7");
-      tl.setAttribute("height", 0);
-    } else if (b.filled) {
-      var y = Math.max(yOf(b.level), 40);
-      bl.setAttribute("y", y); bl.setAttribute("height", Math.max(0, 344 - y)); bl.setAttribute("fill", "rgb(122,28,140)"); bl.setAttribute("fill-opacity", ".8");
-      tl.setAttribute("height", 42); tl.setAttribute("y", 344); tl.setAttribute("fill", "rgb(122,28,140)"); tl.setAttribute("fill-opacity", ".8");
-    } else { bl.setAttribute("height", 0); tl.setAttribute("height", 0); }
-    var bsh = $("buShade"); bsh.setAttribute("y", bl.getAttribute("y")); bsh.setAttribute("height", bl.getAttribute("height"));
+    var have = function (k) { return preview || Pk[k] || S.matOK; };
+    var cont = S.matOK ? (Pk.erlen ? "erlen" : "becher") : (Pk.erlen ? "erlen" : (Pk.becher ? "becher" : (preview ? "erlen" : null)));
+    var wasteOn = !preview && (S.step === 3 || (S.step === 6 && !f.has && !b.zeroOK));
+    var yEr = GROUND - 24, tipY = Y_BUR, water = b.anim === "water", tit = b.anim === "titrant";
     var showB = b.filled && b.bubble && b.checked && !water && !tit;
-    bub.setAttribute("opacity", showB ? 1 : 0);
-    if (showB) tl.setAttribute("height", 42);
-    var men = $("meniscus");
-    if (b.filled && !water && !tit) { var ym = yOf(b.level); men.setAttribute("d", "M273 " + (ym - 2).toFixed(1) + " Q280 " + (ym + 3).toFixed(1) + " 287 " + (ym - 2).toFixed(1)); } else men.setAttribute("d", "");
-    show("gWarn", b.filled && !b.checked && S.step === 3);
-    // flask
-    var lq = $("fLiq");
-    if (S.flask.has) {
-      var Vt = m ? m.Vt : S.flask.Vs, top = 536 - (6 + Vt * 1.7), col = colorOf(m);
-      lq.setAttribute("y", top.toFixed(1)); lq.setAttribute("height", (542 - top).toFixed(1));
-      lq.setAttribute("clip-path", cont === "becher" ? "url(#clipBecher)" : "url(#clipErlen)");
-      lq.style.fill = col.fill; lq.style.fillOpacity = col.op;
-      $("stream").setAttribute("y2", top.toFixed(1));
-      $("drop").style.setProperty("--fall", (top - 392).toFixed(0) + "px");
-      var hw = cont === "becher" ? 66 : (top <= 446 ? 18 : Math.min(66, 18 + (top - 446) / 78 * 48)), sf = $("fSurf"), sh = $("fShade");
-      sf.setAttribute("cy", top.toFixed(1)); sf.setAttribute("rx", hw.toFixed(1)); sf.setAttribute("ry", (hw * 0.2).toFixed(1)); sf.style.fill = col.fill; sf.style.fillOpacity = Math.min(1, col.op + 0.15).toFixed(2);
-      sh.setAttribute("y", top.toFixed(1)); sh.setAttribute("height", (542 - top).toFixed(1)); sh.setAttribute("clip-path", cont === "becher" ? "url(#clipBecher)" : "url(#clipErlen)");
-    } else if (wasteOn) {
-      $("stream").setAttribute("y2", (538 - wh).toFixed(1));
-      $("drop").style.setProperty("--fall", (538 - wh - 392).toFixed(0) + "px");
+    // niveau du liquide de l'erlenmeyer et point d'arrivée du filet
+    var top = GROUND - 30, col = null;
+    if (f.has && cont && !wasteOn) { var Vt = m ? m.Vt : f.Vs; top = yEr - (6 + Vt * 1.7); col = colorOf(m); }
+    else if (wasteOn) top = yEr - Math.min(70, S.waste * 1.6);
+    out += '<g opacity="' + (preview ? ".35" : "1") + '">';
+    out += '<rect class="gsol" x="0" y="' + GROUND + '" width="560" height="6" rx="3"/>';
+    // plan arrière : statif, pince, burette
+    out += '<g class="l-back">';
+    if (have("potence")) out += g("statif", { hauteur: 500, base: 118 }, ST, GROUND);
+    if (have("potence") && have("burette")) out += g("pince", { distance: AX - ST, y: Y_BUR - 168 - GROUND, pas: 14 }, ST, GROUND);
+    if (have("burette")) {
+      var vol, sol = "permanganate";
+      if (water || tit) { vol = 8; sol = water ? "eau" : "permanganate"; }
+      else if (b.pend) { vol = 20; sol = b.pend === "eau" ? "eau" : "permanganate"; }
+      else if (b.filled) vol = Math.max(b.level, -1.4);
+      else { vol = 25; sol = "eau"; }
+      out += g("burette", { volume: vol, solution: sol }, AX, tipY);
+      if (b.filled && !water && !tit) {
+        out += '<path d="M' + (AX - 2.6) + ',' + (tipY - 14) + ' L' + (AX - 1.2) + ',' + (tipY - 1.5) + ' H' + (AX + 1.2) + ' L' + (AX + 2.6) + ',' + (tipY - 14) + ' Z" fill="var(--v-permanganate)"/>';
+        if (showB) out += '<ellipse cx="' + AX + '" cy="' + (tipY - 8) + '" rx="1.9" ry="3.4" fill="var(--surface)" stroke="var(--v-trait)" stroke-width="1"/>';
+      }
+      if (b.fun && !preview) out += g("entonnoir", {}, AX, tipY - 292);
     }
-    var bar = $("bar"); bar.setAttribute("class", S.stir ? "s" + S.stir : "");
-    $("led").setAttribute("fill", S.stir ? "#4CE08A" : "#33423D");
-    $("knobPtr").style.transform = "rotate(" + [0, -50, 20, 110][S.stir] + "deg)";
-    drawLoupe();
+    out += '</g>';
+    // paillasse : papier, agitateur, récipient, barreau
+    if (have("agit")) out += g("agitateur", { actif: S.stir > 0 }, AX, GROUND);
+    if (S.paper && cont && !wasteOn && !preview) out += '<rect class="gpap" x="' + (AX - 70) + '" y="' + (yEr - 122) + '" width="140" height="122" rx="6"/>';
+    if (wasteOn) {
+      out += g("becher", { niveau: Math.min(0.7, S.waste * 1.6 / 100), solution: b.rT >= 1 ? "permanganate" : "eau" }, AX, yEr);
+      out += '<text class="sc" x="' + AX + '" y="' + (GROUND + 22) + '" text-anchor="middle">bécher de récupération</text>';
+    } else if (cont) {
+      var d = cont === "erlen" ? ERLEN_D : BECHER_D;
+      if (f.has && col) out += '<clipPath id="cF"><path transform="translate(' + AX + ',' + yEr + ')" d="' + d + '"/></clipPath><g clip-path="url(#cF)"><rect id="fLiq" x="' + (AX - 60) + '" y="' + top.toFixed(1) + '" width="120" height="' + (yEr + 6 - top).toFixed(1) + '" fill="' + col.fill + '" fill-opacity="' + col.op.toFixed(2) + '"/><path d="M' + (AX - 60) + ',' + top.toFixed(1) + ' H' + (AX + 60) + '" stroke="var(--v-trait)" stroke-width="1.2" opacity=".5"/></g>';
+      out += g(cont === "erlen" ? "erlenmeyer" : "becher", { niveau: 0 }, AX, yEr);
+      if (f.bar || preview) out += '<g id="bar"' + (S.stir ? ' class="s' + S.stir + '"' : "") + '>' + g("barreau", {}, AX, yEr - 5) + '</g>';
+    }
+    // filet et goutte
+    if (b.filled && !preview && (cont || wasteOn)) {
+      out += '<line id="stream" class="' + (FL && FL.big ? "on" : "") + '" x1="' + AX + '" y1="' + (tipY + 2) + '" x2="' + AX + '" y2="' + top.toFixed(1) + '"/>';
+      out += '<circle id="drop" cx="' + AX + '" cy="' + (tipY + 6) + '" r="3.2" style="--fall:' + (top - tipY - 6).toFixed(0) + 'px;' + (FL && !FL.big ? 'animation:dropfall .26s ease-in ' + FL.n + ' forwards' : "") + '"/>';
+    }
+    // plan avant : bécher « à titrer » et pissette
+    out += '<g class="l-front"><rect class="gsol" x="340" y="' + FRONT + '" width="200" height="4" rx="2"/>';
+    if (!preview && S.step === 4) {
+      out += g("becher", { niveau: Math.min(0.6, S.pi.bV / 40), solution: "vert" }, 420, FRONT) + '<text class="sc" x="420" y="' + (FRONT + 16) + '" text-anchor="middle">à titrer</text>';
+    }
+    if (!preview && S.matOK && S.step >= 3 && S.step <= 6) {
+      out += g("pissette", {}, 520, FRONT) + '<text class="sc" x="520" y="' + (FRONT + 16) + '" text-anchor="middle">eau dist.</text>';
+    }
+    out += '</g>';
+    if (b.filled && !b.checked && S.step === 3) {
+      out += '<g id="gWarn"><g id="warnIco"><path d="M338 318 L357 352 L319 352 Z" fill="var(--warn-bg)" stroke="var(--warn)" stroke-width="2" stroke-linejoin="round"/><text x="338" y="347" text-anchor="middle" style="font:700 15px var(--font-body);fill:var(--warn)">!</text></g><text class="scw" x="366" y="340">Regarde sous le robinet</text></g>';
+    }
+    out += '</g>' + loupeSvg();
+    $("scene").innerHTML = out;
   }
+  function updateScene() { drawScene(); }
   function flowAnim(vol) {
-    var st = $("stream"), dr = $("drop"), h = $("handle"), small = vol <= 0.3;
-    clearTimeout(timers.flow); st.classList.remove("on"); h.classList.add("open");
-    if (small) {
-      var n = Math.max(1, Math.min(5, Math.round(vol / DROP)));
-      dr.style.animation = "none"; void dr.getBoundingClientRect(); dr.style.animation = "dropfall .26s ease-in " + n + " forwards";
-      timers.flow = setTimeout(function () { h.classList.remove("open"); }, 280 * n);
-    } else {
-      st.classList.add("on");
-      timers.flow = setTimeout(function () { st.classList.remove("on"); h.classList.remove("open"); }, 700);
-    }
+    clearTimeout(timers.flow);
+    if (vol <= 0.3) { FL = { big: false, n: Math.max(1, Math.min(5, Math.round(vol / DROP))) }; timers.flow = setTimeout(function () { FL = null; }, 280 * FL.n); }
+    else { FL = { big: true }; timers.flow = setTimeout(function () { FL = null; drawScene(); }, 700); }
   }
   function refresh() { renderSteps(); renderPanel(); updateScene(); renderObs(); }
 
@@ -1130,6 +1001,13 @@ footer { color: var(--muted); font-size: 13px; }
     S.app.tblRes = r;
     if (appDone()) S.done[0] = true;
     say(ok ? "ok" : "info", ok ? "Les quatre grandeurs sont bien repérées." : (miss ? "Il manque des réponses. " : "") + "Relis la situation pour les lignes à revoir : la ligne dit ce qu'on sait déjà et ce qu'on doit encore trouver.");
+    refresh();
+  };
+  A.legCheck = function () {
+    var r = [], n = 0, miss = 0;
+    LEG.forEach(function (l, i) { var v = S.form["leg" + i] || ""; if (!v) miss++; r[i] = v === l[0]; if (r[i]) n++; });
+    S.app.legRes = r;
+    say(n === LEG.length ? "ok" : "info", n === LEG.length ? "Légende juste : les sept pièces sont bien nommées." : (miss ? "Il manque des réponses. " : "") + n + " pièce" + (n > 1 ? "s" : "") + " sur 7 bien nommée" + (n > 1 ? "s" : "") + ". Regarde le schéma : le robinet est sous la burette, la pince tient la burette sur le statif.");
     refresh();
   };
   A.appSave = function () {
@@ -1319,8 +1197,7 @@ footer { color: var(--muted); font-size: 13px; }
     if (!canPour() || S.stir !== 2) return false;
     if (25 - b.level < amount - 1e-9) { say("err", "La burette est presque vide. Il faut la remplir de nouveau."); return false; }
     b.level = r6(b.level + amount); f.poured = r6(f.poured + amount);
-    var m = mix(), lq = $("fLiq");
-    lq.style.transition = "none"; lq.style.fill = "rgb(150,40,170)"; lq.style.fillOpacity = Math.min(0.85, 0.35 + amount * 2); void lq.getBoundingClientRect(); lq.style.transition = "";
+    var m = mix();
     flowAnim(amount);
     return m;
   }
@@ -1455,7 +1332,7 @@ footer { color: var(--muted); font-size: 13px; }
     });
     st.addEventListener("pointerleave", function () { st.style.setProperty("--px", 0); st.style.setProperty("--py", 0); });
   })();
-  newSession(readSit()); buildTicks(); refresh();
+  newSession(readSit()); refresh();
   window.__titrage = { get S() { return S; }, chem: chem, veExact: veExact, mix: mix, stats: stats, A: A };
 })();
 </script>
